@@ -1,4 +1,4 @@
-/// <reference types="@testing-library/jest-native" />
+/// <reference types="@testing-library/react-native/extend-expect" />
 
 /* eslint-disable import/order, import/no-duplicates */
 

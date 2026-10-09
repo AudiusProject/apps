@@ -1,6 +1,6 @@
 {
   "name": "@audius/mobile",
-  "version": "1.5.186",
+  "version": "1.5.187",
   "private": true,
   "scripts": {
     "android:dev": "ENVFILE=.env.dev turbo run android -- --mode=prodDebug",
@@ -50,6 +50,7 @@
     "@audius/sdk": "*",
     "@bravemobile/react-native-code-push": "^12.3.2",
     "@coinflowlabs/react-native": "4.5.2",
+    "@dr.pogodin/react-native-fs": "2.32.1",
     "@ebay/nice-modal-react": "^1.2.13",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "11.14.0",
@@ -121,7 +122,6 @@
     "react-native-draggable-flatlist": "4.0.1",
     "react-native-dynamic": "1.0.0",
     "react-native-fast-crypto": "3.0.0",
-    "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "2.25.0",
     "react-native-get-random-values": "1.10.0",
     "react-native-gifted-charts": "1.4.46",
@@ -134,14 +134,12 @@
     "react-native-intersection-observer": "0.2.1",
     "react-native-keyboard-aware-scroll-view": "0.9.5",
     "react-native-keyboard-controller": "1.19.0",
-    "react-native-linear-gradient": "2.8.3",
     "react-native-markdown-display": "7.0.2",
     "react-native-modal": "^13.0.0",
     "react-native-modal-datetime-picker": "18.0.0",
     "react-native-pager-view": "6.7.1",
     "react-native-permissions": "5.4.4",
     "react-native-qrcode-svg": "6.2.0",
-    "react-native-radial-gradient": "1.1.4",
     "react-native-randombytes": "3.6.1",
     "react-native-reanimated": "~3.19.5",
     "react-native-restart": "0.0.27",
@@ -195,7 +193,6 @@
     "@react-native/metro-config": "0.79.5",
     "@react-native/typescript-config": "0.79.5",
     "@redux-devtools/cli": "4.0.0",
-    "@testing-library/jest-native": "5.4.3",
     "@testing-library/react-native": "12.4.3",
     "@types/array.prototype.flat": "1.2.1",
     "@types/color": "3.0.6",
@@ -218,26 +215,5 @@
     "reactotron-react-native": "^5.1.14",
     "replace-in-file": "6.3.5",
     "typescript": "5.0.4"
-  },
-  "jest": {
-    "preset": "react-native",
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "moduleNameMapper": {
-      "^react-native$": "<rootDir>/node_modules/react-native",
-      "^@testing-library/react-native$": "<rootDir>/node_modules/@testing-library/react-native"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-reanimated)/)"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
   }
 }
