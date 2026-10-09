@@ -2,9 +2,8 @@ import { useCallback } from 'react'
 
 import Clipboard from '@react-native-clipboard/clipboard'
 import { View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
-import { IconCopy } from '@audius/harmony-native'
+import { LinearGradient, IconCopy } from '@audius/harmony-native'
 import { Tile, Text } from 'app/components/core'
 import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'

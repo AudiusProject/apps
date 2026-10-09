@@ -7,9 +7,9 @@ import {
   addFollowArtists
 } from 'common/store/pages/signon/actions'
 import { getFollowIds } from 'common/store/pages/signon/selectors'
-import LinearGradient from 'react-native-linear-gradient'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { LinearGradient } from '@audius/harmony-native'
 import type { UserCardListProps } from 'app/components/user-card-list'
 import { ProfileCard, UserCardList } from 'app/components/user-card-list'
 import { makeStyles } from 'app/styles'

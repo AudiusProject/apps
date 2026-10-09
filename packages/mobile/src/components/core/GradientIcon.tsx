@@ -1,9 +1,9 @@
 import type { ComponentType } from 'react'
 
 import MaskedView from '@react-native-masked-view/masked-view'
-import LinearGradient from 'react-native-linear-gradient'
 import type { SvgProps } from 'react-native-svg'
 
+import { LinearGradient } from '@audius/harmony-native'
 import { useThemeColors } from 'app/utils/theme'
 
 type GradientIconProps = SvgProps & {

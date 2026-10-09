@@ -25,6 +25,17 @@ buildscript {
     }
 }
 
+// @dr.pogodin/react-native-fs ships its generated module spec but only adds it
+// to the build on the new architecture. The module also runs on the bridge, so
+// compile the spec on the old architecture too.
+subprojects { subproject ->
+    if (subproject.name == 'dr.pogodin_react-native-fs' && findProperty('newArchEnabled') != 'true') {
+        subproject.plugins.withId('com.android.library') {
+            subproject.android.sourceSets.main.java.srcDirs += ["${subproject.projectDir}/generated/java"]
+        }
+    }
+}
+
 apply plugin: "com.facebook.react.rootproject"
 
 allprojects {
