@@ -4,15 +4,9 @@ extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autoli
 rootProject.name = 'AudiusReactNative'
 include ':react-native-randombytes'
 project(':react-native-randombytes').projectDir = new File(rootProject.projectDir, '../../../node_modules/react-native-randombytes/android')
-include ':react-native-fs'
-project(':react-native-fs').projectDir = new File(rootProject.projectDir, '../../../node_modules/react-native-fs/android')
-include ':react-native-radial-gradient'
-project(':react-native-radial-gradient').projectDir = new File(rootProject.projectDir, '../../../node_modules/react-native-radial-gradient/android')
 include ':react-native-config'
 project(':react-native-config').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-config/android')
 include ':react-native-google-cast'
 project(':react-native-google-cast').projectDir = new File(rootProject.projectDir, '../../../node_modules/react-native-google-cast/android')
-include ':react-native-notifications'
-project(':react-native-notifications').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-notifications/lib/android/app')
 include ':app'
 includeBuild('../../../node_modules/@react-native/gradle-plugin')

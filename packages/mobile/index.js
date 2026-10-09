@@ -20,6 +20,10 @@ import ViewReactNativeStyleAttributes from 'react-native/Libraries/Components/Vi
 ViewReactNativeStyleAttributes.scaleY = true
 import { AppRegistry, LogBox, Text, TextInput } from 'react-native'
 import TrackPlayer from 'react-native-track-player'
+import {
+  getMessaging,
+  setBackgroundMessageHandler
+} from '@react-native-firebase/messaging'
 import { Crypto } from '@peculiar/webcrypto'
 
 import { name as appName } from './app.json'
@@ -52,3 +56,7 @@ TextInput.defaultProps.allowFontScaling = false
 
 AppRegistry.registerComponent(appName, () => App)
 TrackPlayer.registerPlaybackService(() => require('./audio-service'))
+// On Android, firebase starts a headless JS task for each push that arrives
+// while the app is in the background. The OS displays the push itself, so
+// there is nothing to do here.
+setBackgroundMessageHandler(getMessaging(), async () => {})

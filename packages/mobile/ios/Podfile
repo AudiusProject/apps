@@ -31,11 +31,15 @@ project 'AudiusReactNative',
 'Prod.Release' => :release
 
 target 'AudiusReactNative' do
-  pod 'SRSRadialGradient', :path => '../../../node_modules/react-native-radial-gradient/ios'
   pod 'ffmpeg-kit-ios-full-gpl', :podspec => './ffmpeg-kit-ios-full-gpl.podspec'
   pod 'ffmpeg-kit-react-native', :subspecs => ['full-gpl'], :podspec => '../../../node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec'
 
   pod 'nSure'
+
+  # Firebase's Swift pods import these, and pods link statically here, so they
+  # need module maps.
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
 
   config = use_native_modules!
 
@@ -138,6 +142,24 @@ target 'AudiusReactNative' do
         File.write(fmt_base_h, patched)
         Pod::UI.puts "Patched Pods/fmt/include/fmt/base.h: disable consteval for all Apple Clang (Xcode 26 fmt 11.0.2 compat)".green
       end
+    end
+
+    # SwiftAudioEx 1.x only shifts the current index for an insert in front
+    # of the current item when the queue already has more than one item. With
+    # a single item, inserting at 0 leaves the index one slot early, so the
+    # player replays the current track instead of advancing. Fixed upstream
+    # on main but not released. Fail if the line changes so an update can't
+    # silently drop the patch.
+    queue_manager = File.join(__dir__, 'Pods/SwiftAudioEx/Sources/SwiftAudioEx/QueueManager.swift')
+    buggy_line = 'if (self.items.count > 1 && currentIndex >= index) {'
+    fixed_line = 'if (self.items.count > 0 && currentIndex >= index) {'
+    text = File.read(queue_manager)
+    if text.include?(buggy_line)
+      File.chmod(0644, queue_manager)
+      File.write(queue_manager, text.sub(buggy_line, fixed_line))
+      Pod::UI.puts "Patched SwiftAudioEx QueueManager.swift: shift current index when inserting into a one-item queue".green
+    elsif !text.include?(fixed_line)
+      raise "SwiftAudioEx QueueManager.swift no longer contains '#{buggy_line}'. Check whether the insert index fix is still needed and update the Podfile patch."
     end
 
   end

@@ -92,6 +92,11 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_notification" />
+        <!-- @react-native-firebase/messaging defaults the accent to white.
+             Keep the system default we had before. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            tools:node="remove" />
 
         <provider
             android:authorities="${applicationId}.tiktokopensdkfileprovider;${applicationId}.fileprovider"

@@ -10,6 +10,12 @@ buildscript {
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.0.21"
     }
+    // @react-native-firebase defaults to Firebase BoM 34, whose
+    // play-services-measurement needs Kotlin 2.2. Stay on 33 until the app's
+    // Kotlin is upgraded.
+    project.ext.set('react-native', [
+        versions: [firebase: [bom: '33.16.0']]
+    ])
     repositories {
         google()
         mavenCentral()
@@ -22,6 +28,17 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+    }
+}
+
+// @dr.pogodin/react-native-fs ships its generated module spec but only adds it
+// to the build on the new architecture. The module also runs on the bridge, so
+// compile the spec on the old architecture too.
+subprojects { subproject ->
+    if (subproject.name == 'dr.pogodin_react-native-fs' && findProperty('newArchEnabled') != 'true') {
+        subproject.plugins.withId('com.android.library') {
+            subproject.android.sourceSets.main.java.srcDirs += ["${subproject.projectDir}/generated/java"]
+        }
     }
 }
 

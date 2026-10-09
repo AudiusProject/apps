@@ -8,7 +8,8 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
-#import "RNNotifications.h"
+#import <Firebase.h>
+#import "NotifeeCore+UNUserNotificationCenter.h"
 
 @implementation AppDelegate {
   NSDictionary *_launchOptions;
@@ -17,7 +18,12 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [RNNotifications startMonitorNotifications];
+  [FIRApp configure];
+  // Our iOS pushes come straight from APNs (SNS), not FCM. Firebase messaging
+  // only reports taps on FCM pushes and passes the rest to the delegate it
+  // replaced, so notifee has to be that delegate to report them to JS.
+  // Both libraries install themselves after launch, so make notifee go first.
+  [[NotifeeCoreUNUserNotificationCenter instance] observe];
   NSString *receiverAppID = @"222B31C8";
   GCKDiscoveryCriteria *criteria = [[GCKDiscoveryCriteria alloc] initWithApplicationID:receiverAppID];
   GCKCastOptions* options = [[GCKCastOptions alloc] initWithDiscoveryCriteria:criteria];
@@ -72,9 +78,10 @@
   return window;
 }
 
-// Scene apps get the launch URL, user activity and notification through the
-// connection options rather than launchOptions. Linking.getInitialURL and
-// Notifications.getInitialNotification read them from the bridge's launchOptions.
+// Scene apps get the launch URL and user activity through the connection
+// options rather than launchOptions. Linking.getInitialURL reads them from the
+// bridge's launchOptions. A tapped notification needs no copy: the notification
+// center delegate still receives it at launch.
 - (NSDictionary *)launchOptionsWithConnectionOptions:(UISceneConnectionOptions *)connectionOptions
 {
   NSMutableDictionary *launchOptions = [NSMutableDictionary dictionaryWithDictionary:_launchOptions ?: @{}];
@@ -90,11 +97,6 @@
       UIApplicationLaunchOptionsUserActivityTypeKey : userActivity.activityType,
       @"UIApplicationLaunchOptionsUserActivityKey" : userActivity,
     };
-  }
-
-  NSDictionary *notification = connectionOptions.notificationResponse.notification.request.content.userInfo;
-  if (notification != nil && launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey] == nil) {
-    launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey] = notification;
   }
 
   return launchOptions;
@@ -118,18 +120,6 @@
 #else
   return [CodePush bundleURL];
 #endif
-}
-
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-  [RNNotifications didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
-}
-
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-  [RNNotifications didFailToRegisterForRemoteNotificationsWithError:error];
-}
-
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  [RNNotifications didReceiveBackgroundNotification:userInfo withCompletionHandler:completionHandler];
 }
 
 @end
