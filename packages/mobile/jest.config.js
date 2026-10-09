@@ -8,6 +8,9 @@ const resolvePackageDir = (name) =>
 module.exports = {
   preset: 'react-native',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  // A screen's first render loads its whole module tree, which can take
+  // longer than the 5s default on CI runners.
+  testTimeout: 30000,
   moduleNameMapper: {
     '^react-native$': resolvePackageDir('react-native'),
     '^@testing-library/react-native$': resolvePackageDir(
