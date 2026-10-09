@@ -8,13 +8,13 @@ import {
   TabRouter,
   useNavigationBuilder
 } from '@react-navigation/native'
+
+import { useTheme } from '@audius/harmony-native'
 import type {
   CollapsibleProps,
   CollapsibleRef
-} from 'react-native-collapsible-tab-view'
-import { Tabs } from 'react-native-collapsible-tab-view'
-
-import { useTheme } from '@audius/harmony-native'
+} from 'app/components/collapsible-tabs'
+import { Tabs } from 'app/components/collapsible-tabs'
 
 import type { CollapsibleTopTabBarProps } from './CollapsibleTopTabBar'
 

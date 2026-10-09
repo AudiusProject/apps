@@ -10,16 +10,16 @@ import type {
 } from 'react-native'
 import { Animated, Platform, RefreshControl, View } from 'react-native'
 import {
-  Tabs,
-  useCollapsibleStyle,
-  useCurrentTabScrollY
-} from 'react-native-collapsible-tab-view'
-import {
   runOnJS,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated'
 
+import {
+  Tabs,
+  useCollapsibleStyle,
+  useCurrentTabScrollY
+} from 'app/components/collapsible-tabs'
 import { useThemeColors } from 'app/utils/theme'
 
 import { CollapsibleTabNavigatorContext } from '../top-tab-bar'

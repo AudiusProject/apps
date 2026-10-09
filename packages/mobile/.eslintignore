@@ -1,1 +1,4 @@
 **/node_modules/*
+
+# Vendored react-native-collapsible-tab-view 8.0.1, kept close to upstream
+src/components/collapsible-tabs/**

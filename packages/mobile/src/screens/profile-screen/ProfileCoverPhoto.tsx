@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react'
 import { useUserByParams } from '@audius/common/api'
 import { BlurView } from '@react-native-community/blur'
 import { Pressable, StyleSheet } from 'react-native'
-import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
 import Animated, {
   interpolate,
   useAnimatedStyle
@@ -12,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex } from '@audius/harmony-native'
 import BadgeArtist from 'app/assets/images/badgeArtist.svg'
+import { useCurrentTabScrollY } from 'app/components/collapsible-tabs'
 import { CoverPhoto } from 'app/components/image/CoverPhoto'
 import { useRoute } from 'app/hooks/useRoute'
 import { makeStyles } from 'app/styles'
