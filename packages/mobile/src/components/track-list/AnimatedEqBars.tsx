@@ -10,36 +10,40 @@ const BAR_COLOR = '#CC5DE8'
 const BAR_DURATIONS_MS = [520, 410, 640, 470]
 const BAR_DELAYS_MS = [0, 180, 90, 260]
 
+// Each bar is a full-height bar slid down inside a rounded clip, so the
+// native driver can animate it with translateY instead of height.
+const BAR_MIN_OFFSET = BAR_MAX_HEIGHT - BAR_MIN_HEIGHT
+
 type AnimatedEqBarsProps = {
   isPlaying: boolean
 }
 
 export const AnimatedEqBars = ({ isPlaying }: AnimatedEqBarsProps) => {
-  const heights = useRef(
-    Array.from({ length: BAR_COUNT }, () => new Animated.Value(BAR_MIN_HEIGHT))
+  const offsets = useRef(
+    Array.from({ length: BAR_COUNT }, () => new Animated.Value(BAR_MIN_OFFSET))
   ).current
 
   useEffect(() => {
     if (!isPlaying) {
-      heights.forEach((h) => h.stopAnimation())
+      offsets.forEach((offset) => offset.stopAnimation())
       return
     }
 
-    const loops = heights.map((value, i) =>
+    const loops = offsets.map((value, i) =>
       Animated.loop(
         Animated.sequence([
           Animated.delay(BAR_DELAYS_MS[i]),
           Animated.timing(value, {
-            toValue: BAR_MAX_HEIGHT,
+            toValue: 0,
             duration: BAR_DURATIONS_MS[i],
             easing: Easing.inOut(Easing.quad),
-            useNativeDriver: false
+            useNativeDriver: true
           }),
           Animated.timing(value, {
-            toValue: BAR_MIN_HEIGHT,
+            toValue: BAR_MIN_OFFSET,
             duration: BAR_DURATIONS_MS[i],
             easing: Easing.inOut(Easing.quad),
-            useNativeDriver: false
+            useNativeDriver: true
           })
         ])
       )
@@ -50,12 +54,16 @@ export const AnimatedEqBars = ({ isPlaying }: AnimatedEqBarsProps) => {
     return () => {
       loops.forEach((loop) => loop.stop())
     }
-  }, [isPlaying, heights])
+  }, [isPlaying, offsets])
 
   return (
     <View style={styles.container} pointerEvents='none'>
-      {heights.map((height, i) => (
-        <Animated.View key={i} style={[styles.bar, { height }]} />
+      {offsets.map((offset, i) => (
+        <View key={i} style={styles.barClip}>
+          <Animated.View
+            style={[styles.bar, { transform: [{ translateY: offset }] }]}
+          />
+        </View>
       ))}
     </View>
   )
@@ -70,8 +78,14 @@ const styles = StyleSheet.create({
     height: BAR_MAX_HEIGHT,
     paddingBottom: 2
   },
-  bar: {
+  barClip: {
     width: 4,
+    height: BAR_MAX_HEIGHT,
+    borderRadius: 2,
+    overflow: 'hidden'
+  },
+  bar: {
+    height: BAR_MAX_HEIGHT,
     borderRadius: 2,
     backgroundColor: BAR_COLOR
   }

@@ -3,13 +3,15 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useCurrentTrack } from '@audius/common/hooks'
 import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
-import { Animated, Dimensions, Easing } from 'react-native'
+import { Animated, Dimensions } from 'react-native'
 import TrackPlayer, { useIsPlaying } from 'react-native-track-player'
 import { useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
 
 import { LinearGradient } from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
+import type { LinearAnimation } from 'app/utils/animation'
+import { animateLinear } from 'app/utils/animation'
 import { useThemeColors } from 'app/utils/theme'
 
 import { NOW_PLAYING_HEIGHT } from './constants'
@@ -51,9 +53,7 @@ export const TrackingBar = (props: TrackingBarProps) => {
   const { primaryLight2, primaryDark2 } = useThemeColors()
 
   const translateXAnimation = useRef(new Animated.Value(0))
-  const currentAnimation = useRef<Animated.CompositeAnimation | undefined>(
-    undefined
-  )
+  const currentAnimation = useRef<LinearAnimation | undefined>(undefined)
 
   const seek = useSelector(getSeek) ?? 0
   const { playing } = useIsPlaying()
@@ -74,26 +74,20 @@ export const TrackingBar = (props: TrackingBarProps) => {
     : 1.0
 
   const runTranslateXAnimation = useCallback(
-    (timeRemaining: number) => {
-      currentAnimation.current = Animated.timing(translateXAnimation.current, {
-        toValue: 1,
-        duration: (timeRemaining * 1000) / actualPlaybackRate,
-        easing: Easing.linear,
-        // Can't use native driver because this animation is potentially hours long,
-        // and would have to be serialized into an array to be passed to the native layer.
-        // The array exceeds the number of properties allowed in hermes
-        useNativeDriver: false
+    (percentComplete: number, timeRemaining: number) => {
+      currentAnimation.current?.stop()
+      currentAnimation.current = animateLinear(translateXAnimation.current, {
+        from: percentComplete,
+        to: 1,
+        duration: (timeRemaining * 1000) / actualPlaybackRate
       })
-
-      currentAnimation.current.start()
     },
     [actualPlaybackRate]
   )
 
   useEffect(() => {
     if (duration) {
-      translateXAnimation.current.setValue(0)
-      runTranslateXAnimation(duration)
+      runTranslateXAnimation(0, duration)
     }
   }, [mediaKey, duration, runTranslateXAnimation])
 
@@ -102,7 +96,10 @@ export const TrackingBar = (props: TrackingBarProps) => {
       currentAnimation.current?.stop()
     } else if (isPlaying) {
       const { position } = await TrackPlayer.getProgress()
-      runTranslateXAnimation(duration - position)
+      runTranslateXAnimation(
+        duration === 0 ? 0 : position / duration,
+        duration - position
+      )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- no duration
   }, [isPlaying, paused, runTranslateXAnimation])
@@ -111,13 +108,15 @@ export const TrackingBar = (props: TrackingBarProps) => {
     const percentComplete = duration === 0 ? 0 : seek / duration
     const timeRemaining = duration - seek
 
-    translateXAnimation.current.setValue(percentComplete)
-
     if (isPlaying) {
-      runTranslateXAnimation(timeRemaining)
+      runTranslateXAnimation(percentComplete, timeRemaining)
+    } else {
+      translateXAnimation.current.setValue(percentComplete)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- no duration
   }, [seek, runTranslateXAnimation])
+
+  useEffect(() => () => currentAnimation.current?.stop(), [])
 
   const rootOpacity = translateYAnimation.interpolate({
     // Interpolate the animation such that the tracker fades out

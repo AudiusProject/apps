@@ -5,7 +5,7 @@ import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useAppState } from '@react-native-community/hooks'
 import type { GestureResponderEvent } from 'react-native'
-import { Easing, View, Animated, PanResponder } from 'react-native'
+import { View, Animated, PanResponder } from 'react-native'
 import TrackPlayer from 'react-native-track-player'
 import { useSelector } from 'react-redux'
 import { useAsync, usePrevious } from 'react-use'
@@ -13,7 +13,8 @@ import { useAsync, usePrevious } from 'react-use'
 import { LinearGradient } from '@audius/harmony-native'
 import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import { makeStyles } from 'app/styles'
-import { attachToDx } from 'app/utils/animation'
+import type { LinearAnimation } from 'app/utils/animation'
+import { animateLinear, attachToDx } from 'app/utils/animation'
 import { useThemeColors } from 'app/utils/theme'
 
 const { getPlaybackRate, getSeek, getSeekCounter } = playbackSelectors
@@ -156,9 +157,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
 
   useEffect(getRailPageX, [railRef])
 
-  const currentAnimation = useRef<Animated.CompositeAnimation | undefined>(
-    undefined
-  )
+  const currentAnimation = useRef<LinearAnimation | undefined>(undefined)
   const playbackRate = useSelector(getPlaybackRate)
 
   // Calculate the actual playback rate based on track type
@@ -169,17 +168,13 @@ export const Slider = memo(function Slider(props: SliderProps) {
     : 1.0
 
   const play = useCallback(
-    (timeRemaining: number) => {
-      currentAnimation.current = Animated.timing(translationAnim, {
-        toValue: railWidth,
-        duration: timeRemaining / actualPlaybackRate,
-        easing: Easing.linear,
-        // Can't use native driver because this animation is potentially hours long,
-        // and would have to be serialized into an array to be passed to the native layer.
-        // The array exceeds the number of properties allowed in hermes
-        useNativeDriver: false
+    (percentComplete: number, timeRemaining: number) => {
+      currentAnimation.current?.stop()
+      currentAnimation.current = animateLinear(translationAnim, {
+        from: percentComplete * railWidth,
+        to: railWidth,
+        duration: timeRemaining / actualPlaybackRate
       })
-      currentAnimation.current.start()
     },
     [translationAnim, railWidth, actualPlaybackRate]
   )
@@ -187,6 +182,8 @@ export const Slider = memo(function Slider(props: SliderProps) {
   const pause = useCallback(() => {
     currentAnimation.current?.stop()
   }, [currentAnimation])
+
+  useEffect(() => pause, [pause])
 
   const onPressRail = useCallback(
     (e: GestureResponderEvent) => {
@@ -198,7 +195,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
       Animated.timing(translationAnim, {
         duration: 100,
         toValue: newPosition,
-        useNativeDriver: false
+        useNativeDriver: true
       }).start()
       handlePressHandleIn()
       onPressIn()
@@ -215,7 +212,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
   const animateFromNowToEnd = useCallback(
     (percentComplete: number) => {
       if (isPlaying && duration !== undefined) {
-        play((1 - percentComplete) * duration * 1000)
+        play(percentComplete, (1 - percentComplete) * duration * 1000)
       }
     },
     [isPlaying, duration, play]
@@ -322,11 +319,14 @@ export const Slider = memo(function Slider(props: SliderProps) {
       if (durationRef.current !== undefined) {
         if (mediaKey !== prevMediaKey.current) {
           // New media key, playback starts at 0
-          play(durationRef.current * 1000)
+          play(0, durationRef.current * 1000)
           prevMediaKey.current = mediaKey
         } else {
           const { position } = await TrackPlayer.getProgress()
-          play((durationRef.current - position) * 1000)
+          play(
+            durationRef.current === 0 ? 0 : position / durationRef.current,
+            (durationRef.current - position) * 1000
+          )
         }
       }
     } else {
@@ -350,7 +350,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
 
       setHandlePosition(percentComplete * railWidth)
       if (isPlaying && durationRef.current !== undefined) {
-        play((durationRef.current - position) * 1000)
+        play(percentComplete, (durationRef.current - position) * 1000)
       }
     }
   }, [isPlaying, appState, previousAppState, play, railWidth, translationAnim])

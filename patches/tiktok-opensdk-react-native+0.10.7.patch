@@ -1,0 +1,27 @@
+diff --git a/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt b/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt
+index 9e1c66a..44999b3 100644
+--- a/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt
++++ b/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt
+@@ -52,7 +52,7 @@ class TiktokOpensdkReactNativeModule(reactContext: ReactApplicationContext) :
+     fun share(mediaUrls: ReadableArray, isImage: Boolean, isGreenScreen: Boolean, promise: Promise) {
+         Log.d("TikTokSDK", "Share method called with clientKey: $clientKey, mediaUrls size: ${mediaUrls.size()}, isImage: $isImage, isGreenScreen: $isGreenScreen")
+         
+-        val activity = currentActivity ?: run {
++        val activity = reactApplicationContext.currentActivity ?: run {
+             Log.e("TikTokSDK", "Activity is null")
+             promise.reject("ERROR", "Activity is null")
+             return
+@@ -144,10 +144,10 @@ class TiktokOpensdkReactNativeModule(reactContext: ReactApplicationContext) :
+         handler.removeCallbacksAndMessages(null)
+     }
+ 
+-    override fun onNewIntent(intent: Intent?) {
++    override fun onNewIntent(intent: Intent) {
+         Log.d("TikTokSDK", "onNewIntent called")
+-        Log.d("TikTokSDK", "Intent data: ${intent?.toString()}")
+-        Log.d("TikTokSDK", "Intent extras: ${intent?.extras}")
++        Log.d("TikTokSDK", "Intent data: ${intent.toString()}")
++        Log.d("TikTokSDK", "Intent extras: ${intent.extras}")
+ 
+         if (!isShareInProgress) {
+             Log.d("TikTokSDK", "No share in progress, ignoring new intent")
