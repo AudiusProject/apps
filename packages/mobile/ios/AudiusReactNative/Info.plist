@@ -81,7 +81,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This lets you select photos for uploading to Audius, including setting your profile picture and track cover art.</string>
 	<key>RCTNewArchEnabled</key>
-	<false/>
+	<true/>
 	<key>SCSDKClientId</key>
 	<string>$(SCSDK_CLIENT_ID)</string>
 	<key>SCSDKRedirectUrl</key>
