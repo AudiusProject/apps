@@ -44,4 +44,8 @@ export const ALLOWED_AUDIO_FILE_EXTENSIONS = [
   'tsa'
 ]
 
-export const ALLOWED_AUDIO_FILE_MIME = /^audio/
+// Ogg is a generic container format, so browsers don't always label .ogg
+// files as audio: Firefox's built-in extension table gives .ogg the type
+// application/ogg (and lists video/ogg for it too), whatever the OS. The
+// extension itself is checked separately (ALLOWED_AUDIO_FILE_EXTENSIONS above).
+export const ALLOWED_AUDIO_FILE_MIME = /^(audio|video\/ogg|application\/ogg)/
