@@ -166,6 +166,15 @@ body,
   height: 100%;
 }
 
+/* Unstyled fields default to ~13px, and iOS Safari zooms on focus under 16px */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 .grecaptcha-badge {
   visibility: hidden;
 }

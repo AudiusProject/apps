@@ -150,3 +150,11 @@
 .input::placeholder {
   color: var(--harmony-text-subdued);
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .input.extra-small,
+  .input.extraSmall {
+    font-size: var(--harmony-font-m);
+  }
+}

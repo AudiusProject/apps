@@ -112,3 +112,10 @@
   stroke: var(--harmony-n-300) !important;
   stroke-width: 3px;
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .searchBar input {
+    font-size: var(--harmony-font-m);
+  }
+}

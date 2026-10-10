@@ -109,3 +109,10 @@
   font-size: 12px;
   font-weight: var(--harmony-font-bold);
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .input.small > input {
+    font-size: var(--harmony-font-m);
+  }
+}
