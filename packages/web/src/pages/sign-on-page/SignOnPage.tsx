@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useLayoutEffect } from 'react'
 
 import { SystemAppearance } from '@audius/common/models'
-import { FEED_PAGE } from '@audius/common/src/utils/route'
+import { FEED_PAGE, TRENDING_PAGE } from '@audius/common/src/utils/route'
 import { themeSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -317,9 +317,14 @@ export const SignOnPage = () => {
   const SignOnRoot = isMobile ? MobileSignOnRoot : DesktopSignOnRoot
   const location = useLocation()
   const isSignUp = location.pathname.startsWith(SIGN_UP_PAGE)
+  const signUpCompletionRoute =
+    completionRoute === FEED_PAGE ? TRENDING_PAGE : completionRoute
+  const successRoute = startedSignUpProcess
+    ? (signUpCompletionRoute ?? TRENDING_PAGE)
+    : (completionRoute ?? FEED_PAGE)
 
   if (signOnStatus === EditingStatus.SUCCESS) {
-    return <Navigate to={completionRoute || FEED_PAGE} />
+    return <Navigate to={successRoute} />
   }
 
   return (
