@@ -12,7 +12,7 @@ import { env } from 'services/env'
 
 import { useFastReferral } from '../hooks/useFastReferral'
 
-const { FEED_PAGE, SignUpPath } = route
+const { TRENDING_PAGE, SignUpPath } = route
 
 const isDevEnvironment =
   env.ENVIRONMENT === 'development' ||
@@ -63,7 +63,7 @@ export const useDetermineAllowedRoute = () => {
       return {
         allowedRoutes: [],
         isAllowedRoute: false,
-        correctedRoute: FEED_PAGE
+        correctedRoute: TRENDING_PAGE
       }
     }
     // Normalize path: strip /signup/ or signup/ prefix and trailing slash so "select-genres" always matches

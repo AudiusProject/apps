@@ -45,6 +45,7 @@ import { useMedia } from 'hooks/useMedia'
 import { SignInPage } from 'pages/sign-in-page'
 import SignUpPage from 'pages/sign-up-page'
 import { NavHeader } from 'pages/sign-up-page/components/NavHeader'
+import { getSignUpCompletionRoute } from 'pages/sign-up-page/utils/getSignUpCompletionRoute'
 import landingImg from 'public-site/pages/landing-2026/assets/landing.png'
 
 const {
@@ -317,9 +318,18 @@ export const SignOnPage = () => {
   const SignOnRoot = isMobile ? MobileSignOnRoot : DesktopSignOnRoot
   const location = useLocation()
   const isSignUp = location.pathname.startsWith(SIGN_UP_PAGE)
+  const signInCompletionRoute = completionRoute ? completionRoute : FEED_PAGE
 
   if (signOnStatus === EditingStatus.SUCCESS) {
-    return <Navigate to={completionRoute || FEED_PAGE} />
+    return (
+      <Navigate
+        to={
+          startedSignUpProcess
+            ? getSignUpCompletionRoute(completionRoute)
+            : signInCompletionRoute
+        }
+      />
+    )
   }
 
   return (

@@ -181,7 +181,7 @@ async function testSignUp({
     })
   ).toBeVisible({ timeout: 60000 }) // This can take a long time
   await page.getByRole('button', { name: /start listening/i }).click()
-  await expect(page).toHaveURL(/feed/i)
+  await expect(page).toHaveURL(/trending/i)
 }
 
 test.describe('Sign Up', () => {
