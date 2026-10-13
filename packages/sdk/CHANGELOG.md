@@ -1,5 +1,17 @@
 # @audius/sdk
 
+## 17.1.0
+
+### Minor Changes
+
+- aeba05f: Load the default ClaimableTokens, RewardManager and PaymentRouter clients and the EthereumService contracts on first use, so creating the SDK no longer loads @audius/spl, anchor or the @audius/eth ABIs up front. The public interfaces are unchanged, with two differences for the defaults: `sdk.services.ethereum.<contract>.abi` is only available after that contract has been used, and these services are no longer `instanceof` their client classes. Also marks the package as side-effect free so bundlers can drop unused exports.
+
+### Patch Changes
+
+- 2633593: Parse weekly rotation notifications so a response containing one does not fail to load the entire notification list.
+- 4042e05: Load `tus-js-client` and the Node `file-type` path only when an upload or file type check needs them, and fetch the storage node list on first use instead of when the SDK is created.
+- 737c197: When a storage node reports an audio upload as done without its transcode result, poll the next node and fail after two minutes instead of waiting for the 20-minute stall timeout.
+
 ## 17.0.0
 
 ### Major Changes
