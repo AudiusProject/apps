@@ -2,6 +2,7 @@ package co.audius.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import com.bytedance.sdk.open.tiktok.TikTokOpenApiFactory
 import com.bytedance.sdk.open.tiktok.TikTokOpenConfig
 import com.facebook.react.ReactActivity
@@ -11,6 +12,8 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.zoontek.rnbars.RNBars
 import com.zoontek.rnbootsplash.RNBootSplash
 
@@ -46,8 +49,24 @@ class MainActivity : ReactActivity() {
     RNBars.init(this, "light-content")
     TikTokOpenApiFactory.init(TikTokOpenConfig(BuildConfig.TIKTOK_APP_ID))
 
-    // lazy load Google Cast context
-    CastContext.getSharedInstance(this)
+    initCastContext()
+  }
+
+  /**
+   * Lazy load the Google Cast context. Cast depends on Google Play Services,
+   * which is missing on de-Googled devices (e.g. GrapheneOS, F-Droid users),
+   * where getSharedInstance throws and would crash the app on launch.
+   * react-native-google-cast already no-ops when Play Services is unavailable.
+   */
+  private fun initCastContext() {
+    val playServicesState =
+      GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+    if (playServicesState != ConnectionResult.SUCCESS) return
+    try {
+      CastContext.getSharedInstance(this)
+    } catch (e: Exception) {
+      Log.w("MainActivity", "Google Cast unavailable", e)
+    }
   }
 
   override fun onDestroy() {
