@@ -7,9 +7,13 @@ on:
     paths:
       - 'packages/mobile/**'
       - 'packages/common/**'
+      - 'packages/dotenv-linter/**'
+      - 'packages/eth/**'
+      - 'packages/fixed-decimal/**'
       - 'packages/harmony/**'
       - 'packages/libs/**'
       - 'packages/sdk/**'
+      - 'packages/spl/**'
       - 'package-lock.json'
       - '.github/workflows/mobile.yml'
   workflow_dispatch:
