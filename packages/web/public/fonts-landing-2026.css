@@ -1,8 +1,7 @@
 /* Dust Bucer – display font for 2026 landing large text */
 @font-face {
   font-family: 'Dust Bucer';
-  src: url('/fonts/DustBucer.otf') format('opentype'),
-    url('/fonts/DustBucer.ttf') format('truetype');
+  src: url('/fonts/DustBucer.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -10,8 +9,7 @@
 
 @font-face {
   font-family: 'Dust Bucer Swash';
-  src: url('/fonts/DustBucer%20Swash.otf') format('opentype'),
-    url('/fonts/DustBucer%20Swash.ttf') format('truetype');
+  src: url('/fonts/DustBucer-Swash.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
