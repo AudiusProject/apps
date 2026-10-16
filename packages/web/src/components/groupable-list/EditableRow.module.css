@@ -75,3 +75,11 @@
 .textarea::placeholder {
   color: var(--harmony-n-400);
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .input,
+  .textarea {
+    font-size: var(--harmony-font-m);
+  }
+}
