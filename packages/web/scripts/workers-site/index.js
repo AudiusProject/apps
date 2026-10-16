@@ -24,8 +24,6 @@ function cacheControlForPathname(pathname) {
   return `public, max-age=${BROWSER_CACHE_TTL_SECONDS}`
 }
 
-let h1 = null
-
 const routes = [
   { pattern: /^\/([^/]+)$/, name: 'user', keys: ['handle'] },
   {
@@ -137,33 +135,38 @@ function clean(str) {
 }
 
 class SEOHandlerBody {
+  constructor(seo) {
+    this.seo = seo
+  }
+
   element(element) {
-    if (!h1) {
+    if (!this.seo.h1) {
       return
     }
     const h1Tag = `<h1 id="audius-h1" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">${clean(
-      h1
+      this.seo.h1
     )}</h1>`
     element.prepend(h1Tag, { html: true })
   }
 }
 
 class SEOHandlerHead {
-  constructor(pathname, apiEndpoint, host) {
-    self.pathname = pathname
-    self.apiEndpoint = apiEndpoint
-    self.host = host
+  constructor(pathname, apiEndpoint, host, seo) {
+    this.pathname = pathname
+    this.apiEndpoint = apiEndpoint
+    this.host = host
+    this.seo = seo
   }
 
   async element(element) {
     const { metadata, name } = await getMetadata(
-      self.pathname,
-      self.apiEndpoint
+      this.pathname,
+      this.apiEndpoint
     )
 
     if (!metadata || !name || !metadata.data) {
       // We didn't parse this to anything we have custom tags for, so just return the default tags
-      const baseUrl = `https://${self.host}`
+      const baseUrl = `https://${this.host}`
       const schemaLd = JSON.stringify({
         '@context': 'https://schema.org',
         '@graph': [
@@ -296,7 +299,7 @@ class SEOHandlerHead {
         const displayName =
           (u.name && String(u.name).trim()) || u.handle || 'Artist'
         title = `${displayName} • Audius`
-        h1 = displayName
+        this.seo.h1 = displayName
         description = `Play ${displayName} on Audius and discover followers on Audius | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
         ogDescription = u.bio || description
         image = u.profile_picture ? u.profile_picture['480x480'] : ''
@@ -305,7 +308,7 @@ class SEOHandlerHead {
       }
       case 'track': {
         title = `${metadata.data[0].title} by ${metadata.data[0].user.name} • Audius`
-        h1 = metadata.data[0].title
+        this.seo.h1 = metadata.data[0].title
         description = `Stream ${metadata.data[0].title} by ${metadata.data[0].user.name} on Audius`
         ogDescription = metadata.data[0].description || description
         image = metadata.data[0].artwork
@@ -316,7 +319,7 @@ class SEOHandlerHead {
       }
       case 'playlist': {
         title = `${metadata.data[0].playlist_name} by ${metadata.data[0].user.name} • Audius`
-        h1 = metadata.data[0].playlist_name
+        this.seo.h1 = metadata.data[0].playlist_name
         description = `Listen to ${metadata.data[0].playlist_name}, a playlist curated by ${metadata.data[0].user.name} on Audius | Stream tracks, albums, playlists on desktop and mobile`
         ogDescription = metadata.data[0].description || ''
         image = metadata.data[0].artwork
@@ -327,7 +330,7 @@ class SEOHandlerHead {
       }
       case 'album': {
         title = `${metadata.data[0].playlist_name} by ${metadata.data[0].user.name} • Audius`
-        h1 = metadata.data[0].playlist_name
+        this.seo.h1 = metadata.data[0].playlist_name
         description = `Listen to ${metadata.data[0].playlist_name}, an album by ${metadata.data[0].user.name} on Audius | Stream tracks, albums, playlists on desktop and mobile`
         ogDescription = metadata.data[0].description || ''
         image = metadata.data[0].artwork
@@ -342,11 +345,11 @@ class SEOHandlerHead {
     const tags = `<title>${clean(title)}</title>
     <meta name="description" content="${clean(description)}">
 
-    <link rel="canonical" href="https://${self.host}${encodeURI(permalink)}">
+    <link rel="canonical" href="https://${this.host}${encodeURI(permalink)}">
     <meta property="og:title" content="${clean(title)}">
     <meta property="og:description" content="${clean(ogDescription)}">
     <meta property="og:image" content="${image}">
-    <meta property="og:url" content="https://${self.host}${encodeURI(permalink)}">
+    <meta property="og:url" content="https://${this.host}${encodeURI(permalink)}">
     <meta property="og:type" content="website" />
 
     <meta name="twitter:card" content="summary">
@@ -354,7 +357,7 @@ class SEOHandlerHead {
     <meta name="twitter:description" content="${clean(ogDescription)}">
     <meta name="twitter:image" content="${image}">
 
-    <link rel="alternate" type="application/json+oembed" href="https://${self.host}/oembed?url=https://${self.host + encodeURI(permalink)}&format=json" title="${clean(title)}" />
+    <link rel="alternate" type="application/json+oembed" href="https://${this.host}/oembed?url=https://${this.host + encodeURI(permalink)}&format=json" title="${clean(title)}" />
     `
     element.append(tags, { html: true })
   }
@@ -529,9 +532,14 @@ async function handleEvent(request, env, ctx) {
 
         const asset = await getAsset(request, env, ctx, options)
 
+        // Per-request, since module scope is shared across requests in an isolate
+        const seo = { h1: null }
         const rewritten = new HTMLRewriter()
-          .on('head', new SEOHandlerHead(pathname, apiEndpoint, url.host))
-          .on('body', new SEOHandlerBody())
+          .on(
+            'head',
+            new SEOHandlerHead(pathname, apiEndpoint, url.host, seo)
+          )
+          .on('body', new SEOHandlerBody(seo))
           .transform(asset)
 
         return rewritten
