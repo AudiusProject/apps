@@ -37,7 +37,6 @@ import {
   useSyncGlassScroll
 } from 'app/screens/app-screen/GlassChromeContext'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
-import { WeeklyRotation } from 'app/screens/explore-screen/components/WeeklyRotation'
 import { make, track } from 'app/services/analytics'
 
 import { FeedFilterButton } from './FeedFilterButton'
@@ -283,8 +282,6 @@ export const FeedScreen = () => {
               <TrackLineup
                 source='DISCOVER_FEED'
                 pullToRefresh={false}
-                hideHeaderOnEmpty
-                header={<WeeklyRotation surface='feed' />}
                 LineupEmptyComponent={<SuggestedFollows />}
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
@@ -298,8 +295,6 @@ export const FeedScreen = () => {
               <TrackLineup
                 source='DISCOVER_FEED'
                 pullToRefresh
-                hideHeaderOnEmpty
-                header={<WeeklyRotation surface='feed' />}
                 LineupEmptyComponent={<SuggestedFollows />}
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
