@@ -20,7 +20,6 @@ import EndOfLineup from 'components/lineup/EndOfLineup'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
-import { WeeklyRotationBanner } from 'components/weekly-rotation'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
 import { FeedFilters } from 'pages/feed-page/components/FeedFilters'
 import { FeedTabs } from 'pages/feed-page/components/FeedTabs'
@@ -161,7 +160,6 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         gap='l'
         css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}
       >
-        <WeeklyRotationBanner surface='feed' />
         <TrackLineup
           key={`feed-${feedTab}`}
           aria-label='feed'
