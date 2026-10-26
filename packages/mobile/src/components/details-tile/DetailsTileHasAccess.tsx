@@ -9,6 +9,7 @@ import {
 } from '@audius/common/models'
 import type { AccessConditions, User } from '@audius/common/models'
 import type { PurchaseableContentType } from '@audius/common/store'
+import { getCoinLogoUrl } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 import type { ViewStyle } from 'react-native'
 import { Image, View } from 'react-native'
@@ -141,7 +142,7 @@ const DetailsTileOwnerSection = ({
         <Flex row alignItems='center' gap='xs'>
           <HexagonalIcon size={24}>
             <Image
-              source={{ uri: token?.logoUri }}
+              source={{ uri: getCoinLogoUrl(token?.logoUri, 24) ?? undefined }}
               style={{ width: 24, height: 24 }}
             />
           </HexagonalIcon>

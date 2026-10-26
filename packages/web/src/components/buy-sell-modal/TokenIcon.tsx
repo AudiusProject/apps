@@ -1,5 +1,6 @@
 import { ComponentType } from 'react'
 
+import { getCoinLogoUrl } from '@audius/common/utils'
 import { Artwork, ArtworkProps, IconProps, useTheme } from '@audius/harmony'
 
 export type TokenIconProps = {
@@ -41,7 +42,11 @@ export const TokenIcon = ({
 
     return (
       <Artwork
-        src={logoURI}
+        src={
+          typeof dimensions?.w === 'number'
+            ? getCoinLogoUrl(logoURI, dimensions.w)
+            : logoURI
+        }
         {...dimensions}
         borderWidth={0}
         hex={hex}
