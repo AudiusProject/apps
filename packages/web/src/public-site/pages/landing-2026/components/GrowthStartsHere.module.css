@@ -86,9 +86,14 @@
   overflow: hidden;
 }
 
+.visualWrap picture,
 .visualWrap img {
   width: 100%;
   height: 100%;
+  display: block;
+}
+
+.visualWrap img {
   object-fit: cover;
 }
 

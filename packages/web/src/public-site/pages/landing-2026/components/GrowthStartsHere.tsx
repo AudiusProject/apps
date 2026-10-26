@@ -1,5 +1,6 @@
 import featuresBg from '../assets/features-bg.svg?url'
-import featuresVisual from '../assets/features-visual.jpg'
+import featuresVisualJpg from '../assets/features-visual.jpg'
+import featuresVisualWebp from '../assets/features-visual.webp'
 
 import styles from './GrowthStartsHere.module.css'
 
@@ -42,11 +43,17 @@ export const GrowthStartsHere = (_props: GrowthStartsHereProps) => {
         </div>
         <div className={styles.contentRow}>
           <div className={styles.visualWrap}>
-            <img
-              src={featuresVisual}
-              alt='Audius app interface'
-              loading='lazy'
-            />
+            <picture>
+              <source type='image/webp' srcSet={featuresVisualWebp} />
+              <img
+                src={featuresVisualJpg}
+                alt='Audius app interface'
+                width={1456}
+                height={964}
+                loading='lazy'
+                decoding='async'
+              />
+            </picture>
           </div>
           <div className={styles.featuresList}>
             {messages.features.map((feature) => (
