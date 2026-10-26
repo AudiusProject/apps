@@ -48,6 +48,7 @@
     "@audius/harmony": "*",
     "@audius/sdk": "*",
     "@bravemobile/react-native-code-push": "^12.3.2",
+    "@callstack/liquid-glass": "0.8.2",
     "@coinflowlabs/react-native": "4.5.2",
     "@dr.pogodin/react-native-fs": "2.32.1",
     "@ebay/nice-modal-react": "^1.2.13",

@@ -13,11 +13,13 @@ import { TouchableOpacity, Animated, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { IconButton, IconIndent, IconLock } from '@audius/harmony-native'
+import { FLOATING_BAR_SIDE_MARGIN } from 'app/components/bottom-tab-bar/constants'
+import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
 import { FavoriteButton } from 'app/components/favorite-button'
 import Text from 'app/components/text'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
-import { useColor } from 'app/utils/theme'
+import { isDarkTheme, useColor, useThemeVariant } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
 
 import { LockedStatusBadge } from '../core'
@@ -39,6 +41,13 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     height: PLAY_BAR_HEIGHT,
     alignItems: 'center',
     zIndex: zIndex.PLAY_BAR
+  },
+  floatingPill: {
+    flex: 1,
+    alignSelf: 'stretch',
+    marginHorizontal: FLOATING_BAR_SIDE_MARGIN,
+    borderRadius: PLAY_BAR_HEIGHT / 2,
+    overflow: 'hidden'
   },
   // Group: Favorite Button, Track Content, Play Button
   container: {
@@ -142,10 +151,21 @@ type PlayBarProps = {
   onPress: () => void
   translationAnim: Animated.Value
   mediaKey: string
+  /** Render as a glass pill above the floating tab bar. */
+  floating?: boolean
 }
 
 export const PlayBar = (props: PlayBarProps) => {
-  const { track, user, onPress, translationAnim, mediaKey, duration } = props
+  const {
+    track,
+    user,
+    onPress,
+    translationAnim,
+    mediaKey,
+    duration,
+    floating
+  } = props
+  const isDarkMode = isDarkTheme(useThemeVariant())
   const styles = useStyles()
   const { data: accountUserId } = useCurrentUserId()
   const neutral = useColor('neutral')
@@ -198,8 +218,8 @@ export const PlayBar = (props: PlayBarProps) => {
     extrapolate: 'extend'
   })
 
-  return (
-    <Animated.View style={[styles.root, { opacity: rootOpacityAnimation }]}>
+  const content = (
+    <>
       <TrackingBar
         duration={duration}
         mediaKey={mediaKey}
@@ -268,6 +288,22 @@ export const PlayBar = (props: PlayBarProps) => {
           <PlayButton wrapperStyle={styles.playIcon} />
         </View>
       </View>
+    </>
+  )
+
+  return (
+    <Animated.View style={[styles.root, { opacity: rootOpacityAnimation }]}>
+      {floating ? (
+        <LiquidGlassView
+          effect='regular'
+          colorScheme={isDarkMode ? 'dark' : 'light'}
+          style={styles.floatingPill}
+        >
+          {content}
+        </LiquidGlassView>
+      ) : (
+        content
+      )}
     </Animated.View>
   )
 }

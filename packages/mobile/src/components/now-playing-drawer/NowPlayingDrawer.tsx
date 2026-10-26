@@ -15,11 +15,11 @@ import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useNavigationState } from '@react-navigation/native'
 import type {
-  Animated,
   GestureResponderEvent,
   PanResponderGestureState
 } from 'react-native'
 import {
+  Animated,
   Keyboard,
   Platform,
   View,
@@ -32,7 +32,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
+import {
+  BOTTOM_BAR_HEIGHT,
+  useFloatingTabBar
+} from 'app/components/bottom-tab-bar'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import Drawer, {
   DrawerAnimationStyle,
@@ -70,7 +73,7 @@ const RESTART_THRESHOLD_SEC = 3
 // the status bar will be hidden when the drawer is open
 const INSET_STATUS_BAR_HIDE_THRESHOLD = 20
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ palette, spacing }) => ({
   container: {
     paddingTop: 0,
     height: FULL_DRAWER_HEIGHT,
@@ -80,6 +83,18 @@ const useStyles = makeStyles(({ spacing }) => ({
     position: 'absolute',
     width: '100%',
     top: 0
+  },
+  // With the floating tab bar the collapsed drawer is see-through, so content
+  // shows around the play bar and tab bar pills. The background fades in as
+  // the drawer opens.
+  floatingDrawer: {
+    overflow: 'visible',
+    backgroundColor: 'transparent'
+  },
+  floatingBackground: {
+    backgroundColor: palette.white,
+    borderTopLeftRadius: spacing(10),
+    borderTopRightRadius: spacing(10)
   },
   controlsContainer: {
     marginHorizontal: spacing(6),
@@ -199,6 +214,20 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
       ]
     }),
     [isOpen, insets.bottom]
+  )
+
+  const floating = useFloatingTabBar()
+  // Collapsed, with the play bar resting on the tab bar.
+  const collapsedPosition =
+    FULL_DRAWER_HEIGHT - insets.bottom - BOTTOM_BAR_HEIGHT - PLAY_BAR_HEIGHT
+  const fullPlayerOpacity = useMemo(
+    () =>
+      translationAnim.interpolate({
+        inputRange: [collapsedPosition - 160, collapsedPosition],
+        outputRange: [1, 0],
+        extrapolate: 'clamp'
+      }),
+    [translationAnim, collapsedPosition]
   )
 
   useEffect(() => {
@@ -328,6 +357,20 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     onClose()
   }, [onClose, navigation, trackId])
 
+  const playBar = (
+    <View style={styles.playBarContainer}>
+      <PlayBar
+        mediaKey={`${mediaKey}`}
+        duration={trackDuration}
+        track={track}
+        user={user}
+        onPress={onDrawerOpen}
+        translationAnim={translationAnim}
+        floating={!!floating}
+      />
+    </View>
+  )
+
   return (
     // The wrapper is a new stacking context, so restate the drawer's z-order.
     // `box-none` lets touches reach the screen behind it.
@@ -349,9 +392,9 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
         shouldCloseToInitialOffset={isPlayBarShowing}
         animationStyle={DrawerAnimationStyle.SPRINGY}
         shouldBackgroundDim={false}
-        shouldShowShadow={!isInChatScreen}
+        shouldShowShadow={!isInChatScreen && !floating}
         shouldAnimateShadow={false}
-        drawerStyle={{ overflow: 'visible' }}
+        drawerStyle={floating ? styles.floatingDrawer : { overflow: 'visible' }}
         onPercentOpen={onDrawerPercentOpen}
         onPanResponderMove={onPanResponderMove}
         onPanResponderRelease={onPanResponderRelease}
@@ -361,25 +404,29 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
         // Disable safe area view edges because they are handled manually
         disableSafeAreaView
       >
-        <View
+        {floating ? (
+          <Animated.View
+            pointerEvents='none'
+            style={[
+              StyleSheet.absoluteFill,
+              styles.floatingBackground,
+              { opacity: fullPlayerOpacity }
+            ]}
+          />
+        ) : null}
+        {floating ? playBar : null}
+        <Animated.View
+          pointerEvents='box-none'
           style={[
             styles.container,
             {
               paddingTop: effectiveTopInset,
               paddingBottom: effectiveBottomInset
-            }
+            },
+            floating ? { opacity: fullPlayerOpacity } : null
           ]}
         >
-          <View style={styles.playBarContainer}>
-            <PlayBar
-              mediaKey={`${mediaKey}`}
-              duration={trackDuration}
-              track={track}
-              user={user}
-              onPress={onDrawerOpen}
-              translationAnim={translationAnim}
-            />
-          </View>
+          {floating ? null : playBar}
           <Logo translationAnim={translationAnim} />
           <View style={styles.titleBarContainer}>
             <TitleBar onClose={onClose} />
@@ -423,7 +470,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             />
             <ActionsBar track={track} />
           </View>
-        </View>
+        </Animated.View>
       </Drawer>
     </Reanimated.View>
   )
