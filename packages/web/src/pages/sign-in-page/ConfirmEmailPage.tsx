@@ -51,10 +51,14 @@ export const ConfirmEmailPage = () => {
       const sanitizedOtp = otp.replace(/\s/g, '')
       dispatch(setValueField('otp', sanitizedOtp))
       dispatch(setValueField('email', email))
-      dispatch(startSignUp())
+      // Only guests finish sign-up from here. For everyone else this would
+      // open the sign-up welcome modal after a plain sign-in.
+      if (isGuest) {
+        dispatch(startSignUp())
+      }
       dispatch(signIn(email, password, sanitizedOtp))
     },
-    [dispatch, email, password]
+    [dispatch, email, password, isGuest]
   )
 
   return (

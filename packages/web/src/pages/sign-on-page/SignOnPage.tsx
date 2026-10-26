@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useLayoutEffect } from 'react'
+import { ReactNode, useEffect, useLayoutEffect, useRef } from 'react'
 
 import { SystemAppearance } from '@audius/common/models'
 import { FEED_PAGE } from '@audius/common/src/utils/route'
@@ -318,7 +318,16 @@ export const SignOnPage = () => {
   const location = useLocation()
   const isSignUp = location.pathname.startsWith(SIGN_UP_PAGE)
 
+  // The sign-on saga resets status to editing right after success, often
+  // before the navigation to the completion route commits (it suspends on
+  // lazy pages). Rendering the form again would remount the sign-in routes,
+  // and their first-mount redirect to /signin would cancel that navigation.
+  const hasSucceededRef = useRef(false)
   if (signOnStatus === EditingStatus.SUCCESS) {
+    hasSucceededRef.current = true
+  }
+
+  if (hasSucceededRef.current) {
     return <Navigate to={completionRoute || FEED_PAGE} />
   }
 
