@@ -1,9 +1,7 @@
 import { ReactElement } from 'react'
 
 import imageProfilePicEmpty from '@audius/common/src/assets/img/imageProfilePicEmpty2X.png'
-import '@audius/harmony/dist/harmony-no-fonts.css'
-import '@fontsource-variable/inter'
-import '@fontsource-variable/bricolage-grotesque'
+import '@audius/harmony/dist/harmony.css'
 import IconAudiusLogoHorizontal from '@audius/harmony/src/assets/icons/AudiusLogoHorizontal.svg'
 import IconExplore from '@audius/harmony/src/assets/icons/Explore.svg'
 import IconFeed from '@audius/harmony/src/assets/icons/Feed.svg'

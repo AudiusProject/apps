@@ -8,8 +8,6 @@ import svgr from '@svgr/rollup'
 import postcss from 'rollup-plugin-postcss'
 import rollupTypescript from 'rollup-plugin-typescript2'
 
-import { NO_FONTS_CSS, harmonyCssWithFonts } from './rollup.fonts.mjs'
-
 const cjsRequire = createRequire(import.meta.url)
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 const tspCompiler = cjsRequire('ts-patch/compiler')
@@ -44,10 +42,9 @@ export default {
     }),
     postcss({
       minimize: true,
-      extract: NO_FONTS_CSS,
+      extract: 'harmony.css',
       modules: true
     }),
-    harmonyCssWithFonts(),
     svgr(),
     image({
       exclude: /\.svg$/ // Exclude SVG files since they're handled by SVGR

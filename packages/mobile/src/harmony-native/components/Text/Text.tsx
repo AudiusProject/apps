@@ -6,7 +6,6 @@ import {
   bodyLineHeightMap
 } from '@audius/harmony/src/components/text/constants'
 import { TextContext } from '@audius/harmony/src/components/text/textContext'
-import { isNeueTheme } from '@audius/harmony/src/foundations/theme/types'
 import { css } from '@emotion/native'
 import type { TextProps as NativeTextProps, TextStyle } from 'react-native'
 import { Platform, Text as TextBase } from 'react-native'
@@ -43,9 +42,9 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
   const parentVariant = contextVariant && !variantProp
   const strength = strengthProp ?? (parentVariant ? undefined : 'default')
   const size = sizeProp ?? (parentVariant ? undefined : 'm')
-  // Classic and Matrix headings are a gradient on web; native uses the accent.
+  // TODO: make heading a proper gradient
   const color =
-    colorProp === 'heading' && !isNeueTheme(theme.type)
+    colorProp === 'heading'
       ? theme.color.secondary.secondary
       : theme.color.text[colorProp]
 

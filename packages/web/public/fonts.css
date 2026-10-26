@@ -1,8 +1,8 @@
 /**
  * Avenir Next LT Pro
  *
- * Fallback behind Inter. Each weight is a separate woff2 file, so browsers
- * only download the weights a page renders.
+ * Each weight is a separate woff2 file, so browsers only download the
+ * weights a page renders.
  */
 
 @font-face {

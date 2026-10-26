@@ -36,11 +36,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
 
   const hoverCss: CSSObject = {
     backgroundColor: theme.color.secondary.s200,
-    // s200 is the dark accent in Neue dark, where static.white is dark too.
-    color:
-      theme.type === 'default-dark'
-        ? theme.color.static.staticWhite
-        : theme.color.static.white,
+    color: theme.color.static.white,
     border: `1px solid ${theme.color.secondary.secondary}`,
     ...(size === 'large' && {
       boxShadow: 'none'

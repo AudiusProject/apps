@@ -1,142 +1,142 @@
 /**
- * Default [Neue] theme - light variant
- * Tokens v2 (Oct 2026): neutral chrome, one accent, AA contrast on every text pair.
+ * Default [Neue] theme - modern design system (light variant)
+ * From Figma Default [Neue].tokens.json
  */
 const defaultLightPrimitives = {
   static: {
-    primary: '#6A52E0',
-    secondary: '#5B44B8',
+    primary: '#7F6AD6',
+    secondary: '#A74CFF',
     white: '#FFFFFF',
     staticWhite: '#F6F8FC',
-    black: '#0B0B0E'
+    black: '#0F0F0F'
   },
   primary: {
-    p100: '#EFEBFF',
-    p200: '#D9D1FF',
-    p300: '#6A52E0',
+    p100: '#E9E3FF',
+    p200: '#CFC3FF',
+    p300: '#7F6AD6',
     p400: '#5B44B8',
     p500: '#3B2A86',
-    default: '#6A52E0',
-    primary: '#6A52E0'
+    default: '#7F6AD6',
+    primary: '#7F6AD6'
   },
   secondary: {
-    s100: '#EFEBFF',
-    s200: '#CFC3FF',
-    s300: '#5B44B8',
-    s400: '#4A369E',
-    s500: '#3B2A86',
-    default: '#5B44B8',
-    secondary: '#5B44B8'
+    s100: '#F0E0FF',
+    s200: '#DDBBFF',
+    s300: '#A74CFF',
+    s400: '#7D2FDB',
+    s500: '#4F159E',
+    default: '#A74CFF',
+    secondary: '#A74CFF'
   },
   neutral: {
-    n25: '#F5F5F7',
-    n50: '#ECECF0',
-    n100: '#E4E4EA',
-    n150: '#C4C4CC',
-    n200: '#A8A8B2',
-    n300: '#6B6B75',
-    n400: '#5C5C66',
-    n500: '#50505A',
-    n600: '#44444E',
-    n700: '#30303A',
-    n800: '#16161A',
-    n900: '#101014',
-    n950: '#0B0B0E',
-    default: '#16161A',
-    neutral: '#16161A'
+    n25: '#F7F7F8',
+    n50: '#F0F1F3',
+    n100: '#E6E8EC',
+    n150: '#D8DBE2',
+    n200: '#C7CCD6',
+    n300: '#B2B8C5',
+    n400: '#9AA1B0',
+    n500: '#7F8798',
+    n600: '#636C7E',
+    n700: '#4A5263',
+    n800: '#343B49',
+    n900: '#232834',
+    n950: '#0C0F14',
+    default: '#343B49',
+    neutral: '#343B49'
   },
   special: {
-    background: '#F7F7F9',
-    blue: '#6A52E0',
-    darkRed: '#B91C1C',
-    glassOverlay: '#FFFFFFC7',
-    gradientStop1: '#6A52E0',
+    background: '#F6F5F7',
+    blue: '#7F6AD6',
+    darkRed: '#C44357',
+    glassOverlay: '#00000014',
+    gradientStop1: '#7F6AD6',
     gradientStop2: '#5B44B8',
-    gradient: 'linear-gradient(315deg, #6A52E0 0%, #5B44B8 100%)',
+    gradient: 'linear-gradient(315deg, #7F6AD6 0%, #5B44B8 100%)',
     coinGradient:
       'linear-gradient(85deg, #7F6AD6 -4.82%, #A74CFF 49.8%, #7F6AD6 104.43%)',
     coinGradientColor1: '#7F6AD6',
     coinGradientColor2: '#A74CFF',
     coinGradientColor3: '#7F6AD6',
     green: '#0F9E48',
-    lightGreen: '#15803D',
-    orange: '#B45309',
-    red: '#DC2626',
+    lightGreen: '#A74CFF',
+    orange: '#FF9400',
+    red: '#F94D62',
     trendingBlue: '#2A85E8',
     white: '#FFFFFF',
-    default: '#6A52E0',
-    special: '#6A52E0'
+    default: '#7F6AD6',
+    special: '#7F6AD6'
   }
 }
 
 /**
- * Default [Neue] theme - dark variant
- * Tokens v2 (Oct 2026): neutral chrome, one accent, AA contrast on every text pair.
+ * Dark [Neue] theme - modern design system (dark variant)
+ * From Figma Dark [Neue].tokens.json
  */
 const defaultDarkPrimitives = {
   static: {
-    primary: '#6A52E0',
-    secondary: '#A594FF',
-    white: '#1C1C21',
+    primary: '#917FD8',
+    secondary: '#C67CFF',
+    white: '#0F0F0F',
     staticWhite: '#F6F8FC',
     black: '#FFFFFF'
   },
   primary: {
-    p100: '#1E1A33',
-    p200: '#2E2752',
-    p300: '#6A52E0',
-    p400: '#8E7CE8',
+    p100: '#261F40',
+    p200: '#443873',
+    p300: '#806AD8',
+    p400: '#9E8EE8',
     p500: '#D8CFFF',
-    default: '#6A52E0',
-    primary: '#6A52E0'
+    default: '#806AD8',
+    primary: '#806AD8'
   },
   secondary: {
-    s100: '#2E2752',
-    s200: '#6A52E0',
-    s300: '#A594FF',
-    s400: '#BDB2FF',
-    s500: '#D8CFFF',
-    default: '#A594FF',
-    secondary: '#A594FF'
+    s100: '#9A66CA',
+    s200: '#B071E4',
+    s300: '#C67CFF',
+    s400: '#CF90FF',
+    s500: '#D7A3FF',
+    default: '#C67CFF',
+    secondary: '#C67CFF'
   },
   neutral: {
-    n25: '#141418',
-    n50: '#1C1C21',
-    n100: '#2A2A31',
-    n150: '#42424B',
-    n200: '#55555F',
-    n300: '#85858F',
-    n400: '#A9A9B3',
-    n500: '#B8B8C1',
-    n600: '#C8C8CF',
-    n700: '#D8D8DE',
-    n800: '#F2F2F5',
-    n900: '#F7F7F9',
-    n950: '#FFFFFF',
-    default: '#F2F2F5',
-    neutral: '#F2F2F5'
+    n25: '#0F0F0F',
+    n50: '#141414',
+    n100: '#1F1F1F',
+    n150: '#292929',
+    n200: '#333333',
+    n300: '#474747',
+    n400: '#636363',
+    n500: '#757575',
+    n600: '#8F8F8F',
+    n700: '#9E9E9E',
+    n800: '#D1D1D1',
+    n900: '#E0E0E0',
+    n950: '#EDEDED',
+    default: '#D1D1D1',
+    neutral: '#D1D1D1'
   },
   special: {
-    background: '#0B0B0E',
-    blue: '#A594FF',
-    darkRed: '#DC2626',
-    glassOverlay: '#0B0B0EB8',
-    gradientStop1: '#6A52E0',
-    gradientStop2: '#A594FF',
-    gradient: 'linear-gradient(315deg, #6A52E0 0%, #A594FF 100%)',
+    background: '#000000',
+    blue: '#806AD8',
+    darkRed: '#C44357',
+    glassOverlay: '#0F0F0F99',
+    gradientStop1: '#806AD8',
+    gradientStop2: '#9E8EE8',
+    gradient: 'linear-gradient(315deg, #806AD8 0%, #9E8EE8 100%)',
     coinGradient:
       'linear-gradient(85deg, #806AD8 -4.82%, #C67CFF 49.8%, #806AD8 104.43%)',
     coinGradientColor1: '#806AD8',
     coinGradientColor2: '#C67CFF',
     coinGradientColor3: '#806AD8',
     green: '#84DF64',
-    lightGreen: '#4ADE80',
-    orange: '#FBBF24',
-    red: '#F87171',
+    lightGreen: '#C67CFF',
+    orange: '#EFB360',
+    red: '#F94D62',
     trendingBlue: '#2A85E8',
-    white: '#1C1C21',
-    default: '#A594FF',
-    special: '#A594FF'
+    white: '#0F0F0F',
+    default: '#806AD8',
+    special: '#806AD8'
   }
 }
 

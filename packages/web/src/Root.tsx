@@ -1,6 +1,4 @@
-import '@audius/harmony/dist/harmony-no-fonts.css'
-import '@fontsource-variable/inter'
-import '@fontsource-variable/bricolage-grotesque'
+import '@audius/harmony/dist/harmony.css'
 
 import { Suspense, useState, useEffect, lazy } from 'react'
 
