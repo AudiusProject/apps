@@ -2,8 +2,7 @@ import {
   AudiusSdkWithServices,
   createSdkWithServices,
   Configuration,
-  SolanaRelay,
-  ArchiverService
+  SolanaRelay
 } from '@audius/sdk'
 import { createWalletClient, custom, RpcRequestError } from 'viem'
 import { mainnet } from 'viem/chains'
@@ -34,21 +33,6 @@ export const initSdk = async () => {
         {
           pre: async (context) => {
             const endpoint = env.SOLANA_RELAY_ENDPOINT
-            const url = `${endpoint}${context.url}`
-            return { url, init: context.init }
-          }
-        }
-      ]
-    })
-  )
-
-  const archiverService = new ArchiverService(
-    new Configuration({
-      basePath: '/archive',
-      middleware: [
-        {
-          pre: async (context) => {
-            const endpoint = env.ARCHIVE_ENDPOINT
             const url = `${endpoint}${context.url}`
             return { url, init: context.init }
           }
@@ -98,8 +82,7 @@ export const initSdk = async () => {
     services: {
       solanaRelay,
       audiusWalletClient,
-      ethWalletClient,
-      archiverService
+      ethWalletClient
     }
   })
   console.debug('[audiusSdk] SDK initted.')

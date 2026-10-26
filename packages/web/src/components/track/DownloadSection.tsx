@@ -15,8 +15,7 @@ import {
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
   toastActions,
-  PurchaseableContentType,
-  useDownloadTrackArchiveModal
+  PurchaseableContentType
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
 import {
@@ -34,6 +33,7 @@ import { useDispatch } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { Expandable } from 'components/expandable/Expandable'
+import { useDownloadTrackStemsZip } from 'hooks/useDownloadTrackStemsZip'
 import { useIsMobile } from 'hooks/useIsMobile'
 import {
   useRequiresAccountCallback,
@@ -103,8 +103,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
 
-  const { onOpen: openDownloadTrackArchiveModal } =
-    useDownloadTrackArchiveModal()
+  const downloadStemsZip = useDownloadTrackStemsZip(trackId)
 
   const { data: fileSizes } = useFileSizes(
     {
@@ -153,19 +152,9 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const handleDownloadAll = useRequiresAccountCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
-      // Only include parent track in count if it's downloadable
-      const parentTrackCount = access?.download ? 1 : 0
-      openDownloadTrackArchiveModal({
-        trackId,
-        fileCount: stemTracks.length + parentTrackCount
-      })
+      downloadStemsZip()
     },
-    [
-      openDownloadTrackArchiveModal,
-      trackId,
-      stemTracks.length,
-      access?.download
-    ]
+    [downloadStemsZip]
   )
 
   const hasStems = stemTracks.length > 0 || isUploadingStems

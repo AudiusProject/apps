@@ -9,7 +9,6 @@ export type Env = {
   API_URL: string
   APP_NAME: string
   API_KEY: string
-  ARCHIVE_ENDPOINT: string
   AUDIUS_NETWORK_CHAIN_ID: number
   AUDIUS_URL: string
   BITSKI_CALLBACK_URL: string

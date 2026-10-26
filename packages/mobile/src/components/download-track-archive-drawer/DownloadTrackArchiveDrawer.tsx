@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import {
-  useCancelStemsArchiveJob,
-  useDownloadTrackStems,
-  useGetStemsArchiveJobStatus,
-  useTrack
-} from '@audius/common/api'
+import { useDownloadTrackStems, useTrack } from '@audius/common/api'
 import { useAppContext } from '@audius/common/context'
 import type { ID } from '@audius/common/models'
 import type { DownloadFile } from '@audius/common/services'
@@ -21,14 +16,13 @@ import {
   TextLink
 } from '@audius/harmony-native'
 import Drawer from 'app/components/drawer'
-import { env } from 'app/services/env'
 
 import { DrawerHeader } from '../core/DrawerHeader'
 import LoadingSpinner from '../loading-spinner'
 
 const messages = {
   title: 'Downloading...',
-  zippingFiles: (count: number) => `Zipping files (${count})`,
+  files: (count: number) => `${count} ${count === 1 ? 'file' : 'files'}`,
   error: 'Something went wrong. Please check your connection and try again.',
   tryAgain: 'Try again.'
 }
@@ -98,16 +92,9 @@ const DownloadTrackArchiveDrawerContent = ({
   const { data: trackTitle } = useTrack(trackId, {
     select: (track) => track.title
   })
-  const [step, setStep] = useState<'downloading' | 'zipping'>('zipping')
 
-  const {
-    mutate: downloadTrackStems,
-    isError: initiateDownloadFailed,
-    isPending: isStartingDownload,
-    data: { id: jobId } = {}
-  } = useDownloadTrackStems({
-    trackId
-  })
+  const { mutateAsync: getStemsZipUrl, isError: urlFailed } =
+    useDownloadTrackStems({ trackId })
 
   const {
     downloadFile,
@@ -117,49 +104,22 @@ const DownloadTrackArchiveDrawerContent = ({
     cancel: cancelDownload
   } = useDownloadFile()
 
-  const { mutate: cancelStemsArchiveJob } = useCancelStemsArchiveJob()
+  const hasError = urlFailed || !!downloadError
 
-  const {
-    data: jobState,
-    isError: isJobStatusError,
-    isTimedOut: isJobTimedOut
-  } = useGetStemsArchiveJobStatus({
-    jobId
-  })
-
-  // `isTimedOut` and `isError` have to be part of this, not just `failed`.
-  // A job that never leaves `waiting` — the archiver worker losing its Redis
-  // lock and holding every concurrency slot, for instance — is reported as a
-  // perfectly valid non-terminal state forever, so keying only off `failed`
-  // leaves the drawer spinning with no error and no retry until the user
-  // gives up. The shared hook already enforces STEMS_ARCHIVE_POLL_TIMEOUT_MS
-  // and hands back `isTimedOut`; web consumes it and mobile did not.
-  const hasError =
-    !isStartingDownload &&
-    (downloadError ||
-      initiateDownloadFailed ||
-      jobState?.state === 'failed' ||
-      (!!jobId && (isJobStatusError || isJobTimedOut)))
-
-  useEffect(() => {
-    downloadTrackStems()
-  }, [downloadTrackStems])
-
-  useEffect(() => {
-    if (jobState?.state === 'completed' && trackTitle) {
-      const fetchResult = async () => {
-        setStep('downloading')
-        await downloadFile({
-          file: {
-            url: `${env.ARCHIVE_ENDPOINT}/archive/stems/download/${jobId}`,
-            filename: `${trackTitle}.zip`
-          }
-        })
-        onClose()
-      }
-      fetchResult()
+  const startDownload = useCallback(async () => {
+    if (!trackTitle) return
+    resetDownload()
+    try {
+      const url = await getStemsZipUrl()
+      await downloadFile({ file: { url, filename: `${trackTitle}.zip` } })
+    } catch (e) {
+      console.error('Failed to start stems download', e)
     }
-  }, [jobState, onClose, jobId, downloadFile, trackTitle])
+  }, [trackTitle, getStemsZipUrl, downloadFile, resetDownload])
+
+  useEffect(() => {
+    startDownload()
+  }, [startDownload])
 
   // Close drawer automatically if download was successful
   useEffect(() => {
@@ -169,18 +129,9 @@ const DownloadTrackArchiveDrawerContent = ({
   }, [downloadSuccess, onClose])
 
   const handleClose = useCallback(() => {
-    if (jobId) {
-      cancelStemsArchiveJob({ jobId })
-    }
     cancelDownload()
     onClose()
-  }, [onClose, jobId, cancelStemsArchiveJob, cancelDownload])
-
-  const handleRetry = useCallback(() => {
-    setStep('zipping')
-    resetDownload()
-    downloadTrackStems()
-  }, [downloadTrackStems, resetDownload])
+  }, [onClose, cancelDownload])
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClose} onClosed={onClosed}>
@@ -188,25 +139,17 @@ const DownloadTrackArchiveDrawerContent = ({
         <DrawerHeader icon={IconReceive} title={messages.title} />
         <Flex justifyContent='center' alignItems='center' gap='xl'>
           <Flex row alignItems='center' gap='l'>
-            {step === 'zipping' ? (
-              <>
-                <IconFolder color='default' size='l' />
-                <Text variant='body' size='l' strength='strong'>
-                  {messages.zippingFiles(fileCount)}
-                </Text>
-              </>
-            ) : (
-              <Text variant='body' size='l' strength='strong'>
-                {`${trackTitle}.zip`}
-              </Text>
-            )}
+            <IconFolder color='default' size='l' />
+            <Text variant='body' size='l' strength='strong'>
+              {messages.files(fileCount)}
+            </Text>
           </Flex>
           {hasError ? (
             <Hint
               icon={IconError}
               border='strong'
               actions={
-                <TextLink variant='visible' onPress={handleRetry}>
+                <TextLink variant='visible' onPress={startDownload}>
                   {messages.tryAgain}
                 </TextLink>
               }

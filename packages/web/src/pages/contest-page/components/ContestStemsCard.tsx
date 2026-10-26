@@ -20,7 +20,6 @@ import {
   stemCategoryFriendlyNames
 } from '@audius/common/models'
 import {
-  useDownloadTrackArchiveModal,
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
   PurchaseableContentType
@@ -43,6 +42,7 @@ import {
 import { useLinkClickHandler } from 'react-router'
 
 import { UserLink } from 'components/link/UserLink'
+import { useDownloadTrackStemsZip } from 'hooks/useDownloadTrackStemsZip'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
@@ -96,8 +96,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const { onOpen: openDownloadTrackArchiveModal } =
-    useDownloadTrackArchiveModal()
+  const downloadStemsZip = useDownloadTrackStemsZip(trackId)
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
   // Auto-follow the contest when a signed-in user kicks off a stem
@@ -149,24 +148,15 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     { enabled: stems.length > 0 || !!track?.is_downloadable }
   )
 
-  // Action: Download All archive modal (parent + stems).
+  // Action: Download All as one zip (parent + stems).
   const handleDownloadAll = useRequiresAccountCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
       if (!track) return
       followContestIfNeeded()
-      openDownloadTrackArchiveModal({
-        trackId,
-        fileCount: stemsCount + (track.is_downloadable ? 1 : 0)
-      })
+      downloadStemsZip()
     },
-    [
-      followContestIfNeeded,
-      openDownloadTrackArchiveModal,
-      trackId,
-      stemsCount,
-      track
-    ]
+    [followContestIfNeeded, downloadStemsZip, track]
   )
 
   const handleUnlockAll = useRequiresAccountCallback(
