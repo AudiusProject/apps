@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
-import { SyncLocalStorageUserProvider } from '@audius/common/api'
+import { SyncLocalStorageUserProvider, useHasAccount } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import NiceModal from '@ebay/nice-modal-react'
 import type { RouteObject } from 'react-router'
@@ -60,9 +60,12 @@ const IS_PRODUCTION = env.ENVIRONMENT === 'production'
 /**
  * Coinflow's fraud protection only needs to be running before a checkout, so
  * mount it once the browser is idle, in its own Suspense boundary, rather
- * than having the page wait on its chunk.
+ * than having the page wait on its chunk. Signed-out visitors can't check
+ * out, and its device fingerprinting costs seconds of CPU on mobile, so it
+ * only mounts once there is an account.
  */
 const DeferredCoinflowPurchaseProtection = () => {
+  const hasAccount = useHasAccount()
   const [ready, setReady] = useState(false)
   useEffect(() => {
     if ('requestIdleCallback' in window) {
@@ -74,7 +77,7 @@ const DeferredCoinflowPurchaseProtection = () => {
     const handle = setTimeout(() => setReady(true), 2000)
     return () => clearTimeout(handle)
   }, [])
-  if (!ready) return null
+  if (!ready || !hasAccount) return null
   return (
     <Suspense fallback={null}>
       <CoinflowPurchaseProtection
