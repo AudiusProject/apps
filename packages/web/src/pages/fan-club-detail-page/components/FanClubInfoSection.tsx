@@ -16,6 +16,7 @@ import { Name, WidthSizes } from '@audius/common/models'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
 import {
   formatCurrencyWithSubscript,
+  getCoinLogoUrl,
   getTokenDecimalPlaces,
   removeNullable,
   route
@@ -335,7 +336,7 @@ export const FanClubBannerSection = ({ mint }: FanClubBannerSectionProps) => {
       >
         {coin.logoUri ? (
           <Artwork
-            src={coin.logoUri}
+            src={getCoinLogoUrl(coin.logoUri, spacing.unit24)}
             hex
             w={spacing.unit24}
             h={spacing.unit24}

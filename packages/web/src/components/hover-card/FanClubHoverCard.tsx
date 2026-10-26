@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { useFanClub, useCoinBalance, useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { formatCount, route } from '@audius/common/utils'
+import { formatCount, getCoinLogoUrl, route } from '@audius/common/utils'
 import {
   Artwork,
   Flex,
@@ -143,7 +143,7 @@ export const FanClubHoverCard = ({
               {/* Token Icon */}
               {fanClubBadge?.logo_uri ? (
                 <Artwork
-                  src={fanClubBadge.logo_uri}
+                  src={getCoinLogoUrl(fanClubBadge.logo_uri, spacing.unit12)}
                   hex
                   w={spacing.unit12}
                   h={spacing.unit12}

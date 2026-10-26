@@ -9,7 +9,7 @@ import {
 import { useUser } from '@audius/common/api'
 import { BadgeTier, ID } from '@audius/common/models'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
-import { Nullable } from '@audius/common/utils'
+import { getCoinLogoUrl, Nullable } from '@audius/common/utils'
 import {
   Artwork,
   Box,
@@ -199,7 +199,9 @@ const UserBadges = ({
           }}
         >
           <Artwork
-            src={userFanClubBadge?.logo_uri ?? ''}
+            src={
+              getCoinLogoUrl(userFanClubBadge?.logo_uri, iconSizes[size]) ?? ''
+            }
             hex
             w={iconSizes[size]}
             h={iconSizes[size]}
