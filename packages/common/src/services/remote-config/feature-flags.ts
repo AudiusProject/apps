@@ -54,9 +54,9 @@ export const flagDefaults: FlagDefaults = {
   // Default on so shared links render before the Optimizely datafile loads;
   // the remote flag is the kill switch.
   [FeatureFlags.WEEKLY_ROTATION]: true,
-  // Dense track rows instead of tiles. Default on so pages do not swap from
-  // tiles to rows when the datafile loads; the remote flag is the kill switch.
-  [FeatureFlags.TRACK_ROWS]: true,
+  // Dense track rows instead of tiles. Default off: an Optimizely false falls
+  // through to this default, so only a code default of false can turn it off.
+  [FeatureFlags.TRACK_ROWS]: false,
   // Timestamped comments as markers and bubbles on the Now Playing scrubber.
   // Default on; the remote flag is the kill switch.
   [FeatureFlags.NOW_PLAYING_COMMENTS]: true
