@@ -18,7 +18,8 @@ export enum FeatureFlags {
   QUEUE_NEW_FEATURE_BADGE = 'queue_new_feature_badge',
   WEEKLY_ROTATION = 'weekly_rotation',
   TRACK_ROWS = 'track_rows',
-  NOW_PLAYING_COMMENTS = 'now_playing_comments'
+  NOW_PLAYING_COMMENTS = 'now_playing_comments',
+  TRACK_TILE_WAVEFORM = 'track_tile_waveform'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -28,7 +29,8 @@ export const environmentFlagDefaults: Record<
   Partial<FlagDefaults>
 > = {
   development: {
-    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true
+    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
+    [FeatureFlags.TRACK_TILE_WAVEFORM]: true
   },
   production: {}
 }
@@ -59,5 +61,7 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.TRACK_ROWS]: false,
   // Timestamped comments as markers and bubbles on the Now Playing scrubber.
   // Default on; the remote flag is the kill switch.
-  [FeatureFlags.NOW_PLAYING_COMMENTS]: true
+  [FeatureFlags.NOW_PLAYING_COMMENTS]: true,
+  // Waveform with timestamped comment avatars on desktop web track tiles.
+  [FeatureFlags.TRACK_TILE_WAVEFORM]: false
 }

@@ -8,7 +8,7 @@ import {
   useState
 } from 'react'
 
-import { useUser } from '@audius/common/api'
+import { useUser, useTimestampedComments } from '@audius/common/api'
 import { useCurrentTrack, useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
@@ -60,7 +60,6 @@ import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
-import { useTimestampedComments } from './useTimestampedComments'
 const { seekTo: seek, reset, next, previous } = playbackActions
 
 const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
