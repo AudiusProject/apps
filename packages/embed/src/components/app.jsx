@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 
-import { ThemeProvider } from '@audius/harmony'
+import { ThemeProvider, themes } from '@audius/harmony'
 import cn from 'classnames'
 import { useParams, useSearchParams } from 'react-router'
 import { CSSTransition } from 'react-transition-group'
@@ -19,6 +19,7 @@ import {
   getEntityEvents
 } from '../util/BedtimeClient'
 import { getArtworkUrl } from '../util/getArtworkUrl'
+import { hexToRgb } from '../util/hexToRgb'
 import { getDominantColor } from '../util/image/imageProcessingUtil'
 import { isMobileWebTwitter } from '../util/isMobileWebTwitter'
 import { logError } from '../util/logError'
@@ -59,9 +60,26 @@ export const PlayerFlavor = Object.seal({
   TINY: 'tiny'
 })
 
+// Background treatment for the player, set with `?theme=`.
+// ARTWORK (the default) tints the player with the artwork's dominant color.
+// DARK uses neutral dark surfaces so the player blends into dark sites.
+export const PlayerTheme = Object.seal({
+  ARTWORK: 'artwork',
+  DARK: 'dark'
+})
+
+const darkSurfaces = themes['default-dark'].color.background
+const DARK_PLAYER_COLORS = Object.freeze({
+  primary: hexToRgb(darkSurfaces.surface1),
+  secondary: hexToRgb(darkSurfaces.surface2)
+})
+
+export const parsePlayerTheme = (theme) =>
+  theme === PlayerTheme.DARK ? PlayerTheme.DARK : PlayerTheme.ARTWORK
+
 // Attemps to parse a the window's url.
 // Returns null if the URL scheme is invalid.
-const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
+const getRequestDataFromURL = ({ path, type, flavor, theme, matches }) => {
   // Get request type
   const requestType = pathComponentRequestTypeMap[type]
   if (!requestType) return null
@@ -77,6 +95,8 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
   } else {
     playerFlavor = PlayerFlavor.CARD
   }
+
+  const playerTheme = parsePlayerTheme(theme)
 
   switch (path) {
     case ID_ROUTE: {
@@ -95,6 +115,7 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
       return {
         requestType,
         playerFlavor,
+        playerTheme,
         id: intId,
         ownerId: intOwnerId,
         isTwitter
@@ -106,6 +127,7 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
       return {
         requestType,
         playerFlavor,
+        playerTheme,
         hashId,
         isTwitter
       }
@@ -121,6 +143,7 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
       return {
         requestType,
         playerFlavor,
+        playerTheme,
         handle,
         slug,
         isTwitter
@@ -274,6 +297,7 @@ const App = (props) => {
       // Type comes from the url if present, otherwise pull from the component props
       type: params.type || props.type,
       flavor: searchParams[0]?.get('flavor') ?? undefined,
+      theme: searchParams[0]?.get('theme') ?? undefined,
       matches: params
     })
     if (!request) {
@@ -338,6 +362,11 @@ const App = (props) => {
     const mobileWebTwitter = isMobileWebTwitter(requestState?.isTwitter)
     const isCard = requestState?.playerFlavor === PlayerFlavor.CARD
 
+    const playerColors =
+      requestState?.playerTheme === PlayerTheme.DARK
+        ? DARK_PLAYER_COLORS
+        : dominantColor
+
     if (requestState && dominantColor) {
       return (
         <CSSTransition
@@ -372,7 +401,7 @@ const App = (props) => {
                 track={tracksResponse}
                 flavor={requestState.playerFlavor}
                 isTwitter={requestState.isTwitter}
-                backgroundColor={dominantColor.primary}
+                backgroundColor={playerColors.primary}
               />
             )}
             {!collectionsResponse ? null : (
@@ -380,8 +409,8 @@ const App = (props) => {
                 collection={collectionsResponse}
                 flavor={requestState.playerFlavor}
                 isTwitter={requestState.isTwitter}
-                backgroundColor={dominantColor.primary}
-                rowBackgroundColor={dominantColor.secondary}
+                backgroundColor={playerColors.primary}
+                rowBackgroundColor={playerColors.secondary}
               />
             )}
           </div>
