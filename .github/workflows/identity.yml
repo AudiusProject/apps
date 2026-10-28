@@ -55,7 +55,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -88,11 +88,13 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             npm cache clean --force || true
             npm ci --prefer-offline || npm install --prefer-offline
           fi
@@ -118,7 +120,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -182,7 +184,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -269,7 +271,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
