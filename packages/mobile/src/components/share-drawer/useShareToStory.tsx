@@ -497,8 +497,11 @@ export const useShareToStory = ({
           // Pad the result by 10% so the progress bar gets full before we get to IG
           dispatch(setProgress(Math.min(20 + percentageLoaded + 10, 100)))
         })
-        const SHOWFREQS_SEGMENT =
-          'aformat=channel_layouts=mono:sample_rates=16000,adynamicsmooth,showfreqs=s=900x40:fscale=log:colors=#ffffff70'
+        // 36 bars mirrored around the bass, 504x128. showfreqs spans 120dB,
+        // so keep the loudest 64 rows. Each 14px column gets a 4px gap and a
+        // 2px floor so quiet bands still show.
+        const WAVEFORM_SEGMENT =
+          "aformat=channel_layouts=mono:sample_rates=16000,showfreqs=s=18x120:rate=30:fscale=log:win_size=1024:averaging=2:colors=white,crop=18:64:0:0,scale=252:64:flags=neighbor,split[r][l];[l]hflip[lf];[lf][r]hstack,geq=r=255:g=255:b=255:a='if(lt(mod(X,14),4),0,max(alpha(X,Y),255*gte(Y,H-2))*0.85)',split[t][b];[b]vflip[bf];[t][bf]vstack"
         const thirdLayerSegment =
           platform === 'tiktok'
             ? '[vid];[1:v]scale=396:548[stkr];[vid][stkr]overlay=format=auto:x=72:y=200;'
@@ -511,7 +514,7 @@ export const useShareToStory = ({
         for (let attempt = 1; attempt <= FFMPEG_ATTEMPTS; attempt++) {
           try {
             session = await FFmpegKit.execute(
-              `-y ${audioStartOffsetConfig}-i ${streamMp3Url}${stickerImageInput} -filter_complex "${backgroundSegment}[bg];[0:a]${SHOWFREQS_SEGMENT}[fg];[0:a]${SHOWFREQS_SEGMENT},vflip[fgflip];[bg][fg]overlay=format=auto:x=-100:y=H-h-100[fo];[fo][fgflip]overlay=format=auto:x=-100:y=H-h-60${thirdLayerSegment}[0:a]anull" -pix_fmt yuv420p -c:v libx264 -preset ultrafast -c:a aac -t 10 ${storyVideoPath}`
+              `-y ${audioStartOffsetConfig}-i ${streamMp3Url}${stickerImageInput} -filter_complex "${backgroundSegment}[bg];[0:a]${WAVEFORM_SEGMENT}[wave];[bg][wave]overlay=format=auto:x=(W-w)/2-2:y=H-h-80${thirdLayerSegment}[0:a]anull" -pix_fmt yuv420p -c:v libx264 -preset ultrafast -c:a aac -t 10 ${storyVideoPath}`
             )
           } catch (e) {
             handleError(platform, e, 'Error at FFmpeg step')
