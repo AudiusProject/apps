@@ -784,6 +784,7 @@ jobs:
           # patch file, which patch-package cannot re-apply. Fall back to a fresh
           # install when postinstall fails on the cache.
           if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
+            :
           else
             echo "No usable cache, running fresh install..."
             rm -rf node_modules packages/*/node_modules
@@ -1176,6 +1177,7 @@ jobs:
           # patch file, which patch-package cannot re-apply. Fall back to a fresh
           # install when postinstall fails on the cache.
           if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
+            :
           else
             echo "No usable cache, running fresh install..."
             rm -rf node_modules packages/*/node_modules
