@@ -20,6 +20,8 @@ export const messages = {
   tikTokVideo: 'TikTok',
   copyLink: 'Copy Link',
   shareToStoryError: 'Sorry, something went wrong.',
+  shareToStoryAppNotInstalled: (app: string) =>
+    `${app} isn't installed on this device.`,
   shareSheet: 'More...',
   toast: (asset: ShareType) => `Copied Link to ${shareTypeMap[asset]}`,
   trackShareText: (title: string, handle: string) =>
