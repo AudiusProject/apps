@@ -38,6 +38,8 @@ type ShareToStoryStickerProps = {
    * When provided, use this instead of TrackImage so the sticker always has a working image URL for capture.
    */
   artworkSource?: ImageSourcePropType
+  /** Stat shown above the artwork for milestone cards, e.g. 1,000 / Plays */
+  headline?: { value: string; label: string }
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -48,6 +50,16 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     paddingBottom: spacing(4.5),
     paddingHorizontal: spacing(3),
     borderRadius: 8
+  },
+  headline: {
+    alignItems: 'center',
+    marginBottom: spacing(3)
+  },
+  headlineValue: {
+    lineHeight: 64
+  },
+  headlineLabel: {
+    letterSpacing: 1
   },
   trackImage: {
     height: 240,
@@ -89,7 +101,8 @@ export const ShareToStorySticker = ({
   style,
   onLoad,
   omitLogo = false,
-  artworkSource
+  artworkSource,
+  headline
 }: ShareToStoryStickerProps) => {
   const styles = useStyles()
 
@@ -97,6 +110,34 @@ export const ShareToStorySticker = ({
   return (
     <View style={[styles.container, style]}>
       <View>
+        {headline ? (
+          <View style={styles.headline}>
+            <Text
+              color='staticNeutral'
+              allowFontScaling={false}
+              weight='heavy'
+              fontSize='xxxxxl'
+              noGutter
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={styles.headlineValue}
+            >
+              {headline.value}
+            </Text>
+            <Text
+              color='staticNeutral'
+              allowFontScaling={false}
+              weight='bold'
+              fontSize='medium'
+              textTransform='uppercase'
+              noGutter
+              numberOfLines={1}
+              style={styles.headlineLabel}
+            >
+              {headline.label}
+            </Text>
+          </View>
+        ) : null}
         {artworkSource != null ? (
           <Artwork
             source={artworkSource}

@@ -42,7 +42,7 @@ import { Text } from '../core'
 import { ShareToStorySticker } from './ShareToStorySticker'
 import { messages } from './messages'
 import { useShareToStory } from './useShareToStory'
-import { getContentUrl, getXShareUrl } from './utils'
+import { getContentUrl, getStatHeadline, getXShareUrl } from './utils'
 
 const { getShareRequest, getShareSource } = shareModalUISelectors
 const { shareUser } = usersSocialActions
@@ -99,8 +99,10 @@ export const ShareDrawer = NiceModal.create(() => {
     content?.type === 'track' && accountUserId === content.artist.user_id
   const shareType = content?.type ?? 'track'
 
-  const isStreamGatedTrack =
-    content?.type === 'track' && content.track.is_stream_gated
+  // Content whose track can be rendered into a story
+  const storyContent =
+    content?.type === 'track' || content?.type === 'milestone' ? content : null
+  const isStreamGatedTrack = !!storyContent?.track.is_stream_gated
 
   const handleShareToDirectMessage = useCallback(async () => {
     if (!content) return
@@ -112,7 +114,7 @@ export const ShareDrawer = NiceModal.create(() => {
       make({
         eventName: Name.CHAT_ENTRY_POINT,
         source: 'share',
-        kind: content.type
+        kind: content.type === 'milestone' ? 'track' : content.type
       })
     )
     if (source === ShareSource.NOW_PLAYING) {
@@ -178,6 +180,7 @@ export const ShareDrawer = NiceModal.create(() => {
     if (!source || !content) return
     switch (content.type) {
       case 'track':
+      case 'milestone':
         dispatch(shareTrack(content.track.track_id, source))
         break
       case 'profile':
@@ -215,11 +218,11 @@ export const ShareDrawer = NiceModal.create(() => {
   // Story sharing renders the track's audio, so skip tracks the API marks
   // unstreamable (undefined = not populated).
   const isShareableTrack =
-    content?.type === 'track' &&
-    !content.track.is_unlisted &&
-    !content.track.is_invalid &&
-    !content.track.is_delete &&
-    content.track.is_streamable !== false &&
+    !!storyContent &&
+    !storyContent.track.is_unlisted &&
+    !storyContent.track.is_invalid &&
+    !storyContent.track.is_delete &&
+    storyContent.track.is_streamable !== false &&
     !isStreamGatedTrack
 
   const performActionAndClose = useCallback(
@@ -287,7 +290,10 @@ export const ShareDrawer = NiceModal.create(() => {
       result.push(shareToInstagramStoriesAction)
       result.push(shareVideoToTiktokAction)
       result.push(shareToSnapchatAction)
-    } else if (content?.type === 'weeklyRotation') {
+    } else if (
+      content?.type === 'weeklyRotation' ||
+      content?.type === 'milestone'
+    ) {
       // Story/video shares need a single track; X only needs the link.
       result.push(shareToXAction)
     }
@@ -314,6 +320,7 @@ export const ShareDrawer = NiceModal.create(() => {
     if (!content) return
     switch (content.type) {
       case 'track':
+      case 'milestone':
         sendShareAction(content.track.track_id, 'track')
         break
       case 'album':
@@ -326,8 +333,7 @@ export const ShareDrawer = NiceModal.create(() => {
 
   return (
     <>
-      {/* Redundant `content?.type === 'track'` needed to make TS happy */}
-      {content?.type === 'track' ? (
+      {storyContent ? (
         <ViewShot
           style={styles.viewShot}
           ref={viewShotRef}
@@ -335,10 +341,15 @@ export const ShareDrawer = NiceModal.create(() => {
         >
           <ShareToStorySticker
             onLoad={handleShareToStoryStickerLoad}
-            track={content?.track}
-            artist={content?.artist}
+            track={storyContent.track}
+            artist={storyContent.artist}
             omitLogo={selectedPlatform === 'tiktok'}
             artworkSource={stickerArtworkSource}
+            headline={
+              storyContent.type === 'milestone'
+                ? getStatHeadline(storyContent.stat)
+                : undefined
+            }
           />
         </ViewShot>
       ) : null}

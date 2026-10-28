@@ -33,7 +33,9 @@ export const getXShareText = async (
   let link = ''
   let analyticsEvent: ShareToTwitterEvent
   switch (content.type) {
-    case 'track': {
+    // Web has no stat card yet, so milestones share as their track
+    case 'track':
+    case 'milestone': {
       const {
         track: { title, permalink, track_id },
         artist

@@ -1,4 +1,4 @@
-import type { ShareContent } from '@audius/common/store'
+import type { ShareContent, ShareMilestoneStat } from '@audius/common/store'
 import { makeXShareUrl, getXShareHandle } from '@audius/common/utils'
 
 import {
@@ -11,9 +11,30 @@ import {
 
 import { messages } from './messages'
 
+const formatStatCount = (count: number) => count.toLocaleString('en-US')
+
+export const getStatHeadline = (stat: ShareMilestoneStat) => {
+  switch (stat.kind) {
+    case 'listens':
+    case 'reposts':
+    case 'favorites':
+      return {
+        value: formatStatCount(stat.count),
+        label: messages.milestoneCountLabel[stat.kind]
+      }
+    case 'trending':
+    case 'underground':
+      return {
+        value: `#${stat.rank}`,
+        label: messages.milestoneRankLabel[stat.kind]
+      }
+  }
+}
+
 export const getContentUrl = (content: ShareContent) => {
   switch (content.type) {
-    case 'track': {
+    case 'track':
+    case 'milestone': {
       const { track } = content
       return getTrackRoute(track, true)
     }
@@ -80,6 +101,28 @@ export const getXShareText = async (content: ShareContent) => {
     case 'weeklyRotation': {
       const { user } = content
       return messages.weeklyRotationShareText(getXShareHandle(user))
+    }
+    case 'milestone': {
+      const {
+        track: { title },
+        artist,
+        stat
+      } = content
+      const handle = getXShareHandle(artist)
+      const { value, label } = getStatHeadline(stat)
+      return stat.kind === 'trending' || stat.kind === 'underground'
+        ? messages.milestoneRankShareText(
+            title,
+            stat.rank,
+            label.toLowerCase(),
+            handle
+          )
+        : messages.milestoneCountShareText(
+            title,
+            value,
+            label.toLowerCase(),
+            handle
+          )
     }
   }
 }

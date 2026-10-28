@@ -75,7 +75,10 @@ export const ShareModal = NiceModal.create(() => {
       defaultUserList: 'chats'
     })
     dispatch(
-      make(Name.CHAT_ENTRY_POINT, { source: 'share', kind: content.type })
+      make(Name.CHAT_ENTRY_POINT, {
+        source: 'share',
+        kind: content.type === 'milestone' ? 'track' : content.type
+      })
     )
   }, [openCreateChatModal, dispatch, onClose, content])
 
@@ -91,6 +94,7 @@ export const ShareModal = NiceModal.create(() => {
     if (!source || !content) return
     switch (content.type) {
       case 'track':
+      case 'milestone':
         dispatch(shareTrack(content.track.track_id, source))
         break
       case 'contest':

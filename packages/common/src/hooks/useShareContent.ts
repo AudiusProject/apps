@@ -9,7 +9,9 @@ export const useShareContent = (
   request: ShareModalRequest | null
 ): ShareContent | null => {
   const trackId =
-    request?.type === 'track' || request?.type === 'contest'
+    request?.type === 'track' ||
+    request?.type === 'contest' ||
+    request?.type === 'milestone'
       ? request.trackId
       : null
   const profileId = request?.type === 'profile' ? request.profileId : null
@@ -34,6 +36,11 @@ export const useShareContent = (
   if (request.type === 'track' || request.type === 'contest') {
     if (!track || !trackArtist) return null
     return { type: request.type, track, artist: trackArtist }
+  }
+
+  if (request.type === 'milestone') {
+    if (!track || !trackArtist) return null
+    return { type: 'milestone', track, artist: trackArtist, stat: request.stat }
   }
 
   if (request.type === 'profile') {
