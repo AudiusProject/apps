@@ -278,9 +278,14 @@ export const useShareToStory = ({
   )
 
   const handleError = useCallback(
-    (platform: ShareToStoryPlatform, error: Error, name?: string) => {
+    (
+      platform: ShareToStoryPlatform,
+      error: Error,
+      name?: string,
+      toastContent: string = messages.shareToStoryError
+    ) => {
       console.error(error)
-      toast({ content: messages.shareToStoryError, type: 'error' })
+      toast({ content: toastContent, type: 'error' })
       track(
         make({
           eventName: ERROR_EVENT_NAMES_MAP[platform],
@@ -547,7 +552,20 @@ export const useShareToStory = ({
         try {
           await waitForHandoff(launch)
         } catch (error) {
-          handleError(platform, error, 'Error at share to app step')
+          // The TikTok SDK can't open TikTok, almost always because it isn't installed
+          const isTikTokLaunchError =
+            error instanceof Error &&
+            error.message === 'Failed to launch TikTok share'
+          handleError(
+            platform,
+            error,
+            'Error at share to app step',
+            isTikTokLaunchError
+              ? messages.shareToStoryAppNotInstalled(
+                  PLATFORM_APP_NAMES[platform]
+                )
+              : undefined
+          )
           return
         }
 
