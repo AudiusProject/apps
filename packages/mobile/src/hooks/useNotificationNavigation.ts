@@ -23,6 +23,9 @@ import type {
   RemixCosignNotification,
   RemixCosignPushNotification,
   TrendingTrackNotification,
+  TrendingUndergroundNotification,
+  TrendingPushFields,
+  ShareMilestoneStat,
   ChallengeRewardNotification,
   TierChangeNotification,
   AddTrackToPlaylistNotification,
@@ -51,15 +54,19 @@ import type {
   ArtistRemixContestEndingSoonNotification,
   ArtistRemixContestSubmissionsNotification
 } from '@audius/common/store'
+import { ShareSource } from '@audius/common/models'
+import type { ID } from '@audius/common/models'
 import {
   NotificationType,
   PushNotificationType,
   Entity,
-  Achievement
+  Achievement,
+  shareModalUIActions
 } from '@audius/common/store'
 import { OptionalId } from '@audius/sdk'
 import { useLinkTo } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'
+import { useDispatch } from 'react-redux'
 
 import { useNavigation } from './useNavigation'
 
@@ -72,6 +79,22 @@ export const useNotificationNavigation = () => {
   const navigation = useNavigation()
   const linkTo = useLinkTo()
   const queryClient = useQueryClient()
+  const dispatch = useDispatch()
+
+  // Pushes flagged with shareCard open the stat card over the track
+  const openShareCard = useCallback(
+    (trackId: ID, stat: ShareMilestoneStat) => {
+      dispatch(
+        shareModalUIActions.requestOpen({
+          type: 'milestone',
+          trackId,
+          stat,
+          source: ShareSource.NOTIFICATION
+        })
+      )
+    },
+    [dispatch]
+  )
 
   const socialActionHandler = useCallback(
     (
@@ -197,6 +220,18 @@ export const useNotificationNavigation = () => {
           trackId: notification.entityId,
           canBeUnlisted: false
         })
+        if (notification.shareCard && notification.threshold) {
+          const kind =
+            notification.type === PushNotificationType.MilestoneListen
+              ? 'listens'
+              : notification.type === PushNotificationType.MilestoneRepost
+                ? 'reposts'
+                : 'favorites'
+          openShareCard(notification.entityId, {
+            kind,
+            count: notification.threshold
+          })
+        }
       } else {
         navigation.navigate('Collection', {
           id: notification.entityId,
@@ -204,7 +239,32 @@ export const useNotificationNavigation = () => {
         })
       }
     },
-    [navigation]
+    [navigation, openShareCard]
+  )
+
+  const trendingHandler = useCallback(
+    (
+      notification: (
+        | TrendingTrackNotification
+        | TrendingUndergroundNotification
+      ) &
+        TrendingPushFields
+    ) => {
+      navigation.navigate('Track', {
+        trackId: notification.entityId,
+        canBeUnlisted: false
+      })
+      if (notification.shareCard && notification.rank) {
+        openShareCard(notification.entityId, {
+          kind:
+            notification.type === NotificationType.TrendingUnderground
+              ? 'underground'
+              : 'trending',
+          rank: notification.rank
+        })
+      }
+    },
+    [navigation, openShareCard]
   )
 
   const messagesHandler = useCallback(
@@ -322,14 +382,8 @@ export const useNotificationNavigation = () => {
       [NotificationType.TierChange]: (notification: TierChangeNotification) => {
         navigation.navigate('AudioScreen')
       },
-      [NotificationType.TrendingTrack]: (
-        notification: TrendingTrackNotification
-      ) => {
-        navigation.navigate('Track', {
-          trackId: notification.entityId,
-          canBeUnlisted: false
-        })
-      },
+      [NotificationType.TrendingTrack]: trendingHandler,
+      [NotificationType.TrendingUnderground]: trendingHandler,
       [NotificationType.UserSubscription]: (
         notification: UserSubscriptionNotification
       ) => {
@@ -422,6 +476,7 @@ export const useNotificationNavigation = () => {
       entityHandler,
       contestHandler,
       milestoneHandler,
+      trendingHandler,
       userIdHandler,
       messagesHandler,
       navigation

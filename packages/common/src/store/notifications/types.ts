@@ -343,6 +343,9 @@ export type MilestoneListenPushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneListen
+  /** Set on pushes that should open the milestone stat card */
+  shareCard?: boolean
+  threshold?: number
   metadata: {
     threshold: number
     entity_type: Entity
@@ -362,6 +365,9 @@ export type MilestoneRepostPushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneRepost
+  /** Set on pushes that should open the milestone stat card */
+  shareCard?: boolean
+  threshold?: number
   metadata: {
     threshold: number
     entity_type: Entity
@@ -381,6 +387,9 @@ export type MilestoneFavoritePushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneFavorite
+  /** Set on pushes that should open the milestone stat card */
+  shareCard?: boolean
+  threshold?: number
   metadata: {
     threshold: number
     entity_type: Entity
@@ -455,6 +464,9 @@ export type TrendingTrackNotification = BaseNotification & {
   entityType: Entity.Track
   entityId: ID
 }
+
+/** Trending pushes carry `shareCard` when tapping should open the stat card */
+export type TrendingPushFields = { shareCard?: boolean }
 
 export type TrendingUndergroundNotification = BaseNotification & {
   type: NotificationType.TrendingUnderground
