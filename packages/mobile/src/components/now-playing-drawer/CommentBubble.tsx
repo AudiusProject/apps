@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useUser } from '@audius/common/api'
+import type { TimestampedComment } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
 import { Dimensions, Pressable, View } from 'react-native'
@@ -12,8 +13,6 @@ import { Flex, Text, useTheme } from '@audius/harmony-native'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import { ProfilePicture } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
-
-import type { TimestampedComment } from './useTimestampedComments'
 
 const { getSeek, getSeekCounter } = playbackSelectors
 

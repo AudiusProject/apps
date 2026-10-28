@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 
-import { useTrackComments } from '@audius/common/api'
-import type { Comment, ID } from '@audius/common/models'
+import type { Comment, ID } from '~/models'
+
+import { useTrackComments } from './useTrackComments'
 
 const PAGE_SIZE = 50
 // GetTrackCommentsSortMethodEnum.Timestamp
