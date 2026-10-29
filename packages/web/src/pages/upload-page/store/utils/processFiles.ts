@@ -4,26 +4,10 @@ import {
   ALLOWED_AUDIO_FILE_EXTENSIONS,
   ALLOWED_AUDIO_FILE_MIME
 } from '@audius/common/utils'
-import jsmediatags from 'jsmediatags'
 
 import { resizeImage } from 'utils/imageProcessingUtil'
 
-const readMediaTags = (file: File): Promise<any> => {
-  return new Promise(function (resolve, reject) {
-    jsmediatags.read(file, {
-      onSuccess: function (tag: any) {
-        let tags
-        if (tag && tag.tags) {
-          tags = tag.tags
-        }
-        resolve(tags)
-      },
-      onError: function (error) {
-        reject(error)
-      }
-    })
-  })
-}
+let musicMetadataPromise: Promise<typeof import('music-metadata')> | undefined
 
 const createArtwork = async (selectedFiles: File[]) => {
   const file = selectedFiles[0]
@@ -68,13 +52,18 @@ export const processFiles = (
     const title = file.name.replace(/\.[^/.]+$/, '') // strip file extension
     let artwork = { file: null as File | null, url: '' }
     try {
-      const tags = await readMediaTags(file)
-      if (tags && tags.picture) {
-        const dataArray = new Uint8Array(tags.picture.data)
-        const blob = new window.Blob([dataArray])
-        const artworkFile = new File([blob], 'Artwork', {
-          type: tags.picture.format
-        })
+      musicMetadataPromise ??= import('music-metadata')
+      const { parseBlob, selectCover } = await musicMetadataPromise
+      const { common } = await parseBlob(file)
+      const picture = selectCover(common.picture)
+      if (picture) {
+        const artworkFile = new File(
+          [new Uint8Array(picture.data)],
+          'Artwork',
+          {
+            type: picture.format
+          }
+        )
         artwork = await createArtwork([artworkFile])
       }
     } catch (error) {
