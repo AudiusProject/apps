@@ -6,7 +6,8 @@ const shareTypeMap: Record<ShareType, string> = {
   album: 'Album',
   playlist: 'Playlist',
   contest: 'Contest',
-  weeklyRotation: 'Weekly Rotation'
+  weeklyRotation: 'Weekly Rotation',
+  milestone: 'Milestone'
 }
 
 export const messages = {

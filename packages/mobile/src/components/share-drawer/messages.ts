@@ -6,7 +6,8 @@ const shareTypeMap: Record<ShareType, string> = {
   album: 'Album',
   playlist: 'Playlist',
   contest: 'Contest',
-  weeklyRotation: 'Weekly Rotation'
+  weeklyRotation: 'Weekly Rotation',
+  milestone: 'Milestone'
 }
 
 export const messages = {
@@ -33,6 +34,27 @@ export const messages = {
     `Check out ${albumName} by ${handle} @audius $AUDIO`,
   playlistShareText: (playlistName: string, handle: string) =>
     `Check out ${playlistName} by ${handle} @audius $AUDIO`,
+  milestoneCountLabel: {
+    listens: 'Plays',
+    reposts: 'Reposts',
+    favorites: 'Favorites'
+  },
+  milestoneRankLabel: {
+    trending: 'On Trending',
+    underground: 'On Underground Trending'
+  },
+  milestoneCountShareText: (
+    title: string,
+    count: string,
+    label: string,
+    handle: string
+  ) => `${title} by ${handle} just hit ${count} ${label} on @audius $AUDIO`,
+  milestoneRankShareText: (
+    title: string,
+    rank: number,
+    label: string,
+    handle: string
+  ) => `${title} by ${handle} is #${rank} ${label} on @audius $AUDIO`,
   weeklyRotationShareText: (handle: string) =>
     `Check out ${handle}'s Weekly Rotation on @audius $AUDIO`,
   loadingStoryModalTitle: 'Generating Story',

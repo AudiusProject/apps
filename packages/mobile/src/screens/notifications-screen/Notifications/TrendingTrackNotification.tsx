@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 
 import { useNotificationEntity } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import type {
   TrackEntity,
   TrendingTrackNotification as TrendingTrackNotificationType
@@ -16,16 +15,14 @@ import {
   NotificationHeader,
   NotificationText,
   NotificationTile,
-  NotificationTitle,
-  NotificationXButton
+  NotificationShareCardButton,
+  NotificationTitle
 } from '../Notification'
 
 const messages = {
   title: "You're Trending",
   is: 'is',
   trending: 'on Trending right now!',
-  xShareText: (entityTitle: string) =>
-    `My track ${entityTitle} is trending on @audius! Check it out! $AUDIO`
 }
 
 type TrendingTrackNotificationProps = {
@@ -50,7 +47,6 @@ export const TrendingTrackNotification = (
 
   if (!entity) return null
 
-  const shareText = messages.xShareText(entity.title)
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
@@ -60,13 +56,9 @@ export const TrendingTrackNotification = (
       <NotificationText>
         <EntityLink entity={entity} /> {messages.is} #{rank} {messages.trending}
       </NotificationText>
-      <NotificationXButton
-        type='static'
-        shareText={shareText}
-        analytics={{
-          eventName: Name.NOTIFICATIONS_CLICK_TRENDING_TRACK_TWITTER_SHARE,
-          text: shareText
-        }}
+      <NotificationShareCardButton
+        trackId={notification.entityId}
+        stat={{ kind: 'trending', rank }}
       />
     </NotificationTile>
   )

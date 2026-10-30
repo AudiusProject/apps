@@ -197,13 +197,14 @@ export const useShareToStory = ({
   const [selectedPlatform, setSelectedPlatform] =
     useState<ShareToStoryPlatform | null>(null)
 
-  const trackTitle =
-    content?.type === 'track' ? content?.track.title : undefined
-  const artistHandle =
-    content?.type === 'track' ? content?.artist.handle : undefined
+  // Track and milestone shares both render a track into the story
+  const storyContent =
+    content?.type === 'track' || content?.type === 'milestone' ? content : null
+  const trackTitle = storyContent?.track.title
+  const artistHandle = storyContent?.artist.handle
 
   const trackImage = useTrackImage({
-    trackId: content?.type === 'track' ? content.track.track_id : undefined,
+    trackId: storyContent?.track.track_id,
     size: SquareSizes.SIZE_480_BY_480
   })
   const isStickerImageLoadedRef = useRef(false)
@@ -212,7 +213,7 @@ export const useShareToStory = ({
     stickerLoadedEventEmitter.emit(STICKER_LOADED_EVENT)
   }, [])
 
-  const trackId = content?.type === 'track' ? content.track.track_id : null
+  const trackId = storyContent?.track.track_id ?? null
   // Reset when share content (track) changes so we wait for the new sticker to load
   useEffect(() => {
     if (trackId) {
@@ -220,7 +221,7 @@ export const useShareToStory = ({
     }
   }, [trackId])
   const trackImageUri =
-    content?.type === 'track' &&
+    storyContent &&
     trackImage &&
     trackImage.source &&
     isImageUriSource(trackImage.source)
@@ -367,7 +368,7 @@ export const useShareToStory = ({
     async (platform: ShareToStoryPlatform) => {
       const sdk = await audiusSdk()
 
-      if (content?.type === 'track') {
+      if (storyContent) {
         if (!(await isAppInstalled(platform))) {
           toast({
             content: messages.shareToStoryAppNotInstalled(
@@ -378,8 +379,8 @@ export const useShareToStory = ({
           track(
             make({
               eventName: ERROR_EVENT_NAMES_MAP[platform],
-              title: content.track.title,
-              artist: content.artist.handle,
+              title: storyContent.track.title,
+              artist: storyContent.artist.handle,
               error: 'App not installed'
             })
           )
@@ -390,8 +391,8 @@ export const useShareToStory = ({
         track(
           make({
             eventName: START_EVENT_NAMES_MAP[platform],
-            title: content.track.title,
-            artist: content.artist.handle
+            title: storyContent.track.title,
+            artist: storyContent.artist.handle
           })
         )
 
@@ -468,7 +469,7 @@ export const useShareToStory = ({
               sdk
             })
           streamMp3Url = await sdk.tracks.getTrackStreamUrl({
-            trackId: Id.parse(content.track.track_id),
+            trackId: Id.parse(storyContent.track.track_id),
             userId: OptionalId.parse(userId),
             userSignature: signature,
             userData: data
@@ -482,7 +483,7 @@ export const useShareToStory = ({
           `storyVideo-${uuid()}.mp4`
         )
         const audioStartOffsetConfig =
-          content.track.duration && content.track.duration >= 20
+          storyContent.track.duration && storyContent.track.duration >= 20
             ? '-ss 10 '
             : ''
 
@@ -547,7 +548,7 @@ export const useShareToStory = ({
           launch = pasteToSnapchatApp(
             videoUri,
             `file://${stickerUri}`,
-            encodeURI(getTrackRoute(content.track, true))
+            encodeURI(getTrackRoute(storyContent.track, true))
           )
         } else {
           launch = pasteToTikTokApp(storyVideoPath, platform)
@@ -577,8 +578,8 @@ export const useShareToStory = ({
         track(
           make({
             eventName: SUCCESS_EVENT_NAMES_MAP[platform],
-            title: content.track.title,
-            artist: content.artist.handle
+            title: storyContent.track.title,
+            artist: storyContent.artist.handle
           })
         )
 
@@ -594,7 +595,7 @@ export const useShareToStory = ({
     },
     [
       trackImageUri,
-      content,
+      storyContent,
       toggleProgressDrawer,
       captureStickerImage,
       pasteToInstagramApp,
@@ -678,7 +679,7 @@ export const useShareToStory = ({
     cancelStory,
     /** Pre-resolved artwork source (mirror fallback applied) for the share sticker. Use this so the sticker always has a working image URL. */
     stickerArtworkSource:
-      content?.type === 'track' &&
+      storyContent &&
       trackImage?.source != null &&
       !trackImage.hasNoArtwork
         ? trackImage.source
