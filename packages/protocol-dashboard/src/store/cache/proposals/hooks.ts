@@ -86,6 +86,9 @@ export function fetchActiveProposals(): ThunkAction<
   }
 }
 
+// A block update can arrive before the previous history request has finished.
+const proposalHistoryRequests = new WeakMap<Audius, Promise<void>>()
+
 export function fetchAllProposals(): ThunkAction<
   void,
   AppState,
@@ -93,30 +96,81 @@ export function fetchAllProposals(): ThunkAction<
   Action<string>
 > {
   return async (dispatch, getState, aud) => {
-    const proposalEvents = await aud.Governance.getProposals()
-    const allProposals: (Proposal | null)[] = await Promise.all(
-      proposalEvents.map(async (p: ProposalEvent) => {
-        const { proposalId, description, name } = p
-        if (filteredProposals.has(proposalId)) {
-          return null
-        }
-        const proposal = await aud.Governance.getProposalById(proposalId)
-        const quorum = await aud.Governance.getProposalQuorum(proposalId)
-        proposal.description = description
-        proposal.name = name
-        proposal.quorum = quorum
-        if (proposal.outcome !== Outcome.InProgress) {
-          const evaluationBlockNumber =
-            await aud.Governance.getProposalEvaluationBlock(proposalId)
-          proposal.evaluatedBlock = evaluationBlockNumber
-        }
-        return proposal
-      })
-    )
+    const pending = proposalHistoryRequests.get(aud)
+    if (pending) return pending
 
-    const proposals = allProposals.filter(Boolean) as Proposal[]
+    const request = (async () => {
+      const proposalEvents: ProposalEvent[] =
+        await aud.Governance.getProposals()
+      const cached = getState().cache.proposals.allProposals
+      const proposals: Proposal[] = []
+      const pendingEvents = proposalEvents
+        .filter((p) => !filteredProposals.has(p.proposalId))
+        .sort((a, b) => b.proposalId - a.proposalId)
+        .filter((event) => {
+          const proposal = cached[event.proposalId]
+          // Evaluating is transitional; only reuse completed, dated proposals.
+          if (
+            proposal &&
+            proposal.outcome !== Outcome.InProgress &&
+            proposal.outcome !== Outcome.Evaluating &&
+            proposal.evaluatedBlock
+          ) {
+            proposals.push(proposal)
+            return false
+          }
+          return true
+        })
+      const publish = () => {
+        dispatch(
+          setAllProposals({
+            proposals: [...proposals].sort(
+              (a, b) => a.proposalId - b.proposalId
+            )
+          })
+        )
+      }
 
-    dispatch(setAllProposals({ proposals }))
+      if (proposals.length || !pendingEvents.length) publish()
+
+      // Render the newest proposals first, without flooding the RPC provider
+      // or making the entire list wait for the oldest historical request.
+      for (let i = 0; i < pendingEvents.length; i += 5) {
+        const batch = await Promise.allSettled(
+          pendingEvents.slice(i, i + 5).map(async (event) => {
+            const { proposalId, description, name } = event
+            const [proposal, quorum] = await Promise.all([
+              aud.Governance.getProposalById(proposalId),
+              aud.Governance.getProposalQuorum(proposalId)
+            ])
+            proposal.description = description
+            proposal.name = name
+            proposal.quorum = quorum
+            if (proposal.outcome !== Outcome.InProgress) {
+              proposal.evaluatedBlock =
+                await aud.Governance.getProposalEvaluationBlock(
+                  proposalId,
+                  proposal.submissionBlockNumber
+                )
+            }
+            return proposal
+          })
+        )
+        for (const result of batch) {
+          if (result.status === 'fulfilled') proposals.push(result.value)
+          else
+            console.error('Unable to load governance proposal', result.reason)
+        }
+        // Failed proposals remain uncached and are retried on the next refresh.
+        if (proposals.length) publish()
+      }
+    })()
+    proposalHistoryRequests.set(aud, request)
+    try {
+      await request
+    } finally {
+      proposalHistoryRequests.delete(aud)
+    }
   }
 }
 
@@ -141,7 +195,10 @@ export function fetchRecentProposals(): ThunkAction<
         proposal.quorum = quorum
         if (proposal.outcome !== Outcome.InProgress) {
           const evaluationBlockNumber =
-            await aud.Governance.getProposalEvaluationBlock(proposalId)
+            await aud.Governance.getProposalEvaluationBlock(
+              proposalId,
+              proposal.submissionBlockNumber
+            )
           proposal.evaluatedBlock = evaluationBlockNumber
         }
         return proposal
@@ -175,7 +232,10 @@ export function fetchProposal(
     proposal.quorum = quorum
     if (proposal.outcome !== Outcome.InProgress) {
       const evaluationBlockNumber =
-        await aud.Governance.getProposalEvaluationBlock(proposalId)
+        await aud.Governance.getProposalEvaluationBlock(
+          proposalId,
+          proposal.submissionBlockNumber
+        )
       proposal.evaluatedBlock = evaluationBlockNumber
     }
 
