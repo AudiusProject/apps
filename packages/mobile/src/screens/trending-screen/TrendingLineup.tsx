@@ -22,6 +22,14 @@ import { TrackLineup } from 'app/components/lineup/TrackLineup'
 const { setTrendingTimeRange } = trendingPageActions
 const { getTrendingGenre } = trendingPageSelectors
 
+// Matches the query client's default staleTime.
+const STALE_TIME_MS = 1000 * 60 * 5
+
+// Trending is persisted to disk so it can paint on a cold start. A snapshot
+// that was already stale when this session started gets refetched on mount,
+// and painting it first means showing an old order and then reshuffling.
+const sessionStartedAt = Date.now()
+
 const sourceFor = (timeRange: TimeRange) => {
   if (timeRange === TimeRange.WEEK) return 'DISCOVER_TRENDING_WEEK'
   if (timeRange === TimeRange.MONTH) return 'DISCOVER_TRENDING_MONTH'
@@ -70,8 +78,20 @@ export const TrendingLineup = ({
     [timeRange, genre]
   )
 
-  const { trackIds, isPending, isFetching, hasNextPage, loadNextPage } =
-    useTrending(queryArgs)
+  const {
+    trackIds,
+    isPending,
+    isFetching,
+    isRefetching,
+    dataUpdatedAt,
+    hasNextPage,
+    loadNextPage
+  } = useTrending(queryArgs)
+
+  // Show skeletons until the refetch of a stale restored snapshot lands. If
+  // it fails, the snapshot is shown.
+  const isRestoredStale =
+    isRefetching && dataUpdatedAt < sessionStartedAt - STALE_TIME_MS
 
   const querySource = useMemo(
     () => ({ queryKey: [...getTrendingQueryKey(queryArgs)] as unknown[] }),
@@ -81,10 +101,10 @@ export const TrendingLineup = ({
   return (
     <TrackLineup
       tileVariant={isTrackRowsEnabled ? 'row' : 'tile'}
-      trackIds={trackIds}
+      trackIds={isRestoredStale ? [] : trackIds}
       source={sourceFor(timeRange)}
       querySource={querySource}
-      isPending={isPending}
+      isPending={isPending || isRestoredStale}
       isFetching={isFetching}
       hasNextPage={hasNextPage}
       loadNextPage={loadNextPage}
