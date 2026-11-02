@@ -16,8 +16,6 @@ const formatStatCount = (count: number) => count.toLocaleString('en-US')
 export const getStatHeadline = (stat: ShareMilestoneStat) => {
   switch (stat.kind) {
     case 'listens':
-    case 'reposts':
-    case 'favorites':
       return {
         value: formatStatCount(stat.count),
         label: messages.milestoneCountLabel[stat.kind]
@@ -27,6 +25,11 @@ export const getStatHeadline = (stat: ShareMilestoneStat) => {
       return {
         value: `#${stat.rank}`,
         label: messages.milestoneRankLabel[stat.kind]
+      }
+    case 'featured':
+      return {
+        value: stat.playlistName,
+        label: messages.milestoneFeaturedLabel
       }
   }
 }
@@ -110,19 +113,29 @@ export const getXShareText = async (content: ShareContent) => {
       } = content
       const handle = getXShareHandle(artist)
       const { value, label } = getStatHeadline(stat)
-      return stat.kind === 'trending' || stat.kind === 'underground'
-        ? messages.milestoneRankShareText(
-            title,
-            stat.rank,
-            label.toLowerCase(),
-            handle
-          )
-        : messages.milestoneCountShareText(
+      switch (stat.kind) {
+        case 'listens':
+          return messages.milestoneCountShareText(
             title,
             value,
             label.toLowerCase(),
             handle
           )
+        case 'trending':
+        case 'underground':
+          return messages.milestoneRankShareText(
+            title,
+            stat.rank,
+            label.toLowerCase(),
+            handle
+          )
+        case 'featured':
+          return messages.milestoneFeaturedShareText(
+            title,
+            stat.playlistName,
+            handle
+          )
+      }
     }
   }
 }

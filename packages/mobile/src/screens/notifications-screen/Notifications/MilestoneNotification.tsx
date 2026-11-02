@@ -10,7 +10,11 @@ import type {
   MilestoneNotification as MilestoneNotificationType,
   ShareMilestoneStat
 } from '@audius/common/store'
-import { Achievement, Entity } from '@audius/common/store'
+import {
+  Achievement,
+  Entity,
+  isShareCardPlayMilestone
+} from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { formatCount, isEntityHidden, route } from '@audius/common/utils'
 
@@ -86,21 +90,14 @@ const getXShareData = (
   }
 }
 
-const statKinds: Partial<Record<Achievement, 'listens' | 'reposts' | 'favorites'>> =
-  {
-    [Achievement.Listens]: 'listens',
-    [Achievement.Reposts]: 'reposts',
-    [Achievement.Favorites]: 'favorites'
-  }
-
-// Track milestones get a stat card; collection and follower milestones keep X
+// Track play milestones at a card-worthy count get a stat card; the rest keep X
 const getShareCardStat = (
   notification: MilestoneNotificationType,
   entity?: Nullable<EntityType>
 ): Nullable<ShareMilestoneStat> => {
-  const kind = statKinds[notification.achievement]
   if (
-    !kind ||
+    notification.achievement !== Achievement.Listens ||
+    !isShareCardPlayMilestone(notification.value) ||
     !('entityType' in notification) ||
     notification.entityType !== Entity.Track ||
     !entity ||
@@ -108,7 +105,7 @@ const getShareCardStat = (
   ) {
     return null
   }
-  return { kind, count: notification.value }
+  return { kind: 'listens', count: notification.value }
 }
 
 type MilestoneNotificationProps = {

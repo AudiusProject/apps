@@ -35,14 +35,18 @@ export const messages = {
   playlistShareText: (playlistName: string, handle: string) =>
     `Check out ${playlistName} by ${handle} @audius $AUDIO`,
   milestoneCountLabel: {
-    listens: 'Plays',
-    reposts: 'Reposts',
-    favorites: 'Favorites'
+    listens: 'Plays'
   },
   milestoneRankLabel: {
     trending: 'On Trending',
     underground: 'On Underground Trending'
   },
+  milestoneFeaturedLabel: 'Featured Playlist',
+  milestoneFeaturedShareText: (
+    title: string,
+    playlistName: string,
+    handle: string
+  ) => `${title} by ${handle} is featured on ${playlistName} on @audius $AUDIO`,
   milestoneCountShareText: (
     title: string,
     count: string,

@@ -158,7 +158,8 @@ export const ShareDrawer = NiceModal.create(() => {
     const link = getContentUrl(content)
     Clipboard.setString(link)
     toast({
-      content: messages.toast(shareType),
+      // A milestone share links to its track
+      content: messages.toast(shareType === 'milestone' ? 'track' : shareType),
       type: 'info',
       timeout: shareToastTimeout
     })

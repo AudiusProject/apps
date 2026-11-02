@@ -38,7 +38,11 @@ type ShareToStoryStickerProps = {
    * When provided, use this instead of TrackImage so the sticker always has a working image URL for capture.
    */
   artworkSource?: ImageSourcePropType
-  /** Stat shown above the artwork for milestone cards, e.g. 1,000 / Plays */
+  /**
+   * Stat shown over the artwork for milestone cards, e.g. 1,000 / Plays.
+   * Overlaid so the sticker keeps the size the story pipeline hardcodes for
+   * Snapchat and TikTok.
+   */
   headline?: { value: string; label: string }
 }
 
@@ -52,8 +56,16 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     borderRadius: 8
   },
   headline: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: 240,
+    width: 240,
     alignItems: 'center',
-    marginBottom: spacing(3)
+    justifyContent: 'center',
+    paddingHorizontal: spacing(3),
+    borderRadius: spacing(1),
+    backgroundColor: 'rgba(0, 0, 0, 0.45)'
   },
   headlineValue: {
     lineHeight: 64
@@ -110,34 +122,6 @@ export const ShareToStorySticker = ({
   return (
     <View style={[styles.container, style]}>
       <View>
-        {headline ? (
-          <View style={styles.headline}>
-            <Text
-              color='staticNeutral'
-              allowFontScaling={false}
-              weight='heavy'
-              fontSize='xxxxxl'
-              noGutter
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              style={styles.headlineValue}
-            >
-              {headline.value}
-            </Text>
-            <Text
-              color='staticNeutral'
-              allowFontScaling={false}
-              weight='bold'
-              fontSize='medium'
-              textTransform='uppercase'
-              noGutter
-              numberOfLines={1}
-              style={styles.headlineLabel}
-            >
-              {headline.label}
-            </Text>
-          </View>
-        ) : null}
         {artworkSource != null ? (
           <Artwork
             source={artworkSource}
@@ -153,6 +137,35 @@ export const ShareToStorySticker = ({
             onLoad={onLoad}
           />
         )}
+        {headline ? (
+          <View style={styles.headline}>
+            <Text
+              color='staticWhite'
+              allowFontScaling={false}
+              weight='heavy'
+              fontSize='xxxxxl'
+              noGutter
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={styles.headlineValue}
+            >
+              {headline.value}
+            </Text>
+            <Text
+              color='staticWhite'
+              allowFontScaling={false}
+              weight='bold'
+              fontSize='medium'
+              textTransform='uppercase'
+              noGutter
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={styles.headlineLabel}
+            >
+              {headline.label}
+            </Text>
+          </View>
+        ) : null}
         <Text
           color='staticNeutral'
           allowFontScaling={false}

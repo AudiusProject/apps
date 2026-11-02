@@ -63,11 +63,13 @@ type ShareWeeklyRotationContent = {
 }
 
 export type ShareMilestoneStat =
-  | { kind: 'listens' | 'reposts' | 'favorites'; count: number }
+  | { kind: 'listens'; count: number }
   | { kind: 'trending' | 'underground'; rank: number }
+  | { kind: 'featured'; playlistName: string }
 
 /**
- * A track milestone (play count, trending rank) shared as a stat card.
+ * A track milestone (play count, trending rank, editorial feature) shared as a
+ * stat card.
  * Links to the track like a track share.
  */
 type ShareMilestoneContent = {

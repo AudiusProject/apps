@@ -22,7 +22,7 @@ import {
 const messages = {
   title: "You're Trending",
   is: 'is',
-  trending: 'on Underground Trending right now!',
+  trending: 'on Underground Trending right now!'
 }
 
 type TrendingUndergroundNotificationProps = {
@@ -44,7 +44,6 @@ export const TrendingUndergroundNotification = (
   }, [navigation, notification, entity])
 
   if (!entity) return null
-
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>

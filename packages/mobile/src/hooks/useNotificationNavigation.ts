@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react'
 
 import { getEventQueryKey } from '@audius/common/api'
+import { ShareSource } from '@audius/common/models'
+import type { ID } from '@audius/common/models'
 import type {
   AnnouncementNotification,
   UserSubscriptionNotification,
@@ -29,6 +31,7 @@ import type {
   ChallengeRewardNotification,
   TierChangeNotification,
   AddTrackToPlaylistNotification,
+  AddTrackToPlaylistPushFields,
   AddTrackToPlaylistPushNotification,
   MessagePushNotification,
   MessageReactionPushNotification,
@@ -54,13 +57,12 @@ import type {
   ArtistRemixContestEndingSoonNotification,
   ArtistRemixContestSubmissionsNotification
 } from '@audius/common/store'
-import { ShareSource } from '@audius/common/models'
-import type { ID } from '@audius/common/models'
 import {
   NotificationType,
   PushNotificationType,
   Entity,
   Achievement,
+  getFeaturedPlaylistName,
   shareModalUIActions
 } from '@audius/common/store'
 import { OptionalId } from '@audius/sdk'
@@ -216,19 +218,19 @@ export const useNotificationNavigation = () => {
       } else if (notification.type === PushNotificationType.MilestoneFollow) {
         navigation.navigate('Profile', { id: notification.initiator })
       } else if (notification.actions[0].actionEntityType === Entity.Track) {
+        // The push sends this id as a string, and iOS delivers it as is
+        const trackId = Number(notification.entityId)
         navigation.navigate('Track', {
-          trackId: notification.entityId,
+          trackId,
           canBeUnlisted: false
         })
-        if (notification.shareCard && notification.threshold) {
-          const kind =
-            notification.type === PushNotificationType.MilestoneListen
-              ? 'listens'
-              : notification.type === PushNotificationType.MilestoneRepost
-                ? 'reposts'
-                : 'favorites'
-          openShareCard(notification.entityId, {
-            kind,
+        if (
+          notification.type === PushNotificationType.MilestoneListen &&
+          notification.shareCard &&
+          notification.threshold
+        ) {
+          openShareCard(trackId, {
+            kind: 'listens',
             count: notification.threshold
           })
         }
@@ -314,16 +316,24 @@ export const useNotificationNavigation = () => {
   const notificationTypeHandlerMap = useMemo(
     () => ({
       [NotificationType.AddTrackToPlaylist]: (
-        notification:
+        notification: (
           | AddTrackToPlaylistNotification
           | AddTrackToPlaylistPushNotification
+        ) &
+          AddTrackToPlaylistPushFields
       ) => {
-        navigation.navigate('Collection', {
-          id:
-            'playlistId' in notification
-              ? notification.playlistId
-              : notification.metadata.playlistId
-        })
+        const playlistId =
+          'playlistId' in notification
+            ? notification.playlistId
+            : notification.metadata.playlistId
+        navigation.navigate('Collection', { id: playlistId })
+        const playlistName = getFeaturedPlaylistName(playlistId)
+        if (notification.shareCard && notification.trackId && playlistName) {
+          openShareCard(notification.trackId, {
+            kind: 'featured',
+            playlistName
+          })
+        }
       },
       // Will handle NotificationType.Announcement and PushNotificationType.Announcement
       [NotificationType.Announcement]: announcementHandler,
@@ -479,6 +489,7 @@ export const useNotificationNavigation = () => {
       trendingHandler,
       userIdHandler,
       messagesHandler,
+      openShareCard,
       navigation
     ]
   )

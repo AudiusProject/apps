@@ -679,9 +679,7 @@ export const useShareToStory = ({
     cancelStory,
     /** Pre-resolved artwork source (mirror fallback applied) for the share sticker. Use this so the sticker always has a working image URL. */
     stickerArtworkSource:
-      storyContent &&
-      trackImage?.source != null &&
-      !trackImage.hasNoArtwork
+      storyContent && trackImage?.source != null && !trackImage.hasNoArtwork
         ? trackImage.source
         : undefined
   }

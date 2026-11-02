@@ -365,9 +365,6 @@ export type MilestoneRepostPushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneRepost
-  /** Set on pushes that should open the milestone stat card */
-  shareCard?: boolean
-  threshold?: number
   metadata: {
     threshold: number
     entity_type: Entity
@@ -387,9 +384,6 @@ export type MilestoneFavoritePushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneFavorite
-  /** Set on pushes that should open the milestone stat card */
-  shareCard?: boolean
-  threshold?: number
   metadata: {
     threshold: number
     entity_type: Entity
@@ -516,6 +510,12 @@ export type TrackAddedToPurchasedAlbumNotification = BaseNotification & {
   trackId: ID
   playlistId: ID
   playlistOwnerId: ID
+}
+
+/** Editorial playlist pushes carry these when tapping should open the stat card */
+export type AddTrackToPlaylistPushFields = {
+  shareCard?: boolean
+  trackId?: ID
 }
 
 export type AddTrackToPlaylistPushNotification = {
