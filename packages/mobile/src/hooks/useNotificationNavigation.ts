@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react'
 
 import { getEventQueryKey } from '@audius/common/api'
+import { ShareSource } from '@audius/common/models'
+import type { ID } from '@audius/common/models'
 import type {
   AnnouncementNotification,
   UserSubscriptionNotification,
@@ -23,9 +25,13 @@ import type {
   RemixCosignNotification,
   RemixCosignPushNotification,
   TrendingTrackNotification,
+  TrendingUndergroundNotification,
+  TrendingPushFields,
+  ShareMilestoneStat,
   ChallengeRewardNotification,
   TierChangeNotification,
   AddTrackToPlaylistNotification,
+  AddTrackToPlaylistPushFields,
   AddTrackToPlaylistPushNotification,
   MessagePushNotification,
   MessageReactionPushNotification,
@@ -55,11 +61,14 @@ import {
   NotificationType,
   PushNotificationType,
   Entity,
-  Achievement
+  Achievement,
+  getFeaturedPlaylistName,
+  shareModalUIActions
 } from '@audius/common/store'
 import { OptionalId } from '@audius/sdk'
 import { useLinkTo } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'
+import { useDispatch } from 'react-redux'
 
 import { useNavigation } from './useNavigation'
 
@@ -72,6 +81,22 @@ export const useNotificationNavigation = () => {
   const navigation = useNavigation()
   const linkTo = useLinkTo()
   const queryClient = useQueryClient()
+  const dispatch = useDispatch()
+
+  // Pushes flagged with shareCard open the stat card over the track
+  const openShareCard = useCallback(
+    (trackId: ID, stat: ShareMilestoneStat) => {
+      dispatch(
+        shareModalUIActions.requestOpen({
+          type: 'milestone',
+          trackId,
+          stat,
+          source: ShareSource.NOTIFICATION
+        })
+      )
+    },
+    [dispatch]
+  )
 
   const socialActionHandler = useCallback(
     (
@@ -193,10 +218,22 @@ export const useNotificationNavigation = () => {
       } else if (notification.type === PushNotificationType.MilestoneFollow) {
         navigation.navigate('Profile', { id: notification.initiator })
       } else if (notification.actions[0].actionEntityType === Entity.Track) {
+        // The push sends this id as a string, and iOS delivers it as is
+        const trackId = Number(notification.entityId)
         navigation.navigate('Track', {
-          trackId: notification.entityId,
+          trackId,
           canBeUnlisted: false
         })
+        if (
+          notification.type === PushNotificationType.MilestoneListen &&
+          notification.shareCard &&
+          notification.threshold
+        ) {
+          openShareCard(trackId, {
+            kind: 'listens',
+            count: notification.threshold
+          })
+        }
       } else {
         navigation.navigate('Collection', {
           id: notification.entityId,
@@ -204,7 +241,32 @@ export const useNotificationNavigation = () => {
         })
       }
     },
-    [navigation]
+    [navigation, openShareCard]
+  )
+
+  const trendingHandler = useCallback(
+    (
+      notification: (
+        | TrendingTrackNotification
+        | TrendingUndergroundNotification
+      ) &
+        TrendingPushFields
+    ) => {
+      navigation.navigate('Track', {
+        trackId: notification.entityId,
+        canBeUnlisted: false
+      })
+      if (notification.shareCard && notification.rank) {
+        openShareCard(notification.entityId, {
+          kind:
+            notification.type === NotificationType.TrendingUnderground
+              ? 'underground'
+              : 'trending',
+          rank: notification.rank
+        })
+      }
+    },
+    [navigation, openShareCard]
   )
 
   const messagesHandler = useCallback(
@@ -254,16 +316,24 @@ export const useNotificationNavigation = () => {
   const notificationTypeHandlerMap = useMemo(
     () => ({
       [NotificationType.AddTrackToPlaylist]: (
-        notification:
+        notification: (
           | AddTrackToPlaylistNotification
           | AddTrackToPlaylistPushNotification
+        ) &
+          AddTrackToPlaylistPushFields
       ) => {
-        navigation.navigate('Collection', {
-          id:
-            'playlistId' in notification
-              ? notification.playlistId
-              : notification.metadata.playlistId
-        })
+        const playlistId =
+          'playlistId' in notification
+            ? notification.playlistId
+            : notification.metadata.playlistId
+        navigation.navigate('Collection', { id: playlistId })
+        const playlistName = getFeaturedPlaylistName(playlistId)
+        if (notification.shareCard && notification.trackId && playlistName) {
+          openShareCard(notification.trackId, {
+            kind: 'featured',
+            playlistName
+          })
+        }
       },
       // Will handle NotificationType.Announcement and PushNotificationType.Announcement
       [NotificationType.Announcement]: announcementHandler,
@@ -322,14 +392,8 @@ export const useNotificationNavigation = () => {
       [NotificationType.TierChange]: (notification: TierChangeNotification) => {
         navigation.navigate('AudioScreen')
       },
-      [NotificationType.TrendingTrack]: (
-        notification: TrendingTrackNotification
-      ) => {
-        navigation.navigate('Track', {
-          trackId: notification.entityId,
-          canBeUnlisted: false
-        })
-      },
+      [NotificationType.TrendingTrack]: trendingHandler,
+      [NotificationType.TrendingUnderground]: trendingHandler,
       [NotificationType.UserSubscription]: (
         notification: UserSubscriptionNotification
       ) => {
@@ -422,8 +486,10 @@ export const useNotificationNavigation = () => {
       entityHandler,
       contestHandler,
       milestoneHandler,
+      trendingHandler,
       userIdHandler,
       messagesHandler,
+      openShareCard,
       navigation
     ]
   )

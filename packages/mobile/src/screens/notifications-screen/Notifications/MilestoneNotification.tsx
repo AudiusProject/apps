@@ -7,9 +7,14 @@ import {
 import type { User } from '@audius/common/models'
 import type {
   EntityType,
-  MilestoneNotification as MilestoneNotificationType
+  MilestoneNotification as MilestoneNotificationType,
+  ShareMilestoneStat
 } from '@audius/common/store'
-import { Achievement } from '@audius/common/store'
+import {
+  Achievement,
+  Entity,
+  isShareCardPlayMilestone
+} from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { formatCount, isEntityHidden, route } from '@audius/common/utils'
 
@@ -22,6 +27,7 @@ import {
   NotificationText,
   NotificationTile,
   NotificationTitle,
+  NotificationShareCardButton,
   NotificationXButton
 } from '../Notification'
 import { getEntityRoute } from '../Notification/utils'
@@ -84,6 +90,24 @@ const getXShareData = (
   }
 }
 
+// Track play milestones at a card-worthy count get a stat card; the rest keep X
+const getShareCardStat = (
+  notification: MilestoneNotificationType,
+  entity?: Nullable<EntityType>
+): Nullable<ShareMilestoneStat> => {
+  if (
+    notification.achievement !== Achievement.Listens ||
+    !isShareCardPlayMilestone(notification.value) ||
+    !('entityType' in notification) ||
+    notification.entityType !== Entity.Track ||
+    !entity ||
+    isEntityHidden(entity)
+  ) {
+    return null
+  }
+  return { kind: 'listens', count: notification.value }
+}
+
 type MilestoneNotificationProps = {
   notification: MilestoneNotificationType
 }
@@ -127,6 +151,7 @@ export const MilestoneNotification = (props: MilestoneNotificationProps) => {
   }
 
   const { link, text } = getXShareData(notification, entity, user)
+  const shareCardStat = getShareCardStat(notification, entity)
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
@@ -134,7 +159,12 @@ export const MilestoneNotification = (props: MilestoneNotificationProps) => {
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
       <NotificationText>{renderBody()}</NotificationText>
-      {link && text ? (
+      {shareCardStat ? (
+        <NotificationShareCardButton
+          trackId={notification.entityId}
+          stat={shareCardStat}
+        />
+      ) : link && text ? (
         <NotificationXButton type='static' url={link} shareText={text} />
       ) : null}
     </NotificationTile>

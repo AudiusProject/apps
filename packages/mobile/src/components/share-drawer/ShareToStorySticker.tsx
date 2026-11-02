@@ -38,6 +38,12 @@ type ShareToStoryStickerProps = {
    * When provided, use this instead of TrackImage so the sticker always has a working image URL for capture.
    */
   artworkSource?: ImageSourcePropType
+  /**
+   * Stat shown over the artwork for milestone cards, e.g. 1,000 / Plays.
+   * Overlaid so the sticker keeps the size the story pipeline hardcodes for
+   * Snapchat and TikTok.
+   */
+  headline?: { value: string; label: string }
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -48,6 +54,24 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     paddingBottom: spacing(4.5),
     paddingHorizontal: spacing(3),
     borderRadius: 8
+  },
+  headline: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: 240,
+    width: 240,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing(3),
+    borderRadius: spacing(1),
+    backgroundColor: 'rgba(0, 0, 0, 0.45)'
+  },
+  headlineValue: {
+    lineHeight: 64
+  },
+  headlineLabel: {
+    letterSpacing: 1
   },
   trackImage: {
     height: 240,
@@ -89,7 +113,8 @@ export const ShareToStorySticker = ({
   style,
   onLoad,
   omitLogo = false,
-  artworkSource
+  artworkSource,
+  headline
 }: ShareToStoryStickerProps) => {
   const styles = useStyles()
 
@@ -112,6 +137,35 @@ export const ShareToStorySticker = ({
             onLoad={onLoad}
           />
         )}
+        {headline ? (
+          <View style={styles.headline}>
+            <Text
+              color='staticWhite'
+              allowFontScaling={false}
+              weight='heavy'
+              fontSize='xxxxxl'
+              noGutter
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={styles.headlineValue}
+            >
+              {headline.value}
+            </Text>
+            <Text
+              color='staticWhite'
+              allowFontScaling={false}
+              weight='bold'
+              fontSize='medium'
+              textTransform='uppercase'
+              noGutter
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={styles.headlineLabel}
+            >
+              {headline.label}
+            </Text>
+          </View>
+        ) : null}
         <Text
           color='staticNeutral'
           allowFontScaling={false}

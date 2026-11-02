@@ -40,6 +40,7 @@ export {
   actions as shareModalUIActions
 } from './share-modal/slice'
 export * from './share-modal/types'
+export * from './share-modal/milestones'
 export * as shareModalUISelectors from './share-modal/selectors'
 export { default as shareModalUISagas } from './share-modal/sagas'
 
