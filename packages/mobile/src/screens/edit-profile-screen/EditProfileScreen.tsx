@@ -18,6 +18,7 @@ import {
   IconX
 } from '@audius/harmony-native'
 import { ScrollView } from 'app/components/core'
+import { FIXED_FOOTER_HEIGHT } from 'app/components/core/FixedFooter'
 import { TextField } from 'app/components/fields'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { useProfilePicture } from 'app/components/image/UserImage'
@@ -38,7 +39,7 @@ const useStyles = makeStyles(({ spacing }) => ({
   scrollContent: {
     paddingTop: spacing(6),
     paddingHorizontal: 16, // 16px horizontal margin
-    paddingBottom: spacing(24) // Extra padding for bottom action bar
+    paddingBottom: FIXED_FOOTER_HEIGHT
   }
 }))
 
