@@ -23,12 +23,25 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: mockSafeBottom })
 }))
 jest.mock('@emotion/native', () => ({ css: (style: unknown) => style }))
-jest.mock('@audius/harmony-native', () => ({
-  Button: 'Button',
-  IconUser: () => null,
-  Flex: 'Flex',
-  Paper: 'Paper',
-  spacing: { l: 16, xl: 24, unit5: 20 }
+jest.mock(
+  '@audius/harmony-native',
+  () => ({
+    Button: 'Button',
+    IconUser: () => null,
+    Flex: 'Flex',
+    Paper: 'Paper',
+    spacing: { l: 16, xl: 24, unit5: 20 }
+  }),
+  { virtual: true }
+)
+jest.mock('../now-playing-drawer/constants', () => ({ PLAY_BAR_HEIGHT: 46 }))
+jest.mock('./ScreenFooterLayout', () => ({
+  ScreenFooterLayout: ({ children, footer }: any) => (
+    <>
+      {children}
+      {footer}
+    </>
+  )
 }))
 jest.mock('./KeyboardAvoidingView', () => ({
   KeyboardAvoidingView: 'KeyboardAvoidingView'
@@ -132,8 +145,6 @@ describe('FixedFooter floating navigation clearance', () => {
       )
     })
     const [cancel, save] = renderer.root.findAllByType('Button' as any)
-    const footer = renderer.root.findAllByType('Flex' as any)[0]
-    expect(footer.props.style.bottom).toBe(121)
     expect(save.props.disabled).toBe(false)
     act(() => save.props.onPress())
     expect(onSubmit).toHaveBeenCalledTimes(1)

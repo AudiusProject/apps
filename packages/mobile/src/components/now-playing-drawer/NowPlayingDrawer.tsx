@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -37,6 +38,7 @@ import {
   useFloatingTabBar
 } from 'app/components/bottom-tab-bar'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
+import { SetPlayBarVisibilityContext } from 'app/components/core/BottomBarInsetContext'
 import Drawer, {
   DrawerAnimationStyle,
   FULL_DRAWER_HEIGHT
@@ -146,6 +148,10 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
   const [isPlayBarShowing, setIsPlayBarShowing] = useState(false)
+  const setPlayBarVisible = useContext(SetPlayBarVisibilityContext)
+  useLayoutEffect(() => {
+    setPlayBarVisible(isPlayBarShowing)
+  }, [isPlayBarShowing, setPlayBarVisible])
 
   const { drawerNavigation } = useContext(AppDrawerContext)
 
