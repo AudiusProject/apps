@@ -151,6 +151,8 @@ const styles = StyleSheet.create({
   },
   borderTop: {
     top: 0,
-    shadowOffset: { width: 0, height: -2 }
+    shadowOffset: { width: 0, height: -2 },
+    // Android elevation always casts downward, into the bar itself
+    elevation: 0
   }
 })
