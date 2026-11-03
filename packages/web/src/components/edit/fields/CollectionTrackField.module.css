@@ -60,3 +60,8 @@
   flex-direction: row;
   gap: var(--harmony-unit-2);
 }
+
+.genreMood > * {
+  flex: 1;
+  min-width: 0;
+}

@@ -12,11 +12,17 @@ const messages = {
 
 type SelectGenreFieldProps = Partial<TextFieldProps> & {
   name: string
+  /**
+   * Id for the suggestions datalist. Pass a unique id when rendering more
+   * than one genre field on a page so the ids don't collide.
+   */
+  datalistId?: string
 }
 
 const staticSuggestions = getStaticGenreSuggestions()
 
 export const SelectGenreField = (props: SelectGenreFieldProps) => {
+  const { datalistId = GENRE_DATALIST_ID, ...other } = props
   const { data: suggestions = staticSuggestions } = useGenreSuggestions()
 
   return (
@@ -27,10 +33,10 @@ export const SelectGenreField = (props: SelectGenreFieldProps) => {
         placeholder={messages.genre}
         required
         maxLength={GENRE_MAX_LENGTH}
-        list={GENRE_DATALIST_ID}
-        {...props}
+        list={datalistId}
+        {...other}
       />
-      <datalist id={GENRE_DATALIST_ID}>
+      <datalist id={datalistId}>
         {suggestions.map(({ value }) => (
           <option key={value} value={value} />
         ))}
