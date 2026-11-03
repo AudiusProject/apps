@@ -57,10 +57,10 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     flexDirection: 'row',
     alignItems: 'center'
   },
-  // Inset the artwork and play button evenly from the pill's rounded ends.
+  // Keep the artwork and play button clear of the pill's rounded ends.
   floatingContainer: {
-    paddingLeft: spacing(1.5),
-    paddingRight: spacing(1.5)
+    paddingLeft: spacing(3),
+    paddingRight: spacing(3)
   },
   trackContainer: {
     paddingRight: spacing(1),
