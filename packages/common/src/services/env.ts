@@ -32,6 +32,7 @@ export type Env = {
   ETH_TOKEN_ADDRESS: string
   ETH_TOKEN_BRIDGE_ADDRESS: Nullable<string>
   EXPLORE_CONTENT_URL: string
+  FACEBOOK_APP_ID: string
   FCM_PUSH_PUBLIC_KEY: Nullable<string>
   GA_HOSTNAME: string
   GA_MEASUREMENT_ID: string

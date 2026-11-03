@@ -324,7 +324,7 @@ export const useShareToStory = ({
         stickerImage: stickerUri,
         attributionURL: env.AUDIUS_URL,
         social: Social.InstagramStories,
-        appId: env.INSTAGRAM_APP_ID
+        appId: env.FACEBOOK_APP_ID
       }
       await Share.shareSingle(shareOptions)
     },
