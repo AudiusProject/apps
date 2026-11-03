@@ -33,6 +33,8 @@ import {
   Flex,
   IconButton,
   IconCaretDown,
+  IconPause,
+  IconPlay,
   IconReceive,
   Paper,
   PlainButton,
@@ -46,6 +48,8 @@ import { useDownloadTrackStemsZip } from 'hooks/useDownloadTrackStemsZip'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
+import { useStemPreview } from '../hooks/useStemPreview'
+
 const messages = {
   heading: 'STEMS & DOWNLOADS',
   downloadHeading: 'DOWNLOAD',
@@ -55,7 +59,9 @@ const messages = {
   downloadAll: 'Download All',
   stemsCount: (n: number) => (n === 1 ? '1 Stem' : `${n} Stems`),
   fullTrack: 'Full Track',
-  downloadStem: 'Download stem'
+  downloadStem: 'Download stem',
+  previewStem: (title: string) => `Preview ${title}`,
+  stopPreview: (title: string) => `Stop preview of ${title}`
 }
 
 type ContestStemsCardProps = {
@@ -97,6 +103,10 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const downloadStemsZip = useDownloadTrackStemsZip(trackId)
+  const { playingTrackId, loadingTrackId, togglePreview } = useStemPreview()
+  // Previews resolve the same gated stream the download would, so only
+  // offer them once the listener has access to the downloads.
+  const canPreview = !shouldDisplayPremiumDownloadLocked
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
   // Auto-follow the contest when a signed-in user kicks off a stem
@@ -365,6 +375,12 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
               subtitle={row.subtitle}
               size={row.size}
               onDownload={() => handleDownloadOne(row.trackId)}
+              onTogglePreview={
+                canPreview ? () => togglePreview(row.trackId) : undefined
+              }
+              isPreviewing={
+                playingTrackId === row.trackId || loadingTrackId === row.trackId
+              }
             />
           ))}
         </Box>
@@ -401,6 +417,9 @@ type ContestStemDownloadRowProps = {
   subtitle: string
   size?: number
   onDownload: () => void
+  /** Omitted when the listener can't preview (e.g. locked downloads). */
+  onTogglePreview?: () => void
+  isPreviewing?: boolean
 }
 
 const ContestStemDownloadRow = ({
@@ -408,7 +427,9 @@ const ContestStemDownloadRow = ({
   title,
   subtitle,
   size,
-  onDownload
+  onDownload,
+  onTogglePreview,
+  isPreviewing = false
 }: ContestStemDownloadRowProps) => {
   return (
     <>
@@ -455,8 +476,8 @@ const ContestStemDownloadRow = ({
             ) : null}
           </Flex>
         </Flex>
-        {/* Right: size + download icon. `formatBytes` mirrors how
-            the track-page DownloadRow renders this column. */}
+        {/* Right: size + preview + download icons. `formatBytes`
+            mirrors how the track-page DownloadRow renders this column. */}
         <Flex alignItems='center' gap='l' css={{ flexShrink: 0 }}>
           {size ? (
             <Text
@@ -467,6 +488,20 @@ const ContestStemDownloadRow = ({
             >
               {formatBytes(size)}
             </Text>
+          ) : null}
+          {onTogglePreview ? (
+            <IconButton
+              icon={isPreviewing ? IconPause : IconPlay}
+              size='s'
+              color='default'
+              aria-label={
+                isPreviewing
+                  ? messages.stopPreview(title)
+                  : messages.previewStem(title)
+              }
+              aria-pressed={isPreviewing}
+              onClick={onTogglePreview}
+            />
           ) : null}
           <IconButton
             icon={IconReceive}
