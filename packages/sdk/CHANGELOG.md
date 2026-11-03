@@ -1,5 +1,30 @@
 # @audius/sdk
 
+## 18.0.0
+
+### Major Changes
+
+- 5a1a3a0: Load @solana/web3.js on first use instead of when the SDK is created. `createSdkWithServices` now creates a lazy `solanaClient` and the Solana relay, `PublicKeySchema` and the program client defaults import @solana/web3.js only when they need it.
+
+  - Adds `solanaClient.getConnection()`, which resolves to the RPC `Connection`. Use it instead of `solanaClient.connection`.
+  - The default `sdk.services.solanaClient.connection` throws until the client has loaded (after any `await solanaClient.<method>()` call, including `getConnection()`), and the default `solanaClient` is no longer `instanceof SolanaClient`. A `solanaClient` passed in through `services` is used as-is.
+  - The default `rewardManagerClient.lookupTable` is only available once that client has loaded, unless `rewardManagerLookupTable` is passed in its config.
+  - `PublicKeySchema` (and schemas built on it, such as `MintSchema`) now only supports async parsing (`parseAsync`/`safeParseAsync`). The SDK's own methods already parse asynchronously.
+  - `SolanaAddressSchema` validates the address as base58-encoded 32 bytes without @solana/web3.js. It accepts the same strings as before.
+
+### Minor Changes
+
+- aeba05f: Load the default ClaimableTokens, RewardManager and PaymentRouter clients and the EthereumService contracts on first use, so creating the SDK no longer loads @audius/spl, anchor or the @audius/eth ABIs up front. The public interfaces are unchanged, with two differences for the defaults: `sdk.services.ethereum.<contract>.abi` is only available after that contract has been used, and these services are no longer `instanceof` their client classes. Also marks the package as side-effect free so bundlers can drop unused exports.
+- 196ef51: Add `tracks.getTrackStemsDownloadUrl` for downloading a track's stems as one zip
+
+### Patch Changes
+
+- 2633593: Parse weekly rotation notifications so a response containing one does not fail to load the entire notification list.
+- 4042e05: Load `tus-js-client` and the Node `file-type` path only when an upload or file type check needs them, and fetch the storage node list on first use instead of when the SDK is created.
+- 1408b93: Use @noble/curves for secp256k1 and @noble/ciphers for AES-GCM instead of @noble/secp256k1 and micro-aes-gcm. Chat and email encryption, shared secrets and signatures are byte-for-byte the same.
+- 737c197: When a storage node reports an audio upload as done without its transcode result, poll the next node and fail after two minutes instead of waiting for the 20-minute stall timeout.
+- de6f379: Define the Ethereum mainnet chain in the SDK instead of importing it from `viem/chains`, so bundlers that don't tree-shake CommonJS (like Metro) no longer include viem's full chain list.
+
 ## 17.0.0
 
 ### Major Changes
