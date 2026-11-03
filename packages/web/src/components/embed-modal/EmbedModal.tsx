@@ -24,7 +24,7 @@ import EmbedCopy from './components/EmbedCopy'
 import EmbedFrame from './components/EmbedFrame'
 import { close } from './store/actions'
 import { getIsOpen, getId, getKind } from './store/selectors'
-import { Size } from './types'
+import { PlayerTheme, Size } from './types'
 
 const BASE_EMBED_URL = `${BASE_GA_URL}/embed`
 
@@ -40,10 +40,16 @@ const KindMap = {
   [PlayableType.ALBUM]: 'album'
 }
 
+// Only non-default themes are written to the url so existing embed codes
+// stay unchanged.
+const getThemeQuery = (theme: PlayerTheme) =>
+  theme === PlayerTheme.DARK ? '&theme=dark' : ''
+
 const constructUrl = (
   kind: PlayableType,
   id: ID,
   size: Size,
+  theme: PlayerTheme,
   permalink?: string
 ) => {
   // Use permalink format if available (needed for private tracks/collections)
@@ -71,11 +77,11 @@ const constructUrl = (
 
     return `${BASE_EMBED_URL}/${KindMap[kind]}/${permalinkPath}?flavor=${
       FlavorMap[size]
-    }`
+    }${getThemeQuery(theme)}`
   }
   return `${BASE_EMBED_URL}/${KindMap[kind]}/${Id.parse(id)}?flavor=${
     FlavorMap[size]
-  }`
+  }${getThemeQuery(theme)}`
 }
 
 const formatIFrame = (url: string, size: Size) => {
@@ -116,6 +122,7 @@ const messages = {
     [PlayableType.ALBUM]: 'Embed Album'
   },
   playerSize: 'Player Size',
+  playerColor: 'Player Color',
   embedCode: 'Embed Code'
 }
 
@@ -128,6 +135,7 @@ type EmbedModalProps = OwnProps &
 const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
   const { data: metadata } = useMetadata()
   const [size, setSize] = useState(Size.STANDARD)
+  const [theme, setTheme] = useState(PlayerTheme.ARTWORK)
   // Delay the rendering of the embed frame since it's expensive.
   // This shores up the modal open animation a bit.
   const [delayedOpen, setDelayedOpen] = useState(false)
@@ -162,20 +170,23 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
   const standardFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
     return formatIFrame(
-      constructUrl(kind, id, Size.STANDARD, permalink),
+      constructUrl(kind, id, Size.STANDARD, theme, permalink),
       Size.STANDARD
     )
-  }, [kind, id, metadata, permalink])
+  }, [kind, id, metadata, permalink, theme])
   const compactFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
     return formatIFrame(
-      constructUrl(kind, id, Size.COMPACT, permalink),
+      constructUrl(kind, id, Size.COMPACT, theme, permalink),
       Size.COMPACT
     )
-  }, [kind, id, metadata, permalink])
+  }, [kind, id, metadata, permalink, theme])
   const tinyFrameString = useMemo(() => {
     if (!kind || !id || !metadata) return ''
-    return formatIFrame(constructUrl(kind, id, Size.TINY, permalink), Size.TINY)
+    return formatIFrame(
+      constructUrl(kind, id, Size.TINY, PlayerTheme.ARTWORK, permalink),
+      Size.TINY
+    )
   }, [kind, id, metadata, permalink])
 
   const tabOptions = [
@@ -191,6 +202,11 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
       key: Size.TINY,
       text: Size.TINY
     }
+  ]
+
+  const themeOptions = [
+    { key: PlayerTheme.ARTWORK, text: PlayerTheme.ARTWORK },
+    { key: PlayerTheme.DARK, text: PlayerTheme.DARK }
   ]
 
   let frameString
@@ -258,6 +274,17 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
               />
             </div>
           )}
+          {/* The tiny player has no background, so color doesn't apply */}
+          {size !== Size.TINY ? (
+            <div className={styles.panel}>
+              <div className={styles.title}>{messages.playerColor}</div>
+              <SegmentedControl
+                options={themeOptions}
+                selected={theme}
+                onSelectOption={(theme) => setTheme(theme)}
+              />
+            </div>
+          ) : null}
           <div className={styles.panel}>
             <div className={styles.title}>{messages.embedCode}</div>
             <EmbedCopy frameString={frameString} onCopy={onCopy} />
