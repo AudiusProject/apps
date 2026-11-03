@@ -21,6 +21,10 @@ describe('formatSeconds', () => {
   test('should correctly format seconds more than an hour', () => {
     expect(formatSeconds(3661)).toBe('1:01:01')
   })
+
+  test('should not drop days for durations of a day or more', () => {
+    expect(formatSeconds(25 * 3600 + 5 * 60 + 7)).toBe('25:05:07')
+  })
 })
 
 describe('formatSecondsAsText', () => {
@@ -31,6 +35,10 @@ describe('formatSecondsAsText', () => {
   test('should correctly format seconds more than an hour', () => {
     expect(formatSecondsAsText(3661)).toBe('1h 1m')
   })
+
+  test('should not drop days for durations of a day or more', () => {
+    expect(formatSecondsAsText(25 * 3600 + 5 * 60 + 7)).toBe('25h 5m')
+  })
 })
 
 describe('formatLineupTileDuration', () => {
@@ -40,6 +48,12 @@ describe('formatLineupTileDuration', () => {
 
   test('should format correctly for long content more than an hour', () => {
     expect(formatLineupTileDuration(3661, true)).toBe('1hr 2m')
+  })
+
+  test('should not drop days for long content of a day or more', () => {
+    expect(formatLineupTileDuration(25 * 3600 + 5 * 60 + 7, true)).toBe(
+      '25hr 6m'
+    )
   })
 })
 
