@@ -6,20 +6,30 @@ import type {
   BottomTabBarProps as RNBottomTabBarProps
 } from '@react-navigation/bottom-tabs'
 import type { NavigationHelpers, ParamListBase } from '@react-navigation/native'
-import type { LayoutChangeEvent } from 'react-native'
-import { Animated, StyleSheet, View } from 'react-native'
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions
+} from 'react-native'
+import type { SharedValue } from 'react-native-reanimated'
 import Reanimated, {
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Flex } from '@audius/harmony-native'
+import { Flex, IconSearch } from '@audius/harmony-native'
 import { GlassSurface } from 'app/components/core/Screen/GlassSurface'
 import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
 import { FULL_DRAWER_HEIGHT } from 'app/components/drawer'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
+import {
+  useIsTabBarCollapsed,
+  useTabBarHiddenProgress
+} from 'app/screens/app-screen/TabBarAutoHideContext'
 import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { ExploreButton } from './bottom-tab-bar-buttons/ExploreButton'
@@ -34,6 +44,10 @@ import {
   FLOATING_BAR_SIDE_MARGIN
 } from './constants'
 import { useFloatingTabBar } from './useFloatingTabBar'
+
+const messages = {
+  search: 'Search'
+}
 
 export const bottomTabBarButtons = {
   feed: FeedButton,
@@ -107,6 +121,13 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
     [navigation]
   )
 
+  const handlePressSearch = useCallback(() => {
+    navigation.navigate('explore', {
+      screen: 'SearchExplore',
+      params: { autoFocus: true }
+    })
+  }, [navigation])
+
   const handleLongPress = useCallback(() => {
     navigation.emit({
       type: 'scrollToTop'
@@ -142,6 +163,7 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
           bottom={floating.pillBottom}
           activeIndex={activeIndex}
           tabCount={routes.length}
+          onPressSearch={handlePressSearch}
         >
           {buttons}
         </FloatingPill>
@@ -180,18 +202,30 @@ type FloatingPillProps = {
   bottom: number
   activeIndex: number
   tabCount: number
-  children: ReactNode
+  onPressSearch: () => void
+  children: ReactNode[]
 }
 
 /**
  * iOS 26 style tab bar: a capsule of liquid glass floating over the content,
  * with a highlight that springs to the active tab.
+ *
+ * Scrolling down collapses it rather than hiding it: the capsule shrinks to a
+ * circle holding the active tab, a search button appears on the right, and the
+ * play bar drops in between them. Tapping the active tab scrolls back to the
+ * top, which expands the bar again.
  */
 const FloatingPill = (props: FloatingPillProps) => {
-  const { bottom, activeIndex, tabCount, children } = props
+  const { bottom, activeIndex, tabCount, onPressSearch, children } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
-  const pillWidth = useSharedValue(0)
+  const colorScheme = isDarkMode ? 'dark' : 'light'
+  const { width: windowWidth } = useWindowDimensions()
+  const hidden = useTabBarHiddenProgress()
+  const isCollapsed = useIsTabBarCollapsed()
   const index = useSharedValue(activeIndex)
+
+  const fullWidth = windowWidth - FLOATING_BAR_SIDE_MARGIN * 2
+  const tabWidth = fullWidth / tabCount
 
   useEffect(() => {
     index.value = withSpring(activeIndex, {
@@ -201,48 +235,123 @@ const FloatingPill = (props: FloatingPillProps) => {
     })
   }, [activeIndex, index])
 
-  const handleLayout = useCallback(
-    (e: LayoutChangeEvent) => {
-      pillWidth.value = e.nativeEvent.layout.width
-    },
-    [pillWidth]
-  )
+  const pillStyle = useAnimatedStyle(() => ({
+    width: interpolate(hidden.value, [0, 1], [fullWidth, FLOATING_BAR_HEIGHT])
+  }))
 
-  const indicatorStyle = useAnimatedStyle(() => {
-    const tabWidth = pillWidth.value / tabCount
+  // Slide the row so the active tab ends up centered in the collapsed circle.
+  const rowStyle = useAnimatedStyle(() => {
+    const activeCenter = (index.value + 0.5) * tabWidth
     return {
-      opacity: pillWidth.value > 0 ? 1 : 0,
-      width: tabWidth - FLOATING_BAR_INDICATOR_INSET * 2,
       transform: [
         {
-          translateX: index.value * tabWidth + FLOATING_BAR_INDICATOR_INSET
+          translateX: (FLOATING_BAR_HEIGHT / 2 - activeCenter) * hidden.value
         }
       ]
     }
   })
 
+  const indicatorStyle = useAnimatedStyle(() => ({
+    opacity: 1 - hidden.value,
+    transform: [
+      {
+        translateX: index.value * tabWidth + FLOATING_BAR_INDICATOR_INSET
+      }
+    ]
+  }))
+
+  // Grows from a point rather than fading in, since the system glass stops
+  // rendering under a parent that starts at zero opacity. Waits for the
+  // capsule to pull back so the two never overlap.
+  const searchStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: interpolate(hidden.value, [0.4, 1], [0.01, 1], 'clamp') }
+    ]
+  }))
+
   return (
-    <LiquidGlassView
-      effect='regular'
-      interactive
-      colorScheme={isDarkMode ? 'dark' : 'light'}
-      onLayout={handleLayout}
-      style={[styles.pill, { bottom }]}
-    >
+    <>
+      <Reanimated.View style={[styles.pill, { bottom }, pillStyle]}>
+        <LiquidGlassView
+          effect='regular'
+          interactive
+          colorScheme={colorScheme}
+          style={styles.pillGlass}
+        >
+          <Reanimated.View
+            pointerEvents='none'
+            style={[
+              styles.indicator,
+              {
+                width: tabWidth - FLOATING_BAR_INDICATOR_INSET * 2,
+                backgroundColor: isDarkMode
+                  ? 'rgba(255, 255, 255, 0.12)'
+                  : 'rgba(0, 0, 0, 0.06)'
+              },
+              indicatorStyle
+            ]}
+          />
+          <Reanimated.View
+            style={[styles.pillRow, { width: fullWidth }, rowStyle]}
+          >
+            {children.map((child, i) => (
+              <CollapsingTab
+                key={i}
+                hidden={hidden}
+                isActive={i === activeIndex}
+                isCollapsed={isCollapsed}
+              >
+                {child}
+              </CollapsingTab>
+            ))}
+          </Reanimated.View>
+        </LiquidGlassView>
+      </Reanimated.View>
       <Reanimated.View
-        pointerEvents='none'
-        style={[
-          styles.indicator,
-          {
-            backgroundColor: isDarkMode
-              ? 'rgba(255, 255, 255, 0.12)'
-              : 'rgba(0, 0, 0, 0.06)'
-          },
-          indicatorStyle
-        ]}
-      />
-      <View style={styles.pillRow}>{children}</View>
-    </LiquidGlassView>
+        pointerEvents={isCollapsed ? 'auto' : 'none'}
+        style={[styles.searchButton, { bottom }, searchStyle]}
+      >
+        <LiquidGlassView
+          effect='regular'
+          interactive
+          colorScheme={colorScheme}
+          style={styles.pillGlass}
+        >
+          <Pressable
+            onPress={onPressSearch}
+            accessibilityRole='button'
+            accessibilityLabel={messages.search}
+            style={styles.searchPressable}
+          >
+            <IconSearch size='l' color='default' />
+          </Pressable>
+        </LiquidGlassView>
+      </Reanimated.View>
+    </>
+  )
+}
+
+type CollapsingTabProps = {
+  hidden: SharedValue<number>
+  isActive: boolean
+  isCollapsed: boolean
+  children: ReactNode
+}
+
+/** Fades the inactive tabs out ahead of the capsule closing over them. */
+const CollapsingTab = (props: CollapsingTabProps) => {
+  const { hidden, isActive, isCollapsed, children } = props
+  const style = useAnimatedStyle(() => ({
+    opacity: isActive ? 1 : interpolate(hidden.value, [0, 0.6], [1, 0], 'clamp')
+  }))
+
+  return (
+    <Reanimated.View
+      pointerEvents={isCollapsed && !isActive ? 'none' : 'box-none'}
+      style={[styles.tab, style]}
+    >
+      {children}
+    </Reanimated.View>
   )
 }
 
@@ -254,13 +363,33 @@ const styles = StyleSheet.create({
   pill: {
     position: 'absolute',
     left: FLOATING_BAR_SIDE_MARGIN,
-    right: FLOATING_BAR_SIDE_MARGIN,
-    height: FLOATING_BAR_HEIGHT,
-    borderRadius: FLOATING_BAR_HEIGHT / 2
+    height: FLOATING_BAR_HEIGHT
+  },
+  pillGlass: {
+    flex: 1,
+    borderRadius: FLOATING_BAR_HEIGHT / 2,
+    overflow: 'hidden'
   },
   pillRow: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
     flexDirection: 'row'
+  },
+  tab: {
+    flex: 1
+  },
+  searchButton: {
+    position: 'absolute',
+    right: FLOATING_BAR_SIDE_MARGIN,
+    width: FLOATING_BAR_HEIGHT,
+    height: FLOATING_BAR_HEIGHT
+  },
+  searchPressable: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   indicator: {
     position: 'absolute',

@@ -9,13 +9,29 @@ import type { Track, User } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { TouchableOpacity, Animated, View } from 'react-native'
+import Reanimated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 import { useSelector } from 'react-redux'
 
-import { IconButton, IconIndent, IconLock } from '@audius/harmony-native'
-import { FLOATING_BAR_SIDE_MARGIN } from 'app/components/bottom-tab-bar/constants'
+import {
+  IconButton,
+  IconIndent,
+  IconLock,
+  useTheme
+} from '@audius/harmony-native'
+import {
+  COLLAPSED_PLAY_BAR_INSET,
+  FLOATING_BAR_SIDE_MARGIN
+} from 'app/components/bottom-tab-bar/constants'
 import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
 import Text from 'app/components/text'
 import { useDrawer } from 'app/hooks/useDrawer'
+import {
+  useIsTabBarCollapsed,
+  useTabBarHiddenProgress
+} from 'app/screens/app-screen/TabBarAutoHideContext'
 import { makeStyles } from 'app/styles'
 import { isDarkTheme, useColor, useThemeVariant } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
@@ -27,6 +43,10 @@ import { PlayButton } from './PlayButton'
 import { TrackingBar } from './TrackingBar'
 import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
 const { getPreviewing } = playbackSelectors
+
+// Queue button (24px icon plus its padding). Collapses to nothing while the
+// play bar sits between the collapsed tab bar's buttons.
+const QUEUE_BUTTON_WIDTH = 32
 
 const messages = {
   preview: 'PREVIEW',
@@ -40,10 +60,12 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     alignItems: 'center',
     zIndex: zIndex.PLAY_BAR
   },
+  floatingPillFrame: {
+    flex: 1,
+    alignSelf: 'stretch'
+  },
   floatingPill: {
     flex: 1,
-    alignSelf: 'stretch',
-    marginHorizontal: FLOATING_BAR_SIDE_MARGIN,
     borderRadius: PLAY_BAR_HEIGHT / 2,
     overflow: 'hidden'
   },
@@ -76,7 +98,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   queueContainer: {
     flexShrink: 0,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    overflow: 'hidden'
   },
   playContainer: {
     flexShrink: 1,
@@ -152,6 +175,7 @@ export const PlayBar = (props: PlayBarProps) => {
   } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
   const styles = useStyles()
+  const { spacing } = useTheme()
   const neutral = useColor('neutral')
 
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -173,6 +197,24 @@ export const PlayBar = (props: PlayBarProps) => {
     }
     openQueue()
   }, [showQueueNewFeatureBadge, dismissQueueNewFeatureBadge, openQueue])
+
+  // Narrows to fit between the collapsed tab bar's buttons, dropping the queue
+  // button to make room for the title.
+  const hidden = useTabBarHiddenProgress()
+  const isCollapsed = useIsTabBarCollapsed()
+  const pillFrameStyle = useAnimatedStyle(() => ({
+    marginHorizontal: interpolate(
+      hidden.value,
+      [0, 1],
+      [FLOATING_BAR_SIDE_MARGIN, COLLAPSED_PLAY_BAR_INSET]
+    )
+  }))
+  const queueStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(hidden.value, [0, 0.5], [1, 0], 'clamp'),
+    width: QUEUE_BUTTON_WIDTH * (1 - hidden.value),
+    // Fold the row gap in with the button so no extra space is left behind.
+    marginLeft: -spacing.s * hidden.value
+  }))
 
   const rootOpacityAnimation = translationAnim.interpolate({
     // Interpolate the animation such that the play bar fades out
@@ -236,7 +278,10 @@ export const PlayBar = (props: PlayBarProps) => {
             </View>
           ) : null}
         </TouchableOpacity>
-        <View style={styles.queueContainer}>
+        <Reanimated.View
+          pointerEvents={floating && isCollapsed ? 'none' : 'auto'}
+          style={[styles.queueContainer, floating ? queueStyle : null]}
+        >
           <IconButton
             icon={IconIndent}
             onPress={handleOpenQueue}
@@ -244,7 +289,7 @@ export const PlayBar = (props: PlayBarProps) => {
             color={showQueueNewFeatureBadge ? 'active' : 'default'}
             aria-label={messages.queueLabel}
           />
-        </View>
+        </Reanimated.View>
         <View style={styles.playContainer}>
           <PlayButton wrapperStyle={styles.playIcon} />
         </View>
@@ -255,13 +300,15 @@ export const PlayBar = (props: PlayBarProps) => {
   return (
     <Animated.View style={[styles.root, { opacity: rootOpacityAnimation }]}>
       {floating ? (
-        <LiquidGlassView
-          effect='regular'
-          colorScheme={isDarkMode ? 'dark' : 'light'}
-          style={styles.floatingPill}
-        >
-          {content}
-        </LiquidGlassView>
+        <Reanimated.View style={[styles.floatingPillFrame, pillFrameStyle]}>
+          <LiquidGlassView
+            effect='regular'
+            colorScheme={isDarkMode ? 'dark' : 'light'}
+            style={styles.floatingPill}
+          >
+            {content}
+          </LiquidGlassView>
+        </Reanimated.View>
       ) : (
         content
       )}

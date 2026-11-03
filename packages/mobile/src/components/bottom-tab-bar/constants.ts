@@ -15,3 +15,10 @@ export const FLOATING_BAR_SIDE_MARGIN = 16
 export const FLOATING_BAR_TOP_GAP = 6
 // Space between the edge of the pill and the highlight behind the active tab.
 export const FLOATING_BAR_INDICATOR_INSET = 4
+// Space between the pieces of the collapsed bar: the active tab, the play bar
+// and search.
+export const FLOATING_BAR_ITEM_GAP = 8
+// Inset of the play bar from each screen edge while the bar is collapsed, so it
+// sits between the active-tab and search buttons.
+export const COLLAPSED_PLAY_BAR_INSET =
+  FLOATING_BAR_SIDE_MARGIN + FLOATING_BAR_HEIGHT + FLOATING_BAR_ITEM_GAP
