@@ -12,6 +12,15 @@ on:
       - 'packages/sdk/**'
       - 'package-lock.json'
       - '.github/workflows/mobile.yml'
+  pull_request:
+    paths:
+      - 'packages/mobile/**'
+      - 'packages/common/**'
+      - 'packages/harmony/**'
+      - 'packages/libs/**'
+      - 'packages/sdk/**'
+      - 'package-lock.json'
+      - '.github/workflows/mobile.yml'
   workflow_dispatch:
     inputs:
       ota_channel:

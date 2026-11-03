@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 import { isEmpty } from 'lodash'
 
 import { Button, Flex, IconUser } from '@audius/harmony-native'
-import { FixedFooter } from 'app/components/core/FixedFooter'
+import { ScreenFooterLayout } from 'app/components/core/ScreenFooterLayout'
 
 import type { ScreenProps } from '../../components/core/Screen'
 import { ScreenContent, Screen } from '../../components/core/Screen'
@@ -37,29 +37,31 @@ export const FormScreen = (props: FormScreenProps) => {
       icon={IconUser}
       {...other}
     >
-      <ScreenContent>{children}</ScreenContent>
-
-      <FixedFooter avoidKeyboard>
-        <Flex direction='row' gap='s' w='100%'>
-          <Button
-            variant='secondary'
-            size='default'
-            onPress={handleCancel}
-            style={{ flex: 1 }}
-          >
-            {messages.cancel}
-          </Button>
-          <Button
-            variant='primary'
-            size='default'
-            onPress={onSubmit}
-            disabled={!isEmpty(errors)}
-            style={{ flex: 1 }}
-          >
-            {messages.save}
-          </Button>
-        </Flex>
-      </FixedFooter>
+      <ScreenFooterLayout
+        footer={
+          <Flex direction='row' gap='s' w='100%'>
+            <Button
+              variant='secondary'
+              size='default'
+              onPress={handleCancel}
+              style={{ flex: 1 }}
+            >
+              {messages.cancel}
+            </Button>
+            <Button
+              variant='primary'
+              size='default'
+              onPress={onSubmit}
+              disabled={!isEmpty(errors)}
+              style={{ flex: 1 }}
+            >
+              {messages.save}
+            </Button>
+          </Flex>
+        }
+      >
+        <ScreenContent>{children}</ScreenContent>
+      </ScreenFooterLayout>
     </Screen>
   )
 }

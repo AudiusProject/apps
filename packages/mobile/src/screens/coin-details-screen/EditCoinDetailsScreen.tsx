@@ -33,17 +33,12 @@ import {
   PlainButton,
   Paper,
   Divider,
-  spacing,
   Button,
-  LoadingSpinner
+  LoadingSpinner,
+  spacing
 } from '@audius/harmony-native'
-import {
-  TokenIcon,
-  Screen,
-  ScreenContent,
-  FixedFooter,
-  FixedFooterContent
-} from 'app/components/core'
+import { TokenIcon, Screen, ScreenContent } from 'app/components/core'
+import { ScreenFooterLayout } from 'app/components/core/ScreenFooterLayout'
 import { TextAreaField } from 'app/components/fields/TextAreaField'
 import { TextField } from 'app/components/fields/TextField'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
@@ -384,7 +379,13 @@ export const EditCoinDetailsScreen = () => {
       {({ handleSubmit: formikSubmit }) => (
         <Screen title={coin?.name ?? `$${coin?.ticker}`} topbarRight={null}>
           <ScreenContent>
-            <FixedFooterContent>
+            <ScreenFooterLayout
+              footer={
+                <Button onPress={() => formikSubmit()} fullWidth>
+                  {coinDetailsMessages.editCoinDetails.saveChanges}
+                </Button>
+              }
+            >
               <KeyboardAwareScrollView keyboardShouldPersistTaps='handled'>
                 <Paper
                   borderRadius='l'
@@ -392,7 +393,7 @@ export const EditCoinDetailsScreen = () => {
                   border='default'
                   mh='s'
                   mt='2xl'
-                  mb='5xl'
+                  mb='l'
                 >
                   {/* Banner Image Section */}
                   <BannerImageSection
@@ -442,12 +443,7 @@ export const EditCoinDetailsScreen = () => {
                   </Flex>
                 </Paper>
               </KeyboardAwareScrollView>
-            </FixedFooterContent>
-            <FixedFooter keyboardShowingOffset={spacing.unit24} avoidKeyboard>
-              <Button onPress={() => formikSubmit()} fullWidth>
-                {coinDetailsMessages.editCoinDetails.saveChanges}
-              </Button>
-            </FixedFooter>
+            </ScreenFooterLayout>
           </ScreenContent>
         </Screen>
       )}

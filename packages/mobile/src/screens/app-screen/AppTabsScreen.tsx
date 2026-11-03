@@ -2,8 +2,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import type { NavigatorScreenParams } from '@react-navigation/native'
 
-import { BottomBarInsetContext } from 'app/components/core/BottomBarInsetContext'
-import { useBottomChinHeight } from 'app/components/core/BottomChin'
+import { BottomBarInsetProvider } from 'app/components/core/BottomBarInsetProvider'
 
 import { usePhantomConnect } from '../external-wallets/usePhantomConnect'
 
@@ -37,12 +36,11 @@ const tabBar = (props: BottomTabBarProps) => <AppTabBar {...props} />
 export const AppTabsScreen = () => {
   usePhantomConnect((route) => route?.params?.params?.params ?? ({} as any))
   usePrefetchNotifications()
-  const bottomBarInset = useBottomChinHeight()
 
   return (
     // Sits above the navigator so the tab bar, which renders as a sibling of
     // the screens, can still animate off the focused tab's scrolling.
-    <BottomBarInsetContext.Provider value={bottomBarInset}>
+    <BottomBarInsetProvider>
       <TabBarAutoHideProvider>
         <Tab.Navigator
           tabBar={tabBar}
@@ -56,6 +54,6 @@ export const AppTabsScreen = () => {
           <Tab.Screen name='notifications' component={NotificationsTabScreen} />
         </Tab.Navigator>
       </TabBarAutoHideProvider>
-    </BottomBarInsetContext.Provider>
+    </BottomBarInsetProvider>
   )
 }
