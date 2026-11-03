@@ -32,6 +32,7 @@ export const env: Env = {
   ETH_TOKEN_BRIDGE_ADDRESS: null,
   EXPLORE_CONTENT_URL:
     'https://download.audius.co/static-resources/explore-content.json',
+  FACEBOOK_APP_ID: '2255617904583696',
   FCM_PUSH_PUBLIC_KEY: null,
   GA_HOSTNAME: 'audius.co',
   GA_MEASUREMENT_ID: 'G-XXXXX',
