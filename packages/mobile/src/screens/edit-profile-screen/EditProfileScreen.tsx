@@ -8,6 +8,7 @@ import { profilePageActions } from '@audius/common/store'
 import type { FormikProps } from 'formik'
 import { Formik } from 'formik'
 import { pick } from 'lodash'
+import { ScrollView } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import {
@@ -17,7 +18,6 @@ import {
   IconTikTok,
   IconX
 } from '@audius/harmony-native'
-import { ScrollView } from 'app/components/core'
 import { TextField } from 'app/components/fields'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { useProfilePicture } from 'app/components/image/UserImage'
@@ -38,7 +38,7 @@ const useStyles = makeStyles(({ spacing }) => ({
   scrollContent: {
     paddingTop: spacing(6),
     paddingHorizontal: 16, // 16px horizontal margin
-    paddingBottom: spacing(24) // Extra padding for bottom action bar
+    paddingBottom: spacing(6)
   }
 }))
 
@@ -57,7 +57,10 @@ const EditProfileForm = (props: EditProfileFormProps) => {
 
   return (
     <FormScreen onReset={handleReset} onSubmit={handleSubmit} errors={errors}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps='handled'
+      >
         <Flex direction='column' gap='l' w='100%'>
           {/* Profile Header with Cover Photo, Avatar, and Display Name */}
           <ProfileHeader />

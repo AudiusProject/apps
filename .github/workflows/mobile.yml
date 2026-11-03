@@ -351,7 +351,7 @@ jobs:
   mobile-ota-release-production:
     name: Mobile OTA Release (Production, ${{ matrix.platform }})
     runs-on: ubuntu-latest
-    needs: [mobile-install, mobile-version-check]
+    needs: [mobile-install, mobile-version-check, mobile-verify]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.ota_channel == 'production'
     environment:
       name: mobile-production-ota

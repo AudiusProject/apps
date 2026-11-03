@@ -2,11 +2,13 @@ import type { ReactNode } from 'react'
 import React, { useMemo } from 'react'
 
 import { css } from '@emotion/native'
-import { Dimensions, View } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex, Paper, spacing } from '@audius/harmony-native'
-import { KeyboardAvoidingView } from 'app/components/core'
+
+import { useBottomBarInset } from './BottomBarInsetContext'
+import { KeyboardAvoidingView } from './KeyboardAvoidingView'
 
 type FixedFooterProps = {
   children: ReactNode
@@ -22,11 +24,11 @@ export const FIXED_FOOTER_HEIGHT = 48 + spacing.l * 2 + spacing.xl
 
 /**
  * A fixed footer component that sticks to the bottom of the screen.
- * Handles safe area insets and optional keyboard avoidance.
+ * Clears floating app navigation, safe area insets and optionally the keyboard.
  * Based on the PageFooter pattern from sign-on screens.
  *
- * When using this component, wrap your main content in a Flex with flex={1}
- * and add paddingBottom: FIXED_FOOTER_HEIGHT to prevent content from being hidden.
+ * Use FixedFooterContent around the main content to reserve space for the
+ * footer and any floating app navigation.
  */
 export const FixedFooter = ({
   children,
@@ -34,6 +36,7 @@ export const FixedFooter = ({
   keyboardShowingOffset = spacing.unit5
 }: FixedFooterProps) => {
   const insets = useSafeAreaInsets()
+  const bottomBarInset = useBottomBarInset()
 
   const KeyboardAvoidContainer = useMemo(() => {
     return avoidKeyboard ? KeyboardAvoidingView : View
@@ -42,14 +45,16 @@ export const FixedFooter = ({
   return (
     <Flex
       gap='xl'
-      w={Dimensions.get('window').width}
+      w='100%'
       style={css({
         position: 'absolute',
-        bottom: insets.bottom === 0 ? spacing.l : 0,
+        bottom: bottomBarInset || (insets.bottom === 0 ? spacing.l : 0),
         left: 0
       })}
     >
-      <KeyboardAvoidContainer keyboardShowingOffset={keyboardShowingOffset}>
+      <KeyboardAvoidContainer
+        keyboardShowingOffset={keyboardShowingOffset + bottomBarInset}
+      >
         <Paper
           p='l'
           justifyContent='center'
@@ -59,7 +64,7 @@ export const FixedFooter = ({
           shadow='midInverted'
           style={css({
             borderRadius: 0,
-            paddingBottom: insets.bottom
+            paddingBottom: bottomBarInset ? spacing.l : insets.bottom
           })}
         >
           {children}
@@ -76,12 +81,13 @@ export const FixedFooterContent = ({
   children,
   ...props
 }: { children: ReactNode } & React.ComponentProps<typeof Flex>) => {
+  const bottomBarInset = useBottomBarInset()
   return (
     <Flex
       direction='column'
       flex={1}
       style={{
-        paddingBottom: FIXED_FOOTER_HEIGHT
+        paddingBottom: FIXED_FOOTER_HEIGHT + bottomBarInset
       }}
       {...props}
     >
