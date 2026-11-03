@@ -35,6 +35,8 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import {
   BOTTOM_BAR_HEIGHT,
+  FLOATING_BAR_HEIGHT,
+  FLOATING_BAR_TOP_GAP,
   useFloatingTabBar
 } from 'app/components/bottom-tab-bar'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
@@ -204,24 +206,28 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     isOpen && isDrawerFullyOpen ? staticTopInset.current : insets.top
   const effectiveBottomInset = isOpen && isDrawerFullyOpen ? 0 : insets.bottom
 
-  // Slide the collapsed drawer out with the tab bar. Translates the whole
-  // drawer because the play bar's background belongs to the drawer root.
-  // Pinned to 0 while open, since the open drawer is the full-screen player.
+  const floating = useFloatingTabBar()
+
+  // When the tab bar hides, the collapsed play bar drops into its place rather
+  // than leaving with it, so what's playing and play/pause stay on screen.
+  // Floating, that's down to where the tab pill sat; classic, down onto the
+  // safe area. Translates the whole drawer because the play bar's background
+  // belongs to the drawer root. Pinned to 0 while open, since the open drawer
+  // is the full-screen player.
+  const playBarDrop = floating
+    ? FLOATING_BAR_HEIGHT + FLOATING_BAR_TOP_GAP
+    : BOTTOM_BAR_HEIGHT
   const chromeHideStyle = useAnimatedStyle(
     () => ({
       transform: [
         {
-          translateY: isOpen
-            ? 0
-            : (PLAY_BAR_HEIGHT + BOTTOM_BAR_HEIGHT + insets.bottom) *
-              tabBarHidden.value
+          translateY: isOpen ? 0 : playBarDrop * tabBarHidden.value
         }
       ]
     }),
-    [isOpen, insets.bottom]
+    [isOpen, playBarDrop]
   )
 
-  const floating = useFloatingTabBar()
   // Collapsed, with the play bar resting on the tab bar.
   const collapsedPosition =
     FULL_DRAWER_HEIGHT - insets.bottom - BOTTOM_BAR_HEIGHT - PLAY_BAR_HEIGHT

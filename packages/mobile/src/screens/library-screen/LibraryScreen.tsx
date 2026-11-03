@@ -49,7 +49,7 @@ export const LibraryScreen = () => {
   return (
     <Screen
       header={() => (
-        <MobileRootHeader title={messages.header} showDivider={false}>
+        <MobileRootHeader title={messages.header}>
           <LibraryDownloadSection />
         </MobileRootHeader>
       )}

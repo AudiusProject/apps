@@ -211,7 +211,7 @@ export const FeedScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={messages.header} showDivider={false}>
+      <MobileRootHeader title={messages.header}>
         {isForYou ? null : <FeedFilterButton />}
       </MobileRootHeader>
     ),

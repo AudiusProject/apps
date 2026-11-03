@@ -1,11 +1,10 @@
 import { useCallback } from 'react'
 
-import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
 import {
   useGatedContentAccess,
   useQueueNewFeatureBadge
 } from '@audius/common/hooks'
-import { FavoriteSource, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import type { Track, User } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
@@ -15,7 +14,6 @@ import { useSelector } from 'react-redux'
 import { IconButton, IconIndent, IconLock } from '@audius/harmony-native'
 import { FLOATING_BAR_SIDE_MARGIN } from 'app/components/bottom-tab-bar/constants'
 import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
-import { FavoriteButton } from 'app/components/favorite-button'
 import Text from 'app/components/text'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
@@ -49,20 +47,20 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     borderRadius: PLAY_BAR_HEIGHT / 2,
     overflow: 'hidden'
   },
-  // Group: Favorite Button, Track Content, Play Button
+  // Group: Track Content, Queue Button, Play Button
   container: {
     height: '100%',
     width: '100%',
     paddingLeft: spacing(3),
-    paddingRight: spacing(3),
-    gap: spacing(3),
+    paddingRight: spacing(2),
+    gap: spacing(2),
     flexDirection: 'row',
     alignItems: 'center'
   },
-  favoriteContainer: {
-    flexShrink: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+  // Inset the artwork and play button evenly from the pill's rounded ends.
+  floatingContainer: {
+    paddingLeft: spacing(1.5),
+    paddingRight: spacing(1.5)
   },
   trackContainer: {
     paddingRight: spacing(1),
@@ -86,47 +84,34 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     justifyContent: 'center'
   },
   playIcon: {
-    width: spacing(8),
-    height: spacing(8)
-  },
-  icon: {
-    width: 28,
-    height: 28
+    width: spacing(10),
+    height: spacing(10)
   },
   // Group: Artwork, Text
   artworkContainer: {
-    borderRadius: 2,
+    borderRadius: 8,
     overflow: 'hidden'
   },
   trackTextContainer: {
     flexGrow: 1,
     flexShrink: 1,
-    width: '100%',
-    alignItems: 'center',
-    flexDirection: 'row'
+    justifyContent: 'center'
   },
-  // Group: Title, separator, artist
+  // Group: Title over artist
   title: {
-    flexShrink: 1,
     color: palette.neutral,
-    fontSize: spacing(3)
-  },
-  separator: {
-    color: palette.neutral,
-    marginLeft: spacing(1),
-    marginRight: spacing(1),
-    fontSize: spacing(4)
+    fontSize: 14,
+    lineHeight: 18
   },
   artist: {
-    flexGrow: 1,
-    flexShrink: 1,
-    color: palette.neutral,
-    fontSize: spacing(3)
+    color: palette.neutralLight2,
+    fontSize: 12,
+    lineHeight: 16
   },
   // Artwork interior
   artwork: {
-    height: 26,
-    width: 26,
+    height: 40,
+    width: 40,
     backgroundColor: palette.neutralLight7
   },
   lockOverlay: {
@@ -167,7 +152,6 @@ export const PlayBar = (props: PlayBarProps) => {
   } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
   const styles = useStyles()
-  const { data: accountUserId } = useCurrentUserId()
   const neutral = useColor('neutral')
 
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -177,11 +161,6 @@ export const PlayBar = (props: PlayBarProps) => {
     (track?.stream_conditions &&
       'usdc_purchase' in track.stream_conditions &&
       !hasStreamAccess)
-
-  const onPressFavoriteButton = useToggleFavoriteTrack({
-    trackId: track?.track_id,
-    source: FavoriteSource.PLAYBAR
-  })
 
   const { onOpen: openQueue } = useDrawer('Queue')
   const {
@@ -194,17 +173,6 @@ export const PlayBar = (props: PlayBarProps) => {
     }
     openQueue()
   }, [showQueueNewFeatureBadge, dismissQueueNewFeatureBadge, openQueue])
-
-  const renderFavoriteButton = () => {
-    return (
-      <FavoriteButton
-        isDisabled={accountUserId === track?.owner_id || track?.is_unlisted}
-        onPress={onPressFavoriteButton}
-        isActive={track?.has_current_user_saved ?? false}
-        wrapperStyle={styles.icon}
-      />
-    )
-  }
 
   const rootOpacityAnimation = translationAnim.interpolate({
     // Interpolate the animation such that the play bar fades out
@@ -225,10 +193,9 @@ export const PlayBar = (props: PlayBarProps) => {
         mediaKey={mediaKey}
         translateYAnimation={translationAnim}
       />
-      <View style={styles.container}>
-        {shouldShowPreviewLock ? null : (
-          <View style={styles.favoriteContainer}>{renderFavoriteButton()}</View>
-        )}
+      <View
+        style={[styles.container, floating ? styles.floatingContainer : null]}
+      >
         <TouchableOpacity
           activeOpacity={1}
           style={styles.trackContainer}
@@ -245,19 +212,13 @@ export const PlayBar = (props: PlayBarProps) => {
                 trackId={track?.track_id}
                 style={styles.artwork}
                 size={SquareSizes.SIZE_150_BY_150}
+                borderRadius='m'
               />
             </View>
           ) : null}
           <View style={styles.trackTextContainer}>
             <Text numberOfLines={1} weight='bold' style={styles.title}>
               {track?.title ?? ''}
-            </Text>
-            <Text
-              weight='bold'
-              style={styles.separator}
-              accessibilityElementsHidden
-            >
-              {track ? '•' : ''}
             </Text>
             <Text numberOfLines={1} weight='medium' style={styles.artist}>
               {user?.name ?? ''}

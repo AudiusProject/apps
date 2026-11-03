@@ -5,44 +5,47 @@ import type { LayoutChangeEvent } from 'react-native'
 import { StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 
-import { GlassSurface } from 'app/components/core/Screen/GlassSurface'
 import { zIndex } from 'app/utils/zIndex'
 
 import {
   useChromeHiddenProgress,
   useGlassHeaderInset,
-  useGlassScrollY,
   useRootHeaderHeight,
-  useSetSubHeaderHeight
+  useSetSubHeaderHeight,
+  useSubHeaderHeight
 } from './GlassChromeContext'
+import {
+  EDGE_FADE_TAIL,
+  GlassEdgeFade,
+  SUB_HEADER_FADE_OPACITY
+} from './GlassEdgeFade'
 
 type FloatingSubHeaderProps = {
   children: ReactNode
-  /** Draw a hairline separator along the bottom edge of the glass stack. */
-  showBorder?: boolean
 }
 
 /**
  * Pins a screen's persistent top row (feed tabs, trending pills) beneath the
- * floating root header as a second glass layer, so content scrolls behind one
- * continuous frosted surface.
+ * floating root header. The pills float on their own over a fade that picks
+ * up where the header's leaves off, so there's no slab behind them.
  *
  * Owned by the screen rather than passed into `MobileRootHeader`, whose
  * memoized render prop must not rebuild on tab-state changes (that remounts
  * `AccountPictureHeader` and re-fires the profile-picture fetch).
  */
 export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
-  const { children, showBorder = true } = props
+  const { children } = props
   const headerHeight = useRootHeaderHeight()
+  const subHeaderHeight = useSubHeaderHeight()
   const setSubHeaderHeight = useSetSubHeaderHeight()
-  const scrollY = useGlassScrollY()
   const hidden = useChromeHiddenProgress()
   const glassHeaderInset = useGlassHeaderInset()
 
   // Travels by the full stack height, not just its own, so it tucks up behind
   // the header rather than colliding with it on the way out.
   const hideStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -glassHeaderInset * hidden.value }]
+    transform: [{ translateY: -glassHeaderInset * hidden.value }],
+    opacity: 1 - hidden.value
   }))
 
   const handleLayout = useCallback(
@@ -53,14 +56,18 @@ export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
   )
 
   return (
-    <Animated.View style={[styles.root, { top: headerHeight }, hideStyle]}>
-      <GlassSurface
-        showBorder={showBorder}
-        scrollY={scrollY}
-        onLayout={handleLayout}
-      >
-        <View>{children}</View>
-      </GlassSurface>
+    <Animated.View
+      pointerEvents='box-none'
+      style={[styles.root, { top: headerHeight }, hideStyle]}
+    >
+      <GlassEdgeFade
+        height={subHeaderHeight + EDGE_FADE_TAIL}
+        fromOpacity={SUB_HEADER_FADE_OPACITY}
+        toOpacity={0}
+      />
+      <View pointerEvents='box-none' onLayout={handleLayout}>
+        {children}
+      </View>
     </Animated.View>
   )
 }

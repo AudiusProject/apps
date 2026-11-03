@@ -32,7 +32,7 @@ type GlassChromeContextValue = {
   directionAnchorY: SharedValue<number>
 }
 
-/** Avatar row (40) plus `spacing(3)` padding top and bottom. */
+/** Header capsule (52) plus its top and bottom margins. */
 const ESTIMATED_HEADER_ROW_HEIGHT = 64
 
 /**
@@ -156,6 +156,9 @@ const useGlassChrome = () => {
 
 /** Height of the floating root header alone. */
 export const useRootHeaderHeight = () => useGlassChrome().headerHeight
+
+/** Height of the floating sub-header row alone, 0 when there is none. */
+export const useSubHeaderHeight = () => useGlassChrome().subHeaderHeight
 
 /**
  * Total height of the floating glass stack (header + sub-header). This is the
