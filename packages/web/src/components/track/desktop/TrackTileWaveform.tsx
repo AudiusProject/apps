@@ -1,4 +1,11 @@
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import {
   useTimestampedComments,
@@ -36,8 +43,9 @@ const MIN_BAR_HEIGHT = 2
 const AVATAR_SIZE = 24
 const MAX_AVATARS = 24
 const POLL_MS = 250
-// Matches the comments context: play first, seek once the engine has loaded.
-const SEEK_AFTER_PLAY_MS = 100
+// A seek requested before playback starts waits this long for the load.
+const PENDING_SEEK_TTL_MS = 15000
+const PENDING_SEEK_POLL_MS = 50
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value))
@@ -221,6 +229,38 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
   const { ref: inViewRef, inView } = useDeferredElement()
   const progress = useTrackProgress(isActive, isPlaying, duration)
 
+  // The player swaps in a new audio element once the stream URL resolves, and
+  // marks this track active before that, so a seek sent early lands on the old
+  // element. Hold it until this track is active on a new element.
+  const isActiveRef = useRef(isActive)
+  isActiveRef.current = isActive
+  const pendingSeekRef = useRef<number | null>(null)
+  const clearPendingSeek = useCallback(() => {
+    if (pendingSeekRef.current !== null) {
+      window.clearInterval(pendingSeekRef.current)
+      pendingSeekRef.current = null
+    }
+  }, [])
+  useEffect(() => clearPendingSeek, [clearPendingSeek])
+
+  const seekAfterLoad = useCallback(
+    (seconds: number) => {
+      clearPendingSeek()
+      const staleAudio = audioPlayer?.audio
+      const startedAt = Date.now()
+      pendingSeekRef.current = window.setInterval(() => {
+        if (Date.now() - startedAt > PENDING_SEEK_TTL_MS) {
+          clearPendingSeek()
+          return
+        }
+        if (!isActiveRef.current || audioPlayer?.audio === staleAudio) return
+        clearPendingSeek()
+        dispatch(seekTo({ seconds }))
+      }, PENDING_SEEK_POLL_MS)
+    },
+    [clearPendingSeek, dispatch]
+  )
+
   // One comments request per tile, and only for tiles that have comments and
   // have scrolled near the viewport.
   const comments = useTimestampedComments(trackId, inView && commentCount > 0)
@@ -271,14 +311,11 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
       if (isActive) {
         dispatch(seekTo({ seconds }))
       } else {
+        seekAfterLoad(seconds)
         onPlay()
-        window.setTimeout(
-          () => dispatch(seekTo({ seconds })),
-          SEEK_AFTER_PLAY_MS
-        )
       }
     },
-    [canSeek, duration, isActive, onPlay, dispatch]
+    [canSeek, duration, isActive, onPlay, dispatch, seekAfterLoad]
   )
 
   return (
