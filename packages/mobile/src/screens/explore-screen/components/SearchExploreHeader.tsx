@@ -10,6 +10,7 @@ import { exploreMessages as messages } from '@audius/common/messages'
 import { useIsFocused, useNavigation } from '@react-navigation/native'
 import type { ScrollView } from 'react-native'
 import { Keyboard } from 'react-native'
+import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDebounce } from 'react-use'
 
@@ -99,16 +100,17 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   )
 
   const { top } = useSafeAreaInsets()
+  const flat = useSharedValue(0)
 
   return (
     <>
       {/*
-        Same floating capsule as the other tabs' headers, with the search
-        field in place of the title. Unlike them it never hides on scroll:
-        Explore is where you type.
+        Same capsule as the other tabs' headers, with the search field in
+        place of the title. Explore's content scrolls below it rather than
+        under it, so it stays flat and never hides.
       */}
-      <Flex ph='l' pt={top + spacing.xs} pb='s' style={{ zIndex: 2 }}>
-        <GlassCapsule height={SEARCH_CAPSULE_HEIGHT}>
+      <Flex pt={top + spacing.xs} pb='s' style={{ zIndex: 2 }}>
+        <GlassCapsule height={SEARCH_CAPSULE_HEIGHT} floatProgress={flat}>
           <Flex
             flex={1}
             direction='row'

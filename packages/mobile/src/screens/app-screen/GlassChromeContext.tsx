@@ -11,7 +11,10 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import {
   Easing,
+  Extrapolation,
+  interpolate,
   useAnimatedReaction,
+  useDerivedValue,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
@@ -48,6 +51,12 @@ const DIRECTION_THRESHOLD = 6
  * opens with the header already dismissed.
  */
 const ALWAYS_SHOWN_OFFSET = 40
+
+/**
+ * Scroll distance over which the root header turns from flat into a pill.
+ * Short enough to finish before the header starts hiding.
+ */
+const HEADER_FLOAT_DISTANCE = 32
 
 // Long enough for the tab bar's collapse to read as a morph rather than a cut.
 const HIDE_TIMING = {
@@ -188,6 +197,22 @@ export const useGlassScrollY = () => useGlassChrome().scrollY
  * moving in opposite directions.
  */
 export const useChromeHiddenProgress = () => useGlassChrome().hidden
+
+/**
+ * 0 = header flat on the page (list at the top), 1 = floating pill (content
+ * scrolled under it).
+ */
+export const useHeaderFloatProgress = () => {
+  const scrollY = useGlassScrollY()
+  return useDerivedValue(() =>
+    interpolate(
+      scrollY.value,
+      [0, HEADER_FLOAT_DISTANCE],
+      [0, 1],
+      Extrapolation.CLAMP
+    )
+  )
+}
 
 /**
  * Points the chrome at a list that is already scrolled to `offset`. Call when

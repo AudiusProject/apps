@@ -17,6 +17,7 @@ import { AccountPictureHeader } from './AccountPictureHeader'
 import {
   useChromeHiddenProgress,
   useGlassHeaderInset,
+  useHeaderFloatProgress,
   useRootHeaderHeight,
   useSetRootHeaderHeight
 } from './GlassChromeContext'
@@ -36,7 +37,6 @@ type MobileRootHeaderProps = {
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   capsule: {
-    marginHorizontal: spacing(4),
     marginTop: spacing(1),
     marginBottom: spacing(2)
   },
@@ -60,9 +60,9 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
 /**
  * Custom header for root (bottom-bar) tab screens.
  *
- * A floating glass capsule, [Avatar] [title] [right content], matching the
- * floating tab bar. Content scrolls under it with a fade behind the status
- * bar. It reports its measured height through `GlassChromeContext` so the
+ * [Avatar] [title] [right content], flat on the page at the top of the list.
+ * Once content scrolls under it, it becomes a floating glass pill matching
+ * the floating tab bar, with a fade behind the status bar. It reports its measured height through `GlassChromeContext` so the
  * screen underneath can pad its scrollable content to start below it.
  */
 export const MobileRootHeader = (props: MobileRootHeaderProps) => {
@@ -73,6 +73,7 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const setRootHeaderHeight = useSetRootHeaderHeight()
   const hidden = useChromeHiddenProgress()
+  const floatProgress = useHeaderFloatProgress()
   const headerHeight = useRootHeaderHeight()
   const hasSubHeader = useGlassHeaderInset() > headerHeight
 
@@ -118,7 +119,11 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
       />
       <Animated.View pointerEvents='box-none' style={hideStyle}>
         <OtaUpdateBanner />
-        <GlassCapsule height={CAPSULE_HEIGHT} style={styles.capsule}>
+        <GlassCapsule
+          height={CAPSULE_HEIGHT}
+          floatProgress={floatProgress}
+          style={styles.capsule}
+        >
           <View style={styles.row}>
             <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
             <Text
