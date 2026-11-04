@@ -59,6 +59,7 @@ import {
 
 import { useChromecast } from './GoogleCast'
 import { addTracksAroundCurrent } from './addTracksAroundCurrent'
+import { isStreamSignatureFresh } from './streamSignature'
 import { useSavePodcastProgress } from './useSavePodcastProgress'
 
 export const DEFAULT_IMAGE_URL =
@@ -270,7 +271,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
         if (offlineTrackAvailable && isCollectionMarkedForDownload) {
           const audioFilePath = getLocalAudioPath(trackId)
           url = `file://${audioFilePath}`
-        } else if (streamObj?.url) {
+        } else if (streamObj?.url && isStreamSignatureFresh(streamObj.url)) {
           url = resolveMirrors
             ? ((await resolveStreamUrl(streamObj, retries ?? 0)) ??
               streamObj.url)
@@ -285,6 +286,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
             userId: OptionalId.parse(currentUserId),
             userSignature: signature,
             userData: data,
+            preview: shouldPreview || undefined,
             nftAccessSignature: nftAccessSignature
               ? JSON.stringify(nftAccessSignature)
               : undefined
