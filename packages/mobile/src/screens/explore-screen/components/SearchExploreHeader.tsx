@@ -22,6 +22,7 @@ import {
   TextInputSize,
   useTheme
 } from '@audius/harmony-native'
+import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AccountPictureHeader } from 'app/screens/app-screen/AccountPictureHeader'
@@ -30,13 +31,15 @@ import { SearchCategoriesAndFilters } from 'app/screens/search-screen/SearchCate
 import { useSearchQuery } from '../../search-screen/searchState'
 import { useExploreRoute } from '../hooks'
 
+const SEARCH_CAPSULE_HEIGHT = 52
+
 type SearchExploreHeaderProps = {
   scrollRef?: React.RefObject<ScrollView | null>
 }
 
 export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   const { scrollRef } = props
-  const { spacing, color } = useTheme()
+  const { spacing, cornerRadius } = useTheme()
   const { params } = useExploreRoute<'SearchExplore'>()
   const { drawerHelpers } = useContext(AppDrawerContext)
   const navigation = useNavigation()
@@ -99,50 +102,50 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
 
   return (
     <>
-      <Flex
-        direction='row'
-        alignItems='center'
-        gap='m'
-        backgroundColor='white'
-        ph='l'
-        pv='m'
-        pt={top + spacing.m}
-        pb='m'
-        style={{ zIndex: 2 }}
-      >
-        <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
-        <Flex flex={1}>
-          <TextInput
-            ref={textInputRef}
-            label='Search'
-            autoCorrect={false}
-            placeholder={messages.searchPlaceholder}
-            size={TextInputSize.SMALL}
-            startIcon={IconSearch}
-            onChangeText={handleSearchInputChange}
-            value={inputValue}
-            endIcon={(props) =>
-              inputValue ? (
-                <IconButton
-                  icon={IconCloseAlt}
-                  color='subdued'
-                  onPress={handleClearSearch}
-                  hitSlop={10}
-                  {...props}
-                />
-              ) : null
-            }
-          />
-        </Flex>
+      {/*
+        Same floating capsule as the other tabs' headers, with the search
+        field in place of the title. Unlike them it never hides on scroll:
+        Explore is where you type.
+      */}
+      <Flex ph='l' pt={top + spacing.xs} pb='s' style={{ zIndex: 2 }}>
+        <GlassCapsule height={SEARCH_CAPSULE_HEIGHT}>
+          <Flex
+            flex={1}
+            direction='row'
+            alignItems='center'
+            gap='m'
+            pl='s'
+            pr='s'
+          >
+            <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
+            <Flex flex={1}>
+              <TextInput
+                ref={textInputRef}
+                label='Search'
+                autoCorrect={false}
+                placeholder={messages.searchPlaceholder}
+                size={TextInputSize.SMALL}
+                startIcon={IconSearch}
+                onChangeText={handleSearchInputChange}
+                value={inputValue}
+                inputStyle={{ borderRadius: cornerRadius['2xl'] }}
+                endIcon={(props) =>
+                  inputValue ? (
+                    <IconButton
+                      icon={IconCloseAlt}
+                      color='subdued'
+                      onPress={handleClearSearch}
+                      hitSlop={10}
+                      {...props}
+                    />
+                  ) : null
+                }
+              />
+            </Flex>
+          </Flex>
+        </GlassCapsule>
       </Flex>
-      <Flex
-        backgroundColor='white'
-        style={{
-          zIndex: 1,
-          borderBottomWidth: 1,
-          borderBottomColor: color.border.strong
-        }}
-      >
+      <Flex style={{ zIndex: 1 }}>
         <SearchCategoriesAndFilters />
       </Flex>
     </>

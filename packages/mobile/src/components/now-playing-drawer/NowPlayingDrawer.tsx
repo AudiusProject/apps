@@ -28,13 +28,19 @@ import {
   Pressable,
   StyleSheet
 } from 'react-native'
-import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
+import Reanimated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
   BOTTOM_BAR_HEIGHT,
+  COLLAPSE_DROP_START,
+  FLOATING_BAR_HEIGHT,
+  FLOATING_BAR_TOP_GAP,
   useFloatingTabBar
 } from 'app/components/bottom-tab-bar'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
@@ -204,24 +210,42 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     isOpen && isDrawerFullyOpen ? staticTopInset.current : insets.top
   const effectiveBottomInset = isOpen && isDrawerFullyOpen ? 0 : insets.bottom
 
-  // Slide the collapsed drawer out with the tab bar. Translates the whole
-  // drawer because the play bar's background belongs to the drawer root.
-  // Pinned to 0 while open, since the open drawer is the full-screen player.
+  const floating = useFloatingTabBar()
+
+  // When the tab bar hides, the collapsed play bar drops into its place rather
+  // than leaving with it, so what's playing and play/pause stay on screen.
+  // Floating, it drops level with the collapsed tab bar, between the
+  // active-tab and search buttons; classic, down onto the safe area.
+  // Translates the whole drawer because the play bar's background belongs to
+  // the drawer root. Pinned to 0 while open, since the open drawer is the
+  // full-screen player.
+  const playBarDrop = floating
+    ? FLOATING_BAR_HEIGHT +
+      FLOATING_BAR_TOP_GAP -
+      (FLOATING_BAR_HEIGHT - PLAY_BAR_HEIGHT) / 2
+    : BOTTOM_BAR_HEIGHT
   const chromeHideStyle = useAnimatedStyle(
     () => ({
       transform: [
         {
           translateY: isOpen
             ? 0
-            : (PLAY_BAR_HEIGHT + BOTTOM_BAR_HEIGHT + insets.bottom) *
-              tabBarHidden.value
+            : playBarDrop *
+              (floating
+                ? // Drops once the tab bar has shrunk out of the way.
+                  interpolate(
+                    tabBarHidden.value,
+                    [COLLAPSE_DROP_START, 1],
+                    [0, 1],
+                    'clamp'
+                  )
+                : tabBarHidden.value)
         }
       ]
     }),
-    [isOpen, insets.bottom]
+    [isOpen, playBarDrop, floating]
   )
 
-  const floating = useFloatingTabBar()
   // Collapsed, with the play bar resting on the tab bar.
   const collapsedPosition =
     FULL_DRAWER_HEIGHT - insets.bottom - BOTTOM_BAR_HEIGHT - PLAY_BAR_HEIGHT

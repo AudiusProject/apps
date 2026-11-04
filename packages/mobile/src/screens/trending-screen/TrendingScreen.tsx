@@ -56,7 +56,7 @@ export const TrendingScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={titleByCategory[category]} showDivider={false}>
+      <MobileRootHeader title={titleByCategory[category]}>
         {category === 'tracks' ? <TrendingFilterButton /> : null}
       </MobileRootHeader>
     ),
