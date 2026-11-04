@@ -29,7 +29,7 @@ const messages = {
   openComment: (name: string) => `Open comment by ${name}`
 }
 
-const HEIGHT = 56
+const DEFAULT_HEIGHT = 56
 const BAR_WIDTH = 2
 const BAR_GAP = 1
 const MIN_BAR_HEIGHT = 2
@@ -68,12 +68,12 @@ const makePeaks = (seed: number, count: number) => {
   return peaks
 }
 
-const buildPath = (peaks: number[]) => {
+const buildPath = (peaks: number[], height: number) => {
   let d = ''
   for (let i = 0; i < peaks.length; i++) {
-    const h = Math.max(MIN_BAR_HEIGHT, Math.round(peaks[i] * HEIGHT))
+    const h = Math.max(MIN_BAR_HEIGHT, Math.round(peaks[i] * height))
     const x = i * (BAR_WIDTH + BAR_GAP)
-    d += `M${x} ${HEIGHT - h}h${BAR_WIDTH}v${h}h-${BAR_WIDTH}z`
+    d += `M${x} ${height - h}h${BAR_WIDTH}v${h}h-${BAR_WIDTH}z`
   }
   return d
 }
@@ -117,9 +117,15 @@ type CommentAvatarProps = {
   comment: TimestampedComment
   x: number
   permalink: string
+  onOpenComment?: (commentId: ID) => void
 }
 
-const CommentAvatar = ({ comment, x, permalink }: CommentAvatarProps) => {
+const CommentAvatar = ({
+  comment,
+  x,
+  permalink,
+  onOpenComment
+}: CommentAvatarProps) => {
   const dispatch = useDispatch()
   const { data: name } = useUser(comment.userId, {
     select: (user) => user.name
@@ -128,10 +134,14 @@ const CommentAvatar = ({ comment, x, permalink }: CommentAvatarProps) => {
   const handleClick = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
+      if (onOpenComment) {
+        onOpenComment(comment.id)
+        return
+      }
       // The desktop track page highlights and scrolls to this comment.
       dispatch(push(`${permalink}?commentId=${Id.parse(comment.id)}`))
     },
-    [dispatch, permalink, comment.id]
+    [dispatch, permalink, comment.id, onOpenComment]
   )
 
   if (!name) return null
@@ -181,6 +191,9 @@ type TrackTileWaveformProps = {
   canSeek: boolean
   /** Start this tile playing; the tile owns gating and queue semantics. */
   onPlay: () => void
+  /** Replaces the default of opening the comment on the track page. */
+  onOpenComment?: (commentId: ID) => void
+  height?: number
 }
 
 /**
@@ -198,7 +211,9 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
     isActive,
     isPlaying,
     canSeek,
-    onPlay
+    onPlay,
+    onOpenComment,
+    height = DEFAULT_HEIGHT
   } = props
   const dispatch = useDispatch()
   const { color } = useTheme()
@@ -212,8 +227,8 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
 
   const barCount = Math.max(0, Math.floor(width / (BAR_WIDTH + BAR_GAP)))
   const path = useMemo(
-    () => (barCount ? buildPath(makePeaks(trackId, barCount)) : ''),
-    [trackId, barCount]
+    () => (barCount ? buildPath(makePeaks(trackId, barCount), height) : ''),
+    [trackId, barCount, height]
   )
 
   const avatars = useMemo(() => {
@@ -278,7 +293,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
       css={{
         position: 'relative',
         width: '100%',
-        height: HEIGHT,
+        height,
         cursor: 'pointer',
         userSelect: 'none'
       }}
@@ -287,7 +302,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
         <>
           <svg
             width={width}
-            height={HEIGHT}
+            height={height}
             css={{ position: 'absolute', inset: 0, display: 'block' }}
             aria-hidden
           >
@@ -305,7 +320,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
             }}
             aria-hidden
           >
-            <svg width={width} height={HEIGHT} css={{ display: 'block' }}>
+            <svg width={width} height={height} css={{ display: 'block' }}>
               <path d={path} fill={color.primary.p300} />
             </svg>
           </Box>
@@ -317,6 +332,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
           comment={comment}
           x={x}
           permalink={permalink}
+          onOpenComment={onOpenComment}
         />
       ))}
     </Box>
