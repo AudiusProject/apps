@@ -22,3 +22,9 @@ export const FLOATING_BAR_ITEM_GAP = 8
 // sits between the active-tab and search buttons.
 export const COLLAPSED_PLAY_BAR_INSET =
   FLOATING_BAR_SIDE_MARGIN + FLOATING_BAR_HEIGHT + FLOATING_BAR_ITEM_GAP
+// The collapse runs in two steps over the chrome's hide progress (0 to 1): the
+// tab bar shrinks and the play bar narrows in place, then the play bar drops
+// into the gap. Keeping each move on one axis stops the play bar swooping
+// diagonally across the shrinking tab bar. Expanding plays it in reverse.
+export const COLLAPSE_SHRINK_END = 0.55
+export const COLLAPSE_DROP_START = 0.45

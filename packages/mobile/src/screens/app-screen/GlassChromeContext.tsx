@@ -10,6 +10,7 @@ import {
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import {
+  Easing,
   useAnimatedReaction,
   useSharedValue,
   withTiming
@@ -48,7 +49,11 @@ const DIRECTION_THRESHOLD = 6
  */
 const ALWAYS_SHOWN_OFFSET = 40
 
-const HIDE_DURATION_MS = 180
+// Long enough for the tab bar's collapse to read as a morph rather than a cut.
+const HIDE_TIMING = {
+  duration: 380,
+  easing: Easing.bezier(0.4, 0, 0.2, 1)
+}
 
 const GlassChromeContext = createContext<GlassChromeContextValue | undefined>(
   undefined
@@ -89,15 +94,13 @@ export const GlassChromeProvider = (props: { children: ReactNode }) => {
     (current, previous) => {
       if (previous === null) return
       if (current < ALWAYS_SHOWN_OFFSET) {
-        hidden.value = withTiming(0, { duration: HIDE_DURATION_MS })
+        hidden.value = withTiming(0, HIDE_TIMING)
         directionAnchorY.value = current
         return
       }
       const delta = current - directionAnchorY.value
       if (Math.abs(delta) < DIRECTION_THRESHOLD) return
-      hidden.value = withTiming(delta > 0 ? 1 : 0, {
-        duration: HIDE_DURATION_MS
-      })
+      hidden.value = withTiming(delta > 0 ? 1 : 0, HIDE_TIMING)
       directionAnchorY.value = current
     }
   )

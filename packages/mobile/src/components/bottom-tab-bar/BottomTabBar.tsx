@@ -39,6 +39,8 @@ import { NotificationsButton } from './bottom-tab-bar-buttons/NotificationsButto
 import { TrendingButton } from './bottom-tab-bar-buttons/TrendingButton'
 import {
   BOTTOM_BAR_HEIGHT,
+  COLLAPSE_DROP_START,
+  COLLAPSE_SHRINK_END,
   FLOATING_BAR_HEIGHT,
   FLOATING_BAR_INDICATOR_INSET,
   FLOATING_BAR_SIDE_MARGIN
@@ -236,23 +238,39 @@ const FloatingPill = (props: FloatingPillProps) => {
   }, [activeIndex, index])
 
   const pillStyle = useAnimatedStyle(() => ({
-    width: interpolate(hidden.value, [0, 1], [fullWidth, FLOATING_BAR_HEIGHT])
+    width: interpolate(
+      hidden.value,
+      [0, COLLAPSE_SHRINK_END],
+      [fullWidth, FLOATING_BAR_HEIGHT],
+      'clamp'
+    )
   }))
 
   // Slide the row so the active tab ends up centered in the collapsed circle.
   const rowStyle = useAnimatedStyle(() => {
     const activeCenter = (index.value + 0.5) * tabWidth
+    const shrink = interpolate(
+      hidden.value,
+      [0, COLLAPSE_SHRINK_END],
+      [0, 1],
+      'clamp'
+    )
     return {
       transform: [
         {
-          translateX: (FLOATING_BAR_HEIGHT / 2 - activeCenter) * hidden.value
+          translateX: (FLOATING_BAR_HEIGHT / 2 - activeCenter) * shrink
         }
       ]
     }
   })
 
   const indicatorStyle = useAnimatedStyle(() => ({
-    opacity: 1 - hidden.value,
+    opacity: interpolate(
+      hidden.value,
+      [0, COLLAPSE_SHRINK_END],
+      [1, 0],
+      'clamp'
+    ),
     transform: [
       {
         translateX: index.value * tabWidth + FLOATING_BAR_INDICATOR_INSET
@@ -261,11 +279,18 @@ const FloatingPill = (props: FloatingPillProps) => {
   }))
 
   // Grows from a point rather than fading in, since the system glass stops
-  // rendering under a parent that starts at zero opacity. Waits for the
-  // capsule to pull back so the two never overlap.
+  // rendering under a parent that starts at zero opacity. Comes in with the
+  // play bar, once the capsule has pulled back.
   const searchStyle = useAnimatedStyle(() => ({
     transform: [
-      { scale: interpolate(hidden.value, [0.4, 1], [0.01, 1], 'clamp') }
+      {
+        scale: interpolate(
+          hidden.value,
+          [COLLAPSE_DROP_START, 1],
+          [0.01, 1],
+          'clamp'
+        )
+      }
     ]
   }))
 
@@ -342,7 +367,9 @@ type CollapsingTabProps = {
 const CollapsingTab = (props: CollapsingTabProps) => {
   const { hidden, isActive, isCollapsed, children } = props
   const style = useAnimatedStyle(() => ({
-    opacity: isActive ? 1 : interpolate(hidden.value, [0, 0.6], [1, 0], 'clamp')
+    opacity: isActive
+      ? 1
+      : interpolate(hidden.value, [0, 0.35], [1, 0], 'clamp')
   }))
 
   return (

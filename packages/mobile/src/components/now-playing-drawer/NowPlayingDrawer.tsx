@@ -28,13 +28,17 @@ import {
   Pressable,
   StyleSheet
 } from 'react-native'
-import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
+import Reanimated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
   BOTTOM_BAR_HEIGHT,
+  COLLAPSE_DROP_START,
   FLOATING_BAR_HEIGHT,
   FLOATING_BAR_TOP_GAP,
   useFloatingTabBar
@@ -224,11 +228,22 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     () => ({
       transform: [
         {
-          translateY: isOpen ? 0 : playBarDrop * tabBarHidden.value
+          translateY: isOpen
+            ? 0
+            : playBarDrop *
+              (floating
+                ? // Drops once the tab bar has shrunk out of the way.
+                  interpolate(
+                    tabBarHidden.value,
+                    [COLLAPSE_DROP_START, 1],
+                    [0, 1],
+                    'clamp'
+                  )
+                : tabBarHidden.value)
         }
       ]
     }),
-    [isOpen, playBarDrop]
+    [isOpen, playBarDrop, floating]
   )
 
   // Collapsed, with the play bar resting on the tab bar.

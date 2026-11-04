@@ -23,6 +23,7 @@ import {
 } from '@audius/harmony-native'
 import {
   COLLAPSED_PLAY_BAR_INSET,
+  COLLAPSE_SHRINK_END,
   FLOATING_BAR_SIDE_MARGIN
 } from 'app/components/bottom-tab-bar/constants'
 import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
@@ -205,16 +206,25 @@ export const PlayBar = (props: PlayBarProps) => {
   const pillFrameStyle = useAnimatedStyle(() => ({
     marginHorizontal: interpolate(
       hidden.value,
-      [0, 1],
-      [FLOATING_BAR_SIDE_MARGIN, COLLAPSED_PLAY_BAR_INSET]
+      [0, COLLAPSE_SHRINK_END],
+      [FLOATING_BAR_SIDE_MARGIN, COLLAPSED_PLAY_BAR_INSET],
+      'clamp'
     )
   }))
-  const queueStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(hidden.value, [0, 0.5], [1, 0], 'clamp'),
-    width: QUEUE_BUTTON_WIDTH * (1 - hidden.value),
-    // Fold the row gap in with the button so no extra space is left behind.
-    marginLeft: -spacing.s * hidden.value
-  }))
+  const queueStyle = useAnimatedStyle(() => {
+    const shrink = interpolate(
+      hidden.value,
+      [0, COLLAPSE_SHRINK_END],
+      [0, 1],
+      'clamp'
+    )
+    return {
+      opacity: interpolate(hidden.value, [0, 0.3], [1, 0], 'clamp'),
+      width: QUEUE_BUTTON_WIDTH * (1 - shrink),
+      // Fold the row gap in with the button so no extra space is left behind.
+      marginLeft: -spacing.s * shrink
+    }
+  })
 
   const rootOpacityAnimation = translationAnim.interpolate({
     // Interpolate the animation such that the play bar fades out
@@ -231,6 +241,7 @@ export const PlayBar = (props: PlayBarProps) => {
   const content = (
     <>
       <TrackingBar
+        floating={floating}
         duration={duration}
         mediaKey={mediaKey}
         translateYAnimation={translationAnim}
