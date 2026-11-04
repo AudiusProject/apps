@@ -88,7 +88,18 @@ export const AnimatedButton = ({
     else if (haptic) medium()
   }, [haptics, hapticsConfig, iconIndex])
 
+  // Lottie also reports finishes for animations this button didn't start, e.g.
+  // the icon that replaces the play button's buffering spinner can play
+  // through on its own. Acting on those makes the button press itself, so
+  // just put the icon back on its first frame.
+  const isAnimatingRef = useRef(false)
+
   const handleAnimationFinish = useCallback(() => {
+    if (!isAnimatingRef.current) {
+      animationRef.current?.reset()
+      return
+    }
+    isAnimatingRef.current = false
     if (waitForAnimationFinish) {
       onPress?.()
     }
@@ -118,6 +129,7 @@ export const AnimatedButton = ({
     handleHaptics()
 
     if (hasMultipleStates || !isActive) {
+      isAnimatingRef.current = true
       animationRef.current?.play()
       setIsPlaying(true)
     }
@@ -148,6 +160,7 @@ export const AnimatedButton = ({
   useEffect(() => {
     if (hasMultipleStates) {
       if (isActive !== previousActiveState && !isPlaying) {
+        isAnimatingRef.current = true
         animationRef.current?.play()
         setIsPlaying(true)
       }
