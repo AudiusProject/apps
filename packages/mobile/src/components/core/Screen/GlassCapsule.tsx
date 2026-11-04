@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { Platform, StyleSheet, View } from 'react-native'
 
-import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
+import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 
 import { GlassSurface } from './GlassSurface'
 import { isLiquidGlassAvailable, LiquidGlassView } from './LiquidGlass'
@@ -22,6 +22,7 @@ type GlassCapsuleProps = {
 export const GlassCapsule = (props: GlassCapsuleProps) => {
   const { children, height, style } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
+  const { borderDefault } = useThemeColors()
   const shape = { height, borderRadius: height / 2 }
 
   if (isLiquidGlassAvailable) {
@@ -38,11 +39,20 @@ export const GlassCapsule = (props: GlassCapsuleProps) => {
   }
 
   // The shadow lives on an unclipped wrapper; the surface inside is clipped
-  // to the capsule so the frost doesn't spill past the corners.
+  // to the capsule so the frost doesn't spill past the corners. The edge keeps
+  // it apart from cards of the same color passing under it in dark mode.
   return (
     <View style={[shape, styles.shadow, style]}>
       <GlassSurface showBorder={false} style={[shape, styles.clip]}>
         {children}
+        <View
+          pointerEvents='none'
+          style={[
+            StyleSheet.absoluteFill,
+            styles.edge,
+            { borderRadius: height / 2, borderColor: borderDefault }
+          ]}
+        />
       </GlassSurface>
     </View>
   )
@@ -58,5 +68,8 @@ const styles = StyleSheet.create({
   },
   clip: {
     overflow: 'hidden'
+  },
+  edge: {
+    borderWidth: StyleSheet.hairlineWidth
   }
 })
