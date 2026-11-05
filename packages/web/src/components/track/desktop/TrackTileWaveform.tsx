@@ -13,6 +13,7 @@ import {
 } from '@audius/common/store'
 import { Box, Tooltip, useTheme } from '@audius/harmony'
 import { Id } from '@audius/sdk'
+import { keyframes } from '@emotion/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMeasure } from 'react-use'
 
@@ -20,6 +21,8 @@ import { Avatar } from 'components/avatar'
 import { useDeferredElement } from 'pages/search-explore-page/components/desktop/useDeferredElement'
 import { audioPlayer } from 'services/audio-player'
 import { push } from 'utils/navigation'
+
+import { useTrackWaveformPeaks } from './useTrackWaveformPeaks'
 
 const { seekTo } = playbackActions
 const { getSeek, getSeekCounter } = playbackSelectors
@@ -50,10 +53,14 @@ const mulberry32 = (seed: number) => () => {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296
 }
 
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`
+
 /**
- * No node serves audio peaks yet, so the shape is synthesized from the track
- * id: a slow section envelope with per-bar jitter, which reads as a song
- * without pretending to be one. Swap this for real peaks when they exist.
+ * Fallback for tracks no content node has analyzed: a shape synthesized from
+ * the track id, a slow section envelope with per-bar jitter.
  */
 const makePeaks = (seed: number, count: number) => {
   const rand = mulberry32(seed)
@@ -64,6 +71,24 @@ const makePeaks = (seed: number, count: number) => {
     const jitter = 0.55 + rand() * 0.45
     const noise = (rand() - 0.5) * 0.12
     peaks.push(clamp(envelope * jitter + noise, 0.05, 1))
+  }
+  return peaks
+}
+
+/** Fits the node's 0-255 buckets to the bar count, keeping each span's loudest. */
+const resamplePeaks = (source: number[], count: number) => {
+  const peaks: number[] = []
+  for (let i = 0; i < count; i++) {
+    const start = Math.floor((i * source.length) / count)
+    const end = Math.max(
+      start + 1,
+      Math.floor(((i + 1) * source.length) / count)
+    )
+    let max = 0
+    for (let j = start; j < end && j < source.length; j++) {
+      max = Math.max(max, source[j])
+    }
+    peaks.push(max / 255)
   }
   return peaks
 }
@@ -209,12 +234,22 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
   // One comments request per tile, and only for tiles that have comments and
   // have scrolled near the viewport.
   const comments = useTimestampedComments(trackId, inView && commentCount > 0)
+  // Settles to null on a miss or error; either way the fallback shape draws.
+  const { data: realPeaks, isFetched: isPeaksSettled } = useTrackWaveformPeaks(
+    trackId,
+    inView
+  )
 
   const barCount = Math.max(0, Math.floor(width / (BAR_WIDTH + BAR_GAP)))
-  const path = useMemo(
-    () => (barCount ? buildPath(makePeaks(trackId, barCount)) : ''),
-    [trackId, barCount]
-  )
+  // Wait for the lookup so a real shape never replaces a fake one on screen.
+  const path = useMemo(() => {
+    if (!barCount || !isPeaksSettled) return ''
+    return buildPath(
+      realPeaks
+        ? resamplePeaks(realPeaks, barCount)
+        : makePeaks(trackId, barCount)
+    )
+  }, [trackId, barCount, realPeaks, isPeaksSettled])
 
   const avatars = useMemo(() => {
     if (!width || !duration) return []
@@ -288,7 +323,12 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
           <svg
             width={width}
             height={HEIGHT}
-            css={{ position: 'absolute', inset: 0, display: 'block' }}
+            css={{
+              position: 'absolute',
+              inset: 0,
+              display: 'block',
+              animation: `${fadeIn} 200ms ease-out`
+            }}
             aria-hidden
           >
             <path d={path} fill={color.neutral.n150} />
