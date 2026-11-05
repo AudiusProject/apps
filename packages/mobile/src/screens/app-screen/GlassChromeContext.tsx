@@ -76,8 +76,7 @@ const GlassChromeContext = createContext<GlassChromeContextValue | undefined>(
  * so content scrolls behind the glass. Screens pad their own scrollable
  * content by these heights: the root header plus an optional
  * `FloatingSubHeader` row. Heights are measured because the safe-area inset
- * varies per device and `OtaUpdateBanner` adds a row when an update is
- * pending.
+ * varies per device.
  *
  * Mounted per tab stack in `AppTabScreen`.
  */

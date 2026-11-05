@@ -12,6 +12,7 @@ import {
 } from 'app/components/bottom-tab-bar'
 import { FULL_DRAWER_HEIGHT } from 'app/components/drawer'
 import { NowPlayingDrawer } from 'app/components/now-playing-drawer'
+import { OtaUpdateBanner } from 'app/components/ota-update-banner/OtaUpdateBanner'
 
 import { useTabBarHiddenProgress } from './TabBarAutoHideContext'
 
@@ -54,6 +55,7 @@ export const AppTabBar = (props: TabBarProps) => {
   return (
     <>
       <NowPlayingDrawer translationAnim={translationAnim} />
+      <OtaUpdateBanner />
       <Reanimated.View style={[styles.bar, hideStyle]}>
         <BottomTabBar
           translationAnim={translationAnim}

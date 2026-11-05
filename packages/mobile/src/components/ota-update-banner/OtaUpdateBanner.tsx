@@ -2,27 +2,39 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import CodePush from '@bravemobile/react-native-code-push'
 import { StyleSheet, View } from 'react-native'
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated'
 
 import {
+  Button,
   Flex,
+  IconArrowRotate,
   IconButton,
   IconClose,
-  Paper,
-  PlainButton,
-  Text,
-  useTheme
+  Text
 } from '@audius/harmony-native'
 import {
   getOtaLastHistoryEndpointForLogs,
   isOtaEnabled
 } from 'app/app/ota-updates'
+import { useBottomBarInset } from 'app/components/core/BottomBarInsetContext'
+import { GlassSurface } from 'app/components/core/Screen/GlassSurface'
+import {
+  isLiquidGlassAvailable,
+  LiquidGlassView
+} from 'app/components/core/Screen/LiquidGlass'
 import { useEnterForeground } from 'app/hooks/useAppState'
+import { useDrawer } from 'app/hooks/useDrawer'
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
-/** Set to `true` to always show the banner for layout preview; use `false` in production. */
+/** Set to `true` to always show the toast for layout preview; use `false` in production. */
 const FORCE_OTA_BANNER_PREVIEW = false
 
+const TOAST_HEIGHT = 44
+/** Gap between the toast and the play bar or tab bar below it. */
+const TOAST_GAP = 12
+
 const messages = {
-  pendingBody: 'The latest version is ready. Restart to finish updating.',
+  pendingBody: 'Update ready',
   restart: 'Restart',
   dismiss: 'Dismiss'
 }
@@ -62,12 +74,14 @@ const PENDING_POLL_WINDOW_MS = 3 * 60 * 1000
  * ON_NEXT_RESTART. We only surface UI when an update is already downloaded
  * and installed as pending — then the user restarts when they want.
  *
- * One instance per root tab. A tab mounted during ota-root's sync gets
- * SYNC_IN_PROGRESS from its own sync, so it detects the pending package by
- * polling.
+ * Mounted once, beside the tab bar, as a small toast floating above the play
+ * bar. It mounts during ota-root's sync and gets SYNC_IN_PROGRESS from its own
+ * sync, so it detects the pending package by polling.
  */
 export const OtaUpdateBanner = () => {
-  const { color, spacing } = useTheme()
+  const bottomInset = useBottomBarInset()
+  const isDarkMode = isDarkTheme(useThemeVariant())
+  const { isOpen: isNowPlayingOpen } = useDrawer('NowPlaying')
   const [phase, setPhase] = useState<BannerPhase>('none')
   const dismissedRef = useRef(false)
   const pendingLoggedRef = useRef(false)
@@ -213,81 +227,86 @@ export const OtaUpdateBanner = () => {
     CodePush.restartApp(true)
   }, [])
 
-  const uiPhase: BannerPhase = FORCE_OTA_BANNER_PREVIEW ? 'pending' : phase
-
   const showBanner =
     FORCE_OTA_BANNER_PREVIEW || (isOtaEnabled() && phase === 'pending')
 
-  if (!showBanner) {
+  if (!showBanner || isNowPlayingOpen) {
     return null
   }
 
+  const content = (
+    <Flex row alignItems='center' gap='s' h={TOAST_HEIGHT} pl='m' pr='xs'>
+      <IconArrowRotate size='s' color='active' />
+      <Text variant='body' size='s' strength='strong'>
+        {messages.pendingBody}
+      </Text>
+      <Button
+        variant='primary'
+        size='xs'
+        onPress={handleRestart}
+        accessibilityLabel={messages.restart}
+      >
+        {messages.restart}
+      </Button>
+      <IconButton
+        icon={IconClose}
+        size='xs'
+        color='subdued'
+        onPress={handleDismiss}
+        accessibilityLabel={messages.dismiss}
+      />
+    </Flex>
+  )
+
+  // Slides rather than fades: the system glass stops rendering under a parent
+  // at zero opacity.
   return (
     <View
-      style={[
-        styles.inline,
-        {
-          paddingHorizontal: spacing.m,
-          paddingTop: spacing.xs,
-          paddingBottom: spacing.s
-        }
-      ]}
+      pointerEvents='box-none'
+      style={[styles.root, { bottom: bottomInset + TOAST_GAP }]}
     >
-      <Paper
-        borderRadius='l'
-        shadow='mid'
-        backgroundColor='surface1'
-        style={[
-          styles.card,
-          {
-            paddingVertical: spacing.m,
-            paddingHorizontal: spacing.m,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: color.border.default
-          }
-        ]}
+      <Animated.View
+        entering={SlideInDown.springify().damping(18)}
+        exiting={SlideOutDown.duration(200)}
+        style={styles.shadow}
       >
-        <Flex row alignItems='center' justifyContent='space-between' gap='m'>
-          <Flex row alignItems='center' gap='s' style={styles.body}>
-            <Text color='subdued' variant='body' size='s' flexShrink={1}>
-              {messages.pendingBody}
-            </Text>
-          </Flex>
-          <Flex row alignItems='center' gap='s'>
-            {uiPhase === 'pending' ? (
-              <>
-                <PlainButton
-                  variant='default'
-                  onPress={handleRestart}
-                  accessibilityLabel={messages.restart}
-                >
-                  {messages.restart}
-                </PlainButton>
-                <IconButton
-                  icon={IconClose}
-                  size='s'
-                  color='subdued'
-                  onPress={handleDismiss}
-                  accessibilityLabel={messages.dismiss}
-                />
-              </>
-            ) : null}
-          </Flex>
-        </Flex>
-      </Paper>
+        {isLiquidGlassAvailable ? (
+          <LiquidGlassView
+            effect='regular'
+            colorScheme={isDarkMode ? 'dark' : 'light'}
+            style={styles.capsule}
+          >
+            {content}
+          </LiquidGlassView>
+        ) : (
+          <GlassSurface showBorder={false} style={styles.capsule}>
+            {content}
+          </GlassSurface>
+        )}
+      </Animated.View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  inline: {
-    width: '100%'
+  root: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 5,
+    elevation: 5
   },
-  card: {
-    overflow: 'visible'
+  shadow: {
+    borderRadius: TOAST_HEIGHT / 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.14,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6
   },
-  body: {
-    flex: 1,
-    minWidth: 0
+  capsule: {
+    borderRadius: TOAST_HEIGHT / 2,
+    overflow: 'hidden'
   }
 })
