@@ -17,13 +17,7 @@ import type {
   GestureResponderEvent,
   LayoutChangeEvent
 } from 'react-native'
-import {
-  Dimensions,
-  PanResponder,
-  Pressable,
-  StyleSheet,
-  View
-} from 'react-native'
+import { PanResponder, Pressable, StyleSheet, View } from 'react-native'
 import Animated, {
   Easing,
   FadeIn,
@@ -49,13 +43,7 @@ const messages = {
   openComment: (name: string) => `Open comment by ${name}`
 }
 
-/**
- * SE-sized screens can't fit the full waveform and the comment bubble
- * without squeezing the artwork down to a thumbnail.
- */
-export const IS_COMPACT_NOW_PLAYING = Dimensions.get('window').height < 700
-
-const HEIGHT = IS_COMPACT_NOW_PLAYING ? 32 : 48
+const HEIGHT = 48
 const BAR_WIDTH = 3
 const BAR_GAP = 2
 const MIN_BAR_HEIGHT = 3

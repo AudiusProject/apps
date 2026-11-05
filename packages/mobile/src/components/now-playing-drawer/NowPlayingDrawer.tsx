@@ -66,7 +66,7 @@ import { Logo } from './Logo'
 import { PlayBar } from './PlayBar'
 import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
-import { IS_COMPACT_NOW_PLAYING, WaveformScrubber } from './WaveformScrubber'
+import { WaveformScrubber } from './WaveformScrubber'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
 import { useDominantArtworkColors } from './useDominantArtworkColors'
@@ -505,10 +505,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               />
             )}
           </View>
-          {isNowPlayingCommentsEnabled &&
-          trackId &&
-          // On short screens the avatars under the waveform stand in for it
-          !(isWaveformEnabled && IS_COMPACT_NOW_PLAYING) ? (
+          {isNowPlayingCommentsEnabled && trackId ? (
             <CommentBubble
               trackId={trackId}
               comments={timestampedComments}
@@ -516,7 +513,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               mediaKey={`${mediaKey}`}
             />
           ) : null}
-          {isWaveformEnabled && !IS_COMPACT_NOW_PLAYING ? (
+          {isWaveformEnabled ? (
             <View style={styles.commentBubbleSpace} />
           ) : null}
           <View style={styles.controlsContainer}>
