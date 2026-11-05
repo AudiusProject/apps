@@ -7,7 +7,6 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
-import { OtaUpdateBanner } from 'app/components/ota-update-banner/OtaUpdateBanner'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
 
@@ -118,7 +117,6 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
         style={fadeStyle}
       />
       <Animated.View pointerEvents='box-none' style={hideStyle}>
-        <OtaUpdateBanner />
         <GlassCapsule
           height={CAPSULE_HEIGHT}
           floatProgress={floatProgress}
