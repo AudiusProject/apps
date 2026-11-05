@@ -27,6 +27,9 @@ export const GroupedTextField = (props: GroupedTextFieldProps) => {
     padding: 0,
     fontFamily: typography.fontByWeight.medium,
     fontSize: typography.size.l,
+    // Match the label's line box so the two share a baseline on Android
+    lineHeight: typography.lineHeight.l,
+    includeFontPadding: false,
     color: color.text.default
   }
 

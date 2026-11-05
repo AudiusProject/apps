@@ -87,12 +87,23 @@ export const UserListItem = (props: UserListItemProps) => {
           />
           <Flex flex={1} gap='2xs'>
             <UserLink userId={userId} strength='strong' />
-            <Text size='s' color='subdued' numberOfLines={1}>
-              @{handle} ·{' '}
-              {followsYou && !hideFollowsYou
-                ? messages.followsYou
-                : messages.followers(follower_count)}
-            </Text>
+            {/* The handle truncates first so the count stays readable. */}
+            <Flex row>
+              <Text
+                size='s'
+                color='subdued'
+                numberOfLines={1}
+                style={{ flexShrink: 1 }}
+              >
+                @{handle}
+              </Text>
+              <Text size='s' color='subdued' numberOfLines={1}>
+                {' · '}
+                {followsYou && !hideFollowsYou
+                  ? messages.followsYou
+                  : messages.followers(follower_count)}
+              </Text>
+            </Flex>
           </Flex>
           {renderRightContent ? (
             renderRightContent(userId, rank ? rank - 1 : 0)
