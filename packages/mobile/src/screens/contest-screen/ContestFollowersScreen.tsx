@@ -1,6 +1,5 @@
 import { useEventFollowers } from '@audius/common/api'
 
-import { IconUserFollowers } from '@audius/harmony-native'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { UserList } from '../user-list-screen/UserList'
@@ -31,7 +30,7 @@ export const ContestFollowersScreen = () => {
   const { userIds, isPending } = useEventFollowers({ eventId, limit: 100 })
 
   return (
-    <UserListScreen title={messages.title} titleIcon={IconUserFollowers}>
+    <UserListScreen title={messages.title}>
       <UserList
         data={userIds ?? []}
         isFetchingNextPage={false}

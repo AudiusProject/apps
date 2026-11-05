@@ -18,7 +18,7 @@ let mockSafeBottom = 0
 // React 19 requires this flag when using the renderer directly.
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 
-jest.mock('react-native', () => ({ View: 'View' }))
+jest.mock('react-native', () => ({ View: 'View', Pressable: 'Pressable' }))
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: mockSafeBottom })
 }))
@@ -28,6 +28,7 @@ jest.mock(
   () => ({
     Button: 'Button',
     IconUser: () => null,
+    Text: 'Text',
     Flex: 'Flex',
     Paper: 'Paper',
     spacing: { l: 16, xl: 24, unit5: 20 }
@@ -132,42 +133,33 @@ describe('FixedFooter floating navigation clearance', () => {
     }
   })
 
-  it('profile Save and Cancel remain wired above the tab bar', () => {
+  it('profile Save sits in the header and submits', () => {
     const onSubmit = jest.fn()
-    const onReset = jest.fn()
     act(() => {
       renderer = create(
-        <BottomBarInsetContext.Provider value={121}>
-          <FormScreen onSubmit={onSubmit} onReset={onReset} errors={{}}>
-            Profile fields
-          </FormScreen>
-        </BottomBarInsetContext.Provider>
-      )
-    })
-    const [cancel, save] = renderer.root.findAllByType('Button' as any)
-    expect(save.props.disabled).toBe(false)
-    act(() => save.props.onPress())
-    expect(onSubmit).toHaveBeenCalledTimes(1)
-    act(() => cancel.props.onPress())
-    expect(onReset).toHaveBeenCalledTimes(1)
-    expect(mockGoBack).toHaveBeenCalledTimes(1)
-  })
-
-  it('profile validation disables Save without removing it', () => {
-    act(() => {
-      renderer = create(
-        <FormScreen
-          onSubmit={jest.fn()}
-          onReset={jest.fn()}
-          errors={{ name: 'Required' }}
-        >
+        <FormScreen onSubmit={onSubmit} canSubmit>
           Profile fields
         </FormScreen>
       )
     })
-    const buttons = renderer.root.findAllByType('Button' as any)
-    expect(buttons).toHaveLength(2)
-    expect(buttons[1].props.children).toBe('Save')
-    expect(buttons[1].props.disabled).toBe(true)
+    const save = renderer.root.findByType('Screen' as any).props.topbarRight
+    expect(save.props.disabled).toBe(false)
+    act(() => save.props.onPress())
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+
+  it('profile Save is disabled until there is something to save', () => {
+    const onSubmit = jest.fn()
+    act(() => {
+      renderer = create(
+        <FormScreen onSubmit={onSubmit} canSubmit={false}>
+          Profile fields
+        </FormScreen>
+      )
+    })
+    const save = renderer.root.findByType('Screen' as any).props.topbarRight
+    expect(save.props.disabled).toBe(true)
+    act(() => save.props.onPress())
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 })

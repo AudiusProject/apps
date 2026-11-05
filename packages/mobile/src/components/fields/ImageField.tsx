@@ -110,6 +110,9 @@ export const ImageField = (props: ImageFieldProps) => {
       <View style={[styles.imageContainer, stylesProp?.imageContainer]}>
         <HarmonyImage
           source={source}
+          // The fade-in can miss onLoad on Android when the same URL comes
+          // back from cache, leaving the image transparent
+          immediate
           onLoad={() => setIsLoading(false)}
           resizeMode={isDefaultImage ? 'repeat' : undefined}
           style={[styles.image, stylesProp?.image]}

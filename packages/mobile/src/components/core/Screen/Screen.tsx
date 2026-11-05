@@ -123,15 +123,17 @@ export const Screen = (props: ScreenProps) => {
             ? null
             : topbarRight,
         title: isSecondary ? undefined : titleProp,
-        headerTitle: isSecondary
-          ? () => (
-              <SecondaryScreenTitle
-                icon={icon!}
-                title={titleProp}
-                IconProps={IconProps}
-              />
-            )
-          : headerTitleProp
+        // An explicit headerTitle wins over the secondary icon + caps title.
+        headerTitle:
+          isSecondary && headerTitleProp === undefined
+            ? () => (
+                <SecondaryScreenTitle
+                  icon={icon!}
+                  title={titleProp}
+                  IconProps={IconProps}
+                />
+              )
+            : headerTitleProp
       })
     )
   }, [

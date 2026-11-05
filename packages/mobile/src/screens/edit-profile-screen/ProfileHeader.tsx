@@ -1,116 +1,74 @@
-import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { View } from 'react-native'
 
 import { useTheme } from '@audius/harmony-native'
-import { ImageField, TextField } from 'app/components/fields'
+import { ImageField } from 'app/components/fields'
 
+const COVER_HEIGHT = 116
+const AVATAR_SIZE = 84
+const AVATAR_RING = 4
+/** How far the avatar hangs below the cover. */
+const AVATAR_OVERHANG = 36
+
+/** Cover photo with the profile picture overlapping its bottom-left corner. */
 export const ProfileHeader = () => {
-  const { color, cornerRadius } = useTheme()
+  const { color, cornerRadius, spacing } = useTheme()
+  const avatarOuter = AVATAR_SIZE + AVATAR_RING * 2
 
   return (
-    <View
-      style={{
-        width: '100%',
-        backgroundColor: color.background.white,
-        borderRadius: cornerRadius.m,
-        borderWidth: 1,
-        borderColor: color.border.default,
-        overflow: 'visible' // Changed to visible so avatar can overflow
-      }}
-    >
+    <View style={{ width: '100%', paddingBottom: AVATAR_OVERHANG }}>
+      <ImageField
+        name='cover_photo'
+        label='cover photo'
+        styles={{
+          root: { marginHorizontal: 0 },
+          imageContainer: {
+            height: COVER_HEIGHT,
+            width: '100%',
+            aspectRatio: undefined,
+            borderRadius: cornerRadius.xl
+          },
+          image: { borderRadius: cornerRadius.xl }
+        }}
+        pickerOptions={{
+          height: 500,
+          width: 2000,
+          freeStyleCropEnabled: true
+        }}
+      />
       <View
         style={{
-          overflow: 'hidden',
-          borderRadius: cornerRadius.m
+          position: 'absolute',
+          left: spacing.l,
+          bottom: 0,
+          width: avatarOuter,
+          height: avatarOuter,
+          borderRadius: avatarOuter / 2,
+          padding: AVATAR_RING,
+          backgroundColor: color.background.default
         }}
       >
-        {/* Cover Photo */}
-        <View
-          style={{
-            height: 96,
-            width: '100%',
-            position: 'relative'
+        <ImageField
+          name='profile_picture'
+          label='profile picture'
+          styles={{
+            root: { marginHorizontal: 0 },
+            imageContainer: {
+              height: AVATAR_SIZE,
+              width: AVATAR_SIZE,
+              borderRadius: AVATAR_SIZE / 2
+            },
+            image: {
+              height: AVATAR_SIZE,
+              width: AVATAR_SIZE,
+              borderRadius: AVATAR_SIZE / 2
+            }
           }}
-        >
-          <ImageField
-            name='cover_photo'
-            styles={{
-              root: {
-                marginHorizontal: 0,
-                height: 96,
-                width: '100%'
-              },
-              imageContainer: {
-                height: 96,
-                width: '100%',
-                borderTopLeftRadius: cornerRadius.m,
-                borderTopRightRadius: cornerRadius.m,
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-                aspectRatio: undefined
-              }
-            }}
-            pickerOptions={{
-              height: 500,
-              width: 2000,
-              freeStyleCropEnabled: true
-            }}
-          />
-        </View>
-
-        {/* Profile Picture - Positioned absolutely to overlap cover photo */}
-        <View
-          style={{
-            position: 'absolute',
-            left: 16,
-            top: 40, // 96px (cover height) - 56px (overlap) = 40px from container top
-            zIndex: 100
+          pickerOptions={{
+            height: 1000,
+            width: 1000,
+            cropperCircleOverlay: true
           }}
-        >
-          <ImageField
-            name='profile_picture'
-            styles={{
-              root: {
-                marginHorizontal: 0
-              },
-              imageContainer: {
-                height: 80,
-                width: 80,
-                borderRadius: 40
-              },
-              image: {
-                height: 80,
-                width: 80,
-                borderRadius: 40
-              }
-            }}
-            pickerOptions={{
-              height: 1000,
-              width: 1000,
-              cropperCircleOverlay: true
-            }}
-          />
-        </View>
-
-        {/* Bottom Container with Display Name */}
-        <View
-          style={{
-            paddingTop: 40, // Space for avatar (80px height - 56px overlap = 24px visible + 16px padding)
-            paddingHorizontal: 16,
-            paddingBottom: 16,
-            backgroundColor: color.background.white,
-            borderBottomLeftRadius: cornerRadius.m,
-            borderBottomRightRadius: cornerRadius.m
-          }}
-        >
-          <TextField
-            name='name'
-            label='Display Name'
-            placeholder='Name'
-            maxLength={MAX_DISPLAY_NAME_LENGTH}
-            noGutter
-          />
-        </View>
+        />
       </View>
     </View>
   )

@@ -1,67 +1,65 @@
 import { useCallback } from 'react'
 
-import { useNavigation } from '@react-navigation/native'
-import { isEmpty } from 'lodash'
+import { Pressable } from 'react-native'
 
-import { Button, Flex, IconUser } from '@audius/harmony-native'
-import { ScreenFooterLayout } from 'app/components/core/ScreenFooterLayout'
+import { Text } from '@audius/harmony-native'
 
 import type { ScreenProps } from '../../components/core/Screen'
 import { ScreenContent, Screen } from '../../components/core/Screen'
 
 const messages = {
-  cancel: 'Cancel',
   save: 'Save',
-  editProfile: 'Edit Profile'
+  editProfile: 'Edit profile'
 }
 
 type FormScreenProps = ScreenProps & {
   onSubmit: () => void
-  onReset: () => void
-  errors?: Record<string, unknown>
+  /** Save is offered only when there's something valid to save. */
+  canSubmit: boolean
 }
 
-export const FormScreen = (props: FormScreenProps) => {
-  const { children, onSubmit, onReset, errors, ...other } = props
-  const navigation = useNavigation()
+const ScreenTitle = () => (
+  <Text variant='title' size='l' accessibilityRole='header'>
+    {messages.editProfile}
+  </Text>
+)
 
-  const handleCancel = useCallback(() => {
-    onReset()
-    navigation.goBack()
-  }, [navigation, onReset])
+/**
+ * Edit profile chrome: back discards, Save sits in the header. No footer bar,
+ * so the form gets the whole screen.
+ */
+export const FormScreen = (props: FormScreenProps) => {
+  const { children, onSubmit, canSubmit, ...other } = props
+
+  const handleSave = useCallback(() => {
+    if (canSubmit) onSubmit()
+  }, [canSubmit, onSubmit])
 
   return (
     <Screen
-      variant='white'
-      title={messages.editProfile}
-      icon={IconUser}
+      variant='secondary'
+      headerTitle={ScreenTitle}
+      topbarRight={
+        <Pressable
+          onPress={handleSave}
+          disabled={!canSubmit}
+          accessibilityRole='button'
+          accessibilityState={{ disabled: !canSubmit }}
+          hitSlop={12}
+        >
+          <Text
+            variant='title'
+            size='m'
+            color={canSubmit ? 'active' : 'subdued'}
+            style={{ paddingHorizontal: 8 }}
+          >
+            {messages.save}
+          </Text>
+        </Pressable>
+      }
       {...other}
     >
-      <ScreenFooterLayout
-        footer={
-          <Flex direction='row' gap='s' w='100%'>
-            <Button
-              variant='secondary'
-              size='default'
-              onPress={handleCancel}
-              style={{ flex: 1 }}
-            >
-              {messages.cancel}
-            </Button>
-            <Button
-              variant='primary'
-              size='default'
-              onPress={onSubmit}
-              disabled={!isEmpty(errors)}
-              style={{ flex: 1 }}
-            >
-              {messages.save}
-            </Button>
-          </Flex>
-        }
-      >
-        <ScreenContent>{children}</ScreenContent>
-      </ScreenFooterLayout>
+      <ScreenContent>{children}</ScreenContent>
     </Screen>
   )
 }

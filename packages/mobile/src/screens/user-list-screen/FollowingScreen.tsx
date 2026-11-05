@@ -1,6 +1,5 @@
 import { useFollowing, useUser } from '@audius/common/api'
 
-import { IconUserList } from '@audius/harmony-native'
 import { useProfileRoute } from 'app/hooks/useRoute'
 
 import { UserList } from './UserList'
@@ -21,7 +20,7 @@ export const FollowingScreen = () => {
   })
 
   return (
-    <UserListScreen title={messages.title} titleIcon={IconUserList}>
+    <UserListScreen title={messages.title}>
       <UserList
         data={data}
         totalCount={followerCount}

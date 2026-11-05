@@ -11,14 +11,14 @@ export const getTitle = (notification: Notification) => {
   if (!('userIds' in notification)) return 'Users'
   const count = notification.userIds.length
   if (notification.type === NotificationType.Follow)
-    return `${formatCount(count)} New Followers`
+    return `${formatCount(count)} new followers`
   if (
     notification.type === NotificationType.Comment ||
     notification.type === NotificationType.CommentThread ||
     notification.type === NotificationType.CommentMention ||
     notification.type === NotificationType.CommentReaction
   )
-    return `${formatCount(count)} Commenters`
+    return `${formatCount(count)} commenters`
   return `${formatCount(count)} ${notification.type.toLowerCase()}s`
 }
 

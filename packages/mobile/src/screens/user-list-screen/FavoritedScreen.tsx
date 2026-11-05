@@ -6,7 +6,6 @@ import {
 } from '@audius/common/api'
 import { FavoriteType } from '@audius/common/models'
 
-import { IconHeart } from '@audius/harmony-native'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { UserList } from './UserList'
@@ -46,7 +45,7 @@ export const FavoritedScreen = () => {
       : collectionFavoritesQuery
 
   return (
-    <UserListScreen title={messages.title} titleIcon={IconHeart}>
+    <UserListScreen title={messages.title}>
       <UserList
         data={data}
         totalCount={
