@@ -23,6 +23,7 @@ export const QUERY_KEYS = {
   tracksByPlaylist: 'tracksByPlaylist',
   tracksByAlbum: 'tracksByAlbum',
   trackFileInfo: 'trackFileInfo',
+  trackWaveformPeaks: 'trackWaveformPeaks',
   stems: 'stems',
   user: 'user',
   userByHandle: 'userByHandle',

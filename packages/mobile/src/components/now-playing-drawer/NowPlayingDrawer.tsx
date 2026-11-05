@@ -66,8 +66,10 @@ import { Logo } from './Logo'
 import { PlayBar } from './PlayBar'
 import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
+import { WaveformScrubber } from './WaveformScrubber'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
+import { useDominantArtworkColors } from './useDominantArtworkColors'
 const { seekTo: seek, reset, next, previous } = playbackActions
 
 const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
@@ -120,6 +122,11 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   },
   scrubberContainer: {
     marginHorizontal: spacing(6)
+  },
+  // The waveform is taller than the slider; keep the comment bubble, which
+  // floats under it, clear of the play button.
+  waveformContainer: {
+    marginBottom: spacing(8)
   }
 }))
 
@@ -321,9 +328,14 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const { isEnabled: isNowPlayingCommentsEnabled } = useFeatureFlag(
     FeatureFlags.NOW_PLAYING_COMMENTS
   )
+  const { isEnabled: isWaveformEnabled } = useFeatureFlag(
+    FeatureFlags.NOW_PLAYING_WAVEFORM
+  )
+  // Feeds the artwork's colored glow.
+  useDominantArtworkColors(trackId, isWaveformEnabled && isOpen)
   const timestampedComments = useTimestampedComments(
     trackId,
-    isNowPlayingCommentsEnabled && isOpen
+    (isNowPlayingCommentsEnabled || isWaveformEnabled) && isOpen
   )
   const commentMarkers = useMemo(
     () =>
@@ -470,15 +482,33 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               user={user}
             />
           </View>
-          <View style={styles.scrubberContainer}>
-            <Scrubber
-              mediaKey={`${mediaKey}`}
-              isPlaying={isPlaying && !isBuffering}
-              onPressIn={onPressScrubberIn}
-              onPressOut={onPressScrubberOut}
-              duration={trackDuration}
-              markers={commentMarkers}
-            />
+          <View
+            style={[
+              styles.scrubberContainer,
+              isWaveformEnabled ? styles.waveformContainer : null
+            ]}
+          >
+            {isWaveformEnabled && trackId ? (
+              <WaveformScrubber
+                trackId={trackId}
+                duration={trackDuration}
+                mediaKey={`${mediaKey}`}
+                isOpen={isOpen}
+                isPlaying={isPlaying && !isBuffering}
+                comments={timestampedComments}
+                onPressIn={onPressScrubberIn}
+                onPressOut={onPressScrubberOut}
+              />
+            ) : (
+              <Scrubber
+                mediaKey={`${mediaKey}`}
+                isPlaying={isPlaying && !isBuffering}
+                onPressIn={onPressScrubberIn}
+                onPressOut={onPressScrubberOut}
+                duration={trackDuration}
+                markers={commentMarkers}
+              />
+            )}
           </View>
           {isNowPlayingCommentsEnabled && trackId ? (
             <CommentBubble

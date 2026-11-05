@@ -19,7 +19,8 @@ export enum FeatureFlags {
   WEEKLY_ROTATION = 'weekly_rotation',
   TRACK_ROWS = 'track_rows',
   NOW_PLAYING_COMMENTS = 'now_playing_comments',
-  TRACK_TILE_WAVEFORM = 'track_tile_waveform'
+  TRACK_TILE_WAVEFORM = 'track_tile_waveform',
+  NOW_PLAYING_WAVEFORM = 'now_playing_waveform'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -30,7 +31,8 @@ export const environmentFlagDefaults: Record<
 > = {
   development: {
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
-    [FeatureFlags.TRACK_TILE_WAVEFORM]: true
+    [FeatureFlags.TRACK_TILE_WAVEFORM]: true,
+    [FeatureFlags.NOW_PLAYING_WAVEFORM]: true
   },
   production: {}
 }
@@ -63,5 +65,7 @@ export const flagDefaults: FlagDefaults = {
   // Default on; the remote flag is the kill switch.
   [FeatureFlags.NOW_PLAYING_COMMENTS]: true,
   // Waveform with timestamped comment avatars on desktop web track tiles.
-  [FeatureFlags.TRACK_TILE_WAVEFORM]: false
+  [FeatureFlags.TRACK_TILE_WAVEFORM]: false,
+  // Waveform scrubber with comment avatars in the mobile Now Playing drawer.
+  [FeatureFlags.NOW_PLAYING_WAVEFORM]: false
 }
