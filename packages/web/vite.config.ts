@@ -300,11 +300,10 @@ export default defineConfig(async ({ mode }) => {
           })
         }
       },
+      // React Compiler is off on web while we investigate social actions
+      // (likes, reposts, comments) not persisting after #14730 shipped.
       react({
-        jsxImportSource: '@emotion/react',
-        babel: {
-          plugins: ['babel-plugin-react-compiler']
-        }
+        jsxImportSource: '@emotion/react'
       }),
       ...(ssr ? [vike()] : []),
       ...((analyze
