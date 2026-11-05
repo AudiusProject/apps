@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { Button, Flex, Text } from '@audius/harmony-native'
 import Drawer from 'app/components/drawer'
+import { WalletHelpLink } from 'app/components/wallet-help-link'
 import { getPurchaseVendor } from 'app/store/purchase-vendor/selectors'
 import { reset as resetPurchaseMethod } from 'app/store/purchase-vendor/slice'
 
@@ -87,6 +88,7 @@ export const AddCashDrawer = () => {
               <Button onPress={onContinuePress} fullWidth>
                 {messages.continue}
               </Button>
+              <WalletHelpLink />
             </Flex>
           </>
         ) : (
@@ -104,6 +106,7 @@ export const AddCashDrawer = () => {
               </Text>
             </Flex>
             <USDCManualTransfer />
+            <WalletHelpLink />
           </>
         )}
       </Flex>
