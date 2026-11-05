@@ -7,7 +7,7 @@ import {
 } from '@audius/common/store'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { IconTrophy, Text } from '@audius/harmony-native'
+import { Text } from '@audius/harmony-native'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { UserList } from './UserList'
@@ -41,10 +41,7 @@ export const CoinLeaderboardScreen = () => {
   if (!mint && !reduxMint) return null
 
   return (
-    <UserListScreen
-      title={messages.title(coin?.ticker || '')}
-      titleIcon={IconTrophy}
-    >
+    <UserListScreen title={messages.title(coin?.ticker || '')}>
       <UserList
         data={data?.map((member) => member.userId)}
         isFetchingNextPage={isFetchingNextPage}

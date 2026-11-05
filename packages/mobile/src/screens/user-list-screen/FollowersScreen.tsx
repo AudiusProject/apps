@@ -1,7 +1,7 @@
 import { useCurrentUserId, useFollowers } from '@audius/common/api'
 import { ChatBlastAudience } from '@audius/sdk'
 
-import { Flex, IconUserFollowers } from '@audius/harmony-native'
+import { Flex } from '@audius/harmony-native'
 import { useBottomBarInset } from 'app/components/core/BottomBarInsetContext'
 import { useProfileRoute } from 'app/hooks/useRoute'
 
@@ -25,7 +25,7 @@ export const FollowersScreen = () => {
   })
 
   return (
-    <UserListScreen title={messages.title} titleIcon={IconUserFollowers}>
+    <UserListScreen title={messages.title}>
       <Flex flex={1} mb={bottomBarInset}>
         <UserList
           data={data}
@@ -33,6 +33,7 @@ export const FollowersScreen = () => {
           isPending={isPending}
           fetchNextPage={fetchNextPage}
           tag='FOLLOWERS'
+          hideFollowsYou={currentUserId === userId}
         />
         {currentUserId === userId ? (
           <Flex w='100%'>
