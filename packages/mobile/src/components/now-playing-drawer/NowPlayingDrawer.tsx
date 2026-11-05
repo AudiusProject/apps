@@ -66,7 +66,7 @@ import { Logo } from './Logo'
 import { PlayBar } from './PlayBar'
 import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
-import { WaveformScrubber } from './WaveformScrubber'
+import { IS_COMPACT_NOW_PLAYING, WaveformScrubber } from './WaveformScrubber'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
 import { useDominantArtworkColors } from './useDominantArtworkColors'
@@ -123,10 +123,10 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   scrubberContainer: {
     marginHorizontal: spacing(6)
   },
-  // The waveform is taller than the slider; keep the comment bubble, which
-  // floats under it, clear of the play button.
-  waveformContainer: {
-    marginBottom: spacing(8)
+  // Room for the comment bubble, which floats under the waveform, so it
+  // clears the play button.
+  commentBubbleSpace: {
+    height: spacing(8)
   }
 }))
 
@@ -482,12 +482,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               user={user}
             />
           </View>
-          <View
-            style={[
-              styles.scrubberContainer,
-              isWaveformEnabled ? styles.waveformContainer : null
-            ]}
-          >
+          <View style={styles.scrubberContainer}>
             {isWaveformEnabled && trackId ? (
               <WaveformScrubber
                 trackId={trackId}
@@ -510,13 +505,19 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               />
             )}
           </View>
-          {isNowPlayingCommentsEnabled && trackId ? (
+          {isNowPlayingCommentsEnabled &&
+          trackId &&
+          // On short screens the avatars under the waveform stand in for it
+          !(isWaveformEnabled && IS_COMPACT_NOW_PLAYING) ? (
             <CommentBubble
               trackId={trackId}
               comments={timestampedComments}
               isActive={isOpen && isPlaying && !isBuffering}
               mediaKey={`${mediaKey}`}
             />
+          ) : null}
+          {isWaveformEnabled && !IS_COMPACT_NOW_PLAYING ? (
+            <View style={styles.commentBubbleSpace} />
           ) : null}
           <View style={styles.controlsContainer}>
             <AudioControls

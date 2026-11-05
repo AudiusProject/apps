@@ -17,7 +17,13 @@ import type {
   GestureResponderEvent,
   LayoutChangeEvent
 } from 'react-native'
-import { PanResponder, Pressable, StyleSheet, View } from 'react-native'
+import {
+  Dimensions,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  View
+} from 'react-native'
 import Animated, {
   Easing,
   FadeIn,
@@ -43,7 +49,13 @@ const messages = {
   openComment: (name: string) => `Open comment by ${name}`
 }
 
-const HEIGHT = 48
+/**
+ * SE-sized screens can't fit the full waveform and the comment bubble
+ * without squeezing the artwork down to a thumbnail.
+ */
+export const IS_COMPACT_NOW_PLAYING = Dimensions.get('window').height < 700
+
+const HEIGHT = IS_COMPACT_NOW_PLAYING ? 32 : 48
 const BAR_WIDTH = 3
 const BAR_GAP = 2
 const MIN_BAR_HEIGHT = 3
@@ -194,7 +206,9 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
     onPressOut
   } = props
   const dispatch = useDispatch()
-  const { color } = useTheme()
+  const { color, type } = useTheme()
+  // n150 nearly disappears on the dark drawer background
+  const unplayedColor = type === 'day' ? color.neutral.n150 : color.neutral.n300
   const [width, setWidth] = useState(0)
   const [dragFraction, setDragFraction] = useState<number | null>(null)
   const position = usePlaybackSeconds(isOpen && isPlaying, mediaKey)
@@ -333,7 +347,7 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
             style={StyleSheet.absoluteFill}
           >
             <Svg width={width} height={HEIGHT}>
-              <Path d={path} fill={color.neutral.n150} />
+              <Path d={path} fill={unplayedColor} />
             </Svg>
             <Animated.View style={[styles.fill, fillStyle]}>
               <Svg width={width} height={HEIGHT}>
@@ -346,7 +360,7 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
           // something to aim at.
           <View
             pointerEvents='none'
-            style={[styles.rail, { backgroundColor: color.neutral.n150 }]}
+            style={[styles.rail, { backgroundColor: unplayedColor }]}
           >
             <Animated.View
               style={[
