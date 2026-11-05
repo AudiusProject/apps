@@ -25,6 +25,8 @@ import { SettingsRow } from './SettingsRow'
 
 const { version: appVersion } = packageInfo
 
+const SUPPORT_EMAIL_LINK = 'mailto:support@audius.co'
+
 const messages = {
   title: 'About',
   appName: 'Audius Music',
@@ -126,7 +128,7 @@ export const AboutScreen = () => {
         <SettingsRow url={route.AUDIUS_INSTAGRAM_LINK}>
           <SettingsRowLabel label={messages.instagram} icon={IconInstagram} />
         </SettingsRow>
-        <SettingsRow url={route.AUDIUS_HELP_LINK}>
+        <SettingsRow url={SUPPORT_EMAIL_LINK}>
           <SettingsRowLabel label={messages.contact} icon={IconMessage} />
         </SettingsRow>
         <SettingsRow url={route.AUDIUS_CAREERS_LINK}>

@@ -20,25 +20,32 @@ import {
 } from '../slice'
 import type { ConnectAction, ConnectNewWalletAction } from '../types'
 import { buildUrl, decryptPayload, encryptPayload } from '../utils'
-const { setIsConnectingWallet, connectNewWallet: baseConnectNewWallet } =
-  tokenDashboardPageActions
+const {
+  setIsConnectingWallet,
+  connectNewWallet: baseConnectNewWallet,
+  updateWalletError
+} = tokenDashboardPageActions
+
+const messages = {
+  connectError: 'Could not connect your wallet. Please try again.'
+}
 
 // Connection a new wallet to an Audius account
 function* connectNewWalletAsync(action: ConnectNewWalletAction) {
   const accountUserId = yield* call(queryCurrentUserId)
-  if (!accountUserId) return
+  if (!accountUserId) throw new Error('No current user')
 
   yield* put(baseConnectNewWallet())
 
   switch (action.payload.connectionType) {
     case null:
-      console.error('No connection type set')
-      break
+      throw new Error('No connection type set')
     case 'phantom': {
       const { phantom_encryption_public_key, data, nonce } = action.payload
       const dappKeyPair = yield* select(getDappKeyPair)
 
-      if (!dappKeyPair) return
+      // Lost if the app restarted while Phantom was open
+      if (!dappKeyPair) throw new Error('Missing dapp key pair')
 
       const sharedSecretDapp = nacl.box.before(
         bs58.decode(phantom_encryption_public_key),
@@ -84,7 +91,7 @@ function* connectNewWalletAsync(action: ConnectNewWalletAction) {
       })
 
       const url = buildUrl('signMessage', urlParams)
-      Linking.openURL(url)
+      yield* call([Linking, Linking.openURL], url)
       break
     }
     case 'solana-phone-wallet-adapter': {
@@ -172,7 +179,11 @@ export function* watchConnectNewWallet() {
     function* (action: ConnectNewWalletAction) {
       try {
         yield* call(connectNewWalletAsync, action)
-      } catch {}
+      } catch (e) {
+        console.error('Failed to connect new wallet', e)
+        // Clears the Connecting status and shows a toast
+        yield* put(updateWalletError({ errorMessage: messages.connectError }))
+      }
     }
   )
 }

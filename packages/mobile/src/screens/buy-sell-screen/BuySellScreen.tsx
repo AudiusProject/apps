@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex, Paper, spacing } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
+import { WalletHelpLink } from 'app/components/wallet-help-link'
 
 import type { BuySellScreenParams } from '../../types/navigation'
 
@@ -58,6 +59,7 @@ export const BuySellScreen = ({ route }: BuySellScreenProps) => {
           })}
         >
           {flowData.footer}
+          <WalletHelpLink />
         </Paper>
       </ScreenContent>
     </Screen>
