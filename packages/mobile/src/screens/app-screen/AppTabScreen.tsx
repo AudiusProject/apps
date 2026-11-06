@@ -33,6 +33,7 @@ import type { AppTabNavigation } from 'app/screens/app-screen/AppTabNavigationPr
 import { AudioScreen } from 'app/screens/audio-screen'
 import { CashScreen } from 'app/screens/cash-screen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
+import { ChatMembersScreen } from 'app/screens/chat-screen/ChatMembersScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
 import {
@@ -167,6 +168,7 @@ export type AppTabScreenParamList = {
     chatId: string
     presetMessage?: string
   }
+  ChatMembers: { chatId: string }
   ChatBlastSelectContent: {
     valueName: string
     title: string
@@ -447,6 +449,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
                   params?.chatId
                 }
                 options={{ ...screenOptions, fullScreenGestureEnabled: false }}
+              />
+              <Stack.Screen
+                name='ChatMembers'
+                getComponent={() => ChatMembersScreen}
               />
             </Stack.Group>
           </Stack.Navigator>

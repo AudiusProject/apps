@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react'
 
 import type { ReactionTypes } from '@audius/common/api'
 import { useCurrentUserId } from '@audius/common/api'
+import { useIsGroupChat } from '@audius/common/hooks'
 import type { ChatMessageWithExtras } from '@audius/common/models'
 import { chatActions } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
@@ -107,6 +108,7 @@ export const ReactionPopup = ({
   const dispatch = useDispatch()
   const { data: userId } = useCurrentUserId()
   const { toast } = useToast()
+  const isGroup = useIsGroupChat(chatId)
 
   const newReaction = useRef<string | undefined>(undefined)
   const userIdEncoded = OptionalId.parse(userId)
@@ -192,6 +194,7 @@ export const ReactionPopup = ({
           chatId={chatId}
           messageId={message.message_id}
           isPopup={true}
+          isGroup={isGroup}
           style={[
             styles.popupChatMessage,
             {
