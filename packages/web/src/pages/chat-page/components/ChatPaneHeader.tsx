@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
+import { GroupChatHeader } from './GroupChatHeader'
 import { UserChatHeader } from './UserChatHeader'
 
 const CHAT_PANE_HEADER_HEIGHT_PX = 112
@@ -57,6 +58,8 @@ export const ChatPaneHeader = (props: ChatPaneHeaderProps) => {
         {chat ? (
           isBlast ? (
             <ChatBlastHeader chat={chat as ChatBlast} />
+          ) : !chat.is_blast && chat.is_group ? (
+            <GroupChatHeader chatId={chat.chat_id} />
           ) : (
             <UserChatHeader chatId={chat.chat_id} />
           )
