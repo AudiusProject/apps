@@ -66,8 +66,10 @@ import { Logo } from './Logo'
 import { PlayBar } from './PlayBar'
 import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
+import { WaveformScrubber } from './WaveformScrubber'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
+import { useDominantArtworkColors } from './useDominantArtworkColors'
 const { seekTo: seek, reset, next, previous } = playbackActions
 
 const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
@@ -120,6 +122,11 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   },
   scrubberContainer: {
     marginHorizontal: spacing(6)
+  },
+  // Room for the comment bubble, which floats under the waveform, so it
+  // clears the play button.
+  commentBubbleSpace: {
+    height: spacing(8)
   }
 }))
 
@@ -321,9 +328,14 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const { isEnabled: isNowPlayingCommentsEnabled } = useFeatureFlag(
     FeatureFlags.NOW_PLAYING_COMMENTS
   )
+  const { isEnabled: isWaveformEnabled } = useFeatureFlag(
+    FeatureFlags.NOW_PLAYING_WAVEFORM
+  )
+  // Feeds the artwork's colored glow.
+  useDominantArtworkColors(trackId, isWaveformEnabled && isOpen)
   const timestampedComments = useTimestampedComments(
     trackId,
-    isNowPlayingCommentsEnabled && isOpen
+    (isNowPlayingCommentsEnabled || isWaveformEnabled) && isOpen
   )
   const commentMarkers = useMemo(
     () =>
@@ -471,14 +483,27 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             />
           </View>
           <View style={styles.scrubberContainer}>
-            <Scrubber
-              mediaKey={`${mediaKey}`}
-              isPlaying={isPlaying && !isBuffering}
-              onPressIn={onPressScrubberIn}
-              onPressOut={onPressScrubberOut}
-              duration={trackDuration}
-              markers={commentMarkers}
-            />
+            {isWaveformEnabled && trackId ? (
+              <WaveformScrubber
+                trackId={trackId}
+                duration={trackDuration}
+                mediaKey={`${mediaKey}`}
+                isOpen={isOpen}
+                isPlaying={isPlaying && !isBuffering}
+                comments={timestampedComments}
+                onPressIn={onPressScrubberIn}
+                onPressOut={onPressScrubberOut}
+              />
+            ) : (
+              <Scrubber
+                mediaKey={`${mediaKey}`}
+                isPlaying={isPlaying && !isBuffering}
+                onPressIn={onPressScrubberIn}
+                onPressOut={onPressScrubberOut}
+                duration={trackDuration}
+                markers={commentMarkers}
+              />
+            )}
           </View>
           {isNowPlayingCommentsEnabled && trackId ? (
             <CommentBubble
@@ -487,6 +512,9 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               isActive={isOpen && isPlaying && !isBuffering}
               mediaKey={`${mediaKey}`}
             />
+          ) : null}
+          {isWaveformEnabled ? (
+            <View style={styles.commentBubbleSpace} />
           ) : null}
           <View style={styles.controlsContainer}>
             <AudioControls

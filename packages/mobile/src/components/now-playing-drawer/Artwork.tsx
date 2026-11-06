@@ -14,6 +14,8 @@ import { makeStyles } from 'app/styles'
 
 import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
+
+import { mostSaturated } from './useDominantArtworkColors'
 const { getPreviewing } = playbackSelectors
 const { getDominantColorsByTrack } = averageColorSelectors
 
@@ -30,6 +32,11 @@ const useStyles = makeStyles(({ palette }) => ({
     borderRadius: 8,
     shadowOpacity: 0.2,
     shadowRadius: 8
+  },
+  glow: {
+    shadowOpacity: 0.55,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 10 }
   },
   image: {
     alignSelf: 'center',
@@ -58,11 +65,15 @@ export const Artwork = ({ track, isOpen }: ArtworkProps) => {
     })
   )
 
-  let shadowColor = 'rgb(0,0,0)'
-  const dominantColor = dominantColors ? dominantColors[0] : null
-  if (dominantColor) {
-    const { r, g, b } = dominantColor
-    shadowColor = `rgb(${r.toFixed()},${g.toFixed()},${b.toFixed()})`
+  // With the artwork's colors, a wide soft glow in its most colorful one;
+  // without, the plain drop shadow.
+  let shadowStyle = { shadowColor: 'rgb(0,0,0)' }
+  if (dominantColors?.length) {
+    const { r, g, b } = mostSaturated(dominantColors)
+    shadowStyle = {
+      ...styles.glow,
+      shadowColor: `rgb(${r.toFixed()},${g.toFixed()},${b.toFixed()})`
+    }
   }
 
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -78,7 +89,7 @@ export const Artwork = ({ track, isOpen }: ArtworkProps) => {
     isPreviewing || canPurchase || shouldDisplayPremiumDownloadLocked
 
   return (
-    <View style={[styles.root, { shadowColor }]}>
+    <View style={[styles.root, shadowStyle]}>
       <TrackImage
         key={track?.track_id}
         trackId={track?.track_id}
