@@ -42,6 +42,7 @@ import { DragDropKind } from 'store/dragndrop/slice'
 import { fullTrackPage } from 'utils/route'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
+import { FeedbackWantedTag } from '../FeedbackWantedTag'
 import { OwnerActionButtons } from '../OwnerActionButtons'
 import { TrackDogEar } from '../TrackDogEar'
 import { TrackTileStats } from '../TrackTileStats'
@@ -458,6 +459,7 @@ export const TrackTile = ({
                       {messages.artistPick}
                     </IconText>
                   ) : null}
+                  {!isLoading ? <FeedbackWantedTag trackId={trackId} /> : null}
                   <TrackTileDuration trackId={trackId} isLoading={isLoading} />
                 </Flex>
               </Flex>

@@ -1,4 +1,8 @@
+import { useEffect } from 'react'
+
+import { useFeatureFlag } from '@audius/common/hooks'
 import { advancedTrackMessages as messages } from '@audius/common/messages'
+import { FeatureFlags } from '@audius/common/services'
 import { useField } from 'formik'
 
 import { IconIndent } from '@audius/harmony-native'
@@ -17,6 +21,19 @@ import { KeyBpmField } from '../fields/KeyBpmField'
 export const AdvancedScreen = () => {
   const [{ value: isUpload }] = useField('isUpload')
   const [{ value: isUnlisted }] = useField('is_unlisted')
+  const [{ value: commentsDisabled }] = useField<boolean>('comments_disabled')
+  const [{ value: feedbackRequested }, , { setValue: setFeedbackRequested }] =
+    useField<boolean | undefined>('feedback_requested')
+  const { isEnabled: isFeedbackEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_FEEDBACK_REQUESTS
+  )
+
+  // Feedback comes in as comments, so it can't stay on without them.
+  useEffect(() => {
+    if (commentsDisabled && feedbackRequested) {
+      setFeedbackRequested(false)
+    }
+  }, [commentsDisabled, feedbackRequested, setFeedbackRequested])
 
   return (
     <FormScreen
@@ -33,6 +50,15 @@ export const AdvancedScreen = () => {
           label={messages.disableComments.header}
           description={messages.disableComments.description}
         />
+        {isFeedbackEnabled && !commentsDisabled && !isUnlisted ? (
+          <SwitchRowField
+            name='feedback_requested'
+            label={messages.feedbackRequested.header}
+            description={messages.feedbackRequested.description}
+          />
+        ) : (
+          <></>
+        )}
         <LicenseTypeField />
         <IsrcField />
         <CoverAttributionField />

@@ -1,6 +1,8 @@
 import React from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 
 import { Flex } from '@audius/harmony-native'
 import { RecentSearches } from 'app/screens/search-screen/RecentSearches'
@@ -10,6 +12,7 @@ import { ArtistSpotlight } from './ArtistSpotlight'
 import { BestSellingAlbums } from './BestSellingAlbums'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
+import { FeedbackTracks } from './FeedbackTracks'
 import { FeelingLucky } from './FeelingLucky'
 import { LabelSpotlight } from './LabelSpotlight'
 import { NewAlbumReleases } from './NewAlbumReleases'
@@ -28,6 +31,9 @@ export const ExploreContent = () => {
   const showPlaylistContent = category === 'playlists' || category === 'all'
   const showAlbumContent = category === 'albums'
   const showUserContent = category === 'users' || category === 'all'
+  const { isEnabled: isFeedbackEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_FEEDBACK_REQUESTS
+  )
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
@@ -40,6 +46,7 @@ export const ExploreContent = () => {
       {showAlbumContent && <NewAlbumReleases />}
       {showAlbumContent && <BestSellingAlbums />}
       {showTrackContent && <FeaturedRemixContests />}
+      {showTrackContent && isFeedbackEnabled && <FeedbackTracks />}
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}

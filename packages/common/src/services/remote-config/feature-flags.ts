@@ -23,7 +23,8 @@ export enum FeatureFlags {
   NOW_PLAYING_WAVEFORM = 'now_playing_waveform',
   MOBILE_MANAGER_MODE = 'mobile_manager_mode',
   BULK_TRACK_EDIT = 'bulk_track_edit',
-  WEEKLY_ARTIST_RECAP = 'weekly_artist_recap'
+  WEEKLY_ARTIST_RECAP = 'weekly_artist_recap',
+  TRACK_FEEDBACK_REQUESTS = 'track_feedback_requests'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -38,7 +39,8 @@ export const environmentFlagDefaults: Record<
     [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
     [FeatureFlags.MOBILE_MANAGER_MODE]: true,
     [FeatureFlags.BULK_TRACK_EDIT]: true,
-    [FeatureFlags.WEEKLY_ARTIST_RECAP]: true
+    [FeatureFlags.WEEKLY_ARTIST_RECAP]: true,
+    [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: true
   },
   production: {}
 }
@@ -81,5 +83,7 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.BULK_TRACK_EDIT]: false,
   // Weekly recap notification tile for artists (plays, followers, top city,
   // saves).
-  [FeatureFlags.WEEKLY_ARTIST_RECAP]: false
+  [FeatureFlags.WEEKLY_ARTIST_RECAP]: false,
+  // "Looking for feedback" toggle, badge, and Explore section.
+  [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: false
 }

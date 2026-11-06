@@ -36,5 +36,6 @@ export const exploreMessages = {
   weeklyRotationTrackCount: (count: number) =>
     `${count} ${count === 1 ? 'track' : 'tracks'}`,
   undergroundTrending: 'Underground Trending',
+  lookingForFeedback: 'Looking for Feedback',
   verified: 'Verified'
 }
