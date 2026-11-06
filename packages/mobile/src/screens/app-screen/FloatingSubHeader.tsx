@@ -3,31 +3,34 @@ import { useCallback } from 'react'
 
 import type { LayoutChangeEvent } from 'react-native'
 import { StyleSheet, View } from 'react-native'
-import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue
+} from 'react-native-reanimated'
 
+import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
 import { zIndex } from 'app/utils/zIndex'
 
 import {
   useChromeHiddenProgress,
-  useGlassHeaderInset,
   useRootHeaderHeight,
   useSetSubHeaderHeight,
-  useSubHeaderHeight
+  useSubHeaderHeight,
+  useSubHeaderScrollOffset
 } from './GlassChromeContext'
-import {
-  EDGE_FADE_TAIL,
-  GlassEdgeFade,
-  SUB_HEADER_FADE_OPACITY
-} from './GlassEdgeFade'
+
+/** Pill (32) plus 6px of glass around it. */
+const PILL_BAR_HEIGHT = 44
 
 type FloatingSubHeaderProps = {
   children: ReactNode
 }
 
 /**
- * Pins a screen's persistent top row (feed tabs, trending pills) beneath the
- * floating root header. The pills float on their own over a fade that picks
- * up where the header's leaves off, so there's no slab behind them.
+ * A screen's tab pills (feed tabs, trending categories) in one glass pill
+ * bar under the root header. It scrolls up with the list, then pins under the
+ * status bar once the header is gone. While pinned it slides away on scroll
+ * down and comes back on scroll up, with the tab bar.
  *
  * Owned by the screen rather than passed into `MobileRootHeader`, whose
  * memoized render prop must not rebuild on tab-state changes (that remounts
@@ -39,14 +42,22 @@ export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
   const subHeaderHeight = useSubHeaderHeight()
   const setSubHeaderHeight = useSetSubHeaderHeight()
   const hidden = useChromeHiddenProgress()
-  const glassHeaderInset = useGlassHeaderInset()
+  const scrollOffset = useSubHeaderScrollOffset()
+  const floating = useSharedValue(1)
 
-  // Travels by the full stack height, not just its own, so it tucks up behind
-  // the header rather than colliding with it on the way out.
-  const hideStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -glassHeaderInset * hidden.value }],
-    opacity: 1 - hidden.value
-  }))
+  // Glass stops rendering under a parent that fades from 0, so it hides by
+  // sliding fully off the top instead.
+  const positionStyle = useAnimatedStyle(() => {
+    const restingTop = headerHeight - scrollOffset.value
+    return {
+      transform: [
+        {
+          translateY:
+            -scrollOffset.value - hidden.value * (restingTop + subHeaderHeight)
+        }
+      ]
+    }
+  })
 
   const handleLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -58,16 +69,16 @@ export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
   return (
     <Animated.View
       pointerEvents='box-none'
-      style={[styles.root, { top: headerHeight }, hideStyle]}
+      style={[styles.root, { top: headerHeight }, positionStyle]}
+      onLayout={handleLayout}
     >
-      <GlassEdgeFade
-        height={subHeaderHeight + EDGE_FADE_TAIL}
-        fromOpacity={SUB_HEADER_FADE_OPACITY}
-        toOpacity={0}
-      />
-      <View pointerEvents='box-none' onLayout={handleLayout}>
-        {children}
-      </View>
+      <GlassCapsule
+        height={PILL_BAR_HEIGHT}
+        floatProgress={floating}
+        style={styles.pillBar}
+      >
+        <View style={styles.pills}>{children}</View>
+      </GlassCapsule>
     </Animated.View>
   )
 }
@@ -77,6 +88,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
+    paddingVertical: 8,
     zIndex: zIndex.HEADER_SHADOW
+  },
+  pillBar: {
+    alignSelf: 'flex-start'
+  },
+  pills: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 6
   }
 })
