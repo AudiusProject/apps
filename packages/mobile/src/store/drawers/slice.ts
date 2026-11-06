@@ -27,6 +27,7 @@ export type Drawer =
   | 'BlockMessages'
   | 'MuteComments'
   | 'DeleteChat'
+  | 'LeaveChat'
   | 'OfflineListening'
   | 'Welcome'
   | 'ManagerMode'
@@ -74,6 +75,7 @@ export type DrawerData = {
   }
   MuteComments: { userId: number; isMuted: boolean }
   DeleteChat: { chatId: string }
+  LeaveChat: { chatId: string }
   InboxUnavailable: { userId: number; shouldOpenChat: boolean }
   Welcome: undefined
   ManagerMode: undefined
@@ -118,6 +120,7 @@ const initialState: DrawersState = {
   BlockMessages: false,
   MuteComments: false,
   DeleteChat: false,
+  LeaveChat: false,
   Welcome: false,
   ManagerMode: false,
   Comment: false,

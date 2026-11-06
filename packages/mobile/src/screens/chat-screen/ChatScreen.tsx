@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useCanSendMessage } from '@audius/common/hooks'
+import { useCanSendMessage, useIsGroupChat } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import type { ChatMessageWithExtras } from '@audius/common/models'
 import {
@@ -56,6 +56,7 @@ import { ChatMessageSeparator } from './ChatMessageSeparator'
 import { ChatTextInput } from './ChatTextInput'
 import { ChatUnavailable } from './ChatUnavailable'
 import { EmptyChatMessages } from './EmptyChatMessages'
+import { GroupChatHeader } from './GroupChatHeader'
 import { ReactionPopup } from './ReactionPopup'
 import { UserChatHeader } from './UserChatHeader'
 import {
@@ -269,6 +270,7 @@ export const ChatScreen = () => {
   )
   const { canSendMessage, firstOtherUser: otherUser } =
     useCanSendMessage(chatId)
+  const isGroup = useIsGroupChat(chatId)
 
   // A ref so that the unread separator doesn't disappear immediately when the chat is marked as read
   // Using a ref instead of state here to prevent unwanted flickers.
@@ -295,10 +297,10 @@ export const ChatScreen = () => {
   useEffect(() => {
     dispatch(fetchBlockees())
     dispatch(fetchBlockers())
-    if (otherUser?.user_id) {
+    if (otherUser?.user_id && !isGroup) {
       dispatch(fetchPermissions({ userIds: [otherUser.user_id] }))
     }
-  }, [chatId, dispatch, otherUser?.user_id])
+  }, [chatId, dispatch, otherUser?.user_id, isGroup])
 
   // Find earliest unread message to display unread tag correctly
   const earliestUnreadIndex = useMemo(
@@ -468,11 +470,14 @@ export const ChatScreen = () => {
     </TouchableOpacity>
   ) : null
 
+  // Only groups need the neighbor message, so 1:1 rows don't rerender on new messages
+  const groupMessages = isGroup ? chatMessages : undefined
+
   // When reaction popup opens, hide reaction here so it doesn't
   // appear underneath the reaction of the message clone inside the
   // portal.
   const renderItem = useCallback(
-    ({ item }) => (
+    ({ item, index }) => (
       <>
         <ChatMessageListItem
           messageId={item.message_id}
@@ -480,6 +485,9 @@ export const ChatScreen = () => {
           itemsRef={itemsRef}
           isPopup={false}
           onLongPress={handleMessagePress}
+          isGroup={isGroup}
+          // The list is newest first, so the older neighbor is index + 1
+          previousMessageId={groupMessages?.[index + 1]?.message_id}
         />
         {item.message_id === earliestUnreadMessageId &&
         chatFrozenRef.current?.unread_message_count ? (
@@ -491,7 +499,13 @@ export const ChatScreen = () => {
         ) : null}
       </>
     ),
-    [earliestUnreadMessageId, handleMessagePress, chatId]
+    [
+      earliestUnreadMessageId,
+      handleMessagePress,
+      chatId,
+      isGroup,
+      groupMessages
+    ]
   )
 
   const maintainVisibleContentPosition = useMemo(
@@ -544,11 +558,15 @@ export const ChatScreen = () => {
       headerTitle={
         isBlast
           ? () => <ChatBlastHeader chat={chat as ChatBlast} />
-          : otherUser
-            ? () => <UserChatHeader user={otherUser} />
-            : () => <Text style={styles.userBadgeTitle}>{messages.title}</Text>
+          : isGroup
+            ? () => <GroupChatHeader chatId={chatId} />
+            : otherUser
+              ? () => <UserChatHeader user={otherUser} />
+              : () => (
+                  <Text style={styles.userBadgeTitle}>{messages.title}</Text>
+                )
       }
-      icon={otherUser ? undefined : IconMessage}
+      icon={otherUser || isGroup ? undefined : IconMessage}
       topbarRight={topBarRight}
     >
       <ScreenContent>
@@ -624,7 +642,9 @@ export const ChatScreen = () => {
                     ) : null
                   }
                   ListHeaderComponent={
-                    !canSendMessage ? <ChatUnavailable chatId={chatId} /> : null
+                    !canSendMessage && !isGroup ? (
+                      <ChatUnavailable chatId={chatId} />
+                    ) : null
                   }
                   ListFooterComponent={
                     chat?.is_blast ? (
