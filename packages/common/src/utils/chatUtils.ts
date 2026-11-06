@@ -43,6 +43,36 @@ const messages = {
 }
 
 /**
+ * Title for a group chat from its other members, e.g. "Ann, Bo & 2 others".
+ */
+export const formatGroupChatTitle = (
+  users: Array<{ name?: string | null }>,
+  maxNames = 2
+) => {
+  const names = users.map((u) => u.name ?? '').filter(Boolean)
+  if (names.length === 0) return 'Group'
+  if (names.length <= maxNames) {
+    return names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
+  }
+  const rest = names.length - maxNames
+  return `${names.slice(0, maxNames).join(', ')} & ${rest} ${rest === 1 ? 'other' : 'others'}`
+}
+
+/**
+ * True when this message starts a new run from a different sender, which is
+ * where group chats show the sender's name.
+ */
+export const isFirstInSenderRun = (
+  message: ChatMessage,
+  previousMessage?: ChatMessage
+) => {
+  if (!previousMessage) return true
+  return hasTail(previousMessage, message)
+}
+
+/**
  * Checks to see if the message was sent within the time threshold for grouping it with the next message
  */
 export const hasTail = (message: ChatMessage, newMessage?: ChatMessage) => {
