@@ -839,6 +839,9 @@ const slice = createSlice({
     deleteChat: (_state, _action: PayloadAction<{ chatId: string }>) => {
       // triggers saga
     },
+    leaveChat: (_state, _action: PayloadAction<{ chatId: string }>) => {
+      // triggers saga, then deleteChatSucceeded
+    },
     deleteChatSucceeded: (state, action: PayloadAction<{ chatId: string }>) => {
       const { chatId } = action.payload
       chatsAdapter.removeOne(state.chats, chatId)

@@ -24,7 +24,8 @@ export enum FeatureFlags {
   MOBILE_MANAGER_MODE = 'mobile_manager_mode',
   BULK_TRACK_EDIT = 'bulk_track_edit',
   WEEKLY_ARTIST_RECAP = 'weekly_artist_recap',
-  TRACK_FEEDBACK_REQUESTS = 'track_feedback_requests'
+  TRACK_FEEDBACK_REQUESTS = 'track_feedback_requests',
+  GROUP_MESSAGES = 'group_messages'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -40,7 +41,8 @@ export const environmentFlagDefaults: Record<
     [FeatureFlags.MOBILE_MANAGER_MODE]: true,
     [FeatureFlags.BULK_TRACK_EDIT]: true,
     [FeatureFlags.WEEKLY_ARTIST_RECAP]: true,
-    [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: true
+    [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: true,
+    [FeatureFlags.GROUP_MESSAGES]: true
   },
   production: {}
 }
@@ -85,5 +87,7 @@ export const flagDefaults: FlagDefaults = {
   // saves).
   [FeatureFlags.WEEKLY_ARTIST_RECAP]: false,
   // "Looking for feedback" toggle, badge, and Explore section.
-  [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: false
+  [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: false,
+  // Creating group DMs. Existing groups always render.
+  [FeatureFlags.GROUP_MESSAGES]: false
 }
