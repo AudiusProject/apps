@@ -12,6 +12,7 @@ import { View, TouchableOpacity, Keyboard } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import {
+  IconCheck,
   IconMessageSlash,
   IconKebabHorizontal,
   IconUser
@@ -124,6 +125,25 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   },
   dim: {
     opacity: 0.5
+  },
+  selectCircle: {
+    width: spacing(6),
+    height: spacing(6),
+    borderRadius: spacing(3),
+    borderWidth: 2,
+    borderColor: palette.neutralLight6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: spacing(3)
+  },
+  selectCircleSelected: {
+    backgroundColor: palette.secondary,
+    borderColor: palette.secondary
+  },
+  iconCheck: {
+    height: spacing(3.5),
+    width: spacing(3.5),
+    fill: palette.staticWhite
   }
 }))
 
@@ -139,11 +159,21 @@ const ctaToTextMap: Record<ChatPermissionAction, string> = {
 type ChatUserListItemProps = {
   userId: number
   presetMessage?: string
+  /** Shows a select circle for building a group chat. */
+  isSelectable?: boolean
+  isSelected?: boolean
+  /** When something is already selected, tapping the row toggles it. */
+  isSelectionMode?: boolean
+  onToggleSelect?: (userId: number) => void
 }
 
 export const ChatUserListItem = ({
   userId,
-  presetMessage
+  presetMessage,
+  isSelectable = false,
+  isSelected = false,
+  isSelectionMode = false,
+  onToggleSelect
 }: ChatUserListItemProps) => {
   const styles = useStyles()
   const dispatch = useDispatch()
@@ -172,6 +202,13 @@ export const ChatUserListItem = ({
     }
   }, [openInboxUnavailableDrawer, user, presetMessage])
 
+  const handleToggleSelect = useCallback(() => {
+    if (user?.user_id) {
+      Keyboard.dismiss()
+      onToggleSelect?.(user.user_id)
+    }
+  }, [onToggleSelect, user?.user_id])
+
   const handleKebabPress = useCallback(() => {
     if (user?.user_id) {
       Keyboard.dismiss()
@@ -191,7 +228,13 @@ export const ChatUserListItem = ({
 
   return (
     <TouchableOpacity
-      onPress={canCreateChat ? handlePress : handleNotPermittedPress}
+      onPress={
+        !canCreateChat
+          ? handleNotPermittedPress
+          : isSelectable && isSelectionMode
+            ? handleToggleSelect
+            : handlePress
+      }
     >
       <View style={styles.border}>
         <View style={styles.userContainer}>
@@ -265,6 +308,34 @@ export const ChatUserListItem = ({
               ) : null}
             </View>
           </View>
+          {isSelectable ? (
+            <TouchableOpacity
+              onPress={canCreateChat ? handleToggleSelect : undefined}
+              disabled={!canCreateChat}
+              hitSlop={8}
+              accessibilityRole='checkbox'
+              accessibilityState={{
+                checked: isSelected,
+                disabled: !canCreateChat
+              }}
+            >
+              <View
+                style={[
+                  styles.selectCircle,
+                  isSelected ? styles.selectCircleSelected : null,
+                  !canCreateChat ? styles.dim : null
+                ]}
+              >
+                {isSelected ? (
+                  <IconCheck
+                    height={styles.iconCheck.height}
+                    width={styles.iconCheck.width}
+                    fill={styles.iconCheck.fill}
+                  />
+                ) : null}
+              </View>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </TouchableOpacity>

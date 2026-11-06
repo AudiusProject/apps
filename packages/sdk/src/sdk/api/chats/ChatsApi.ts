@@ -29,6 +29,9 @@ import {
   ChatCreateRequestSchema,
   ChatDeleteRequest,
   ChatDeleteRequestSchema,
+  ChatLeaveRequest,
+  ChatLeaveRequestSchema,
+  makeGroupChatId,
   ChatEvents,
   ChatGetAllRequest,
   ChatGetAllRequestSchema,
@@ -454,12 +457,17 @@ export class ChatsApi
    * @returns the rpc object
    */
   public async create(params: ChatCreateRequest): Promise<ChatCreateRPC> {
-    const { currentUserId, userId, invitedUserIds } = await parseParams(
-      'create',
-      ChatCreateRequestSchema
-    )(params)
+    const {
+      currentUserId,
+      userId,
+      invitedUserIds,
+      chatId: requestedChatId
+    } = await parseParams('create', ChatCreateRequestSchema)(params)
 
-    const chatId = [userId, ...invitedUserIds].sort().join(':')
+    const isGroup = invitedUserIds.length > 1
+    const chatId = isGroup
+      ? (requestedChatId ?? makeGroupChatId())
+      : [userId, ...invitedUserIds].sort().join(':')
     const chatSecret = secp256k1.utils.randomPrivateKey()
     const invites = await this.createInvites(userId, invitedUserIds, chatSecret)
 
@@ -495,6 +503,26 @@ export class ChatsApi
       params: {
         chat_id: chatId,
         invites
+      }
+    })
+  }
+
+  /**
+   * Leaves a group chat
+   * @param params.chatId the group chat to leave
+   * @param params.currentUserId the user to act on behalf of
+   * @returns the rpc object
+   */
+  public async leave(params: ChatLeaveRequest) {
+    const { currentUserId, chatId } = await parseParams(
+      'leave',
+      ChatLeaveRequestSchema
+    )(params)
+    return await this.sendRpc({
+      current_user_id: currentUserId,
+      method: 'chat.leave',
+      params: {
+        chat_id: chatId
       }
     })
   }

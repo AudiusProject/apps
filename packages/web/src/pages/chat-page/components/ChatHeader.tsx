@@ -24,6 +24,7 @@ import { useModalState } from 'common/hooks/useModalState'
 import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
+import { GroupChatHeader } from './GroupChatHeader'
 import { InboxTabs } from './InboxTabs'
 import { UserChatHeader } from './UserChatHeader'
 
@@ -149,6 +150,8 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
               {chat ? (
                 isBlast ? (
                   <ChatBlastHeader chat={chat} />
+                ) : !chat.is_blast && chat.is_group ? (
+                  <GroupChatHeader chatId={chat.chat_id} />
                 ) : (
                   <UserChatHeader chatId={chat.chat_id} />
                 )

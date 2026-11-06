@@ -20,7 +20,8 @@ export enum FeatureFlags {
   TRACK_ROWS = 'track_rows',
   NOW_PLAYING_COMMENTS = 'now_playing_comments',
   TRACK_TILE_WAVEFORM = 'track_tile_waveform',
-  NOW_PLAYING_WAVEFORM = 'now_playing_waveform'
+  NOW_PLAYING_WAVEFORM = 'now_playing_waveform',
+  GROUP_MESSAGES = 'group_messages'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -32,7 +33,8 @@ export const environmentFlagDefaults: Record<
   development: {
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
     [FeatureFlags.TRACK_TILE_WAVEFORM]: true,
-    [FeatureFlags.NOW_PLAYING_WAVEFORM]: true
+    [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
+    [FeatureFlags.GROUP_MESSAGES]: true
   },
   production: {}
 }
@@ -67,5 +69,7 @@ export const flagDefaults: FlagDefaults = {
   // Waveform with timestamped comment avatars on desktop web track tiles.
   [FeatureFlags.TRACK_TILE_WAVEFORM]: false,
   // Waveform scrubber with comment avatars in the mobile Now Playing drawer.
-  [FeatureFlags.NOW_PLAYING_WAVEFORM]: false
+  [FeatureFlags.NOW_PLAYING_WAVEFORM]: false,
+  // Creating group DMs. Existing groups always render.
+  [FeatureFlags.GROUP_MESSAGES]: false
 }

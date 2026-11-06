@@ -6,42 +6,61 @@ import {
   useSearchUsersModal,
   useUsers
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { Status, statusIsNotFinalized } from '@audius/common/models'
-import type { User } from '@audius/common/models'
-import { chatActions, chatSelectors } from '@audius/common/store'
+import type { ID, User } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
+import {
+  chatActions,
+  chatSelectors,
+  MAX_GROUP_CHAT_MEMBERS,
+  playbackSelectors
+} from '@audius/common/store'
 import type { CreateChatModalState } from '@audius/common/store'
-import { View, Image } from 'react-native'
+import { View, Image, Keyboard } from 'react-native'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 import { useDispatch, useSelector } from 'react-redux'
 import { useDebounce } from 'react-use'
 
-import { IconCompose, IconSearch } from '@audius/harmony-native'
+import { Box, Button, IconCompose, IconSearch } from '@audius/harmony-native'
 import MagnifyingGlass from 'app/assets/images/leftPointingMagnifyingGlass.png'
 import {
   Screen,
   ScreenContent,
   Text,
   TextInput,
-  HeaderShadow
+  HeaderShadow,
+  KeyboardAvoidingView
 } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
+import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer/constants'
 import { useRoute } from 'app/hooks/useRoute'
+import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
 
 import { ChatBlastCTA } from './ChatBlastCTA'
 import { ChatUserListItem } from './ChatUserListItem'
+import { useKeyboardAvoidingPlaybarStyle } from './hooks/useKeyboardAvoidingPlaybarStyle'
 
-const { fetchBlockees, fetchBlockers, fetchPermissions } = chatActions
+const { createChat, fetchBlockees, fetchBlockers, fetchPermissions } =
+  chatActions
 const { getUserList: getChatsUserList } = chatSelectors
+const { getHasTrack } = playbackSelectors
 
 const DEBOUNCE_MS = 150
+
+const MAX_GROUP_CHAT_INVITEES = MAX_GROUP_CHAT_MEMBERS - 1
+const GROUP_FOOTER_HEIGHT = 72
 
 const messages = {
   title: 'New Message',
   search: ' Search Users',
   emptyTitle: 'Search for Friends',
   emptyDescription:
-    'Search for fellow music lovers and strike up a conversation.'
+    'Search for fellow music lovers and strike up a conversation.',
+  startChat: 'Start chat',
+  startGroupChat: (count: number) => `Start group chat (${count})`,
+  maxMembers: `Group chats can have up to ${MAX_GROUP_CHAT_MEMBERS} people`
 }
 
 const useStyles = makeStyles(({ spacing, palette, typography }) => ({
@@ -126,6 +145,11 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   },
   footerPadding: {
     height: spacing(30)
+  },
+  groupFooter: {
+    backgroundColor: palette.white,
+    borderTopColor: palette.neutralLight8,
+    borderTopWidth: 1
   }
 }))
 
@@ -221,6 +245,43 @@ export const ChatUserListScreen = () => {
 
   const { data: users } = useUsers(userIds)
 
+  const { isEnabled: isGroupMessagesEnabled } = useFeatureFlag(
+    FeatureFlags.GROUP_MESSAGES
+  )
+  const { toast } = useToast()
+  const hasCurrentlyPlayingTrack = useSelector(getHasTrack)
+  const keyboardAvoidingPlaybarStyle = useKeyboardAvoidingPlaybarStyle()
+  const [selectedUserIds, setSelectedUserIds] = useState<ID[]>([])
+  const isSelectionMode = selectedUserIds.length > 0
+
+  const handleToggleSelect = useCallback(
+    (userId: ID) => {
+      setSelectedUserIds((prev) => {
+        if (prev.includes(userId)) {
+          return prev.filter((id) => id !== userId)
+        }
+        if (prev.length >= MAX_GROUP_CHAT_INVITEES) {
+          toast({ content: messages.maxMembers })
+          return prev
+        }
+        return [...prev, userId]
+      })
+    },
+    [toast]
+  )
+
+  const handleStartGroupChat = useCallback(() => {
+    if (selectedUserIds.length === 0) return
+    Keyboard.dismiss()
+    dispatch(
+      createChat({
+        userIds: selectedUserIds,
+        presetMessage,
+        replaceNavigation: true
+      })
+    )
+  }, [dispatch, presetMessage, selectedUserIds])
+
   useEffect(() => {
     dispatch(fetchBlockees())
     dispatch(fetchBlockers())
@@ -301,8 +362,13 @@ export const ChatUserListScreen = () => {
                 <ChatUserListItem
                   userId={item.user_id}
                   presetMessage={presetMessage}
+                  isSelectable={isGroupMessagesEnabled}
+                  isSelected={selectedUserIds.includes(item.user_id)}
+                  isSelectionMode={isGroupMessagesEnabled && isSelectionMode}
+                  onToggleSelect={handleToggleSelect}
                 />
               )}
+              extraData={selectedUserIds}
               keyExtractor={(user: User) => user.handle}
               contentContainerStyle={styles.flatListContainer}
               // Only show empty component if there is no search query
@@ -313,7 +379,29 @@ export const ChatUserListScreen = () => {
           )}
         </View>
         <View style={styles.footerContainer}>
-          <ChatBlastCTA />
+          {isGroupMessagesEnabled && isSelectionMode ? (
+            <KeyboardAvoidingView
+              keyboardShowingOffset={
+                GROUP_FOOTER_HEIGHT +
+                (hasCurrentlyPlayingTrack ? PLAY_BAR_HEIGHT : 0)
+              }
+              style={keyboardAvoidingPlaybarStyle}
+            >
+              <Box ph='l' pv='m' style={styles.groupFooter}>
+                <Button
+                  variant='primary'
+                  fullWidth
+                  onPress={handleStartGroupChat}
+                >
+                  {selectedUserIds.length > 1
+                    ? messages.startGroupChat(selectedUserIds.length)
+                    : messages.startChat}
+                </Button>
+              </Box>
+            </KeyboardAvoidingView>
+          ) : (
+            <ChatBlastCTA />
+          )}
         </View>
       </ScreenContent>
     </Screen>

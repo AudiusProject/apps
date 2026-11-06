@@ -210,9 +210,7 @@ export const getHasUnreadMessages = (state: CommonState) => {
 }
 
 /**
- * Gets a list of the users the current user has chats with.
- * Note that this only takes the first user of each chat that doesn't match the current one,
- * so this will need to be adjusted when we do group chats.
+ * Gets a list of the users the current user has 1:1 chats with.
  **/
 export const getUserList = createSelector(
   [
@@ -223,7 +221,7 @@ export const getUserList = createSelector(
   ],
   (chats, hasMore, chatsStatus, currentUserId) => {
     const chatUserListIds = chats
-      .filter((c) => !c.is_blast)
+      .filter((c) => !c.is_blast && !c.is_group)
       .map(
         (c) =>
           (c as UserChat).chat_members
@@ -329,9 +327,12 @@ export const useCanCreateChat = (userId: ID | null | undefined) => {
   // Use a callback fn to prevent iteration until necessary to improve perf
   // Note: this only works if the respective chat has been fetched already, like in chatsUserList
   const encodedUserId = Id.parse(userId)
+  // Only 1:1 chats count; sharing a group grants nothing.
   const existingChat = chats.find(
     (c) =>
-      !c.is_blast && c.chat_members.find((u) => u.user_id === encodedUserId)
+      !c.is_blast &&
+      !c.is_group &&
+      c.chat_members.find((u) => u.user_id === encodedUserId)
   )
 
   const userPermissions = chatPermissions[userId]

@@ -18,10 +18,11 @@ import { chatActions, chatSelectors } from '@audius/common/store'
 import {
   hasTail,
   isEarliestUnread,
+  isFirstInSenderRun,
   chatCanFetchMoreMessages
 } from '@audius/common/utils'
 import { Flex, Text } from '@audius/harmony'
-import { OptionalId } from '@audius/sdk'
+import { HashId, OptionalId } from '@audius/sdk'
 import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
 import { throttle } from 'lodash'
@@ -43,7 +44,7 @@ export const CONTENT_EXPANDED_LISTENER_KEY = 'audius:chat:content-expanded'
 const SPINNER_HEIGHT = 48
 
 const { fetchMoreMessages, markChatAsRead, setActiveChat } = chatActions
-const { getChatMessages, getChat } = chatSelectors
+const { getChatMessages, getChat, getBlockees } = chatSelectors
 
 const messages = {
   newMessages: (count: number) => `${count} New Message${count > 1 ? 's' : ''}`,
@@ -77,6 +78,18 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
     const { firstOtherUser, canSendMessage, callToAction } =
       useCanSendMessage(chatId)
     const chat = useSelector((state) => getChat(state, chatId ?? ''))
+    const isGroup = !!chat && !chat.is_blast && !!chat.is_group
+    const blockees = useSelector(getBlockees)
+    // Groups can include people you blocked; hide their messages
+    const visibleMessages = useMemo(
+      () =>
+        isGroup && blockees.length > 0
+          ? chatMessages?.filter(
+              (m) => !blockees.includes(HashId.parse(m.sender_user_id))
+            )
+          : chatMessages,
+      [chatMessages, isGroup, blockees]
+    )
     const { data: userId } = useCurrentUserId()
     const currentUserId = OptionalId.parse(userId) ?? null
     const [unreadIndicatorEl, setUnreadIndicatorEl] =
@@ -306,12 +319,17 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
           ) : null}
           {showSendMessagePrompt ? <SendMessagePrompt /> : null}
           {chatId &&
-            chatMessages?.map((message, i) => (
+            visibleMessages?.map((message, i) => (
               <Fragment key={message.message_id}>
                 <ChatMessageListItem
                   chatId={chatId}
                   message={message}
-                  hasTail={hasTail(message, chatMessages[i - 1])}
+                  hasTail={hasTail(message, visibleMessages[i - 1])}
+                  isGroup={isGroup}
+                  isFirstInRun={isFirstInSenderRun(
+                    message,
+                    visibleMessages[i + 1]
+                  )}
                 />
                 {/*
                   The separator has to come after the message to appear above it,
@@ -321,7 +339,7 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
                   unreadCount: unreadMessageCount,
                   lastReadAt: chatFrozenRef.current?.last_read_at,
                   currentMessageIndex: i,
-                  messages: chatMessages,
+                  messages: visibleMessages,
                   currentUserId
                 }) ? (
                   <div ref={scrollIntoViewOnMount} className={styles.separator}>
