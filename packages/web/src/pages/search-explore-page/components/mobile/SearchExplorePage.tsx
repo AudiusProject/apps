@@ -9,7 +9,9 @@ import {
 } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
+import { FeatureFlags } from '@audius/common/services'
 import {
   Flex,
   TextInput,
@@ -40,6 +42,7 @@ import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'
 import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
+import { FeedbackTracksSection } from '../desktop/FeedbackTracksSection'
 import { FeelingLuckySection } from '../desktop/FeelingLuckySection'
 import { LabelSpotlightSection } from '../desktop/LabelSpotlightSection'
 import { MoodGrid } from '../desktop/MoodGrid'
@@ -156,6 +159,9 @@ const SearchExplorePage = ({
   }, [setCenter, setRight])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
+  const { isEnabled: isFeedbackEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_FEEDBACK_REQUESTS
+  )
   const showTrackContent =
     categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
   const showPlaylistContent =
@@ -240,6 +246,9 @@ const SearchExplorePage = ({
           {showAlbumContent ? <NewAlbumReleasesSection /> : null}
           {showAlbumContent ? <BestSellingAlbumsSection /> : null}
           {showTrackContent ? <FeaturedRemixContestsSection /> : null}
+          {showTrackContent && isFeedbackEnabled ? (
+            <FeedbackTracksSection />
+          ) : null}
           {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
           {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
           {showUserContent ? <ArtistSpotlightSection /> : null}

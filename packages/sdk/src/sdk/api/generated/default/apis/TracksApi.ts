@@ -139,6 +139,13 @@ export interface GetBulkTracksRequest {
     isrc?: Array<string>;
 }
 
+export interface GetFeedbackTracksRequest {
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    genre?: string;
+}
+
 export interface GetFeelingLuckyTracksRequest {
     userId?: string;
     limit?: number;
@@ -772,6 +779,56 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getBulkTracks(params: GetBulkTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
         const response = await this.getBulkTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets tracks whose artists are asking for feedback, newest request first
+     */
+    async getFeedbackTracksRaw(params: GetFeedbackTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TracksResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.genre !== undefined) {
+            queryParameters['genre'] = params.genre;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/tracks/feedback`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets tracks whose artists are asking for feedback, newest request first
+     */
+    async getFeedbackTracks(params: GetFeedbackTracksRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TracksResponse> {
+        const response = await this.getFeedbackTracksRaw(params, initOverrides);
         return await response.value();
     }
 

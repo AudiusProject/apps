@@ -215,6 +215,7 @@ export const UploadTrackMetadataSchema = z.object({
   isCustomMusicalKey: z.optional(z.boolean()),
   audioAnalysisErrorCount: z.optional(z.number()),
   commentsDisabled: z.optional(z.boolean()),
+  feedbackRequested: z.optional(z.boolean()),
   isScheduledRelease: z.optional(z.boolean())
 })
 

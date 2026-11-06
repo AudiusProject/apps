@@ -57,6 +57,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 
 import { CardTitle } from './CardTitle'
 import { DownloadSection } from './DownloadSection'
+import { FeedbackWantedTag } from './FeedbackWantedTag'
 import { GatedContentSection } from './GatedContentSection'
 import GiantArtwork from './GiantArtwork'
 import styles from './GiantTrackTile.module.css'
@@ -513,6 +514,7 @@ export const GiantTrackTile = ({
             <Flex column gap='l' className={styles.titleArtistSection}>
               <div className={styles.typeLabelRow}>
                 {renderCardTitle(cn(fadeIn))}
+                <FeedbackWantedTag trackId={trackId} />
               </div>
               <Box>
                 <Text
