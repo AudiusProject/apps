@@ -6,6 +6,7 @@ import { ChatPermissionAction, CommonState } from '~/store/index'
 import {
   getBlockees,
   getBlockers,
+  getChat,
   getRecheckPermissions,
   useCanCreateChat
 } from '~/store/pages/chat/selectors'
@@ -22,6 +23,10 @@ export const useCanSendMessage = (
   firstOtherUser: User | undefined
 } => {
   const users = useOtherChatUsers(currentChatId)
+  const isGroup = useSelector((state: CommonState) => {
+    const chat = currentChatId ? getChat(state, currentChatId) : undefined
+    return !!chat && !chat.is_blast && !!chat.is_group
+  })
 
   const firstOtherUser = users[0]
   const userId = firstOtherUser?.user_id
@@ -34,7 +39,8 @@ export const useCanSendMessage = (
     getRecheckPermissions(state, currentChatId)
   )
 
-  if (!userId) {
+  // Any group member can post; blocks only hide messages per reader.
+  if (!userId || isGroup) {
     return {
       canSendMessage: true,
       callToAction: ChatPermissionAction.NOT_APPLICABLE,
