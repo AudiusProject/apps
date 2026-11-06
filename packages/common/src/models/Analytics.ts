@@ -780,6 +780,7 @@ export type ExploreSectionName =
   | 'Fan Clubs'
   | 'Featured Remix Contests'
   | 'Underground Trending Tracks'
+  | 'Looking for Feedback'
   | 'Trending Genres'
   | 'Artist Spotlight'
   | 'Label Spotlight'

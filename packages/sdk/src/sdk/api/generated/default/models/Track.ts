@@ -561,6 +561,18 @@ export interface Track {
      */
     accessAuthorities?: Array<string> | null;
     /**
+     * Whether the artist is asking listeners for feedback on the track
+     * @type {boolean}
+     * @memberof Track
+     */
+    feedbackRequested?: boolean;
+    /**
+     * When the artist asked for feedback, or null when they are not asking
+     * @type {string}
+     * @memberof Track
+     */
+    feedbackRequestedAt?: string | null;
+    /**
      * How to unlock stream access to the track
      * @type {AccessGate}
      * @memberof Track
@@ -746,6 +758,8 @@ export function TrackFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tra
         'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
         'isStreamGated': json['is_stream_gated'],
         'accessAuthorities': !exists(json, 'access_authorities') ? undefined : json['access_authorities'],
+        'feedbackRequested': !exists(json, 'feedback_requested') ? undefined : json['feedback_requested'],
+        'feedbackRequestedAt': !exists(json, 'feedback_requested_at') ? undefined : json['feedback_requested_at'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'isDownloadGated': json['is_download_gated'],
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
@@ -841,6 +855,8 @@ export function TrackToJSON(value?: Track | null): any {
         'parental_warning_type': value.parentalWarningType,
         'is_stream_gated': value.isStreamGated,
         'access_authorities': value.accessAuthorities,
+        'feedback_requested': value.feedbackRequested,
+        'feedback_requested_at': value.feedbackRequestedAt,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'is_download_gated': value.isDownloadGated,
         'download_conditions': AccessGateToJSON(value.downloadConditions),

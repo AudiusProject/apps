@@ -8,7 +8,9 @@ import {
 } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
+import { FeatureFlags } from '@audius/common/services'
 import {
   Flex,
   IconNote,
@@ -44,6 +46,7 @@ import { BestSellingAlbumsSection } from './BestSellingAlbumsSection'
 import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
+import { FeedbackTracksSection } from './FeedbackTracksSection'
 import { FeelingLuckySection } from './FeelingLuckySection'
 import { LabelSpotlightSection } from './LabelSpotlightSection'
 import { MoodGrid } from './MoodGrid'
@@ -161,6 +164,10 @@ const SearchExplorePage = ({
     </TabList>
   )
 
+  const { isEnabled: isFeedbackEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_FEEDBACK_REQUESTS
+  )
+
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent =
     categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
@@ -211,6 +218,11 @@ const SearchExplorePage = ({
       key: 'featuredRemixContests',
       shouldRender: showTrackContent,
       element: <FeaturedRemixContestsSection />
+    },
+    {
+      key: 'feedbackTracks',
+      shouldRender: showTrackContent && isFeedbackEnabled,
+      element: <FeedbackTracksSection />
     },
     {
       key: 'fanClubs',

@@ -198,6 +198,12 @@ export interface UpdateTrackRequestBody {
      */
     accessAuthorities?: Array<string> | null;
     /**
+     * Whether the artist is asking listeners for feedback on the track
+     * @type {boolean}
+     * @memberof UpdateTrackRequestBody
+     */
+    feedbackRequested?: boolean | null;
+    /**
      * API keys allowed to stream this track
      * @type {Array<string>}
      * @memberof UpdateTrackRequestBody
@@ -295,6 +301,7 @@ export function UpdateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
         'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
         'accessAuthorities': !exists(json, 'access_authorities') ? undefined : json['access_authorities'],
+        'feedbackRequested': !exists(json, 'feedback_requested') ? undefined : json['feedback_requested'],
         'allowedApiKeys': !exists(json, 'allowed_api_keys') ? undefined : json['allowed_api_keys'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
@@ -339,6 +346,7 @@ export function UpdateTrackRequestBodyToJSON(value?: UpdateTrackRequestBody | nu
         'is_unlisted': value.isUnlisted,
         'is_stream_gated': value.isStreamGated,
         'access_authorities': value.accessAuthorities,
+        'feedback_requested': value.feedbackRequested,
         'allowed_api_keys': value.allowedApiKeys,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),

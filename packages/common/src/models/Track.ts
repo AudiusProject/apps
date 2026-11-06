@@ -227,6 +227,8 @@ export type TrackMetadata = {
   musical_key?: string | null
   audio_analysis_error_count?: number
   comments_disabled?: boolean
+  feedback_requested?: boolean
+  feedback_requested_at?: string | null
   comment_count: number
   pinned_comment_id?: Nullable<ID>
 
