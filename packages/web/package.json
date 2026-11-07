@@ -34,6 +34,7 @@
     "test:e2e": "npx playwright test",
     "test:coverage": "vitest --resetMocks=false --coverage --watchAll=false",
     "test": "vitest",
+    "test:ssr": "vitest run --config vitest.ssr.config.ts",
     "typecheck:watch": "tsc --watch",
     "typecheck": "tsc",
     "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:stylelint\"",
