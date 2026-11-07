@@ -9,16 +9,11 @@ import {
 } from '@audius/common/store'
 import { ALL_GENRES } from '@audius/common/utils'
 import type { ViewStyle } from 'react-native'
-import { ScrollView, View } from 'react-native'
+import { View } from 'react-native'
 import type { SvgProps } from 'react-native-svg'
 import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  Flex,
-  IconLeading,
-  SelectablePill,
-  useTheme
-} from '@audius/harmony-native'
+import { Flex, IconLeading, SelectablePill } from '@audius/harmony-native'
 import { GradientIcon, GradientText } from 'app/components/core'
 import type { StylesProp } from 'app/styles'
 import { makeStyles } from 'app/styles'
@@ -45,9 +40,8 @@ type TrendingHeaderProps = {
 }
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
-  // No backgroundColor: when rendered inside `FloatingSubHeader` the
-  // surrounding `GlassSurface` owns the frosted fill, and an opaque white here
-  // would punch a solid band through it.
+  // No backgroundColor: inside `FloatingSubHeader` the glass pill bar owns
+  // the fill.
   root: {
     borderBottomWidth: 1,
     borderBottomColor: palette.neutralLight8,
@@ -98,7 +92,6 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
     styles: stylesProp
   } = props
   const styles = useStyles()
-  const { spacing } = useTheme()
   const dispatch = useDispatch()
   const category = useSelector(getTrendingCategory) ?? 'tracks'
   const timeRange = useSelector(trendingPageSelectors.getTrendingTimeRange)
@@ -152,29 +145,25 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
           ) : null}
         </View>
       ) : null}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.pillsContainer,
-          { paddingVertical: spacing.s }
-        ]}
+      <Flex
+        direction='row'
+        alignItems='center'
+        gap='xs'
+        style={showTitleRow ? styles.pillsContainer : undefined}
       >
-        <Flex direction='row' alignItems='center' gap='s'>
-          {categories.map((cat) => (
-            <SelectablePill
-              key={cat}
-              type='radio'
-              size='large'
-              value={cat}
-              label={categoryLabels[cat]}
-              isSelected={category === cat}
-              onChange={handleCategoryChange}
-              disableUnselectAnimation
-            />
-          ))}
-        </Flex>
-      </ScrollView>
+        {categories.map((cat) => (
+          <SelectablePill
+            key={cat}
+            type='radio'
+            size='large'
+            value={cat}
+            label={categoryLabels[cat]}
+            isSelected={category === cat}
+            onChange={handleCategoryChange}
+            disableUnselectAnimation
+          />
+        ))}
+      </Flex>
     </View>
   )
 }

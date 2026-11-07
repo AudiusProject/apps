@@ -10,9 +10,6 @@ import { useThemeColors } from 'app/utils/theme'
 /** Background opacity at the very top, behind the status bar. */
 export const EDGE_FADE_FROM_OPACITY = 0.94
 
-/** Background opacity where the header's fade hands off to a sub-header's. */
-export const SUB_HEADER_FADE_OPACITY = 0.7
-
 /** How far a fade reaches past the chrome it sits behind. */
 export const EDGE_FADE_TAIL = 16
 

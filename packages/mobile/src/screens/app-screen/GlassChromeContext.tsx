@@ -11,8 +11,6 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import {
   Easing,
-  Extrapolation,
-  interpolate,
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
@@ -47,16 +45,10 @@ const ESTIMATED_HEADER_ROW_HEIGHT = 64
 const DIRECTION_THRESHOLD = 6
 
 /**
- * Below this offset the chrome is always shown, so the top of a list never
- * opens with the header already dismissed.
+ * Gap between the status bar and a pinned sub-header, so the status bar fade
+ * ends before the pill bar's glass starts.
  */
-const ALWAYS_SHOWN_OFFSET = 40
-
-/**
- * Scroll distance over which the root header turns from flat into a pill.
- * Short enough to finish before the header starts hiding.
- */
-const HEADER_FLOAT_DISTANCE = 32
+export const SUB_HEADER_PIN_GAP = 8
 
 // Long enough for the tab bar's collapse to read as a morph rather than a cut.
 const HIDE_TIMING = {
@@ -94,14 +86,16 @@ export const GlassChromeProvider = (props: { children: ReactNode }) => {
   const scrollY = useSharedValue(0)
   const hidden = useSharedValue(0)
   const directionAnchorY = useSharedValue(0)
+  const headerRowHeight = headerHeight - insets.top
 
-  // Scrolling down hides the chrome and scrolling up brings it back. Near the
-  // top, and during rubber-band overscroll (negative offset), it stays shown.
+  // Scrolling down hides the chrome and scrolling up brings it back. Until the
+  // title row has scrolled away, and during rubber-band overscroll (negative
+  // offset), it stays shown.
   useAnimatedReaction(
     () => scrollY.value,
     (current, previous) => {
       if (previous === null) return
-      if (current < ALWAYS_SHOWN_OFFSET) {
+      if (current < headerRowHeight) {
         hidden.value = withTiming(0, HIDE_TIMING)
         directionAnchorY.value = current
         return
@@ -110,7 +104,8 @@ export const GlassChromeProvider = (props: { children: ReactNode }) => {
       if (Math.abs(delta) < DIRECTION_THRESHOLD) return
       hidden.value = withTiming(delta > 0 ? 1 : 0, HIDE_TIMING)
       directionAnchorY.value = current
-    }
+    },
+    [headerRowHeight]
   )
 
   // Guard against re-render loops: onLayout fires on every layout pass, and
@@ -198,19 +193,25 @@ export const useGlassScrollY = () => useGlassChrome().scrollY
 export const useChromeHiddenProgress = () => useGlassChrome().hidden
 
 /**
- * 0 = header flat on the page (list at the top), 1 = floating pill (content
- * scrolled under it).
+ * How far the root header has scrolled up with the list, capped once it is
+ * fully off screen. Negative during overscroll so it follows the rubber band.
  */
-export const useHeaderFloatProgress = () => {
+export const useHeaderScrollOffset = () => {
   const scrollY = useGlassScrollY()
-  return useDerivedValue(() =>
-    interpolate(
-      scrollY.value,
-      [0, HEADER_FLOAT_DISTANCE],
-      [0, 1],
-      Extrapolation.CLAMP
-    )
-  )
+  const { headerHeight } = useGlassChrome()
+  return useDerivedValue(() => Math.min(scrollY.value, headerHeight))
+}
+
+/**
+ * How far a sub-header has scrolled up with the list. It stops just under the
+ * status bar and stays pinned there.
+ */
+export const useSubHeaderScrollOffset = () => {
+  const scrollY = useGlassScrollY()
+  const { headerHeight } = useGlassChrome()
+  const insets = useSafeAreaInsets()
+  const pinOffset = headerHeight - insets.top - SUB_HEADER_PIN_GAP
+  return useDerivedValue(() => Math.min(scrollY.value, pinOffset))
 }
 
 /**

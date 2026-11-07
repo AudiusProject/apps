@@ -79,8 +79,7 @@ export const TrendingScreen = () => {
   return (
     <Screen url='Trending' header={renderHeader} headerTransparent>
       <Flex flex={1} direction='column' style={{ minHeight: 0 }}>
-        {/* Pinned into the floating glass stack under the title so the
-            lineups scroll behind one continuous frosted surface. */}
+        {/* Pins under the status bar once the title scrolls away. */}
         <FloatingSubHeader>
           <ScreenPrimaryContent skeleton={trendingPills}>
             {trendingPills}

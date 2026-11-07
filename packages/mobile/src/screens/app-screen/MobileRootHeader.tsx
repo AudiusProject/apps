@@ -6,7 +6,6 @@ import { Text, View } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
 
@@ -14,20 +13,16 @@ import { AppDrawerContext } from '../app-drawer-screen'
 
 import { AccountPictureHeader } from './AccountPictureHeader'
 import {
-  useChromeHiddenProgress,
-  useGlassHeaderInset,
-  useHeaderFloatProgress,
-  useRootHeaderHeight,
+  useHeaderScrollOffset,
   useSetRootHeaderHeight
 } from './GlassChromeContext'
 import {
   EDGE_FADE_FROM_OPACITY,
   EDGE_FADE_TAIL,
-  GlassEdgeFade,
-  SUB_HEADER_FADE_OPACITY
+  GlassEdgeFade
 } from './GlassEdgeFade'
 
-const CAPSULE_HEIGHT = 52
+const ROW_HEIGHT = 52
 
 type MobileRootHeaderProps = {
   title: string
@@ -35,17 +30,14 @@ type MobileRootHeaderProps = {
 }
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
-  capsule: {
-    marginTop: spacing(1),
-    marginBottom: spacing(2)
-  },
   row: {
-    flex: 1,
+    height: ROW_HEIGHT,
+    marginTop: spacing(1),
+    marginBottom: spacing(2),
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing(3),
-    paddingLeft: spacing(2),
-    paddingRight: spacing(2)
+    paddingHorizontal: spacing(4)
   },
   title: {
     flex: 1,
@@ -59,10 +51,10 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
 /**
  * Custom header for root (bottom-bar) tab screens.
  *
- * [Avatar] [title] [right content], flat on the page at the top of the list.
- * Once content scrolls under it, it becomes a floating glass pill matching
- * the floating tab bar, with a fade behind the status bar. It reports its measured height through `GlassChromeContext` so the
- * screen underneath can pad its scrollable content to start below it.
+ * [Avatar] [title] [right content], flat on the page. It scrolls away with
+ * the list, and the content passing under the status bar fades out. It
+ * reports its measured height through `GlassChromeContext` so the screen
+ * underneath can pad its scrollable content to start below it.
  */
 export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   const { title, children } = props
@@ -71,20 +63,10 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   const { drawerHelpers } = useContext(AppDrawerContext)
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const setRootHeaderHeight = useSetRootHeaderHeight()
-  const hidden = useChromeHiddenProgress()
-  const floatProgress = useHeaderFloatProgress()
-  const headerHeight = useRootHeaderHeight()
-  const hasSubHeader = useGlassHeaderInset() > headerHeight
+  const scrollOffset = useHeaderScrollOffset()
 
-  // Slide the capsule off the top as the chrome hides. Visual only: the list
-  // keeps its padding so content doesn't reflow.
-  const hideStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -headerHeight * hidden.value }]
-  }))
-
-  // The fade behind the capsule goes with it; the status bar fade stays.
-  const fadeStyle = useAnimatedStyle(() => ({
-    opacity: 1 - hidden.value
+  const scrollStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -scrollOffset.value }]
   }))
 
   const handleOpenLeftNavDrawer = useCallback(() => {
@@ -105,36 +87,24 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
       style={{ paddingTop: insets.top }}
       onLayout={handleLayout}
     >
+      <Animated.View pointerEvents='box-none' style={scrollStyle}>
+        <View style={styles.row}>
+          <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
+          <Text
+            accessibilityRole='header'
+            numberOfLines={1}
+            style={styles.title}
+          >
+            {title}
+          </Text>
+          {children}
+        </View>
+      </Animated.View>
       <GlassEdgeFade
         height={insets.top + EDGE_FADE_TAIL}
         fromOpacity={EDGE_FADE_FROM_OPACITY}
         toOpacity={0}
       />
-      <GlassEdgeFade
-        height={headerHeight + (hasSubHeader ? 0 : EDGE_FADE_TAIL)}
-        fromOpacity={EDGE_FADE_FROM_OPACITY}
-        toOpacity={hasSubHeader ? SUB_HEADER_FADE_OPACITY : 0}
-        style={fadeStyle}
-      />
-      <Animated.View pointerEvents='box-none' style={hideStyle}>
-        <GlassCapsule
-          height={CAPSULE_HEIGHT}
-          floatProgress={floatProgress}
-          style={styles.capsule}
-        >
-          <View style={styles.row}>
-            <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
-            <Text
-              accessibilityRole='header'
-              numberOfLines={1}
-              style={styles.title}
-            >
-              {title}
-            </Text>
-            {children}
-          </View>
-        </GlassCapsule>
-      </Animated.View>
     </View>
   )
 }

@@ -259,10 +259,7 @@ export const FeedScreen = () => {
   return (
     <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
-        {/* Pinned into the floating glass stack directly under the title, so
-            the lineups scroll behind one continuous frosted surface rather
-            than sliding under the header and colliding with an opaque tab
-            row. */}
+        {/* Pins under the status bar once the title scrolls away. */}
         <FloatingSubHeader>
           <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
         </FloatingSubHeader>
