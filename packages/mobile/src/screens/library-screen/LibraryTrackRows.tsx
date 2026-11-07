@@ -25,7 +25,12 @@ type LibraryTrackRowsProps = {
   | 'onEndReached'
   | 'onEndReachedThreshold'
   | 'ListFooterComponent'
+  | 'ListHeaderComponent'
+  | 'ListEmptyComponent'
   | 'keyboardShouldPersistTaps'
+  | 'contentContainerStyle'
+  | 'onScroll'
+  | 'scrollEventThrottle'
 >
 
 const DEFAULT_PAGE_SIZE = 10
@@ -40,8 +45,8 @@ const keyExtractor = (item: Item, index: number) =>
 
 /**
  * Library tracks as dense rows, the same row Trending and profiles use.
- * The list is full-bleed: the filter above it and the page provide the
- * spacing, not a card.
+ * The list is full-bleed: the filter in its header and the page provide
+ * the spacing, not a card.
  */
 export const LibraryTrackRows = (props: LibraryTrackRowsProps) => {
   const {

@@ -211,7 +211,7 @@ export const FeedScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={messages.header}>
+      <MobileRootHeader title={messages.header} showDivider={false}>
         {isForYou ? null : <FeedFilterButton />}
       </MobileRootHeader>
     ),
@@ -259,8 +259,17 @@ export const FeedScreen = () => {
   return (
     <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
-        {/* Pins under the status bar once the title scrolls away. */}
-        <FloatingSubHeader>
+        <FloatingSubHeader
+          compact={
+            <FeedTabs
+              currentTab={feedTab}
+              onSelectTab={handleSelectTab}
+              size='small'
+            >
+              {isForYou ? null : <FeedFilterButton size='small' />}
+            </FeedTabs>
+          }
+        >
           <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
         </FloatingSubHeader>
         {/* Horizontal pager: swipe left/right toggles between For You and

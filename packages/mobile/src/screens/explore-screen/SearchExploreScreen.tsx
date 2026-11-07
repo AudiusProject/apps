@@ -1,9 +1,15 @@
 import React, { useEffect, useRef } from 'react'
 
+import { View } from 'react-native'
 import { IOScrollView } from 'react-native-intersection-observer'
 
 import { Screen, ScreenContent } from 'app/components/core'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
+import {
+  useGlassScrollHandler,
+  useRootHeaderHeight,
+  useSyncGlassScroll
+} from 'app/screens/app-screen/GlassChromeContext'
 
 import { SearchResults } from '../search-screen/search-results/SearchResults'
 import {
@@ -52,16 +58,34 @@ const SearchExploreContent = () => {
 
   const showSearch = Boolean(query || hasAnyFilter || category !== 'all')
 
+  const headerHeight = useRootHeaderHeight()
+  const handleGlassScroll = useGlassScrollHandler()
+  const syncGlassScroll = useSyncGlassScroll()
+
+  // Search results replace the explore list, and the explore list remounts at
+  // the top, so the header always starts back in place.
+  useEffect(() => {
+    syncGlassScroll(0)
+  }, [showSearch, syncGlassScroll])
+
   return (
     <ScreenContent>
-      <SearchExploreHeader scrollRef={scrollRef} />
       {showSearch ? (
-        <SearchResults />
+        <View style={{ flex: 1, paddingTop: headerHeight }}>
+          <SearchResults />
+        </View>
       ) : (
-        <IOScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
+        <IOScrollView
+          ref={scrollRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: headerHeight }}
+          onScroll={handleGlassScroll}
+          scrollEventThrottle={16}
+        >
           <ExploreContent />
         </IOScrollView>
       )}
+      <SearchExploreHeader scrollRef={scrollRef} />
     </ScreenContent>
   )
 }
