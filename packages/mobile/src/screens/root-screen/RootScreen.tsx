@@ -23,6 +23,7 @@ import { InteractionManager, Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffectOnce } from 'react-use'
 
+import { useManagedAccountAccessCheck } from 'app/components/manager-mode/useManagedAccountAccessCheck'
 import { useActivityPing } from 'app/hooks/useActivityPing'
 import useAppState from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -118,6 +119,7 @@ export const RootScreen = () => {
 
   useResetNotificationBadgeCount()
   useActivityPing()
+  useManagedAccountAccessCheck()
 
   // Reset the player on first mount so a crash doesn't leak previous playback
   // state into the next session. PAY-1412.

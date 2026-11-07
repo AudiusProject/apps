@@ -51,6 +51,7 @@ import {
 } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
 import Drawer from 'app/components/drawer'
+import { useManagedAccountNotAllowedCallback } from 'app/components/manager-mode/useManagedAccountNotAllowed'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { make, track as trackEvent } from 'app/services/analytics'
@@ -487,6 +488,8 @@ export const PremiumContentPurchaseDrawer = () => {
     onClosed()
     dispatch(purchaseContentActions.cleanup())
   }, [onClosed, dispatch])
+
+  useManagedAccountNotAllowedCallback({ trigger: isOpen, callback: onClose })
 
   if (
     !metadata ||

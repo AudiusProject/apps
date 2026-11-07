@@ -25,6 +25,7 @@ import {
   HeaderShadow
 } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
+import { withManagedAccountRestriction } from 'app/components/manager-mode/ManagedAccountUnavailableScreen'
 import { useRoute } from 'app/hooks/useRoute'
 import { makeStyles } from 'app/styles'
 
@@ -202,7 +203,7 @@ const useQueryUserList = (query: string) => {
   return { hasMore: !!hasNextPage, loadMore, status, userIds: userIds ?? [] }
 }
 
-export const ChatUserListScreen = () => {
+const ChatUserListScreenContent = () => {
   const styles = useStyles()
   const [query, setQuery] = useState('')
   const [inputValue, setInputValue] = useState('')
@@ -319,3 +320,8 @@ export const ChatUserListScreen = () => {
     </Screen>
   )
 }
+
+// DMs act as the signed-in wallet, so they're off while managing an account
+export const ChatUserListScreen = withManagedAccountRestriction(
+  ChatUserListScreenContent
+)

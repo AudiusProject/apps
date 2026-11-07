@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Button, IconCompose, IconMessage } from '@audius/harmony-native'
 import { Text, Screen, ScreenContent, HeaderShadow } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
+import { withManagedAccountRestriction } from 'app/components/manager-mode/ManagedAccountUnavailableScreen'
 import { useNavigation } from 'app/hooks/useNavigation'
 import type { AppTabScreenParamList } from 'app/screens/app-screen'
 import { makeStyles } from 'app/styles'
@@ -136,7 +137,7 @@ const TabEmpty = ({ tab }: { tab: InboxTab }) => {
   )
 }
 
-export const ChatListScreen = () => {
+const ChatListScreenContent = () => {
   const styles = useStyles()
   const palette = useThemePalette()
   const dispatch = useDispatch()
@@ -276,3 +277,8 @@ export const ChatListScreen = () => {
     </Screen>
   )
 }
+
+// DMs act as the signed-in wallet, so they're off while managing an account
+export const ChatListScreen = withManagedAccountRestriction(
+  ChatListScreenContent
+)

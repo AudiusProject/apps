@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react'
 
 import { AppContext } from '@audius/common/context'
+import RNRestart from 'react-native-restart'
 import { useAsync } from 'react-use'
 
 import * as analytics from 'app/services/analytics'
@@ -31,7 +32,8 @@ export const AppContextProvider = (props: AppContextProviderProps) => {
       audiusSdk: sdk,
       audiusBackend: audiusBackendInstance,
       trackDownload,
-      remoteConfig: remoteConfigInstance
+      remoteConfig: remoteConfigInstance,
+      reloadApp: () => RNRestart.Restart()
     }),
     [sdk]
   )

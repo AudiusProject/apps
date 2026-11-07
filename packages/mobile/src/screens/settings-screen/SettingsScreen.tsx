@@ -1,5 +1,7 @@
 import { useCallback } from 'react'
 
+import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { Image } from 'react-native'
 
 import {
@@ -9,7 +11,9 @@ import {
   IconNotificationOn,
   IconSettings,
   IconUserUnfollow,
-  IconListeningHistory
+  IconListeningHistory,
+  IconShieldUser,
+  IconUserArrowRotate
 } from '@audius/harmony-native'
 import audiusLogoHorizontal from 'app/assets/images/Horizontal-Logo-Full-Color.png'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
@@ -26,6 +30,7 @@ import { SettingsRowLabel } from './SettingRowLabel'
 import { SettingsDivider } from './SettingsDivider'
 import { SettingsRow } from './SettingsRow'
 import { SettingsRowDescription } from './SettingsRowDescription'
+import { managerModeMessages } from './manager-mode/messages'
 
 const messages = {
   title: 'Settings',
@@ -58,6 +63,10 @@ export const SettingsScreen = () => {
   const navigation = useNavigation<ProfileTabScreenParamList>()
 
   useShowManagerModeNotAvailable()
+  const isManagedAccount = useIsManagedAccount()
+  const { isEnabled: isManagerModeEnabled } = useFeatureFlag(
+    FeatureFlags.MOBILE_MANAGER_MODE
+  )
 
   const handlePressInbox = useCallback(() => {
     navigation.push('InboxSettingsScreen')
@@ -83,6 +92,14 @@ export const SettingsScreen = () => {
     navigation.push('ListeningHistoryScreen')
   }, [navigation])
 
+  const handlePressAccountsManagingYou = useCallback(() => {
+    navigation.push('AccountsManagingYouScreen')
+  }, [navigation])
+
+  const handlePressAccountsYouManage = useCallback(() => {
+    navigation.push('AccountsYouManageScreen')
+  }, [navigation])
+
   return (
     <Screen
       variant='secondary'
@@ -98,12 +115,15 @@ export const SettingsScreen = () => {
           <AccountSettingsRow />
           <SettingsDivider />
           <AppearanceSettingsRow />
-          <SettingsRow onPress={handlePressInbox}>
-            <SettingsRowLabel label={messages.inbox} icon={IconMessage} />
-            <SettingsRowDescription>
-              {messages.inboxDescription}
-            </SettingsRowDescription>
-          </SettingsRow>
+          {/* DMs are disabled while managing another account */}
+          {!isManagedAccount ? (
+            <SettingsRow onPress={handlePressInbox}>
+              <SettingsRowLabel label={messages.inbox} icon={IconMessage} />
+              <SettingsRowDescription>
+                {messages.inboxDescription}
+              </SettingsRowDescription>
+            </SettingsRow>
+          ) : null}
           <SettingsRow onPress={handlePressNotifications}>
             <SettingsRowLabel
               label={messages.notifications}
@@ -134,6 +154,28 @@ export const SettingsScreen = () => {
               icon={IconListeningHistory}
             />
           </SettingsRow>
+          {isManagerModeEnabled ? (
+            <>
+              <SettingsRow onPress={handlePressAccountsManagingYou}>
+                <SettingsRowLabel
+                  label={managerModeMessages.accountsManagingYou}
+                  icon={IconShieldUser}
+                />
+                <SettingsRowDescription>
+                  {managerModeMessages.accountsManagingYouDescription}
+                </SettingsRowDescription>
+              </SettingsRow>
+              <SettingsRow onPress={handlePressAccountsYouManage}>
+                <SettingsRowLabel
+                  label={managerModeMessages.accountsYouManage}
+                  icon={IconUserArrowRotate}
+                />
+                <SettingsRowDescription>
+                  {managerModeMessages.accountsYouManageDescription}
+                </SettingsRowDescription>
+              </SettingsRow>
+            </>
+          ) : null}
           <SettingsDivider />
           <SettingsRow onPress={handlePressAbout}>
             <SettingsRowLabel label={messages.about} icon={IconInfo} />
