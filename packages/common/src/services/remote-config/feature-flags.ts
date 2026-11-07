@@ -20,7 +20,8 @@ export enum FeatureFlags {
   TRACK_ROWS = 'track_rows',
   NOW_PLAYING_COMMENTS = 'now_playing_comments',
   TRACK_TILE_WAVEFORM = 'track_tile_waveform',
-  NOW_PLAYING_WAVEFORM = 'now_playing_waveform'
+  NOW_PLAYING_WAVEFORM = 'now_playing_waveform',
+  MOBILE_MANAGER_MODE = 'mobile_manager_mode'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -32,7 +33,8 @@ export const environmentFlagDefaults: Record<
   development: {
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
     [FeatureFlags.TRACK_TILE_WAVEFORM]: true,
-    [FeatureFlags.NOW_PLAYING_WAVEFORM]: true
+    [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
+    [FeatureFlags.MOBILE_MANAGER_MODE]: true
   },
   production: {}
 }
@@ -67,5 +69,8 @@ export const flagDefaults: FlagDefaults = {
   // Waveform with timestamped comment avatars on desktop web track tiles.
   [FeatureFlags.TRACK_TILE_WAVEFORM]: false,
   // Waveform scrubber with comment avatars in the mobile Now Playing drawer.
-  [FeatureFlags.NOW_PLAYING_WAVEFORM]: true
+  [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
+  // Account switcher and manager settings on mobile. Switching back out and
+  // the manager-mode restrictions stay on regardless of this flag.
+  [FeatureFlags.MOBILE_MANAGER_MODE]: false
 }

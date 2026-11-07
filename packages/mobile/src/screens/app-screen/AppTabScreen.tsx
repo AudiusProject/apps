@@ -53,7 +53,10 @@ import {
   InboxSettingsScreen,
   CommentSettingsScreen,
   NotificationSettingsScreen,
-  SettingsScreen
+  SettingsScreen,
+  AccountsManagingYouScreen,
+  AccountsYouManageScreen,
+  FindAccountManagerScreen
 } from 'app/screens/settings-screen'
 import { TrackScreen } from 'app/screens/track-screen'
 import { TrackRemixesScreen } from 'app/screens/track-screen/TrackRemixesScreen'
@@ -123,6 +126,9 @@ export type AppTabScreenParamList = {
   CommentSettingsScreen: undefined
   DownloadSettingsScreen: undefined
   NotificationSettingsScreen: undefined
+  AccountsManagingYouScreen: undefined
+  AccountsYouManageScreen: undefined
+  FindAccountManagerScreen: undefined
 
   AudioScreen: undefined
   RewardsScreen: undefined
@@ -400,6 +406,18 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
               <Stack.Screen
                 name='NotificationSettingsScreen'
                 getComponent={() => NotificationSettingsScreen}
+              />
+              <Stack.Screen
+                name='AccountsManagingYouScreen'
+                getComponent={() => AccountsManagingYouScreen}
+              />
+              <Stack.Screen
+                name='AccountsYouManageScreen'
+                getComponent={() => AccountsYouManageScreen}
+              />
+              <Stack.Screen
+                name='FindAccountManagerScreen'
+                getComponent={() => FindAccountManagerScreen}
               />
             </Stack.Group>
 

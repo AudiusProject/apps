@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useShareAction, useShareContent } from '@audius/common/hooks'
+import {
+  useIsManagedAccount,
+  useShareAction,
+  useShareContent
+} from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
 import { Name, ShareSource } from '@audius/common/models'
 import { registerNiceModalId } from '@audius/common/services'
@@ -77,6 +81,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 export const ShareDrawer = NiceModal.create(() => {
   const styles = useStyles()
+  const isManagedAccount = useIsManagedAccount()
   const viewShotRef = useRef<ViewShot | null>(null) as React.RefObject<ViewShot>
   const navigation = useNavigation<AppTabScreenParamList>()
   const sendShareAction = useShareAction()
@@ -284,7 +289,8 @@ export const ShareDrawer = NiceModal.create(() => {
       icon: React.ReactElement
       style?: Record<string, string>
       callback: (() => void) | (() => Promise<void>)
-    }[] = [shareToChatAction]
+      // DMs aren't available while managing another account
+    }[] = isManagedAccount ? [] : [shareToChatAction]
 
     if (isShareableTrack) {
       result.push(shareToXAction)
@@ -313,7 +319,8 @@ export const ShareDrawer = NiceModal.create(() => {
     handleShareToSnapchat,
     handleShareToInstagramStory,
     isShareableTrack,
-    content?.type
+    content?.type,
+    isManagedAccount
   ])
 
   // Trigger share action on mount with new content

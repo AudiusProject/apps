@@ -83,6 +83,7 @@ export { default as IconCloudUpload } from '@audius/harmony/src/assets/icons/Clo
 export { default as IconPencil } from '@audius/harmony/src/assets/icons/Pencil.svg'
 export { default as IconUser } from '@audius/harmony/src/assets/icons/User.svg'
 export { default as IconUserArrowRotate } from '@audius/harmony/src/assets/icons/UserArrowRotate.svg'
+export { default as IconShieldUser } from '@audius/harmony/src/assets/icons/ShieldUser.svg'
 export { default as IconArrowRotate } from '@audius/harmony/src/assets/icons/ArrowRotate.svg'
 export { default as IconPlay } from '@audius/harmony/src/assets/icons/Play.svg'
 export { default as IconUserFollow } from '@audius/harmony/src/assets/icons/UserFollow.svg'

@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from 'react'
 
 import { getEventQueryKey } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { ShareSource } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type {
   AnnouncementNotification,
   UserSubscriptionNotification,
@@ -82,6 +84,9 @@ export const useNotificationNavigation = () => {
   const linkTo = useLinkTo()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
+  const { isEnabled: isManagerModeEnabled } = useFeatureFlag(
+    FeatureFlags.MOBILE_MANAGER_MODE
+  )
 
   // Pushes flagged with shareCard open the stat card over the track
   const openShareCard = useCallback(
@@ -134,9 +139,15 @@ export const useNotificationNavigation = () => {
         | ApproveManagerRequestNotification
         | RequestManagerNotification
     ) => {
-      navigation.navigate('Profile', { id: notification.userId })
+      if (!isManagerModeEnabled) {
+        navigation.navigate('Profile', { id: notification.userId })
+      } else if (notification.type === NotificationType.RequestManager) {
+        navigation.navigate('AccountsYouManageScreen')
+      } else {
+        navigation.navigate('AccountsManagingYouScreen')
+      }
     },
-    [navigation]
+    [navigation, isManagerModeEnabled]
   )
 
   const entityHandler = useCallback(

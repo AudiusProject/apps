@@ -30,6 +30,7 @@ export type Drawer =
   | 'OfflineListening'
   | 'Welcome'
   | 'ManagerMode'
+  | 'AccountSwitcher'
   | 'Comment'
   | 'EditTrackFormOverflowMenu'
   | 'PickWinners'
@@ -77,6 +78,7 @@ export type DrawerData = {
   InboxUnavailable: { userId: number; shouldOpenChat: boolean }
   Welcome: undefined
   ManagerMode: undefined
+  AccountSwitcher: undefined
   Comment: { userId: ID; entityId: ID; isEntityOwner: boolean; artistId: ID }
   EditTrackFormOverflowMenu: undefined
   PickWinners: undefined
@@ -120,6 +122,7 @@ const initialState: DrawersState = {
   DeleteChat: false,
   Welcome: false,
   ManagerMode: false,
+  AccountSwitcher: false,
   Comment: false,
   EditTrackFormOverflowMenu: false,
   PickWinners: false,

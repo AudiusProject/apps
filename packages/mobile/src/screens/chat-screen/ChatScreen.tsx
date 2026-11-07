@@ -39,6 +39,7 @@ import {
   ScreenContent
 } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
+import { withManagedAccountRestriction } from 'app/components/manager-mode/ManagedAccountUnavailableScreen'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
 import { light } from 'app/haptics'
 import { useRoute } from 'app/hooks/useRoute'
@@ -221,7 +222,7 @@ const useGetLatestMessages = (
   })
 }
 
-export const ChatScreen = () => {
+const ChatScreenContent = () => {
   const styles = useStyles()
   const palette = useThemePalette()
   const dispatch = useDispatch()
@@ -664,3 +665,6 @@ export const ChatScreen = () => {
     </Screen>
   )
 }
+
+// DMs act as the signed-in wallet, so they're off while managing an account
+export const ChatScreen = withManagedAccountRestriction(ChatScreenContent)

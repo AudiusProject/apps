@@ -5,7 +5,7 @@ import { useAppContext } from '~/context'
 import { UserMetadata } from '~/models/User'
 
 export const useAccountSwitcher = () => {
-  const { localStorage } = useAppContext()
+  const { localStorage, reloadApp } = useAppContext()
   const { data: currentWeb3User } = useCurrentWeb3Account()
 
   const switchAccount = useCallback(
@@ -24,9 +24,13 @@ export const useAccountSwitcher = () => {
       await localStorage.clearAudiusAccount()
       await localStorage.clearAudiusAccountUser()
 
-      window.location.reload()
+      if (reloadApp) {
+        reloadApp()
+      } else {
+        window.location.reload()
+      }
     },
-    [currentWeb3User, localStorage]
+    [currentWeb3User, localStorage, reloadApp]
   )
 
   /** Convenience method to switch out of Manager Mode and back to the current web3 user */
