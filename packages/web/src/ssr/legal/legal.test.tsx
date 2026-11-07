@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+import { existsSync } from 'fs'
+import path from 'path'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { PageContextServer } from 'vike/types'
@@ -32,12 +32,10 @@ describe('legal SSR routes', () => {
       expect(html).toContain(`<h1>${title}</h1>`)
       expect(html).toContain(`href="${documentPath}"`)
       expect(html).toContain(`src="${documentPath}"`)
+      // Use a filesystem path: Vite rewrites new URL(..., import.meta.url)
+      // as an asset URL in the browser test environment.
       expect(
-        existsSync(
-          fileURLToPath(
-            new URL(`../../../public${documentPath}`, import.meta.url)
-          )
-        )
+        existsSync(path.join(__dirname, '../../../public', documentPath))
       ).toBe(true)
     }
   )
