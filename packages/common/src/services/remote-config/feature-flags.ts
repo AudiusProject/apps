@@ -67,5 +67,5 @@ export const flagDefaults: FlagDefaults = {
   // Waveform with timestamped comment avatars on desktop web track tiles.
   [FeatureFlags.TRACK_TILE_WAVEFORM]: false,
   // Waveform scrubber with comment avatars in the mobile Now Playing drawer.
-  [FeatureFlags.NOW_PLAYING_WAVEFORM]: false
+  [FeatureFlags.NOW_PLAYING_WAVEFORM]: true
 }
