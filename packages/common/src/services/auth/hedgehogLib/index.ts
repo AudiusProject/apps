@@ -6,8 +6,7 @@ export {
   bufferFromHexString,
   getPlatformCreateKey,
   getPlatformLocalStorage,
-  waitUntil,
-  WebWorker
+  waitUntil
 } from './utils'
 export type {
   ChangeCredentialsArgs,
