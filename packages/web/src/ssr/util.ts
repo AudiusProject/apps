@@ -32,6 +32,7 @@ const reservedPaths = new Set([
   'clubs',
   'cash',
   'wallet',
+  'legal',
   'error'
 ])
 
