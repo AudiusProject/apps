@@ -2,7 +2,6 @@ import { usePurchaseableStemCount } from '@audius/common/hooks'
 import { PurchaseableContentMetadata } from '@audius/common/src/hooks/purchaseContent/types'
 import { isPurchaseableAlbum } from '@audius/common/src/hooks/purchaseContent/utils'
 import { SIGN_IN_PAGE } from '@audius/common/src/utils/route'
-import { USDC } from '@audius/fixed-decimal'
 import { Button, Flex, Text } from '@audius/harmony'
 
 import { TextLink } from 'components/link'
@@ -17,8 +16,6 @@ const messages = {
   alreadyHaveAnAccount: 'Already have an account?',
   orContinueGuest: 'Or, continue as a guest.'
 }
-
-const AUDIO_MATCHING_REWARDS_MULTIPLIER = 5
 
 type GuestCheckoutProps = {
   metadata: PurchaseableContentMetadata
@@ -55,9 +52,6 @@ export const GuestCheckoutPage = (props: GuestCheckoutProps) => {
           showLabel={false}
           metadata={metadata}
           owner={metadata.user}
-          earnAmount={USDC((price * AUDIO_MATCHING_REWARDS_MULTIPLIER) / 100)
-            .round()
-            .toShorthand()}
         />
         <PurchaseSummaryTable
           {...purchaseSummaryValues}

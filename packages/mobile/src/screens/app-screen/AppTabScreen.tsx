@@ -43,7 +43,6 @@ import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
-import { RewardsScreen } from 'app/screens/rewards-screen'
 import { SendTokensUserSelectionScreen } from 'app/screens/send-tokens-user-selection-screen/SendTokensUserSelectionScreen'
 import {
   AboutScreen,
@@ -131,7 +130,6 @@ export type AppTabScreenParamList = {
   FindAccountManagerScreen: undefined
 
   AudioScreen: undefined
-  RewardsScreen: undefined
   Contests: undefined
   FanClubsExplore: undefined
   FanClubSort: {
@@ -325,10 +323,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
             />
 
             <Stack.Screen name='AudioScreen' getComponent={() => AudioScreen} />
-            <Stack.Screen
-              name='RewardsScreen'
-              getComponent={() => RewardsScreen}
-            />
             <Stack.Screen
               name='Contests'
               getComponent={() => ContestsScreen}

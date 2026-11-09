@@ -6,8 +6,6 @@ import {
   FavoriteNotification,
   FollowNotification,
   RepostNotification,
-  ChallengeRewardNotification,
-  ClaimableRewardNotification,
   RemixCreateNotification,
   UserSubscriptionNotification,
   RemixCosignNotification,
@@ -41,7 +39,6 @@ import { FanRemixContestEndingSoonNotification } from './Notifications/FanRemixC
 import { FanRemixContestStartedNotification } from './Notifications/FanRemixContestStartedNotification'
 import { FanRemixContestSubmissionNotification } from './Notifications/FanRemixContestSubmissionNotification'
 import { FanRemixContestWinnersSelectedNotification } from './Notifications/FanRemixContestWinnersSelectedNotification'
-import { ListenStreakReminderNotification } from './Notifications/ListenStreakReminderNotification'
 import { RemixContestUpdateNotification } from './Notifications/RemixContestUpdateNotification'
 import { WeeklyRotationNotification } from './Notifications/WeeklyRotationNotification'
 
@@ -56,10 +53,6 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
     switch (notification.type) {
       case NotificationType.Announcement:
         return <AnnouncementNotification notification={notification} />
-      case NotificationType.ChallengeReward:
-        return <ChallengeRewardNotification notification={notification} />
-      case NotificationType.ClaimableReward:
-        return <ClaimableRewardNotification notification={notification} />
       case NotificationType.Favorite:
         return <FavoriteNotification notification={notification} />
       case NotificationType.Follow:
@@ -116,8 +109,6 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
         return <CommentMentionNotification notification={notification} />
       case NotificationType.CommentReaction:
         return <CommentReactionNotification notification={notification} />
-      case NotificationType.ListenStreakReminder:
-        return <ListenStreakReminderNotification notification={notification} />
       case NotificationType.WeeklyRotation:
         return <WeeklyRotationNotification notification={notification} />
       case NotificationType.FanRemixContestEnded:
