@@ -697,6 +697,26 @@ export const notificationFromSDK = (
           type: string
           actions: typeof notification.actions
         }
+        if (n.type === 'weekly_rotation_featured') {
+          const data = n.actions[0].data as unknown as Record<
+            string,
+            string | number
+          >
+          const entityId = HashId.parse(
+            (data.trackId ?? data.track_id) as string
+          )
+          if (!entityId) return undefined
+          return {
+            type: NotificationType.WeeklyRotationFeatured,
+            entityType: Entity.Track,
+            entityId,
+            trackCount: Number(data.trackCount ?? data.track_count),
+            rotationCount: Number(data.rotationCount ?? data.rotation_count),
+            year: Number(data.year),
+            week: Number(data.week),
+            ...formatBaseNotification(notification)
+          }
+        }
         if (n.type === 'remix_contest_update') {
           const data = n.actions[0].data as unknown as Record<string, string>
           return {

@@ -47,6 +47,7 @@ export enum NotificationType {
   CommentReaction = 'CommentReaction',
   ListenStreakReminder = 'ListenStreakReminder',
   WeeklyRotation = 'WeeklyRotation',
+  WeeklyRotationFeatured = 'WeeklyRotationFeatured',
   ArtistRemixContestEnded = 'ArtistRemixContestEnded',
   ArtistRemixContestEndingSoon = 'ArtistRemixContestEndingSoon',
   ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions',
@@ -96,6 +97,7 @@ export enum PushNotificationType {
   CommentReaction = 'CommentReaction',
   ListenStreakReminder = 'ListenStreakReminder',
   WeeklyRotation = 'WeeklyRotation',
+  WeeklyRotationFeatured = 'WeeklyRotationFeatured',
   FanClubTextPost = 'FanClubTextPost'
 }
 
@@ -625,6 +627,32 @@ export type WeeklyRotationNotification = BaseNotification & {
   week: number
 }
 
+/**
+ * Sent to an artist on the Wednesday rollover: how many listeners' Weekly
+ * Rotations included their tracks in the period that just closed.
+ */
+export type WeeklyRotationFeaturedNotification = BaseNotification & {
+  type: NotificationType.WeeklyRotationFeatured
+  entityType: Entity.Track
+  /** The most-featured track; the only one when trackCount is 1. */
+  entityId: ID
+  trackCount: number
+  rotationCount: number
+  /** The rotation period reported, as an ISO (year, week) pair. */
+  year: number
+  week: number
+}
+
+/**
+ * Push payload for WeeklyRotationFeatured: a Track when one track was
+ * featured, otherwise the artist (User) whose profile the tap opens.
+ */
+export type WeeklyRotationFeaturedPushNotification = {
+  type: NotificationType.WeeklyRotationFeatured
+  entityType: Entity.Track | Entity.User
+  entityId: ID
+}
+
 export type FanRemixContestStartedNotification = BaseNotification & {
   type: NotificationType.FanRemixContestStarted
   entityId: ID
@@ -731,6 +759,7 @@ export type Notification =
   | CommentReactionNotification
   | ListenStreakReminderNotification
   | WeeklyRotationNotification
+  | WeeklyRotationFeaturedNotification
   | ArtistRemixContestEndedNotification
   | FanRemixContestEndedNotification
   | FanRemixContestWinnersSelectedNotification
