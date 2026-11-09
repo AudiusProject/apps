@@ -44,8 +44,20 @@ const ESTIMATED_HEADER_ROW_HEIGHT = 56
  */
 const DIRECTION_THRESHOLD = 6
 
-/** Scroll distance over which a compact pill forms. */
-const COMPACT_FORM_DISTANCE = 36
+/**
+ * A compact pill fades in from this far before its in-flow row has scrolled
+ * away until this far after, so the two barely overlap.
+ */
+const COMPACT_FADE_BEFORE = 20
+const COMPACT_FADE_AFTER = 8
+
+/** 0..1 progress of a compact pill whose in-flow row is gone at `end`. */
+const compactFadeProgress = (scrollY: number, end: number) => {
+  'worklet'
+  const start = end - COMPACT_FADE_BEFORE
+  const t = (scrollY - start) / (COMPACT_FADE_BEFORE + COMPACT_FADE_AFTER)
+  return Math.min(1, Math.max(0, t))
+}
 
 // Long enough for the tab bar's collapse to read as a morph rather than a cut.
 const HIDE_TIMING = {
@@ -210,15 +222,7 @@ export const useCompactTitleProgress = () => {
   const { headerHeight } = useGlassChrome()
   const insets = useSafeAreaInsets()
   const end = headerHeight - insets.top
-  return useDerivedValue(() =>
-    Math.min(
-      1,
-      Math.max(
-        0,
-        (scrollY.value - (end - COMPACT_FORM_DISTANCE)) / COMPACT_FORM_DISTANCE
-      )
-    )
-  )
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
 }
 
 /**
@@ -230,15 +234,7 @@ export const useCompactControlsProgress = () => {
   const { headerHeight, subHeaderHeight } = useGlassChrome()
   const insets = useSafeAreaInsets()
   const end = headerHeight - insets.top + subHeaderHeight
-  return useDerivedValue(() =>
-    Math.min(
-      1,
-      Math.max(
-        0,
-        (scrollY.value - (end - COMPACT_FORM_DISTANCE)) / COMPACT_FORM_DISTANCE
-      )
-    )
-  )
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
 }
 
 /**

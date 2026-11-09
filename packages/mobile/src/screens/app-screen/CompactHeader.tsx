@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import Animated, {
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
+import { isLiquidGlassAvailable } from 'app/components/core/Screen/LiquidGlass'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
@@ -25,17 +29,37 @@ const COMPACT_STACK_GAP = 6
 /** Page-colored tint so pill text stays readable over the list. */
 const useCompactTint = () => `${useThemeColors().background.slice(0, 7)}B3`
 
+/** How far compact chrome drifts down as it fades in. */
+const FADE_DRIFT = 6
+
 /**
- * Glass can't fade in from transparent, so compact chrome slides down from
- * above the screen as it forms instead of fading.
+ * Fades compact chrome in as the in-flow header scrolls away.
+ *
+ * iOS 26 glass stops rendering under a parent that fades from 0, so there
+ * only the content fades with scroll, and the glass itself materializes
+ * natively (its `effect` switches on) once the chrome is half formed.
+ * Everywhere else the whole pill fades.
  */
-const useSlideInStyle = (progress: SharedValue<number>, distance: number) =>
-  useAnimatedStyle(() => ({
+const useCompactFade = (progress: SharedValue<number>) => {
+  const [isShown, setIsShown] = useState(false)
+  useAnimatedReaction(
+    () => progress.value > 0.5,
+    (current, previous) => {
+      if (current !== previous) runOnJS(setIsShown)(current)
+    }
+  )
+  const frameStyle = useAnimatedStyle(() => ({
+    opacity: isLiquidGlassAvailable ? 1 : progress.value,
     transform: [
-      { translateY: -distance * (1 - progress.value) },
-      { scale: 0.9 + 0.1 * progress.value }
+      { translateY: -FADE_DRIFT * (1 - progress.value) },
+      { scale: 0.96 + 0.04 * progress.value }
     ]
   }))
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: isLiquidGlassAvailable ? progress.value : 1
+  }))
+  return { isShown, frameStyle, contentStyle }
+}
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   titleContent: {
@@ -77,30 +101,28 @@ export const CompactTitlePill = (props: CompactTitlePillProps) => {
   const floating = useSharedValue(1)
   const tint = useCompactTint()
   const top = insets.top + COMPACT_TOP_GAP
-  const slideStyle = useSlideInStyle(
-    progress,
-    top + COMPACT_TITLE_HEIGHT + COMPACT_TOP_GAP
-  )
+  const { isShown, frameStyle, contentStyle } = useCompactFade(progress)
 
   return (
     <Animated.View
       pointerEvents='none'
       accessibilityElementsHidden
       importantForAccessibility='no-hide-descendants'
-      style={[layout.root, { top }, slideStyle]}
+      style={[layout.root, { top }, frameStyle]}
     >
       <GlassCapsule
         height={COMPACT_TITLE_HEIGHT}
         floatProgress={floating}
         tintColor={tint}
+        effect={isShown ? 'regular' : 'none'}
         style={layout.capsule}
       >
-        <View style={styles.titleContent}>
+        <Animated.View style={[styles.titleContent, contentStyle]}>
           {leading}
           <Text numberOfLines={1} style={styles.title}>
             {title}
           </Text>
-        </View>
+        </Animated.View>
       </GlassCapsule>
     </Animated.View>
   )
@@ -124,23 +146,23 @@ export const CompactControls = (props: CompactControlsProps) => {
   const tint = useCompactTint()
   const top =
     insets.top + COMPACT_TOP_GAP + COMPACT_TITLE_HEIGHT + COMPACT_STACK_GAP
-  const slideStyle = useSlideInStyle(
-    progress,
-    top + COMPACT_CONTROLS_HEIGHT + COMPACT_TOP_GAP
-  )
+  const { isShown, frameStyle, contentStyle } = useCompactFade(progress)
 
   return (
     <Animated.View
-      pointerEvents='box-none'
-      style={[layout.root, { top }, slideStyle]}
+      pointerEvents={isShown ? 'box-none' : 'none'}
+      style={[layout.root, { top }, frameStyle]}
     >
       <GlassCapsule
         height={COMPACT_CONTROLS_HEIGHT}
         floatProgress={floating}
         tintColor={tint}
+        effect={isShown ? 'regular' : 'none'}
         style={layout.capsule}
       >
-        <View style={styles.controlsContent}>{children}</View>
+        <Animated.View style={[styles.controlsContent, contentStyle]}>
+          {children}
+        </Animated.View>
       </GlassCapsule>
     </Animated.View>
   )

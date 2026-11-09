@@ -8,9 +8,10 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { makeStyles } from 'app/styles'
 import { zIndex } from 'app/utils/zIndex'
 
-import { CompactControls } from './CompactHeader'
+import { CompactControls, CompactTitlePill } from './CompactHeader'
 import {
   useCompactControlsProgress,
+  useCompactTitleProgress,
   useHeaderScrollOffset,
   useRootHeaderHeight,
   useSetSubHeaderHeight
@@ -26,6 +27,11 @@ type FloatingSubHeaderProps = {
   compact?: ReactNode
   /** Pads the row to the screen gutter. Off for full-width rows. */
   padded?: boolean
+  /**
+   * The screen title. The compact title pill renders here, above this row;
+   * see `MobileRootHeader`'s `hasSubHeader`.
+   */
+  title: string
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -48,12 +54,13 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
  * `AccountPictureHeader` and re-fires the profile-picture fetch).
  */
 export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
-  const { children, compact, padded = true } = props
+  const { children, compact, padded = true, title } = props
   const styles = useStyles()
   const headerHeight = useRootHeaderHeight()
   const setSubHeaderHeight = useSetSubHeaderHeight()
   const scrollOffset = useHeaderScrollOffset()
   const compactProgress = useCompactControlsProgress()
+  const titleProgress = useCompactTitleProgress()
 
   const positionStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -scrollOffset.value }]
@@ -80,6 +87,7 @@ export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
       >
         {children}
       </Animated.View>
+      <CompactTitlePill title={title} progress={titleProgress} />
       {compact ? (
         <CompactControls progress={compactProgress}>{compact}</CompactControls>
       ) : null}

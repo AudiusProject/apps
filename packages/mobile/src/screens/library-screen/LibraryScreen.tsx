@@ -74,7 +74,11 @@ const LibraryTabBar = (props: MaterialTopTabBarProps) => {
   )
 
   return (
-    <FloatingSubHeader padded={false} compact={compactTabs}>
+    <FloatingSubHeader
+      title={messages.header}
+      padded={false}
+      compact={compactTabs}
+    >
       <LibraryCategorySelectionMenu />
       <TopTabBar {...props} />
     </FloatingSubHeader>
@@ -88,7 +92,11 @@ const renderLibraryTabBar = (props: MaterialTopTabBarProps) => (
 export const LibraryScreen = () => {
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={messages.header} showDivider={false}>
+      <MobileRootHeader
+        title={messages.header}
+        showDivider={false}
+        hasSubHeader
+      >
         <LibraryDownloadSection />
       </MobileRootHeader>
     ),

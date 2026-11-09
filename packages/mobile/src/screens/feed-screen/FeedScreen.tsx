@@ -211,7 +211,11 @@ export const FeedScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={messages.header} showDivider={false}>
+      <MobileRootHeader
+        title={messages.header}
+        showDivider={false}
+        hasSubHeader
+      >
         {isForYou ? null : <FeedFilterButton />}
       </MobileRootHeader>
     ),
@@ -260,6 +264,7 @@ export const FeedScreen = () => {
     <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
         <FloatingSubHeader
+          title={messages.header}
           compact={
             <FeedTabs
               currentTab={feedTab}

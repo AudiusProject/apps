@@ -37,6 +37,12 @@ type MobileRootHeaderProps = {
   children?: ReactNode
   /** Hairline under the title row. Off when a sub-header row follows it. */
   showDivider?: boolean
+  /**
+   * Set when the screen renders a `FloatingSubHeader`. The screen's floating
+   * rows draw above the navigation header, so the compact title pill moves
+   * into the sub-header to stay on top of them.
+   */
+  hasSubHeader?: boolean
 }
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
@@ -87,7 +93,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
  * underneath can pad its scrollable content to start below it.
  */
 export const MobileRootHeader = (props: MobileRootHeaderProps) => {
-  const { title, children, showDivider = true } = props
+  const { title, children, showDivider = true, hasSubHeader = false } = props
   const insets = useSafeAreaInsets()
   const styles = useStyles()
   const { drawerHelpers } = useContext(AppDrawerContext)
@@ -148,7 +154,9 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
         toOpacity={0}
         style={fadeStyle}
       />
-      <CompactTitlePill title={title} progress={compactProgress} />
+      {!hasSubHeader ? (
+        <CompactTitlePill title={title} progress={compactProgress} />
+      ) : null}
     </View>
   )
 }
