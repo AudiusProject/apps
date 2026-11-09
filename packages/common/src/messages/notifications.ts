@@ -17,7 +17,7 @@ export const weeklyRotationFeaturedNotificationMessages = {
   your: 'Your',
   yourTracks: 'Your tracks',
   featuredIn: (rotationCount: number) =>
-    `was featured in ${pluralizeRotations(rotationCount)} this week`,
+    `was featured in ${pluralizeRotations(rotationCount)} last week`,
   tracksFeaturedIn: (rotationCount: number) =>
-    `were featured in ${pluralizeRotations(rotationCount)} this week`
+    `were featured in ${pluralizeRotations(rotationCount)} last week`
 }
