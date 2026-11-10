@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -7,8 +7,12 @@ import {
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
-import { Flex } from '@audius/harmony'
+import { Checkbox, Flex } from '@audius/harmony'
 
+import {
+  TrackSelectionProvider,
+  useTrackSelection
+} from 'components/collection/desktop/edit-mode/tracks/TrackSelectionContext'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
@@ -17,9 +21,11 @@ import styles from '../DashboardPage.module.css'
 
 import { EmptySearchResults } from './EmptySearchResults'
 import { EmptyTabState } from './EmptyTabState'
+import selectionStyles from './bulk-edit/BulkEditTracks.module.css'
+import { BulkEditTracksBar } from './bulk-edit/BulkEditTracksBar'
 import { SHOW_MORE_LIMIT, TABLE_PAGE_SIZE } from './constants'
 import { useFilteredTrackData } from './hooks'
-import { TrackFilters } from './types'
+import { DataSourceTrack, TrackFilters } from './types'
 
 const tracksTableColumns: TracksTableColumn[] = [
   'spacer',
@@ -37,13 +43,32 @@ type ArtistDashboardTracksTabProps = {
   filterText: string
 }
 
-export const ArtistDashboardTracksTab = ({
-  selectedFilter,
-  filterText
-}: ArtistDashboardTracksTabProps) => {
+export const ArtistDashboardTracksTab = (
+  props: ArtistDashboardTracksTabProps
+) => {
+  const filteredData = useFilteredTrackData(props)
+  const orderedIds = useMemo(
+    () => filteredData.map((track) => track.track_id),
+    [filteredData]
+  )
+  return (
+    <TrackSelectionProvider orderedIds={orderedIds}>
+      <TracksTab {...props} filteredData={filteredData} />
+    </TrackSelectionProvider>
+  )
+}
+
+const TracksTab = ({
+  filterText,
+  filteredData
+}: ArtistDashboardTracksTabProps & { filteredData: DataSourceTrack[] }) => {
   const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
     FeatureFlags.TRACK_ROWS
   )
+  const { isEnabled: isBulkEditEnabled } = useFeatureFlag(
+    FeatureFlags.BULK_TRACK_EDIT
+  )
+  const selection = useTrackSelection()
   const navigate = useNavigateToPage()
   const [page, setPage] = useState(0)
 
@@ -63,11 +88,6 @@ export const ArtistDashboardTracksTab = ({
     { enabled: !!accountUser?.handle }
   )
 
-  const filteredData = useFilteredTrackData({
-    selectedFilter,
-    filterText
-  })
-
   const handleFetchPage = useCallback((nextPage: number) => {
     setPage(nextPage)
   }, [])
@@ -80,6 +100,33 @@ export const ArtistDashboardTracksTab = ({
     [account, navigate]
   )
 
+  const renderTrackPrefix = useCallback(
+    (track: DataSourceTrack, index: number) => {
+      const checked = selection.isSelected(track.track_id)
+      return (
+        <Checkbox
+          aria-label={`${checked ? 'Deselect' : 'Select'} ${track.title}`}
+          checked={checked}
+          onClick={(e) => {
+            // Keep the click from opening the track page.
+            e.stopPropagation()
+            selection.toggle(track.track_id, index, { shift: e.shiftKey })
+          }}
+          onChange={() => {}}
+        />
+      )
+    },
+    [selection]
+  )
+
+  const rowClassNameAddition = useCallback(
+    (track: DataSourceTrack) =>
+      selection.isSelected(track.track_id)
+        ? selectionStyles.selected
+        : undefined,
+    [selection]
+  )
+
   return !filteredData.length || !account ? (
     filterText ? (
       <EmptySearchResults />
@@ -87,7 +134,12 @@ export const ArtistDashboardTracksTab = ({
       <EmptyTabState type='track' />
     )
   ) : (
-    <Flex w='100%' direction='column' borderTop='default'>
+    <Flex
+      w='100%'
+      direction='column'
+      borderTop={isBulkEditEnabled ? undefined : 'default'}
+    >
+      {isBulkEditEnabled ? <BulkEditTracksBar tracks={filteredData} /> : null}
       <TracksTable
         data={filteredData}
         disabledTrackEdit
@@ -104,6 +156,10 @@ export const ArtistDashboardTracksTab = ({
         responsiveColumns={RESPONSIVE_TABLE_POLICIES.dashboardTracks}
         shouldShowGatedType
         isDense={isTrackRowsEnabled}
+        renderTrackPrefix={isBulkEditEnabled ? renderTrackPrefix : undefined}
+        rowClassNameAddition={
+          isBulkEditEnabled ? rowClassNameAddition : undefined
+        }
       />
     </Flex>
   )

@@ -21,7 +21,8 @@ export enum FeatureFlags {
   NOW_PLAYING_COMMENTS = 'now_playing_comments',
   TRACK_TILE_WAVEFORM = 'track_tile_waveform',
   NOW_PLAYING_WAVEFORM = 'now_playing_waveform',
-  MOBILE_MANAGER_MODE = 'mobile_manager_mode'
+  MOBILE_MANAGER_MODE = 'mobile_manager_mode',
+  BULK_TRACK_EDIT = 'bulk_track_edit'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -34,7 +35,8 @@ export const environmentFlagDefaults: Record<
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
     [FeatureFlags.TRACK_TILE_WAVEFORM]: true,
     [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
-    [FeatureFlags.MOBILE_MANAGER_MODE]: true
+    [FeatureFlags.MOBILE_MANAGER_MODE]: true,
+    [FeatureFlags.BULK_TRACK_EDIT]: true
   },
   production: {}
 }
@@ -72,5 +74,7 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
   // Account switcher and manager settings on mobile. Switching back out and
   // the manager-mode restrictions stay on regardless of this flag.
-  [FeatureFlags.MOBILE_MANAGER_MODE]: false
+  [FeatureFlags.MOBILE_MANAGER_MODE]: false,
+  // Multi-select and bulk edit on the Artist Dashboard tracks table.
+  [FeatureFlags.BULK_TRACK_EDIT]: false
 }
