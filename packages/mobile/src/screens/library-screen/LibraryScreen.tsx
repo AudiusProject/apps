@@ -1,13 +1,22 @@
-import { LibraryPageTabs } from '@audius/common/store'
-import { View } from 'react-native'
+import { useCallback } from 'react'
 
-import { IconAlbum, IconNote, IconPlaylists } from '@audius/harmony-native'
+import { LibraryPageTabs } from '@audius/common/store'
+import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs'
+
+import {
+  Flex,
+  IconAlbum,
+  IconNote,
+  IconPlaylists,
+  SelectablePill
+} from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { TopTabNavigator } from 'app/components/top-tab-bar'
+import { TopTabBar } from 'app/components/top-tab-bar/TopTabBar'
+import { FloatingSubHeader } from 'app/screens/app-screen/FloatingSubHeader'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
-import { makeStyles } from 'app/styles'
 
 import { AlbumsTab } from './AlbumsTab'
 import { LibraryCategorySelectionMenu } from './LibraryCategorySelectionMenu'
@@ -37,33 +46,72 @@ const libraryScreens = [
   }
 ]
 
-const useStyles = makeStyles(({ palette }) => ({
-  subHeader: {
-    backgroundColor: palette.white
-  }
-}))
+/**
+ * Category pills and the Tracks / Albums / Playlists tabs, as the header's
+ * scroll-away row. The tab bar floats over the tab lists, which pad their own
+ * content to start below it.
+ */
+const LibraryTabBar = (props: MaterialTopTabBarProps) => {
+  const { state, navigation } = props
 
-export const LibraryScreen = () => {
-  const styles = useStyles()
+  const compactTabs = (
+    <Flex direction='row' alignItems='center' gap='s'>
+      {state.routes.map((route, index) => (
+        <SelectablePill
+          key={route.key}
+          type='radio'
+          size='small'
+          value={route.name}
+          label={route.name}
+          isSelected={state.index === index}
+          onChange={(value, isSelected) => {
+            if (isSelected) navigation.navigate(value)
+          }}
+          disableUnselectAnimation
+        />
+      ))}
+    </Flex>
+  )
 
   return (
-    <Screen
-      header={() => (
-        <MobileRootHeader title={messages.header}>
-          <LibraryDownloadSection />
-        </MobileRootHeader>
-      )}
+    <FloatingSubHeader
+      title={messages.header}
+      padded={false}
+      compact={compactTabs}
     >
-      <ScreenPrimaryContent>
-        <View style={styles.subHeader}>
-          <LibraryCategorySelectionMenu />
-        </View>
-      </ScreenPrimaryContent>
+      <LibraryCategorySelectionMenu />
+      <TopTabBar {...props} />
+    </FloatingSubHeader>
+  )
+}
+
+const renderLibraryTabBar = (props: MaterialTopTabBarProps) => (
+  <LibraryTabBar {...props} />
+)
+
+export const LibraryScreen = () => {
+  const renderHeader = useCallback(
+    () => (
+      <MobileRootHeader
+        title={messages.header}
+        showDivider={false}
+        hasSubHeader
+      >
+        <LibraryDownloadSection />
+      </MobileRootHeader>
+    ),
+    []
+  )
+
+  return (
+    <Screen header={renderHeader} headerTransparent>
+      <ScreenPrimaryContent>{null}</ScreenPrimaryContent>
       <ScreenContent isOfflineCapable>
         <ScreenSecondaryContent>
           <TopTabNavigator
             screens={libraryScreens}
             screenOptions={{ lazy: true }}
+            tabBar={renderLibraryTabBar}
           />
         </ScreenSecondaryContent>
       </ScreenContent>

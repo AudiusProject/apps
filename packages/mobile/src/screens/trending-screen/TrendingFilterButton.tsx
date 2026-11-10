@@ -7,7 +7,13 @@ import { Flex, IconLeading, SelectablePill } from '@audius/harmony-native'
 
 import { TRENDING_FILTER_MODAL } from './TrendingCombinedFilterDrawer'
 
-export const TrendingFilterButton = () => {
+type TrendingFilterButtonProps = {
+  size?: 'small' | 'large'
+}
+
+export const TrendingFilterButton = ({
+  size = 'large'
+}: TrendingFilterButtonProps) => {
   const dispatch = useDispatch()
   const timeRange = useSelector(trendingPageSelectors.getTrendingTimeRange)
   const genre = useSelector(trendingPageSelectors.getTrendingGenre)
@@ -30,7 +36,7 @@ export const TrendingFilterButton = () => {
       <SelectablePill
         type='button'
         icon={IconLeading}
-        size='large'
+        size={size}
         isSelected={hasActiveFilters}
         isControlled
         onPress={handleOpenFilter}

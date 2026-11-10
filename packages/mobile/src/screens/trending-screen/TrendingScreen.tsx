@@ -56,7 +56,11 @@ export const TrendingScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={titleByCategory[category]}>
+      <MobileRootHeader
+        title={titleByCategory[category]}
+        showDivider={false}
+        hasSubHeader
+      >
         {category === 'tracks' ? <TrendingFilterButton /> : null}
       </MobileRootHeader>
     ),
@@ -79,8 +83,22 @@ export const TrendingScreen = () => {
   return (
     <Screen url='Trending' header={renderHeader} headerTransparent>
       <Flex flex={1} direction='column' style={{ minHeight: 0 }}>
-        {/* Pins under the status bar once the title scrolls away. */}
-        <FloatingSubHeader>
+        <FloatingSubHeader
+          title={titleByCategory[category]}
+          compact={
+            <TrendingHeader
+              title={titleByCategory[category]}
+              icon={IconTrending}
+              filterModal={TRENDING_FILTER_MODAL}
+              showTitleRow={false}
+              size='small'
+            >
+              {category === 'tracks' ? (
+                <TrendingFilterButton size='small' />
+              ) : null}
+            </TrendingHeader>
+          }
+        >
           <ScreenPrimaryContent skeleton={trendingPills}>
             {trendingPills}
           </ScreenPrimaryContent>

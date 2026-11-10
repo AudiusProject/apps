@@ -7,7 +7,11 @@ import { Flex, IconLeading, SelectablePill } from '@audius/harmony-native'
 
 import { FEED_FILTER_MODAL } from './FeedFilterDrawer'
 
-export const FeedFilterButton = () => {
+type FeedFilterButtonProps = {
+  size?: 'small' | 'large'
+}
+
+export const FeedFilterButton = ({ size = 'large' }: FeedFilterButtonProps) => {
   const dispatch = useDispatch()
   const [feedFilter] = useFeedFilter()
 
@@ -27,7 +31,7 @@ export const FeedFilterButton = () => {
       <SelectablePill
         type='button'
         icon={IconLeading}
-        size='large'
+        size={size}
         isSelected={hasActiveFilters}
         isControlled
         onPress={handleOpenFilter}

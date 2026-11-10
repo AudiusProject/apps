@@ -33,6 +33,16 @@ type GlassCapsuleProps = {
    * time under a page-colored cover that fades out.
    */
   floatProgress: SharedValue<number>
+  /**
+   * Tints the iOS 26 glass, for pills that sit over busy content where the
+   * clear material leaves text hard to read.
+   */
+  tintColor?: string
+  /**
+   * iOS 26 glass material. Switching to `'none'` and back animates the glass
+   * away and in natively, which a fade can't do.
+   */
+  effect?: 'regular' | 'none'
 }
 
 /**
@@ -41,7 +51,14 @@ type GlassCapsuleProps = {
  * `GlassSurface` clipped to the same shape with a soft shadow.
  */
 export const GlassCapsule = (props: GlassCapsuleProps) => {
-  const { children, height, style, floatProgress } = props
+  const {
+    children,
+    height,
+    style,
+    floatProgress,
+    tintColor,
+    effect = 'regular'
+  } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
   const { background, borderDefault } = useThemeColors()
   const shape = { height, borderRadius: height / 2 }
@@ -85,7 +102,8 @@ export const GlassCapsule = (props: GlassCapsuleProps) => {
     return (
       <Animated.View style={[frameStyle, style]}>
         <LiquidGlassView
-          effect='regular'
+          effect={effect}
+          tintColor={tintColor}
           colorScheme={isDarkMode ? 'dark' : 'light'}
           style={[shape, styles.clip]}
         >
