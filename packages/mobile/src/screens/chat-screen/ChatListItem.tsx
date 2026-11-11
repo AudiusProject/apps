@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useRef } from 'react'
 
 import { useOtherChatUsers } from '@audius/common/api'
-import { useProxySelector } from '@audius/common/hooks'
+import { useIsGroupChat, useProxySelector } from '@audius/common/hooks'
 import { chatSelectors } from '@audius/common/store'
+import { formatGroupChatTitle } from '@audius/common/utils'
 import { css } from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { TouchableHighlight } from 'react-native'
@@ -21,11 +22,13 @@ import type { AppTabScreenParamList } from '../app-screen'
 
 import { ChatCategorySwipeActions } from './ChatCategorySwipeActions'
 import { ChatListItemSkeleton } from './ChatListItemSkeleton'
+import { GroupChatAvatars } from './GroupChatAvatars'
 
 const { getChat } = chatSelectors
 
 const messages = {
-  new: 'new'
+  new: 'new',
+  members: (count: number) => `${count} members`
 }
 
 const clipMessageCount = (count: number) => {
@@ -47,6 +50,7 @@ export const ChatListItem = ({ chatId }: { chatId: string }) => {
   const chat = useProxySelector((state) => getChat(state, chatId), [chatId])
   const otherUsers = useOtherChatUsers(chatId)
   const otherUser = otherUsers[0]
+  const isGroup = useIsGroupChat(chatId)
   const lastMessage = useRemoveLeadingWhitespace(
     (!chat?.is_blast && chat?.last_message) || ''
   )
@@ -108,26 +112,59 @@ export const ChatListItem = ({ chatId }: { chatId: string }) => {
           >
             <Flex row justifyContent='space-between' w='100%' gap='s'>
               <Flex row flex={1} justifyContent='space-between'>
-                <ProfilePicture
-                  userId={otherUser.user_id}
-                  style={css({ width: spacing.unit12, height: spacing.unit12 })}
-                />
-                <Flex column pt='2xs' ml='s' mb='s' flex={1}>
-                  <Flex row mb='xs' wrap='nowrap' alignItems='center' gap='xs'>
-                    <Text
-                      size='l'
-                      strength='strong'
-                      numberOfLines={1}
-                      flexShrink={1}
-                    >
-                      {otherUser.name}
-                    </Text>
-                    <UserBadges userId={otherUser.user_id} badgeSize='xs' />
+                {isGroup ? (
+                  <Flex
+                    justifyContent='center'
+                    style={css({ minWidth: spacing.unit12 })}
+                  >
+                    <GroupChatAvatars
+                      users={otherUsers}
+                      size={spacing.unit8}
+                      limit={3}
+                    />
                   </Flex>
-                  <Text size='s' numberOfLines={1}>
-                    @{otherUser.handle}
-                  </Text>
-                </Flex>
+                ) : (
+                  <ProfilePicture
+                    userId={otherUser.user_id}
+                    style={css({
+                      width: spacing.unit12,
+                      height: spacing.unit12
+                    })}
+                  />
+                )}
+                {isGroup ? (
+                  <Flex column pt='2xs' ml='s' mb='s' flex={1} gap='xs'>
+                    <Text size='l' strength='strong' numberOfLines={1}>
+                      {formatGroupChatTitle(otherUsers)}
+                    </Text>
+                    <Text size='s' numberOfLines={1}>
+                      {messages.members(otherUsers.length + 1)}
+                    </Text>
+                  </Flex>
+                ) : (
+                  <Flex column pt='2xs' ml='s' mb='s' flex={1}>
+                    <Flex
+                      row
+                      mb='xs'
+                      wrap='nowrap'
+                      alignItems='center'
+                      gap='xs'
+                    >
+                      <Text
+                        size='l'
+                        strength='strong'
+                        numberOfLines={1}
+                        flexShrink={1}
+                      >
+                        {otherUser.name}
+                      </Text>
+                      <UserBadges userId={otherUser.user_id} badgeSize='xs' />
+                    </Flex>
+                    <Text size='s' numberOfLines={1}>
+                      @{otherUser.handle}
+                    </Text>
+                  </Flex>
+                )}
               </Flex>
               {chat?.unread_message_count && chat?.unread_message_count > 0 ? (
                 <Box style={css({ flexShrink: 0 })}>

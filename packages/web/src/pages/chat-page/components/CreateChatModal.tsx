@@ -1,7 +1,9 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { ID, User } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   chatActions,
   useCreateChatModal,
@@ -9,9 +11,10 @@ import {
   useInboxUnavailableModal,
   userListActions,
   followersUserListActions,
-  FOLLOWERS_USER_LIST_TAG
+  FOLLOWERS_USER_LIST_TAG,
+  MAX_GROUP_CHAT_MEMBERS
 } from '@audius/common/store'
-import { IconCompose } from '@audius/harmony'
+import { Box, Button, IconCompose } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { SearchUsersModal } from 'components/search-users-modal/SearchUsersModal'
@@ -22,10 +25,13 @@ import { CreateChatEmptyResults } from './CreateChatEmptyResults'
 
 const DEBOUNCE_MS = 500
 const messages = {
-  title: 'New Message'
+  title: 'New Message',
+  startChat: 'Start Chat',
+  startGroup: (count: number) => `Start Group Chat (${count})`
 }
 
-const { fetchBlockers, fetchMoreChats, fetchPermissions } = chatActions
+const { createChat, fetchBlockers, fetchMoreChats, fetchPermissions } =
+  chatActions
 
 const CreateChatModal = () => {
   const dispatch = useDispatch()
@@ -33,6 +39,27 @@ const CreateChatModal = () => {
   const { isOpen, onClose, onClosed, data } = useCreateChatModal()
   const { onOpen: openInboxUnavailableModal } = useInboxUnavailableModal()
   const { onCancelAction, presetMessage, defaultUserList } = data
+  const { isEnabled: isGroupMessagesEnabled } = useFeatureFlag(
+    FeatureFlags.GROUP_MESSAGES
+  )
+  const [selectedUserIds, setSelectedUserIds] = useState<ID[]>([])
+
+  useEffect(() => {
+    if (!isOpen) setSelectedUserIds([])
+  }, [isOpen])
+
+  const handleToggleUser = useCallback((user: User) => {
+    setSelectedUserIds((ids) =>
+      ids.includes(user.user_id)
+        ? ids.filter((id) => id !== user.user_id)
+        : [...ids, user.user_id]
+    )
+  }, [])
+
+  const handleStartChat = useCallback(() => {
+    dispatch(createChat({ userIds: selectedUserIds, presetMessage }))
+    onClose()
+  }, [dispatch, selectedUserIds, presetMessage, onClose])
 
   const handleCancel = useCallback(() => {
     if (onCancelAction) {
@@ -97,6 +124,18 @@ const CreateChatModal = () => {
             openInboxUnavailableModal={handleOpenInboxUnavailableModal}
             closeParentModal={closeParentModal}
             presetMessage={presetMessage}
+            selection={
+              isGroupMessagesEnabled
+                ? {
+                    isSelected: selectedUserIds.includes(user.user_id),
+                    isSelecting: selectedUserIds.length > 0,
+                    // The current user takes one of the slots
+                    isFull:
+                      selectedUserIds.length >= MAX_GROUP_CHAT_MEMBERS - 1,
+                    onToggle: handleToggleUser
+                  }
+                : undefined
+            }
           />
         )}
         renderEmpty={() => <CreateChatEmptyResults />}
@@ -106,7 +145,19 @@ const CreateChatModal = () => {
         debounceMs={DEBOUNCE_MS}
         onClosed={onClosed}
         onCancel={handleCancel}
-        footer={<ChatBlastCTA onClick={onClose} />}
+        footer={
+          selectedUserIds.length > 0 ? (
+            <Box p='l' backgroundColor='surface1' borderTop='strong'>
+              <Button fullWidth onClick={handleStartChat}>
+                {selectedUserIds.length > 1
+                  ? messages.startGroup(selectedUserIds.length)
+                  : messages.startChat}
+              </Button>
+            </Box>
+          ) : (
+            <ChatBlastCTA onClick={onClose} />
+          )
+        }
       />
     </>
   )

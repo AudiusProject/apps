@@ -36,6 +36,13 @@ export type ChatDeleteRPC = {
   }
 }
 
+export type ChatLeaveRPC = {
+  method: 'chat.leave'
+  params: {
+    chat_id: string
+  }
+}
+
 export type ChatInviteRPC = {
   method: 'chat.invite'
   params: {
@@ -115,6 +122,7 @@ export type RPCPayloadRequest =
   | ChatBlastRPC
   | ChatCreateRPC
   | ChatDeleteRPC
+  | ChatLeaveRPC
   | ChatInviteRPC
   | ChatMessageRPC
   | ChatReactRPC
@@ -141,6 +149,8 @@ export type UserChat = {
   last_message_is_plaintext: boolean
   chat_members: Array<{ user_id: string }>
   recheck_permissions: boolean
+  /** True for group chats (created with more than two members). */
+  is_group?: boolean
 
   // User specific
   invite_code: string

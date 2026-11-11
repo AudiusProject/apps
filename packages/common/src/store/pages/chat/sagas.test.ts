@@ -1,5 +1,6 @@
 import {
   ChatBlastAudience,
+  Id,
   type TypedCommsResponse,
   type UserChat
 } from '@audius/sdk'
@@ -9,8 +10,14 @@ import { describe, expect, it, vitest } from 'vitest'
 
 import { queryCurrentUserId, queryUsers } from '~/api'
 
-import { doFetchLatestChats } from './sagas'
-import { actions } from './slice'
+import {
+  doCreateChat,
+  doFetchChatIfNecessary,
+  doFetchLatestChats,
+  doLeaveChat
+} from './sagas'
+import reducer, { actions } from './slice'
+import { makeChatId } from './utils'
 
 type ChatSummary = NonNullable<TypedCommsResponse<UserChat[]>['summary']>
 
@@ -176,6 +183,106 @@ describe('chat sagas', () => {
       )
 
       expect(getAll).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('group chats', () => {
+    const stateWithChats = (chats: UserChat[]) => ({
+      pages: {
+        chat: reducer(
+          undefined,
+          actions.fetchMoreChatsSucceeded({ data: chats, summary: makeSummary() })
+        )
+      }
+    })
+
+    it('creates a new group with a random group id', async () => {
+      const create = vitest.fn().mockResolvedValue({})
+      const get = vitest.fn((args: { chatId: string }) =>
+        Promise.resolve({
+          data: { ...makeChat(args.chatId), is_group: true }
+        })
+      )
+      const sdk = { chats: { create, get } }
+
+      await expectSaga(doCreateChat, actions.createChat({ userIds: [2, 3] }))
+        .withState(stateWithChats([]))
+        .provide([
+          [matchers.getContext('audiusSdk'), vitest.fn().mockResolvedValue(sdk)],
+          [matchers.call.fn(queryCurrentUserId), 1],
+          [matchers.call.fn(doFetchChatIfNecessary), undefined]
+        ])
+        .silentRun()
+
+      expect(create).toHaveBeenCalledTimes(1)
+      const params = create.mock.calls[0][0]
+      expect(params.chatId).toMatch(/^grp_[A-Za-z0-9]{16,}$/)
+      expect(params.invitedUserIds).toEqual([Id.parse(2), Id.parse(3)])
+      expect(get).toHaveBeenCalledWith({ chatId: params.chatId })
+    })
+
+    it('reuses a group with exactly the same members', async () => {
+      const existing: UserChat = {
+        ...makeChat('grp_EXISTINGGROUPID00000'),
+        is_group: true,
+        chat_members: [1, 2, 3].map((id) => ({ user_id: Id.parse(id) }))
+      }
+      const create = vitest.fn()
+      const sdk = { chats: { create } }
+
+      const result = await expectSaga(
+        doCreateChat,
+        actions.createChat({ userIds: [3, 2] })
+      )
+        .withState(stateWithChats([existing]))
+        .provide([
+          [matchers.getContext('audiusSdk'), vitest.fn().mockResolvedValue(sdk)],
+          [matchers.call.fn(queryCurrentUserId), 1],
+          [matchers.call.fn(doFetchChatIfNecessary), undefined]
+        ])
+        .silentRun()
+
+      expect(create).not.toHaveBeenCalled()
+      const goToChat = result.effects.put?.find(
+        (e) => e.payload.action.type === actions.goToChat.type
+      )
+      expect(goToChat?.payload.action.payload.chatId).toBe(existing.chat_id)
+    })
+
+    it('keeps the deterministic id for 1:1 chats', async () => {
+      const create = vitest.fn().mockResolvedValue({})
+      const get = vitest.fn().mockResolvedValue({ data: makeChat('x') })
+      const sdk = { chats: { create, get } }
+
+      await expectSaga(doCreateChat, actions.createChat({ userIds: [2] }))
+        .withState(stateWithChats([]))
+        .provide([
+          [matchers.getContext('audiusSdk'), vitest.fn().mockResolvedValue(sdk)],
+          [matchers.call.fn(queryCurrentUserId), 1],
+          [matchers.call.fn(doFetchChatIfNecessary), undefined]
+        ])
+        .silentRun()
+
+      expect(create.mock.calls[0][0].chatId).toBeUndefined()
+      expect(get).toHaveBeenCalledWith({ chatId: makeChatId([1, 2]) })
+    })
+
+    it('leaves a group and removes it locally', async () => {
+      const leave = vitest.fn().mockResolvedValue({})
+      const sdk = { chats: { leave } }
+
+      await expectSaga(
+        doLeaveChat,
+        actions.leaveChat({ chatId: 'grp_EXISTINGGROUPID00000' })
+      )
+        .provide([
+          [matchers.getContext('audiusSdk'), vitest.fn().mockResolvedValue(sdk)]
+        ])
+        .put(actions.goToChat({}))
+        .put(actions.deleteChatSucceeded({ chatId: 'grp_EXISTINGGROUPID00000' }))
+        .silentRun()
+
+      expect(leave).toHaveBeenCalledWith({ chatId: 'grp_EXISTINGGROUPID00000' })
     })
   })
 })

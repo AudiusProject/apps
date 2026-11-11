@@ -1,3 +1,4 @@
+import { ulid } from 'ulid'
 import { z } from 'zod'
 
 import {
@@ -60,10 +61,20 @@ export type ChatGetBlockersRequest = z.infer<
   typeof ChatGetBlockersRequestSchema
 >
 
+export const GROUP_CHAT_ID_PREFIX = 'grp_'
+
+/** New random id for a group chat. 1:1 chats use sorted "a:b" ids. */
+export const makeGroupChatId = () => `${GROUP_CHAT_ID_PREFIX}${ulid()}`
+
+export const isGroupChatId = (chatId: string) =>
+  chatId.startsWith(GROUP_CHAT_ID_PREFIX)
+
 export const ChatCreateRequestSchema = z.object({
   currentUserId: z.optional(z.string()),
   userId: z.string(),
-  invitedUserIds: z.array(z.string()).min(1)
+  invitedUserIds: z.array(z.string()).min(1),
+  /** Only for group chats; defaults to a new random group id. */
+  chatId: z.optional(z.string())
 })
 
 export type ChatCreateRequest = z.infer<typeof ChatCreateRequestSchema>
@@ -134,6 +145,13 @@ export const ChatDeleteRequestSchema = z.object({
 })
 
 export type ChatDeleteRequest = z.infer<typeof ChatDeleteRequestSchema>
+
+export const ChatLeaveRequestSchema = z.object({
+  currentUserId: z.optional(z.string()),
+  chatId: z.string()
+})
+
+export type ChatLeaveRequest = z.infer<typeof ChatLeaveRequestSchema>
 
 export const ChatPermitRequestSchema = z.object({
   currentUserId: z.optional(z.string()),
