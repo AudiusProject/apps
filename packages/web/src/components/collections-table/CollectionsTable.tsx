@@ -57,6 +57,8 @@ type CollectionsTableProps = {
   tableHeaderClassName?: string
   responsiveColumns?: TableProps['responsiveColumns']
   isDense?: boolean
+  /** Router state passed along when a collection name link is followed. */
+  linkState?: unknown
 }
 
 const defaultColumns: CollectionsTableColumn[] = [
@@ -86,37 +88,42 @@ export const CollectionsTable = ({
   totalRowCount,
   tableHeaderClassName,
   responsiveColumns,
-  isDense
+  isDense,
+  linkState
 }: CollectionsTableProps) => {
   // Cell Render Functions
-  const renderNameCell = useCallback((cellInfo: CollectionCell) => {
-    const collection = cellInfo.row.original
-    const deleted = collection.is_delete || !!collection.user?.is_deactivated
+  const renderNameCell = useCallback(
+    (cellInfo: CollectionCell) => {
+      const collection = cellInfo.row.original
+      const deleted = collection.is_delete || !!collection.user?.is_deactivated
 
-    return (
-      <Flex
-        gap='xs'
-        w='100%'
-        css={{
-          overflow: 'hidden',
-          position: 'relative',
-          display: 'inline-flex'
-        }}
-      >
-        <TextLink
-          to={deleted ? '' : (collection.permalink ?? '')}
-          textVariant='title'
-          size='s'
-          strength='weak'
-          css={{ display: 'block' }}
-          ellipses
+      return (
+        <Flex
+          gap='xs'
+          w='100%'
+          css={{
+            overflow: 'hidden',
+            position: 'relative',
+            display: 'inline-flex'
+          }}
         >
-          {collection.playlist_name}
-          {deleted ? ` [Deleted By Artist]` : ''}
-        </TextLink>
-      </Flex>
-    )
-  }, [])
+          <TextLink
+            to={deleted ? '' : (collection.permalink ?? '')}
+            state={linkState}
+            textVariant='title'
+            size='s'
+            strength='weak'
+            css={{ display: 'block' }}
+            ellipses
+          >
+            {collection.playlist_name}
+            {deleted ? ` [Deleted By Artist]` : ''}
+          </TextLink>
+        </Flex>
+      )
+    },
+    [linkState]
+  )
 
   const renderRepostsCell = useCallback((cellInfo: CollectionCell) => {
     const collection = cellInfo.row.original
