@@ -1,3 +1,4 @@
+import { Id } from '@audius/sdk'
 import { describe, expect, it } from 'vitest'
 
 import { weeklyArtistRecapNotificationMessages as messages } from '~/messages/notifications'
@@ -77,5 +78,47 @@ describe('weekly_artist_recap', () => {
     expect(messages.rotationSaves(1)).toBe(
       '1 save came from Weekly Rotation listeners.'
     )
+  })
+})
+
+describe('trending_genre', () => {
+  const row = (data: Record<string, unknown>) =>
+    ({
+      type: 'trending_genre',
+      groupId: 'trending_genre:2026-09-18:1',
+      isSeen: false,
+      actions: [
+        {
+          specifier: '1',
+          type: 'trending_genre',
+          timestamp: 1789000000,
+          data
+        }
+      ]
+    }) as unknown as Parameters<typeof notificationFromSDK>[0]
+
+  it('maps the api row', () => {
+    expect(
+      notificationFromSDK(
+        row({
+          track_id: Id.parse(1),
+          genre: 'Dubstep',
+          rank: 4,
+          week: '2026-09-18'
+        })
+      )
+    ).toMatchObject({
+      type: NotificationType.TrendingGenre,
+      rank: 4,
+      genre: 'Dubstep',
+      entityId: 1,
+      groupId: 'trending_genre:2026-09-18:1'
+    })
+  })
+
+  it('drops a row without a genre', () => {
+    expect(
+      notificationFromSDK(row({ track_id: Id.parse(1), rank: 4 }))
+    ).toBeUndefined()
   })
 })

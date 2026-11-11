@@ -42,6 +42,7 @@ export const messages = {
     underground: 'On Underground Trending'
   },
   milestoneFeaturedLabel: 'Featured Playlist',
+  milestoneGenreLabel: (genre: string) => `In ${genre}`,
   milestoneFeaturedShareText: (
     title: string,
     playlistName: string,

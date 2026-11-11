@@ -66,6 +66,7 @@ export type ShareMilestoneStat =
   | { kind: 'listens'; count: number }
   | { kind: 'trending' | 'underground'; rank: number }
   | { kind: 'featured'; playlistName: string }
+  | { kind: 'genre'; rank: number; genre: string }
 
 /**
  * A track milestone (play count, trending rank, editorial feature) shared as a

@@ -53,3 +53,12 @@ export const weeklyArtistRecapNotificationMessages = {
       count === 1 ? 'save' : 'saves'
     } came from Weekly Rotation listeners.`
 }
+
+export const trendingGenreNotificationMessages = {
+  title: (genre: string) => `Charting in ${genre}`,
+  // e.g. "[track] is #4 in Dubstep this week!"
+  is: 'is',
+  inGenre: (rank: number, genre: string) => `#${rank} in ${genre} this week!`,
+  xShareText: (title: string, rank: number, genre: string) =>
+    `My track ${title} is #${rank} in ${genre} on @audius! Check it out!`
+}

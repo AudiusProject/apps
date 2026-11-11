@@ -40,6 +40,7 @@ import { TrackAddedToPurchasedAlbumNotification } from './TrackAddedToPurchasedA
 import { TrackCollaboratorAcceptNotification } from './TrackCollaboratorAcceptNotification'
 import { TrackCollaboratorInviteNotification } from './TrackCollaboratorInviteNotification'
 import { TrendingTrackNotification } from './TrendingTrackNotification'
+import { TrendingGenreNotification } from './TrendingGenreNotification'
 import { TrendingUndergroundNotification } from './TrendingUndergroundNotification'
 import { USDCPurchaseBuyerNotification } from './USDCPurchaseBuyerNotification'
 import { USDCPurchaseSellerNotification } from './USDCPurchaseSellerNotification'
@@ -160,6 +161,9 @@ export const Notification = (props: NotificationProps) => {
       }
       case NotificationType.WeeklyArtistRecap: {
         return <WeeklyArtistRecapNotification notification={notification} />
+      }
+      case NotificationType.TrendingGenre: {
+        return <TrendingGenreNotification notification={notification} />
       }
       case NotificationType.FanRemixContestEndingSoon: {
         return (

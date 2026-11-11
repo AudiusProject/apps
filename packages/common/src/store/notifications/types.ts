@@ -49,6 +49,7 @@ export enum NotificationType {
   WeeklyRotation = 'WeeklyRotation',
   WeeklyRotationFeatured = 'WeeklyRotationFeatured',
   WeeklyArtistRecap = 'WeeklyArtistRecap',
+  TrendingGenre = 'TrendingGenre',
   ArtistRemixContestEnded = 'ArtistRemixContestEnded',
   ArtistRemixContestEndingSoon = 'ArtistRemixContestEndingSoon',
   ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions',
@@ -100,6 +101,7 @@ export enum PushNotificationType {
   WeeklyRotation = 'WeeklyRotation',
   WeeklyRotationFeatured = 'WeeklyRotationFeatured',
   WeeklyArtistRecap = 'WeeklyArtistRecap',
+  TrendingGenre = 'TrendingGenre',
   FanClubTextPost = 'FanClubTextPost'
 }
 
@@ -672,6 +674,18 @@ export type WeeklyArtistRecapNotification = BaseNotification & {
   week: number
 }
 
+/**
+ * Sent on Friday when the artist's track is in the top 10 of its genre's
+ * weekly trending chart.
+ */
+export type TrendingGenreNotification = BaseNotification & {
+  type: NotificationType.TrendingGenre
+  rank: number
+  genre: string
+  entityType: Entity.Track
+  entityId: ID
+}
+
 export type FanRemixContestStartedNotification = BaseNotification & {
   type: NotificationType.FanRemixContestStarted
   entityId: ID
@@ -780,6 +794,7 @@ export type Notification =
   | WeeklyRotationNotification
   | WeeklyRotationFeaturedNotification
   | WeeklyArtistRecapNotification
+  | TrendingGenreNotification
   | ArtistRemixContestEndedNotification
   | FanRemixContestEndedNotification
   | FanRemixContestWinnersSelectedNotification
