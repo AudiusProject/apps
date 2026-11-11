@@ -7,8 +7,7 @@ import {
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
   toastActions,
-  PurchaseableContentType,
-  useDownloadTrackArchiveModal
+  PurchaseableContentType
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
 import {
@@ -25,6 +24,7 @@ import { useDispatch } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { Expandable } from 'components/expandable/Expandable'
+import { useDownloadTrackStemsZip } from 'hooks/useDownloadTrackStemsZip'
 import { useIsMobile } from 'hooks/useIsMobile'
 import {
   useRequiresAccountCallback,
@@ -87,8 +87,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
 
-  const { onOpen: openDownloadTrackArchiveModal } =
-    useDownloadTrackArchiveModal()
+  const downloadStemsZip = useDownloadTrackStemsZip(trackId)
 
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
@@ -135,22 +134,9 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
         dispatch(toast({ content: messages.followToDownload }))
         return
       }
-      // Only include parent track in count if it's downloadable
-      const parentTrackCount = partialTrack?.access?.download ? 1 : 0
-      openDownloadTrackArchiveModal({
-        trackId,
-        fileCount: stemTracks.length + parentTrackCount
-      })
+      downloadStemsZip()
     },
-    [
-      isMobile,
-      shouldDisplayDownloadFollowGated,
-      openDownloadTrackArchiveModal,
-      trackId,
-      stemTracks.length,
-      dispatch,
-      partialTrack?.access?.download
-    ]
+    [isMobile, shouldDisplayDownloadFollowGated, downloadStemsZip, dispatch]
   )
 
   const hasStems = stemTracks.length > 0

@@ -6,7 +6,9 @@ import {
   TRENDING_INITIAL_PAGE_SIZE,
   usePopularGenres
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { TimeRange } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   trendingPageActions,
   trendingPageSelectors
@@ -111,6 +113,10 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   const trendingGenre = useSelector(getTrendingGenre)
   const trendingTimeRange = useSelector(getTrendingTimeRange)
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
+  const tileVariant = isTrackRowsEnabled ? 'row' : 'tile'
   const { data: genreSuggestions = [] } = usePopularGenres()
 
   // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
@@ -433,6 +439,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         ordered
         isTrending
         variant={LineupVariant.MAIN}
+        tileVariant={tileVariant}
         isPending={q.isPending}
         isFetching={q.isFetching}
         isError={q.isError}
@@ -490,6 +497,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         ordered
         isTrending
         variant={LineupVariant.MAIN}
+        tileVariant={tileVariant}
         scrollParent={containerRef?.current ?? null}
         endOfLineupElement={
           <EndOfLineup description={messages.endOfLineupDescription} />

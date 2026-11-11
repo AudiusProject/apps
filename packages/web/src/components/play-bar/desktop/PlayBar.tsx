@@ -113,14 +113,20 @@ const PlayBar = () => {
 
   const playable = !!playingTrackId
 
-  // Update timing state
+  // Update timing state. Only re-render when the displayed second or the
+  // duration changes; the scrubber animates itself between updates.
   const startSeeking = useCallback(() => {
     clearInterval(seekInterval.current)
-    seekInterval.current = window.setInterval(async () => {
+    seekInterval.current = window.setInterval(() => {
       if (!audioPlayer) return
-      const position = await audioPlayer.getPosition()
-      const duration = await audioPlayer.getDuration()
-      setTiming({ position, duration })
+      const position = audioPlayer.getPosition()
+      const duration = audioPlayer.getDuration()
+      setTiming((prev) =>
+        Object.is(Math.floor(prev.position), Math.floor(position)) &&
+        Object.is(prev.duration, duration)
+          ? prev
+          : { position, duration }
+      )
     }, 500) // SEEK_INTERVAL
   }, [setTiming])
 
@@ -212,14 +218,16 @@ const PlayBar = () => {
     dispatch(shuffle({ enable: false }))
   }, [dispatch])
 
+  // Read the position from the player rather than state so these callbacks
+  // (and the hotkeys bound to them) don't change on every timing update
   const onPrevious = useCallback(() => {
     if (isLongFormContent) {
-      const position = timing.position || 0
+      const position = audioPlayer?.getPosition() || 0
       const newPosition = position - SKIP_DURATION_SEC
       dispatch(seek({ seconds: Math.max(0, newPosition) }))
       setMediaKey((prev) => prev + 1)
     } else {
-      const position = timing.position || 0
+      const position = audioPlayer?.getPosition() || 0
       const shouldGoToPrevious = position < RESTART_THRESHOLD_SEC
       if (shouldGoToPrevious) {
         dispatch(previous())
@@ -227,19 +235,19 @@ const PlayBar = () => {
         dispatch(reset({ shouldAutoplay: true }))
       }
     }
-  }, [isLongFormContent, dispatch, timing.position])
+  }, [isLongFormContent, dispatch])
 
   const onNext = useCallback(() => {
     if (isLongFormContent) {
-      const duration = timing.duration || 0
-      const position = timing.position || 0
+      const duration = audioPlayer?.getDuration() || 0
+      const position = audioPlayer?.getPosition() || 0
       const newPosition = position + SKIP_DURATION_SEC
       dispatch(seek({ seconds: Math.min(newPosition, duration) }))
       setMediaKey((prev) => prev + 1)
     } else {
       dispatch(next({ skip: true }))
     }
-  }, [isLongFormContent, dispatch, timing.position, timing.duration])
+  }, [isLongFormContent, dispatch])
 
   // Effects
   useEffect(() => {

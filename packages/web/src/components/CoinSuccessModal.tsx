@@ -5,7 +5,7 @@ import {
   TrackMetadataForUpload,
   useCoinSuccessModal
 } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import { getCoinLogoUrl, route } from '@audius/common/utils'
 import {
   Artwork,
   Button,
@@ -107,7 +107,7 @@ export const CoinSuccessModal = () => {
               >
                 <Flex alignItems='center' gap='m' w='100%'>
                   <Artwork
-                    src={logoUri}
+                    src={getCoinLogoUrl(logoUri, 48)}
                     w='48px'
                     h='48px'
                     hex

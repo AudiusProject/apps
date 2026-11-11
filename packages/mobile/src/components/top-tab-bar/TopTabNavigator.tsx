@@ -1,6 +1,9 @@
 import type { ComponentType, ReactNode } from 'react'
 
-import type { MaterialTopTabNavigationOptions } from '@react-navigation/material-top-tabs'
+import type {
+  MaterialTopTabBarProps,
+  MaterialTopTabNavigationOptions
+} from '@react-navigation/material-top-tabs'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import type { SvgProps } from 'react-native-svg'
 
@@ -12,14 +15,25 @@ type TabNavigatorProps = {
   initialScreenName?: string
   children: ReactNode
   screenOptions?: MaterialTopTabNavigationOptions
+  /** Replaces the default tab bar, e.g. to float it over the content. */
+  tabBar?: (props: MaterialTopTabBarProps) => ReactNode
 }
 
+const renderDefaultTabBar = (props: MaterialTopTabBarProps) => (
+  <TopTabBar {...props} />
+)
+
 export const TabNavigator = (props: TabNavigatorProps) => {
-  const { initialScreenName, children, screenOptions } = props
+  const {
+    initialScreenName,
+    children,
+    screenOptions,
+    tabBar = renderDefaultTabBar
+  } = props
   return (
     <Tab.Navigator
       initialRouteName={initialScreenName}
-      tabBar={(props) => <TopTabBar {...props} />}
+      tabBar={tabBar}
       screenOptions={screenOptions}
     >
       {children}
@@ -59,14 +73,16 @@ type TopTabsProps = {
   initialScreenName?: string
   screens?: ScreenConfig[]
   screenOptions?: MaterialTopTabNavigationOptions
+  tabBar?: (props: MaterialTopTabBarProps) => ReactNode
 }
 
 export const TopTabNavigator = (props: TopTabsProps) => {
-  const { initialScreenName, screens, screenOptions } = props
+  const { initialScreenName, screens, screenOptions, tabBar } = props
   return (
     <TabNavigator
       initialScreenName={initialScreenName}
       screenOptions={screenOptions}
+      tabBar={tabBar}
     >
       {screens?.map((screen) => tabScreen({ key: screen.name, ...screen }))}
     </TabNavigator>

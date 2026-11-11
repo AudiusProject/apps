@@ -5,12 +5,17 @@ import {
   useProfileTracks,
   getProfileTracksQueryKey
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
 export const TracksTab = () => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const { handle, track_count = 0 } =
     useProfileUser({
       select: (user) => ({
@@ -43,6 +48,7 @@ export const TracksTab = () => {
 
   return (
     <TrackLineup
+      tileVariant={isTrackRowsEnabled ? 'row' : 'tile'}
       trackIds={trackIds}
       source='PROFILE_TRACKS'
       querySource={querySource}

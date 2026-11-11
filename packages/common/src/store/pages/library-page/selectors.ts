@@ -1,4 +1,5 @@
 import { uniq } from 'lodash'
+import { createSelector } from 'reselect'
 
 import { CommonState } from '~/store/commonStore'
 
@@ -61,102 +62,93 @@ export const getLocalRemovedPlaylistReposts = (state: CommonState) =>
   state.pages.libraryPage.local.playlist.favorites.removed
 
 /** Get the tracks in currently selected category that have been added to the library in current session */
-export const getSelectedCategoryLocalTrackAdds = (state: CommonState) => {
-  const selectedCategory = getCategory(state, {
-    currentTab: LibraryPageTabs.TRACKS
-  })
-  const localFavorites = getLocalTrackFavorites(state)
-  const localPurchases = getLocalTrackPurchases(state)
-  const localReposts = getLocalTrackReposts(state)
-  let localLibraryAdditions
-  if (selectedCategory === LibraryCategory.Favorite) {
-    localLibraryAdditions = localFavorites
-  } else if (selectedCategory === LibraryCategory.Purchase) {
-    localLibraryAdditions = localPurchases
-  } else if (selectedCategory === LibraryCategory.Repost) {
-    localLibraryAdditions = localReposts
-  } else {
+export const getSelectedCategoryLocalTrackAdds = createSelector(
+  [
+    getTracksCategory,
+    getLocalTrackFavorites,
+    getLocalTrackPurchases,
+    getLocalTrackReposts
+  ],
+  (selectedCategory, localFavorites, localPurchases, localReposts) => {
+    if (selectedCategory === LibraryCategory.Favorite) {
+      return localFavorites
+    } else if (selectedCategory === LibraryCategory.Purchase) {
+      return localPurchases
+    } else if (selectedCategory === LibraryCategory.Repost) {
+      return localReposts
+    }
     // Category = ALL
-    localLibraryAdditions = {
+    return {
       ...localReposts,
       ...localFavorites,
       ...localPurchases
     }
   }
+)
 
-  return localLibraryAdditions
-}
+const EMPTY_IDS: ID[] = []
+const getNone = () => EMPTY_IDS
 
-const getSelectedCategoryLocalCollectionUpdates = (
-  state: CommonState,
-  props: { collectionType: 'album' | 'playlist'; updateType: 'add' | 'remove' }
-) => {
-  const { collectionType, updateType } = props
-  const currentTab =
-    collectionType === 'album'
-      ? LibraryPageTabs.ALBUMS
-      : LibraryPageTabs.PLAYLISTS
-  const selectedCategory = getCategory(state, { currentTab })
-  let localFavorites: ID[], localPurchases: ID[], localReposts: ID[]
+const makeGetSelectedCategoryLocalCollectionUpdates = ({
+  collectionType,
+  updateType
+}: {
+  collectionType: 'album' | 'playlist'
+  updateType: 'add' | 'remove'
+}) => {
+  const isAlbum = collectionType === 'album'
+  let getFavorites: (state: CommonState) => ID[]
+  let getPurchases: (state: CommonState) => ID[]
+  let getReposts: (state: CommonState) => ID[]
   if (updateType === 'add') {
-    localFavorites =
-      collectionType === 'album'
-        ? getLocalAlbumFavorites(state)
-        : getLocalPlaylistFavorites(state)
-    localPurchases =
-      collectionType === 'album' ? getLocalAlbumPurchases(state) : [] // Can't buy playlists
-    localReposts =
-      collectionType === 'album'
-        ? getLocalAlbumReposts(state)
-        : getLocalPlaylistReposts(state)
+    getFavorites = isAlbum ? getLocalAlbumFavorites : getLocalPlaylistFavorites
+    getPurchases = isAlbum ? getLocalAlbumPurchases : getNone // Can't buy playlists
+    getReposts = isAlbum ? getLocalAlbumReposts : getLocalPlaylistReposts
   } else {
-    localFavorites =
-      collectionType === 'album'
-        ? getLocalRemovedAlbumFavorites(state)
-        : getLocalRemovedPlaylistFavorites(state)
-    localPurchases = [] // Can't remove purchases
-    localReposts =
-      collectionType === 'album'
-        ? getLocalRemovedAlbumReposts(state)
-        : getLocalRemovedPlaylistReposts(state)
+    getFavorites = isAlbum
+      ? getLocalRemovedAlbumFavorites
+      : getLocalRemovedPlaylistFavorites
+    getPurchases = getNone // Can't remove purchases
+    getReposts = isAlbum
+      ? getLocalRemovedAlbumReposts
+      : getLocalRemovedPlaylistReposts
   }
 
-  switch (selectedCategory) {
-    case LibraryCategory.Favorite:
-      return localFavorites
-    case LibraryCategory.Purchase:
-      return localPurchases
-    case LibraryCategory.Repost:
-      return localReposts
-    default:
-      // Category = ALL
-      return uniq([...localReposts, ...localFavorites, ...localPurchases])
-  }
+  return createSelector(
+    [getCollectionsCategory, getFavorites, getPurchases, getReposts],
+    (selectedCategory, localFavorites, localPurchases, localReposts) => {
+      switch (selectedCategory) {
+        case LibraryCategory.Favorite:
+          return localFavorites
+        case LibraryCategory.Purchase:
+          return localPurchases
+        case LibraryCategory.Repost:
+          return localReposts
+        default:
+          // Category = ALL
+          return uniq([...localReposts, ...localFavorites, ...localPurchases])
+      }
+    }
+  )
 }
 
-export const getSelectedCategoryLocalAlbumAdds = (state: CommonState) => {
-  return getSelectedCategoryLocalCollectionUpdates(state, {
+export const getSelectedCategoryLocalAlbumAdds =
+  makeGetSelectedCategoryLocalCollectionUpdates({
     collectionType: 'album',
     updateType: 'add'
   })
-}
-export const getSelectedCategoryLocalAlbumRemovals = (state: CommonState) => {
-  return getSelectedCategoryLocalCollectionUpdates(state, {
+export const getSelectedCategoryLocalAlbumRemovals =
+  makeGetSelectedCategoryLocalCollectionUpdates({
     collectionType: 'album',
     updateType: 'remove'
   })
-}
-export const getSelectedCategoryLocalPlaylistRemovals = (
-  state: CommonState
-) => {
-  return getSelectedCategoryLocalCollectionUpdates(state, {
+export const getSelectedCategoryLocalPlaylistRemovals =
+  makeGetSelectedCategoryLocalCollectionUpdates({
     collectionType: 'playlist',
     updateType: 'remove'
   })
-}
-export const getSelectedCategoryLocalPlaylistAdds = (state: CommonState) => {
-  return getSelectedCategoryLocalCollectionUpdates(state, {
+export const getSelectedCategoryLocalPlaylistAdds =
+  makeGetSelectedCategoryLocalCollectionUpdates({
     collectionType: 'playlist',
     updateType: 'add'
   })
-}

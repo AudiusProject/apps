@@ -4,6 +4,8 @@ import {
   getTrendingUndergroundQueryKey,
   useTrendingUnderground
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import type { SectionListProps } from 'react-native'
 
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
@@ -21,6 +23,9 @@ export const TrendingUndergroundLineup = ({
   contentContainerStyle,
   onScroll
 }: TrendingUndergroundLineupProps) => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const { trackIds, isPending, isFetching, hasNextPage, loadNextPage } =
     useTrendingUnderground({ pageSize: PAGE_SIZE })
 
@@ -35,6 +40,7 @@ export const TrendingUndergroundLineup = ({
 
   return (
     <TrackLineup
+      tileVariant={isTrackRowsEnabled ? 'row' : 'tile'}
       trackIds={trackIds}
       source='DISCOVER_TRENDING_UNDERGROUND'
       querySource={querySource}

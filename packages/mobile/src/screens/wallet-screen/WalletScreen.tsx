@@ -3,6 +3,7 @@ import React from 'react'
 import { Flex, IconWallet } from '@audius/harmony-native'
 import { AccountBalance } from 'app/components/account-balance'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
+import { WalletHelpLink } from 'app/components/wallet-help-link'
 
 import {
   LinkedWallets,
@@ -28,6 +29,7 @@ export const WalletScreen = () => {
             <AccountBalance />
             <YourCoins />
             <LinkedWallets />
+            <WalletHelpLink />
           </Flex>
         </ScrollView>
         <WalletRowOverflowMenu />

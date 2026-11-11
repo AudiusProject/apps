@@ -1,3 +1,4 @@
+import { getCoinLogoUrl } from '@audius/common/utils'
 import { Image } from 'react-native'
 
 import { HexagonalIcon, useTheme } from '@audius/harmony-native'
@@ -19,7 +20,7 @@ export const TokenIcon = ({ logoURI, size = 's' }: TokenIconProps) => {
   return (
     <HexagonalIcon size={iconSize}>
       <Image
-        source={{ uri: logoURI }}
+        source={{ uri: getCoinLogoUrl(logoURI, iconSize) }}
         style={{
           width: iconSize,
           height: iconSize

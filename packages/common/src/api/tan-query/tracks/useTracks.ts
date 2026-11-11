@@ -46,30 +46,55 @@ export const useTracks = (
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Filter out duplicate IDs
+  // Filter out duplicate IDs. Callers often pass a new array each render, so
+  // key on the ids themselves to keep the queries below stable.
+  const trackIdsKey = trackIds?.join(',')
   const uniqueTrackIds = useMemo(
     () =>
       trackIds?.filter((id, index, self) => self.indexOf(id) === index && !!id),
-    [trackIds]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [trackIdsKey]
+  )
+
+  // Rebuilding these every render makes tanstack re-hash every key and
+  // re-sync every observer, so only rebuild when an input changes.
+  const queries = useMemo(
+    () =>
+      uniqueTrackIds?.map((trackId) => ({
+        queryKey: getTrackQueryKey(trackId),
+        queryFn: async () => {
+          const sdk = await audiusSdk()
+          return getTrackQueryFn(
+            trackId,
+            currentUserId,
+            queryClient,
+            sdk,
+            dispatch
+          )
+        },
+        ...entityCacheOptions,
+        ...options,
+        enabled: options?.enabled !== false && !!trackId && trackId > 0
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      uniqueTrackIds,
+      currentUserId,
+      audiusSdk,
+      queryClient,
+      dispatch,
+      options?.enabled,
+      options?.staleTime,
+      options?.placeholderData,
+      options?.refetchOnMount,
+      options?.throwOnError,
+      options?.refetchInterval,
+      options?.refetchOnWindowFocus
+    ]
   )
 
   const queryResults = useQueries({
-    queries: uniqueTrackIds?.map((trackId) => ({
-      queryKey: getTrackQueryKey(trackId),
-      queryFn: async () => {
-        const sdk = await audiusSdk()
-        return getTrackQueryFn(
-          trackId,
-          currentUserId,
-          queryClient,
-          sdk,
-          dispatch
-        )
-      },
-      ...entityCacheOptions,
-      ...options,
-      enabled: options?.enabled !== false && !!trackId && trackId > 0
-    })),
+    queries,
     combine: combineQueryResults<TQTrack[]>
   })
 

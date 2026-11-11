@@ -98,11 +98,44 @@ export const useTrackPageLineup = (
       const heroTrackRemixParentTrackId =
         heroTrack.remix_of?.tracks?.[0]?.parent_track_id
 
+      // Fire every request at once instead of one after another. Recommended
+      // tracks are only shown when there are no remixes, but requesting them
+      // up front saves a round trip in the common case.
+      const remixParentPromise = heroTrackRemixParentTrackId
+        ? sdk.tracks.getTrack({
+            trackId: Id.parse(heroTrackRemixParentTrackId),
+            userId: OptionalId.parse(currentUserId)
+          })
+        : undefined
+      const remixesPromise = heroTrackRemixParentTrackId
+        ? undefined
+        : sdk.tracks.getTrackRemixes({
+            trackId: Id.parse(trackId),
+            userId: OptionalId.parse(currentUserId),
+            limit: pageSize,
+            offset: 0
+          })
+      const moreByPromise = sdk.users.getTracksByUserHandle({
+        handle: ownerHandle,
+        userId: OptionalId.parse(currentUserId),
+        sort: 'plays',
+        limit: pageSize,
+        offset: 0
+      })
+      const trendingPromise = sdk.tracks.getTrendingTracks({
+        genre: heroTrack.genre,
+        limit: pageSize
+      })
+      // Only awaited (and so only fails the query) when it's needed
+      trendingPromise.catch(() => {})
+
+      const [remixParentTrack, remixesData, { data = [] }] = await Promise.all([
+        remixParentPromise,
+        remixesPromise,
+        moreByPromise
+      ])
+
       if (heroTrackRemixParentTrackId) {
-        const remixParentTrack = await sdk.tracks.getTrack({
-          trackId: Id.parse(heroTrackRemixParentTrackId),
-          userId: OptionalId.parse(currentUserId)
-        })
         const processedParentTrack = remixParentTrack?.data
           ? userTrackMetadataFromSDK(remixParentTrack.data)
           : undefined
@@ -112,14 +145,7 @@ export const useTrackPageLineup = (
           indices.remixParentSection.pageSize = 1
         }
       } else {
-        // If hero track is remixable (not a remix), get its remixes
-        const remixesData = await sdk.tracks.getTrackRemixes({
-          trackId: Id.parse(trackId),
-          userId: OptionalId.parse(currentUserId),
-          limit: pageSize,
-          offset: 0
-        })
-
+        // If hero track is remixable (not a remix), show its remixes
         if (remixesData?.data?.tracks) {
           const processedRemixes = transformAndCleanList(
             remixesData.data.tracks,
@@ -133,15 +159,7 @@ export const useTrackPageLineup = (
         }
       }
 
-      // Get more tracks by the artist
-      const { data = [] } = await sdk.users.getTracksByUserHandle({
-        handle: ownerHandle,
-        userId: OptionalId.parse(currentUserId),
-        sort: 'plays',
-        limit: pageSize,
-        offset: 0
-      })
-
+      // More tracks by the artist
       const processedTracks = transformAndCleanList(
         data,
         userTrackMetadataFromSDK
@@ -162,10 +180,7 @@ export const useTrackPageLineup = (
 
       // If there are no remixes, get recommended tracks based on genre
       if (indices.remixesSection.index === undefined) {
-        const { data: trendingData } = await sdk.tracks.getTrendingTracks({
-          genre: heroTrack.genre,
-          limit: pageSize
-        })
+        const { data: trendingData } = await trendingPromise
 
         if (trendingData) {
           const processedTracks = transformAndCleanList(
@@ -241,8 +256,6 @@ export const useTrackPageLineup = (
  * live observer so the warmed data is shared with `TrackScreenLineup`'s own
  * query.
  */
-export const usePrefetchTrackPageLineup = (
-  trackId: ID | null | undefined
-) => {
+export const usePrefetchTrackPageLineup = (trackId: ID | null | undefined) => {
   useTrackPageLineup({ trackId })
 }

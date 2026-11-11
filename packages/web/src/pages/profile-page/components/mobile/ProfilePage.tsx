@@ -157,8 +157,12 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     () => ({ handle: handleLower ?? '' }),
     [handleLower]
   )
+  // Artists land on Tracks, so once we know the profile is an artist's, only
+  // fetch reposts when that tab is opened. Everyone else lands on Reposts.
   const userRepostsQuery = useProfileReposts(repostsArgs, {
-    enabled: !!handleLower
+    enabled:
+      !!handleLower &&
+      (activeTab === ProfilePageTabs.REPOSTS || !profile || !isArtist)
   })
   const repostsQuerySource = useMemo(
     () => ({

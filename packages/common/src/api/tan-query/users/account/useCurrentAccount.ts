@@ -6,7 +6,11 @@ import { primeUserData, useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Status } from '~/models'
 import { UserMetadata } from '~/models/User'
-import { LocalStorage } from '~/services'
+import {
+  AUDIUS_ACCOUNT_KEY,
+  AUDIUS_ACCOUNT_USER_KEY,
+  LocalStorage
+} from '~/services'
 import { AccountState } from '~/store'
 
 import { QUERY_KEYS } from '../../queryKeys'
@@ -53,6 +57,44 @@ const getLocalAccount = (
     } as AccountState
   }
   return null
+}
+
+// Last placeholder result, keyed on the raw stored strings. Every entity hook
+// observes this query, and tanstack re-runs placeholderData on each render
+// while the account is pending (or disabled, when signed out), so reuse the
+// parsed account until the stored values change.
+let placeholderCache: {
+  localStorage: LocalStorage
+  account: string | null
+  user: string | null
+  result: AccountState | null
+} | null = null
+
+const getLocalAccountPlaceholder = (
+  localStorage: LocalStorage,
+  queryClient: QueryClient
+) => {
+  const account = localStorage.getItemSync?.(AUDIUS_ACCOUNT_KEY) ?? null
+  const user = localStorage.getItemSync?.(AUDIUS_ACCOUNT_USER_KEY) ?? null
+  if (
+    placeholderCache?.localStorage !== localStorage ||
+    placeholderCache.account !== account ||
+    placeholderCache.user !== user
+  ) {
+    placeholderCache = {
+      localStorage,
+      account,
+      user,
+      result: getLocalAccount(localStorage, queryClient)
+    }
+  } else if (
+    placeholderCache.result?.userId &&
+    !queryClient.getQueryData(getUserQueryKey(placeholderCache.result.userId))
+  ) {
+    // Re-prime the cached user if its query was removed
+    getLocalAccount(localStorage, queryClient)
+  }
+  return placeholderCache.result ?? undefined
 }
 
 export const getCurrentAccountQueryFn = async (
@@ -131,7 +173,7 @@ export const useCurrentAccount = <TResult = AccountState | null | undefined>(
     // Render cached account immediately while fresh data loads, so the UI
     // doesn't flash empty but server data still wins once it arrives.
     placeholderData: () =>
-      getLocalAccount(localStorage, queryClient) ?? undefined,
+      getLocalAccountPlaceholder(localStorage, queryClient),
     staleTime: Infinity,
     gcTime: Infinity,
     enabled: options?.enabled !== false && !!currentUserWallet,

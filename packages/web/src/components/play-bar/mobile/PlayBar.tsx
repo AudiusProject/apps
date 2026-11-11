@@ -48,6 +48,42 @@ const messages = {
   preview: 'preview'
 }
 
+/**
+ * Owns the progress state so the 200ms updates only re-render the bar,
+ * not the whole PlayBar
+ */
+const PlayBarTrackingBar = ({
+  isPlaying,
+  trackId: queueTrackId
+}: {
+  isPlaying: boolean
+  trackId: ID | null
+}) => {
+  const [percentComplete, setPercentComplete] = useState(0)
+
+  // Sync right away whenever play state or the track changes, then poll.
+  // Polling while paused picks up seeks; an unchanged percent doesn't render.
+  useEffect(() => {
+    const updatePercentComplete = () => {
+      if (!audioPlayer) {
+        return
+      }
+      const duration = audioPlayer.getDuration()
+      const pos = audioPlayer.getPosition()
+      if (duration === undefined || pos === undefined) return
+
+      const position = Math.min(pos, duration)
+      const percent = (position / duration) * 100
+      if (percent) setPercentComplete(percent)
+    }
+    updatePercentComplete()
+    const seekInterval = setInterval(updatePercentComplete, SEEK_INTERVAL)
+    return () => clearInterval(seekInterval)
+  }, [isPlaying, queueTrackId])
+
+  return <TrackingBar percentComplete={percentComplete} />
+}
+
 type OwnProps = {
   onClickInfo: () => void
 }
@@ -70,24 +106,7 @@ const PlayBar = ({
   const isMatrixMode = useIsMatrix()
   const { data: user } = useUser(track?.owner_id)
 
-  const [percentComplete, setPercentComplete] = useState(0)
   const record = useRecord()
-
-  useEffect(() => {
-    const seekInterval = setInterval(async () => {
-      if (!audioPlayer) {
-        return
-      }
-      const duration = await audioPlayer.getDuration()
-      const pos = await audioPlayer.getPosition()
-      if (duration === undefined || pos === undefined) return
-
-      const position = Math.min(pos, duration)
-      const percent = (position / duration) * 100
-      if (percent) setPercentComplete(percent)
-    }, SEEK_INTERVAL)
-    return () => clearInterval(seekInterval)
-  })
 
   const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId: track ? track.track_id : undefined,
@@ -152,7 +171,7 @@ const PlayBar = ({
   return (
     <>
       <div className={styles.playBar}>
-        <TrackingBar percentComplete={percentComplete} />
+        <PlayBarTrackingBar isPlaying={isPlaying} trackId={queueTrackId} />
         <div className={styles.controls}>
           {shouldShowPreviewLock || isUnlisted ? null : (
             <FavoriteButton

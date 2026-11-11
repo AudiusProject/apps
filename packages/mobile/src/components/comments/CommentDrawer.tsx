@@ -35,6 +35,7 @@ import { Box, Divider, Flex, Text, useTheme } from '@audius/harmony-native'
 import { ProfilePicture } from 'app/components/core'
 import { UserBadges } from 'app/components/user-badges'
 import { LoadingSpinner } from 'app/harmony-native/components/LoadingSpinner/LoadingSpinner'
+import { useAndroidBackHandler } from 'app/hooks/useAndroidBackHandler'
 
 import { useCommentDrawer } from './CommentDrawerContext'
 import { CommentDrawerForm } from './CommentDrawerForm'
@@ -224,6 +225,8 @@ export type CommentDrawerData = {
 type CommentDrawerProps = {
   bottomSheetModalRef: React.RefObject<BottomSheetModal | null>
   handleClose: (trackId: ID) => void
+  // Called when the sheet has finished dismissing itself.
+  onSheetDismissed: () => void
 } & CommentDrawerData
 
 export const CommentDrawer = (props: CommentDrawerProps) => {
@@ -232,6 +235,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     navigation,
     bottomSheetModalRef,
     handleClose,
+    onSheetDismissed,
     autoFocusInput,
     playbackSource,
     highlightedComment
@@ -315,6 +319,8 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     handleClose(entityId)
   }, [entityId, handleClose])
 
+  useAndroidBackHandler(isDrawerVisible, handleCloseDrawer)
+
   const handleSheetChanges = useCallback(
     (index: number) => {
       setIsDrawerVisible(index >= 0)
@@ -352,7 +358,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
           />
         )}
         footerComponent={renderFooterComponent}
-        onDismiss={handleCloseDrawer}
+        onDismiss={onSheetDismissed}
         onChange={handleSheetChanges}
         keyboardBlurBehavior='restore'
         android_keyboardInputMode='adjustResize'

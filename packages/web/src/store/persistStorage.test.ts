@@ -11,6 +11,7 @@ vi.mock('localforage', () => ({
 
 describe('persistStorage', () => {
   beforeEach(() => {
+    vi.unstubAllGlobals()
     window.localStorage.clear()
     localforageItems.clear()
     getItemMock.mockClear()
@@ -50,5 +51,22 @@ describe('persistStorage', () => {
     await persistStorage.getItem('persist:search')
     await persistStorage.removeItem('persist:search')
     expect(await persistStorage.getItem('persist:search')).toBeNull()
+  })
+
+  it('skips localforage when its database does not exist', async () => {
+    vi.stubGlobal('indexedDB', { databases: async () => [{ name: 'other' }] })
+    localforageItems.set('persist:search', 'old')
+    expect(await persistStorage.getItem('persist:search')).toBeNull()
+    expect(await persistStorage.getItem('persist:search')).toBeNull()
+    expect(getItemMock).not.toHaveBeenCalled()
+  })
+
+  it('migrates when the localforage database exists', async () => {
+    vi.stubGlobal('indexedDB', {
+      databases: async () => [{ name: 'localforage' }]
+    })
+    localforageItems.set('persist:search', 'old')
+    expect(await persistStorage.getItem('persist:search')).toBe('old')
+    expect(getItemMock).toHaveBeenCalledTimes(1)
   })
 })

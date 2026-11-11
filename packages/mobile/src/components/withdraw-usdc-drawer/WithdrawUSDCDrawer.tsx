@@ -31,6 +31,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import { Divider, Flex, Text, useTheme } from '@audius/harmony-native'
+import { useAndroidBackHandler } from 'app/hooks/useAndroidBackHandler'
 
 import { CoinflowConfirmTransfer } from './components/CoinflowConfirmTransfer'
 import { CryptoConfirmTransfer } from './components/CryptoConfirmTransfer'
@@ -169,6 +170,8 @@ export const WithdrawUSDCDrawer = () => {
       bottomSheetRef.current?.dismiss()
     }
   }, [onClose, setData, isClosable, dispatch])
+
+  useAndroidBackHandler(isOpen, handleClose)
 
   const handleClosed = useCallback(() => {
     onClosed()

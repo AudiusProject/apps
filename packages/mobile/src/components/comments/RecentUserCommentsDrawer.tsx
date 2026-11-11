@@ -22,6 +22,7 @@ import {
   TextLink
 } from '@audius/harmony-native'
 import { LoadingSpinner } from 'app/harmony-native/components/LoadingSpinner/LoadingSpinner'
+import { useAndroidBackHandler } from 'app/hooks/useAndroidBackHandler'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { ProfilePicture } from '../core/ProfilePicture'
@@ -232,6 +233,12 @@ export const RecentUserCommentsDrawer = ({
       bottomSheetModalRef.current.present()
     }
   }, [bottomSheetModalRef])
+
+  const handleBack = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss()
+  }, [])
+
+  useAndroidBackHandler(true, handleBack)
 
   return (
     <BottomSheetModal

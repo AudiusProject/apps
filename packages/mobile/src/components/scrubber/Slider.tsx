@@ -21,6 +21,8 @@ const { getPlaybackRate, getSeek, getSeekCounter } = playbackSelectors
 
 // How much the handle "grows" when pressing
 const HANDLE_GROW_SCALE = 1.1
+// Comment marker dot above the rail
+const MARKER_SIZE = 4
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   root: {
@@ -70,6 +72,14 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     shadowOpacity: 0.5,
     shadowRadius: 2,
     elevation: 3
+  },
+  marker: {
+    position: 'absolute',
+    top: -8,
+    width: MARKER_SIZE,
+    height: MARKER_SIZE,
+    borderRadius: MARKER_SIZE / 2,
+    backgroundColor: palette.secondary
   }
 }))
 
@@ -103,6 +113,11 @@ type SliderProps = {
    */
   onDrag: (percentComplete: number) => void
   onDragRelease: () => void
+  /**
+   * Positions along the rail, 0 to 1, that get a small dot above them
+   * (timestamped comments).
+   */
+  markers?: number[]
 }
 
 /**
@@ -120,7 +135,8 @@ export const Slider = memo(function Slider(props: SliderProps) {
     onPressOut,
     onNewPosition,
     onDrag,
-    onDragRelease
+    onDragRelease,
+    markers
   } = props
   const trackGenre = useCurrentTrack({
     select: (track) => track?.genre
@@ -408,6 +424,18 @@ export const Slider = memo(function Slider(props: SliderProps) {
           </Animated.View>
         </Animated.View>
       </Animated.View>
+      {railWidth > 0
+        ? markers?.map((fraction, index) => (
+            <View
+              key={index}
+              pointerEvents='none'
+              style={[
+                styles.marker,
+                { left: fraction * railWidth - MARKER_SIZE / 2 }
+              ]}
+            />
+          ))
+        : null}
       <Animated.View
         {...panResponder.panHandlers}
         style={[

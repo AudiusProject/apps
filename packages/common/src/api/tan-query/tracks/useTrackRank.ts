@@ -31,6 +31,10 @@ export const getTrendingIdsQueryKey = (args?: GetTrendingIdsArgs) => {
   ] as unknown as QueryKey<TrendingIds | null>
 }
 
+// Trending lists change slowly, and every track page reads them for its rank
+// badge, so don't refetch on each track page visit.
+const TRENDING_IDS_STALE_TIME_MS = 30 * 60 * 1000
+
 /**
  * Hook that returns trending track IDs for all time periods
  */
@@ -42,7 +46,8 @@ export const useGetTrendingIds = (args?: GetTrendingIdsArgs) => {
       const sdk = await audiusSdk()
       const { data } = await sdk.tracks.getTrendingTrackIDs(args)
       return data ? trendingIdsFromSDK(data) : null
-    }
+    },
+    staleTime: TRENDING_IDS_STALE_TIME_MS
   })
 }
 

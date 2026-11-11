@@ -21,6 +21,7 @@ export const useCollectionAccessTypeLabel = (
     select: (collection) => ({
       streamConditions: collection?.stream_conditions,
       releaseDate: collection?.release_date,
+      isScheduledRelease: collection?.is_scheduled_release,
       isPrivate: collection?.is_private,
       playlistOwnerId: collection?.playlist_owner_id
     })
@@ -30,7 +31,10 @@ export const useCollectionAccessTypeLabel = (
     collection?.streamConditions
   )
   const releaseDate = collection?.releaseDate
-  const isScheduledRelease = releaseDate && new Date(releaseDate) > new Date()
+  const isScheduledRelease =
+    collection?.isScheduledRelease &&
+    releaseDate &&
+    new Date(releaseDate) > new Date()
   const isPrivate = collection?.isPrivate
 
   const { data: accountUserId } = useCurrentUserId()

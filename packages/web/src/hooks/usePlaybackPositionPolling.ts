@@ -20,23 +20,24 @@ export const usePlaybackPositionPolling = () => {
   const trackId = useSelector(getTrackId)
   const playing = useSelector(getPlaying)
   const { data: currentUserId } = useCurrentUserId()
-  const { data: track } = useTrack(trackId)
+  const { data: isLongForm = false } = useTrack(trackId, {
+    select: isLongFormContent
+  })
 
-  const stateRef = useRef({ trackId, playing, currentUserId, track })
-  stateRef.current = { trackId, playing, currentUserId, track }
+  const stateRef = useRef({ trackId, playing, currentUserId, isLongForm })
+  stateRef.current = { trackId, playing, currentUserId, isLongForm }
 
   useEffect(() => {
     const player = audioPlayer
-    if (!player) return
+    if (!player || !playing || !isLongForm) return
     const interval = setInterval(() => {
       const {
         trackId: tId,
         playing: isPlaying,
         currentUserId: uId,
-        track: t
+        isLongForm: longForm
       } = stateRef.current
-      if (!uId || !tId || !isPlaying) return
-      if (!isLongFormContent(t)) return
+      if (!uId || !tId || !isPlaying || !longForm) return
       const position = player.getPosition()
       dispatch(
         setTrackPosition({
@@ -50,5 +51,5 @@ export const usePlaybackPositionPolling = () => {
       )
     }, RECORD_PLAYBACK_POSITION_INTERVAL)
     return () => clearInterval(interval)
-  }, [dispatch])
+  }, [dispatch, playing, isLongForm])
 }

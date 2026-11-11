@@ -14,6 +14,7 @@ import { recoverMessageAddress } from 'viem'
 import { signMessage } from 'viem/accounts'
 import { describe, expect, it } from 'vitest'
 
+import { createKeyAsync, createKeySync } from './scrypt'
 import { hexToBytesLikeBuffer, waitUntil } from './utils'
 
 import {
@@ -384,6 +385,42 @@ describe('createKey (scrypt)', () => {
       ])
       expect(b.keyHex).toBe(a.keyHex)
       expect(Buffer.from(b.keyBuffer)).toEqual(Buffer.from(a.keyBuffer))
+    }
+  }, 60_000)
+})
+
+describe('createKey (scrypt) vs the old web worker', () => {
+  // Outputs of the scrypt-js@2.0.4 + buffer scripts the old web worker loaded
+  // from jsdelivr, run with the same inputs and JSON round-trip.
+  const vectors: Array<[string, string, string]> = [
+    [
+      'hunter2',
+      '0123456789abcdef0123456789abcdef',
+      'e9f55191be7eeaab074726a9860cb95e57eeac613e5b25415655903fc70a25c4'
+    ],
+    [
+      'dylan@audius.example:::correct horse battery staple',
+      'a1b2c3d4e5f60718293a4b5c6d7e8f90',
+      'aac7f65da104b69fa2e8c95ec4f6a30f43ce4377f55576611f28928a86d93053'
+    ],
+    [
+      'pässwörd ñ 日本語 🎵🎧',
+      'ffeeddccbbaa99887766554433221100',
+      'd4acf4d5eb6a4828cab6f9e02db11fef876fbfd243e968308fbbe983ab4eec79'
+    ],
+    [
+      '',
+      'deadbeefdeadbeefdeadbeefdeadbeef',
+      'ad5bfdb843b3788277d9d287ebf5b45c127577c12e585579a0946ad55f1109db'
+    ]
+  ]
+
+  it('createKeySync and createKeyAsync match', async () => {
+    for (const [str, iv, keyHex] of vectors) {
+      const sync = createKeySync(str, iv)
+      expect(sync.keyHex).toBe(keyHex)
+      expect(Buffer.from(sync.keyBuffer).toString('hex')).toBe(keyHex)
+      expect((await createKeyAsync(str, iv)).keyHex).toBe(keyHex)
     }
   }, 60_000)
 })

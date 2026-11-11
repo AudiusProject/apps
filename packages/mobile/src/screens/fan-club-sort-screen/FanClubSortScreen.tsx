@@ -1,19 +1,16 @@
 import { useCallback, useState } from 'react'
 
 import { walletMessages } from '@audius/common/messages'
-import { playbackSelectors } from '@audius/common/store'
 import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
-import { useSelector } from 'react-redux'
 
 import type { IconComponent } from '@audius/harmony-native'
 import { Button, Flex, IconSortDown, IconSortUp } from '@audius/harmony-native'
 import { Screen, SegmentedControl } from 'app/components/core'
+import { useBottomBarInset } from 'app/components/core/BottomBarInsetContext'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { SelectionItemList } from '../list-selection-screen/SelectionItemList'
-
-const { getHasTrack } = playbackSelectors
 
 const sortOptions = [
   {
@@ -58,7 +55,7 @@ const directionOptions: Array<{
 export const FanClubSortScreen = () => {
   const navigation = useNavigation()
   const { params } = useRoute<'FanClubSort'>()
-  const hasTrack = useSelector(getHasTrack)
+  const bottomBarInset = useBottomBarInset()
 
   const { initialSortMethod, initialSortDirection } = params
 
@@ -121,7 +118,7 @@ export const FanClubSortScreen = () => {
             onChange={handleSortOptionChange}
           />
         </Flex>
-        <Flex ph='l' pb={hasTrack ? '3xl' : '0'}>
+        <Flex ph='l' mb={bottomBarInset}>
           <Button variant='primary' fullWidth onPress={handleBackPress}>
             {walletMessages.done}
           </Button>

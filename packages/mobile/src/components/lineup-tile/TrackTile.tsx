@@ -18,12 +18,8 @@ import {
 } from '@audius/common/models'
 import {
   tracksSocialActions,
-  mobileOverflowMenuUIActions,
   shareModalUIActions,
-  OverflowAction,
-  OverflowSource,
   playbackSelectors,
-  playbackPositionSelectors,
   trackPageActions,
   PurchaseableContentType,
   gatedContentActions,
@@ -31,7 +27,7 @@ import {
   usePublishConfirmationModal
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
-import { Genre, removeNullable } from '@audius/common/utils'
+import { Genre } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Paper, type ImageProps } from '@audius/harmony-native'
@@ -48,12 +44,11 @@ import { LineupTileActionButtons } from './LineupTileActionButtons'
 import { LineupTileMetadata } from './LineupTileMetadata'
 import { TilePressBlockContext } from './TilePressBlockContext'
 import { TrackTileStats } from './TrackTileStats'
+import { useOpenTrackOverflow } from './useOpenTrackOverflow'
 
 const { getTrackId } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
-const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { getTrackPosition } = playbackPositionSelectors
 const { setLockedContentId } = gatedContentActions
 
 const TrackTileComponent = (props: TrackTileProps) => {
@@ -195,60 +190,9 @@ const TrackTileComponent = (props: TrackTileProps) => {
     childPressedRef.current = true
   }, [])
 
-  const playbackPositionInfo = useSelector((state) =>
-    getTrackPosition(state, {
-      trackId: track?.track_id ?? 0,
-      userId: currentUserId
-    })
-  )
-
-  const handlePressOverflow = useCallback(() => {
-    if (!track) return
-    const isLongFormContent =
-      track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
-    const isOwner = currentUserId === track.owner_id
-    const isArtistPick =
-      isOwner && user?.artist_pick_track_id === track.track_id
-
-    const overflowActions = [
-      !track.is_unlisted || isOwner ? OverflowAction.PLAY_NEXT : null,
-      !track.is_unlisted || isOwner ? OverflowAction.ADD_TO_QUEUE : null,
-      isOwner && !track.ddex_app ? OverflowAction.ADD_TO_ALBUM : null,
-      !track.is_unlisted || isOwner ? OverflowAction.ADD_TO_PLAYLIST : null,
-      isLongFormContent
-        ? OverflowAction.VIEW_EPISODE_PAGE
-        : OverflowAction.VIEW_TRACK_PAGE,
-      track.album_backlink ? OverflowAction.VIEW_ALBUM_PAGE : null,
-      isLongFormContent
-        ? playbackPositionInfo?.status === 'COMPLETED'
-          ? OverflowAction.MARK_AS_UNPLAYED
-          : OverflowAction.MARK_AS_PLAYED
-        : null,
-      isOwner && !isArtistPick ? OverflowAction.SET_ARTIST_PICK : null,
-      isArtistPick ? OverflowAction.UNSET_ARTIST_PICK : null,
-      isOnArtistsTracksTab ? null : OverflowAction.VIEW_ARTIST_PAGE,
-      isOwner && !track.ddex_app ? OverflowAction.EDIT_TRACK : null,
-      isOwner && track?.is_scheduled_release && track?.is_unlisted
-        ? OverflowAction.RELEASE_NOW
-        : null,
-      isOwner && !track.ddex_app ? OverflowAction.DELETE_TRACK : null
-    ].filter(removeNullable)
-
-    dispatch(
-      openOverflowMenu({
-        source: OverflowSource.TRACKS,
-        id: track.track_id,
-        overflowActions
-      })
-    )
-  }, [
-    track,
-    currentUserId,
-    user?.artist_pick_track_id,
-    isOnArtistsTracksTab,
-    playbackPositionInfo?.status,
-    dispatch
-  ])
+  const handlePressOverflow = useOpenTrackOverflow(id, {
+    hideViewArtist: isOnArtistsTracksTab
+  })
 
   const handlePressShare = useCallback(() => {
     if (!track) return

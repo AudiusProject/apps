@@ -15,7 +15,7 @@ import * as RNFS from '@dr.pogodin/react-native-fs'
 import { CreativeKit } from '@snapchat/snap-kit-react-native'
 import type { FFmpegSession } from 'ffmpeg-kit-react-native'
 import { FFmpegKit, FFmpegKitConfig, ReturnCode } from 'ffmpeg-kit-react-native'
-import { Platform, View } from 'react-native'
+import { AppState, Linking, Platform, View } from 'react-native'
 import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions'
 import type { ShareSingleOptions } from 'react-native-share'
 import Share, { Social } from 'react-native-share'
@@ -101,6 +101,77 @@ const SUCCESS_EVENT_NAMES_MAP = {
   | typeof EventNames.SHARE_TO_SNAPCHAT_STORY_SUCCESS
 >
 
+const PLATFORM_APP_NAMES: Record<ShareToStoryPlatform, string> = {
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  snapchat: 'Snapchat'
+}
+
+// Schemes listed in LSApplicationQueriesSchemes, so canOpenURL can see them
+const IOS_APP_SCHEMES: Record<ShareToStoryPlatform, string[]> = {
+  instagram: ['instagram-stories://'],
+  tiktok: ['tiktokopensdk://', 'snssdk1233://', 'snssdk1180://', 'tiktok://'],
+  snapchat: ['snapchat://']
+}
+
+// Android has no package visibility for every target, so only check on iOS
+const isAppInstalled = async (platform: ShareToStoryPlatform) => {
+  if (Platform.OS !== 'ios') return true
+  const results = await Promise.all(
+    IOS_APP_SCHEMES[platform].map((scheme) =>
+      Linking.canOpenURL(scheme).catch(() => false)
+    )
+  )
+  return results.some(Boolean)
+}
+
+const HANDOFF_TIMEOUT_MS = 8000
+const FFMPEG_ATTEMPTS = 2
+const ERROR_OUTPUT_LENGTH = 800
+
+// Resolves once the target app has opened: its SDK resolved or this app went
+// to the background. Some SDKs only resolve when the user comes back to
+// Audius (or time out natively), so don't wait for that.
+const waitForHandoff = (launch: Promise<unknown>) =>
+  new Promise<void>((resolve, reject) => {
+    let settled = false
+    const finish = (error?: Error) => {
+      if (settled) return
+      settled = true
+      subscription.remove()
+      clearTimeout(timeout)
+      if (error) {
+        reject(error)
+      } else {
+        resolve()
+      }
+    }
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'background') finish()
+    })
+    const timeout = setTimeout(
+      () => finish(new Error('Share app did not open')),
+      HANDOFF_TIMEOUT_MS
+    )
+    launch.then(
+      () => finish(),
+      (e) => finish(e instanceof Error ? e : new Error(String(e)))
+    )
+  })
+
+const runWhenActive = (fn: () => void) => {
+  if (AppState.currentState === 'active') {
+    fn()
+    return
+  }
+  const subscription = AppState.addEventListener('change', (state) => {
+    if (state === 'active') {
+      subscription.remove()
+      fn()
+    }
+  })
+}
+
 const ERROR_EVENT_NAMES_MAP = {
   instagram: EventNames.SHARE_TO_IG_STORY_ERROR,
   tiktok: EventNames.SHARE_TO_TIKTOK_VIDEO_ERROR,
@@ -126,13 +197,14 @@ export const useShareToStory = ({
   const [selectedPlatform, setSelectedPlatform] =
     useState<ShareToStoryPlatform | null>(null)
 
-  const trackTitle =
-    content?.type === 'track' ? content?.track.title : undefined
-  const artistHandle =
-    content?.type === 'track' ? content?.artist.handle : undefined
+  // Track and milestone shares both render a track into the story
+  const storyContent =
+    content?.type === 'track' || content?.type === 'milestone' ? content : null
+  const trackTitle = storyContent?.track.title
+  const artistHandle = storyContent?.artist.handle
 
   const trackImage = useTrackImage({
-    trackId: content?.type === 'track' ? content.track.track_id : undefined,
+    trackId: storyContent?.track.track_id,
     size: SquareSizes.SIZE_480_BY_480
   })
   const isStickerImageLoadedRef = useRef(false)
@@ -141,7 +213,7 @@ export const useShareToStory = ({
     stickerLoadedEventEmitter.emit(STICKER_LOADED_EVENT)
   }, [])
 
-  const trackId = content?.type === 'track' ? content.track.track_id : null
+  const trackId = storyContent?.track.track_id ?? null
   // Reset when share content (track) changes so we wait for the new sticker to load
   useEffect(() => {
     if (trackId) {
@@ -149,7 +221,7 @@ export const useShareToStory = ({
     }
   }, [trackId])
   const trackImageUri =
-    content?.type === 'track' &&
+    storyContent &&
     trackImage &&
     trackImage.source &&
     isImageUriSource(trackImage.source)
@@ -207,9 +279,14 @@ export const useShareToStory = ({
   )
 
   const handleError = useCallback(
-    (platform: ShareToStoryPlatform, error: Error, name?: string) => {
+    (
+      platform: ShareToStoryPlatform,
+      error: Error,
+      name?: string,
+      toastContent: string = messages.shareToStoryError
+    ) => {
       console.error(error)
-      toast({ content: messages.shareToStoryError, type: 'error' })
+      toast({ content: toastContent, type: 'error' })
       track(
         make({
           eventName: ERROR_EVENT_NAMES_MAP[platform],
@@ -247,7 +324,7 @@ export const useShareToStory = ({
         stickerImage: stickerUri,
         attributionURL: env.AUDIUS_URL,
         social: Social.InstagramStories,
-        appId: env.INSTAGRAM_APP_ID
+        appId: env.FACEBOOK_APP_ID
       }
       await Share.shareSingle(shareOptions)
     },
@@ -291,12 +368,31 @@ export const useShareToStory = ({
     async (platform: ShareToStoryPlatform) => {
       const sdk = await audiusSdk()
 
-      if (content?.type === 'track') {
+      if (storyContent) {
+        if (!(await isAppInstalled(platform))) {
+          toast({
+            content: messages.shareToStoryAppNotInstalled(
+              PLATFORM_APP_NAMES[platform]
+            ),
+            type: 'error'
+          })
+          track(
+            make({
+              eventName: ERROR_EVENT_NAMES_MAP[platform],
+              title: storyContent.track.title,
+              artist: storyContent.artist.handle,
+              error: 'App not installed'
+            })
+          )
+          cleanup()
+          return
+        }
+
         track(
           make({
             eventName: START_EVENT_NAMES_MAP[platform],
-            title: content.track.title,
-            artist: content.artist.handle
+            title: storyContent.track.title,
+            artist: storyContent.artist.handle
           })
         )
 
@@ -373,7 +469,7 @@ export const useShareToStory = ({
               sdk
             })
           streamMp3Url = await sdk.tracks.getTrackStreamUrl({
-            trackId: Id.parse(content.track.track_id),
+            trackId: Id.parse(storyContent.track.track_id),
             userId: OptionalId.parse(userId),
             userSignature: signature,
             userData: data
@@ -387,7 +483,7 @@ export const useShareToStory = ({
           `storyVideo-${uuid()}.mp4`
         )
         const audioStartOffsetConfig =
-          content.track.duration && content.track.duration >= 20
+          storyContent.track.duration && storyContent.track.duration >= 20
             ? '-ss 10 '
             : ''
 
@@ -402,113 +498,104 @@ export const useShareToStory = ({
           // Pad the result by 10% so the progress bar gets full before we get to IG
           dispatch(setProgress(Math.min(20 + percentageLoaded + 10, 100)))
         })
-        let session: FFmpegSession
-        const SHOWFREQS_SEGMENT =
-          'aformat=channel_layouts=mono:sample_rates=16000,adynamicsmooth,showfreqs=s=900x40:fscale=log:colors=#ffffff70'
+        // 36 bars mirrored around the bass, 504x128. showfreqs spans 120dB,
+        // so keep the loudest 64 rows. Each 14px column gets a 4px gap and a
+        // 2px floor so quiet bands still show.
+        const WAVEFORM_SEGMENT =
+          "aformat=channel_layouts=mono:sample_rates=16000,showfreqs=s=18x120:rate=30:fscale=log:win_size=1024:averaging=2:colors=white,crop=18:64:0:0,scale=252:64:flags=neighbor,split[r][l];[l]hflip[lf];[lf][r]hstack,geq=r=255:g=255:b=255:a='if(lt(mod(X,14),4),0,max(alpha(X,Y),255*gte(Y,H-2))*0.85)',split[t][b];[b]vflip[bf];[t][bf]vstack"
         const thirdLayerSegment =
           platform === 'tiktok'
             ? '[vid];[1:v]scale=396:548[stkr];[vid][stkr]overlay=format=auto:x=72:y=200;'
             : ';'
         const stickerImageInput =
           platform === 'tiktok' ? ` -i ${stickerUri}` : ''
-        try {
-          session = await FFmpegKit.execute(
-            `${audioStartOffsetConfig}-i ${streamMp3Url}${stickerImageInput} -filter_complex "${backgroundSegment}[bg];[0:a]${SHOWFREQS_SEGMENT}[fg];[0:a]${SHOWFREQS_SEGMENT},vflip[fgflip];[bg][fg]overlay=format=auto:x=-100:y=H-h-100[fo];[fo][fgflip]overlay=format=auto:x=-100:y=H-h-60${thirdLayerSegment}[0:a]anull" -pix_fmt yuv420p -c:v libx264 -preset ultrafast -c:a aac -t 10 ${storyVideoPath}`
-          )
-        } catch (e) {
-          handleError(platform, e, 'Error at FFmpeg step')
-          return
-        }
-        if (cancelRef.current) {
-          // The job was cancelled.
-          cleanup()
-          return
+        // ffmpeg streams the audio itself, so retry once on a dropped
+        // connection. -y lets the retry overwrite a partial file.
+        let session: FFmpegSession | undefined
+        for (let attempt = 1; attempt <= FFMPEG_ATTEMPTS; attempt++) {
+          try {
+            session = await FFmpegKit.execute(
+              `-y ${audioStartOffsetConfig}-i ${streamMp3Url}${stickerImageInput} -filter_complex "${backgroundSegment}[bg];[0:a]${WAVEFORM_SEGMENT}[wave];[bg][wave]overlay=format=auto:x=(W-w)/2-2:y=H-h-80${thirdLayerSegment}[0:a]anull" -pix_fmt yuv420p -c:v libx264 -preset ultrafast -c:a aac -t 10 ${storyVideoPath}`
+            )
+          } catch (e) {
+            handleError(platform, e, 'Error at FFmpeg step')
+            return
+          }
+          if (cancelRef.current) {
+            // The job was cancelled.
+            cleanup()
+            return
+          }
+          if (ReturnCode.isSuccess(await session.getReturnCode())) break
+          if (attempt === FFMPEG_ATTEMPTS) {
+            // The start of the output is the version banner; the error is at the end
+            const output = await session.getOutput()
+            handleError(
+              platform,
+              new Error(output.slice(-ERROR_OUTPUT_LENGTH)),
+              'Error at generate video background step'
+            )
+            return
+          }
         }
 
-        const returnCode = await session.getReturnCode()
-
-        if (!ReturnCode.isSuccess(returnCode)) {
-          const output = await session.getOutput()
-          handleError(
-            platform,
-            new Error(output),
-            'Error at generate video background step'
-          )
-          return
-        }
-
-        if (cancelRef.current) {
-          cleanup()
-        }
         // Step 4: Put everything together and push to platform
         const videoUri = `file://${storyVideoPath}`
+        let launch: Promise<unknown>
+        if (platform === 'instagram') {
+          launch = pasteToInstagramApp(videoUri, stickerUri)
+        } else if (platform === 'snapchat') {
+          launch = pasteToSnapchatApp(
+            videoUri,
+            `file://${stickerUri}`,
+            encodeURI(getTrackRoute(storyContent.track, true))
+          )
+        } else {
+          launch = pasteToTikTokApp(storyVideoPath, platform)
+        }
         try {
-          if (platform === 'instagram') {
-            // On Android, don't await Instagram share to prevent app from coming back to foreground
-            // react-native-share resolves too quickly before Instagram fully opens
-            if (Platform.OS === 'android') {
-              pasteToInstagramApp(videoUri, stickerUri).catch((error) => {
-                // Only handle errors, don't block on success
-                handleError(platform, error, 'Error at share to app step')
-              })
-              // Give Instagram time to open before cleanup
-              setTimeout(() => {
-                dispatch(reset())
-                toggleProgressDrawer(false, undefined, false)
-                setSelectedPlatform(null)
-                track(
-                  make({
-                    eventName: SUCCESS_EVENT_NAMES_MAP[platform],
-                    title: content.track.title,
-                    artist: content.artist.handle
-                  })
-                )
-              }, 1500)
-              return
-            } else {
-              await pasteToInstagramApp(videoUri, stickerUri)
-            }
-          } else if (platform === 'snapchat') {
-            await pasteToSnapchatApp(
-              videoUri,
-              `file://${stickerUri}`,
-              encodeURI(getTrackRoute(content.track, true))
-            )
-          } else if (platform === 'tiktok') {
-            // Pass the file path (pasteToTikTokApp will format it appropriately)
-            await pasteToTikTokApp(storyVideoPath, platform)
-          }
+          await waitForHandoff(launch)
         } catch (error) {
-          handleError(platform, error, 'Error at share to app step')
+          // The TikTok SDK can't open TikTok, almost always because it isn't installed
+          const isTikTokLaunchError =
+            error instanceof Error &&
+            error.message === 'Failed to launch TikTok share'
+          handleError(
+            platform,
+            error,
+            'Error at share to app step',
+            isTikTokLaunchError
+              ? messages.shareToStoryAppNotInstalled(
+                  PLATFORM_APP_NAMES[platform]
+                )
+              : undefined
+          )
           return
         }
 
+        // Track before cleanup: Android pauses JS timers in the background,
+        // so anything deferred may never run if the user stays in the other app.
         track(
           make({
             eventName: SUCCESS_EVENT_NAMES_MAP[platform],
-            title: content.track.title,
-            artist: content.artist.handle
+            title: storyContent.track.title,
+            artist: storyContent.artist.handle
           })
         )
 
-        // On Android, delay cleanup for Snapchat/TikTok to allow them to fully open
-        // On iOS, cleanup immediately
-        if (Platform.OS === 'android') {
-          // Delay cleanup on Android to prevent app from coming back to foreground
-          setTimeout(() => {
-            dispatch(reset())
-            toggleProgressDrawer(false, undefined, false)
-            setSelectedPlatform(null)
-          }, 1000)
+        // Updating the UI while the other app is still opening can pull Audius
+        // back to the foreground on Android, so wait until the user returns.
+        const reopenShareModal = Platform.OS === 'ios'
+        if (AppState.currentState === 'active') {
+          setTimeout(() => runWhenActive(() => cleanup(reopenShareModal)), 1500)
         } else {
-          // On iOS, cleanup immediately and reopen Share modal
-          cleanup(true)
+          runWhenActive(() => cleanup(reopenShareModal))
         }
       }
     },
     [
       trackImageUri,
-      content,
+      storyContent,
       toggleProgressDrawer,
       captureStickerImage,
       pasteToInstagramApp,
@@ -518,7 +605,8 @@ export const useShareToStory = ({
       dispatch,
       cancelStory,
       userId,
-      pasteToTikTokApp
+      pasteToTikTokApp,
+      toast
     ]
   )
 
@@ -591,9 +679,7 @@ export const useShareToStory = ({
     cancelStory,
     /** Pre-resolved artwork source (mirror fallback applied) for the share sticker. Use this so the sticker always has a working image URL. */
     stickerArtworkSource:
-      content?.type === 'track' &&
-      trackImage?.source != null &&
-      !trackImage.hasNoArtwork
+      storyContent && trackImage?.source != null && !trackImage.hasNoArtwork
         ? trackImage.source
         : undefined
   }

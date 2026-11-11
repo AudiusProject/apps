@@ -1,7 +1,9 @@
 import { useCallback, useMemo } from 'react'
 
 import { SEARCH_PAGE_SIZE, useSearchTrackResults } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { Kind } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { searchActions, SearchKind } from '@audius/common/store'
 import { Flex } from '@audius/harmony'
 import { css } from '@emotion/css'
@@ -38,6 +40,10 @@ export const TrackResults = (props: TrackResultsProps) => {
 
   const mainContentRef = useMainContentRef()
   const isMobile = useIsMobile()
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
+  const isRowLayout = isTrackRowsEnabled && !isMobile
 
   const dispatch = useDispatch()
 
@@ -85,6 +91,7 @@ export const TrackResults = (props: TrackResultsProps) => {
       hasNextPage={shouldLoadMore ? hasNextPage : false}
       loadNextPage={shouldLoadMore ? loadNextPage : undefined}
       variant={LineupVariant.MAIN}
+      tileVariant={isRowLayout ? 'row' : 'tile'}
       scrollParent={mainContentRef.current}
       emptyElement={<NoResultsTile />}
       onClickTile={handleClickTrackTile}
@@ -92,12 +99,15 @@ export const TrackResults = (props: TrackResultsProps) => {
       {...(!isMobile
         ? {
             lineupContainerStyles: css({ width: '100%' }),
-            tileContainerStyles: css({
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px 16px',
-              justifyContent: 'space-between'
-            })
+            // Rows stack with no gap; tiles keep their spacing.
+            tileContainerStyles: isRowLayout
+              ? undefined
+              : css({
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px 16px',
+                  justifyContent: 'space-between'
+                })
           }
         : {})}
     />

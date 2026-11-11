@@ -33,13 +33,15 @@ export const useLibraryCollections = ({
       : getSelectedCategoryLocalPlaylistAdds(state)
   })
 
-  const locallyRemovedCollectionIds = useSelector((state: CommonState) => {
-    const ids =
-      collectionType === 'album'
-        ? getSelectedCategoryLocalAlbumRemovals(state)
-        : getSelectedCategoryLocalPlaylistRemovals(state)
-    return new Set(ids)
-  })
+  const locallyRemovedIds = useSelector((state: CommonState) =>
+    collectionType === 'album'
+      ? getSelectedCategoryLocalAlbumRemovals(state)
+      : getSelectedCategoryLocalPlaylistRemovals(state)
+  )
+  const locallyRemovedCollectionIds = useMemo(
+    () => new Set(locallyRemovedIds),
+    [locallyRemovedIds]
+  )
 
   const {
     data: fetchedCollectionIds,

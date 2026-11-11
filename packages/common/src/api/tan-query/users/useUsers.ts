@@ -25,28 +25,53 @@ export const useUsers = (
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Filter out duplicate IDs
+  // Filter out duplicate IDs. Callers often pass a new array each render, so
+  // key on the ids themselves to keep the queries below stable.
+  const userIdsKey = userIds?.join(',')
   const uniqueUserIds = useMemo(
     () =>
       userIds?.filter((id, index, self) => self.indexOf(id) === index && !!id),
-    [userIds]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [userIdsKey]
+  )
+
+  // Rebuilding these every render makes tanstack re-hash every key and
+  // re-sync every observer, so only rebuild when an input changes.
+  const queries = useMemo(
+    () =>
+      uniqueUserIds?.map((userId) => ({
+        queryKey: getUserQueryKey(userId),
+        queryFn: async () =>
+          getUserQueryFn(
+            userId,
+            currentUserId,
+            queryClient,
+            await audiusSdk(),
+            dispatch
+          ),
+        ...options,
+        ...entityCacheOptions,
+        enabled: options?.enabled !== false && !!userId && userId > 0
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      uniqueUserIds,
+      currentUserId,
+      audiusSdk,
+      queryClient,
+      dispatch,
+      options?.enabled,
+      options?.staleTime,
+      options?.placeholderData,
+      options?.refetchOnMount,
+      options?.throwOnError,
+      options?.refetchInterval,
+      options?.refetchOnWindowFocus
+    ]
   )
 
   const queryResults = useQueries({
-    queries: uniqueUserIds?.map((userId) => ({
-      queryKey: getUserQueryKey(userId),
-      queryFn: async () =>
-        getUserQueryFn(
-          userId,
-          currentUserId,
-          queryClient,
-          await audiusSdk(),
-          dispatch
-        ),
-      ...options,
-      ...entityCacheOptions,
-      enabled: options?.enabled !== false && !!userId && userId > 0
-    })),
+    queries,
     combine: combineQueryResults<UserMetadata[]>
   })
   const { data: users } = queryResults

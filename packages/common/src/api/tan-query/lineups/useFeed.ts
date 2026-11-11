@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { EntityType, Id, type GetUserFeedFilterEnum } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -14,7 +16,7 @@ import { Nullable } from '~/utils/typeUtils'
 import { QUERY_KEYS } from '../queryKeys'
 import { LineupData, QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
+import { useLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeCollectionData } from '../utils/primeCollectionData'
 import { primeTrackData } from '../utils/primeTrackData'
 
@@ -126,10 +128,14 @@ export const useFeed = (
     enabled: options?.enabled !== false && currentUserId != null
   })
 
-  const data = query.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const data = useMemo(() => query.data ?? [], [query.data])
+  const trackIds = useMemo(
+    () =>
+      data.filter((d) => d.type === EntityType.TRACK).map((d) => d.id as ID),
+    [data]
+  )
+
+  const loadNextPage = useLoadNextPage(query)
 
   return {
     data,
@@ -142,7 +148,7 @@ export const useFeed = (
     isInitialLoading: query.isInitialLoading,
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
-    loadNextPage: makeLoadNextPage(query),
+    loadNextPage,
     refetch: query.refetch,
     queryKey
   }

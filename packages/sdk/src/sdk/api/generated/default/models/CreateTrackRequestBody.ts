@@ -150,11 +150,17 @@ export interface CreateTrackRequestBody {
      */
     iswc?: string | null;
     /**
-     * Release date
+     * Release date and time
      * @type {Date}
      * @memberof CreateTrackRequestBody
      */
     releaseDate?: Date;
+    /**
+     * Whether the track is scheduled for release
+     * @type {boolean}
+     * @memberof CreateTrackRequestBody
+     */
+    isScheduledRelease?: boolean;
     /**
      * CID for the track audio file (required)
      * @type {string}
@@ -383,6 +389,7 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
         'iswc': !exists(json, 'iswc') ? undefined : json['iswc'],
         'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
+        'isScheduledRelease': !exists(json, 'is_scheduled_release') ? undefined : json['is_scheduled_release'],
         'trackCid': json['track_cid'],
         'origFileCid': !exists(json, 'orig_file_cid') ? undefined : json['orig_file_cid'],
         'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
@@ -438,7 +445,8 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'license': value.license,
         'isrc': value.isrc,
         'iswc': value.iswc,
-        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString()),
+        'is_scheduled_release': value.isScheduledRelease,
         'track_cid': value.trackCid,
         'orig_file_cid': value.origFileCid,
         'orig_filename': value.origFilename,

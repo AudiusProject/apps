@@ -1,5 +1,5 @@
 diff --git a/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt b/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt
-index 9e1c66a..44999b3 100644
+index 9e1c66a..5f5768b 100644
 --- a/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt
 +++ b/node_modules/tiktok-opensdk-react-native/android/src/main/java/com/tiktokopensdkreactnative/TiktokOpensdkReactNativeModule.kt
 @@ -52,7 +52,7 @@ class TiktokOpensdkReactNativeModule(reactContext: ReactApplicationContext) :
@@ -11,7 +11,30 @@ index 9e1c66a..44999b3 100644
              Log.e("TikTokSDK", "Activity is null")
              promise.reject("ERROR", "Activity is null")
              return
-@@ -144,10 +144,10 @@ class TiktokOpensdkReactNativeModule(reactContext: ReactApplicationContext) :
+@@ -113,15 +113,13 @@ class TiktokOpensdkReactNativeModule(reactContext: ReactApplicationContext) :
+             Log.d("TikTokSDK", "ShareApi.share result: $result")
+             if (result) {
+                 Log.d("TikTokSDK", "Share request sent successfully")
+-                // Set a timeout for the share response
+-                handler.postDelayed({
+-                    if (isShareInProgress) {
+-                        Log.e("TikTokSDK", "Share response timed out")
+-                        isShareInProgress = false
+-                        sharePromise?.reject("ERROR", "Share response timed out")
+-                        sharePromise = null
+-                    }
+-                }, SHARE_TIMEOUT)
++                // Resolve once TikTok opens. It only reports back if the user
++                // returns to the app, and editing a post can take minutes.
++                isShareInProgress = false
++                sharePromise = null
++                promise.resolve(Arguments.createMap().apply {
++                    putBoolean("isSuccess", true)
++                })
+             } else {
+                 Log.e("TikTokSDK", "Failed to launch TikTok share")
+                 isShareInProgress = false
+@@ -144,10 +142,10 @@ class TiktokOpensdkReactNativeModule(reactContext: ReactApplicationContext) :
          handler.removeCallbacksAndMessages(null)
      }
  
@@ -25,3 +48,76 @@ index 9e1c66a..44999b3 100644
  
          if (!isShareInProgress) {
              Log.d("TikTokSDK", "No share in progress, ignoring new intent")
+diff --git a/node_modules/tiktok-opensdk-react-native/ios/TiktokOpensdkReactNative.swift b/node_modules/tiktok-opensdk-react-native/ios/TiktokOpensdkReactNative.swift
+index 25f68b4..ef28405 100644
+--- a/node_modules/tiktok-opensdk-react-native/ios/TiktokOpensdkReactNative.swift
++++ b/node_modules/tiktok-opensdk-react-native/ios/TiktokOpensdkReactNative.swift
+@@ -5,8 +5,6 @@ import Photos
+ 
+ @objc(TiktokOpensdkReactNative)
+ public class TiktokOpensdkReactNative: NSObject {
+-    private static var pendingResolver: RCTPromiseResolveBlock?
+-    private static var pendingRejecter: RCTPromiseRejectBlock?
+     private let serialQueue = DispatchQueue(label: "com.tiktok.sdk.serial")
+ 
+     @objc static func getRedirectURI() -> String? {
+@@ -111,10 +109,13 @@ public class TiktokOpensdkReactNative: NSObject {
+         }
+ 
+         NSLog("TikTok SDK: Sending share request")
+-        shareRequest.send(nil)
+-        
+-        TiktokOpensdkReactNative.pendingResolver = resolver
+-        TiktokOpensdkReactNative.pendingRejecter = rejecter
++        // send() is false when TikTok isn't installed or can't be opened.
++        // Resolve once TikTok opens: it only calls back if the user returns.
++        if shareRequest.send(nil) {
++            resolver(["isSuccess": true])
++        } else {
++            rejecter("LAUNCH_ERROR", "Failed to launch TikTok share", nil)
++        }
+     }
+ 
+     @objc public static func handleOpenURL(_ url: URL) -> Bool {
+@@ -122,36 +123,15 @@ public class TiktokOpensdkReactNative: NSObject {
+         
+         guard let redirectURI = TiktokOpensdkReactNative.getRedirectURI() else {
+             NSLog("TikTok SDK: Failed to get redirect URI")
+-            //TODO: We can't use pendingRejecter here as it's not accessible in a static context
+             return false
+         }
+ 
+-        do {
+-            let shareResponse = try TikTokShareResponse(fromURL: url, redirectURI: redirectURI)
+-            
+-            NSLog("TikTok SDK: Share response received - Error Code: \(shareResponse.errorCode.rawValue), Share State: \(shareResponse.shareState.rawValue)")
+-            
+-            if shareResponse.errorCode == .noError {
+-                NSLog("TikTok SDK: Share succeeded")
+-                pendingResolver?(["isSuccess": true])
+-            } else {
+-                NSLog("TikTok SDK: Share failed - \(shareResponse.errorDescription ?? "Unknown error")")
+-                let errorInfo: [String: Any] = [
+-                    "isSuccess": false,
+-                    "errorCode": shareResponse.errorCode.rawValue,
+-                    "errorMsg": shareResponse.errorDescription ?? "Unknown error",
+-                    "shareState": shareResponse.shareState.rawValue
+-                ]
+-                pendingResolver?(errorInfo)
+-            }
+-        } catch {
+-            NSLog("TikTok SDK: Error creating share response - \(error.localizedDescription)")
+-            pendingRejecter?("SHARE_RESPONSE_ERROR", "Failed to create share response", error)
++        // share() already resolved when TikTok opened, so this only logs the
++        // result. Anything that isn't a TikTok response is left for the app.
++        guard let shareResponse = try? TikTokShareResponse(fromURL: url, redirectURI: redirectURI) else {
++            return false
+         }
+-        
+-        pendingResolver = nil
+-        pendingRejecter = nil
+-        
++        NSLog("TikTok SDK: Share response received - Error Code: \(shareResponse.errorCode.rawValue), Share State: \(shareResponse.shareState.rawValue)")
+         return true
+     }
+ 

@@ -1,6 +1,8 @@
 import { useCallback } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
@@ -37,6 +39,9 @@ export const ArtistDashboardAlbumsTab = ({
   selectedFilter,
   filterText
 }: ArtistDashboardAlbumsTabProps) => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const navigate = useNavigateToPage()
   const { data: accountUser } = useCurrentAccountUser()
   const account = accountUser
@@ -69,6 +74,7 @@ export const ArtistDashboardAlbumsTab = ({
         totalRowCount={account.track_count}
         tableHeaderClassName={styles.tableHeader}
         responsiveColumns={RESPONSIVE_TABLE_POLICIES.dashboardAlbums}
+        isDense={isTrackRowsEnabled}
       />
     </Flex>
   )

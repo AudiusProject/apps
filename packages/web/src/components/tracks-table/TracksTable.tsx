@@ -1105,6 +1105,11 @@ export const TracksTable = ({
   return (
     <Table
       {...tableProps}
+      // Table's own .dense class is scoped to its module; this one lets the
+      // rules in TracksTable.module.css match.
+      wrapperClassName={cn(tableProps.wrapperClassName, {
+        [styles.dense]: tableProps.isDense
+      })}
       columns={tableColumns}
       data={data}
       activeIndex={activeIndex}

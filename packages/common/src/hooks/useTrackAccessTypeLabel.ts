@@ -23,6 +23,7 @@ export const useTrackAccessTypeLabel = (trackId: ID): TrackAccessType => {
       stream_conditions: track?.stream_conditions,
       download_conditions: track?.download_conditions,
       release_date: track?.release_date,
+      is_scheduled_release: track?.is_scheduled_release,
       is_downloadable: track?.is_downloadable,
       is_unlisted: track?.is_unlisted
     })
@@ -40,7 +41,9 @@ export const useTrackAccessTypeLabel = (trackId: ID): TrackAccessType => {
   const isFollowGated = isContentFollowGated(track?.stream_conditions)
   const isDownloadGated = isContentUSDCPurchaseGated(track?.download_conditions)
   const isScheduledRelease =
-    track?.release_date && new Date(track.release_date) > new Date()
+    track?.is_scheduled_release &&
+    track?.release_date &&
+    new Date(track.release_date) > new Date()
 
   let type: Nullable<AccessType> = null
   let isUnlocked = false

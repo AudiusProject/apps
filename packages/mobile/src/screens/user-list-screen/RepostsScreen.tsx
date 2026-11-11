@@ -6,7 +6,6 @@ import {
 } from '@audius/common/api'
 import { RepostType } from '@audius/common/store'
 
-import { IconRepost } from '@audius/harmony-native'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { UserList } from './UserList'
@@ -44,7 +43,7 @@ export const RepostsScreen = () => {
     repostType === RepostType.TRACK ? trackRepostsQuery : collectionRepostsQuery
 
   return (
-    <UserListScreen title={messages.title} titleIcon={IconRepost}>
+    <UserListScreen title={messages.title}>
       <UserList
         data={data}
         totalCount={

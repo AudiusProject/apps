@@ -178,11 +178,18 @@ const NowPlaying = g(
 
     const startSeeking = useCallback(() => {
       clearInterval(seekInterval.current)
-      seekInterval.current = window.setInterval(async () => {
+      seekInterval.current = window.setInterval(() => {
         if (!audioPlayer) return
-        const position = await audioPlayer.getPosition()
-        const duration = await audioPlayer.getDuration()
-        setTiming({ position, duration })
+        const position = audioPlayer.getPosition()
+        const duration = audioPlayer.getDuration()
+        // Only re-render when the displayed second or the duration changes;
+        // the scrubber animates itself between updates
+        setTiming((prev) =>
+          Object.is(Math.floor(prev.position), Math.floor(position)) &&
+          Object.is(prev.duration, duration)
+            ? prev
+            : { position, duration }
+        )
       }, SEEK_INTERVAL)
     }, [setTiming])
 
@@ -325,15 +332,15 @@ const NowPlaying = g(
     const onPrevious = () => {
       const isLongFormContent =
         track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+      const position = audioPlayer?.getPosition() ?? timing.position
       if (isLongFormContent) {
-        const position = timing.position
         const newPosition = position - SKIP_DURATION_SEC
         seek(Math.max(0, newPosition))
         // Update mediakey so scrubber updates
         setTiming({ position: newPosition, duration: timing.duration })
         setMediaKey((mediaKey) => mediaKey + 1)
       } else {
-        const shouldGoToPrevious = timing.position < RESTART_THRESHOLD_SEC
+        const shouldGoToPrevious = position < RESTART_THRESHOLD_SEC
         if (shouldGoToPrevious) {
           previous()
         } else {
@@ -346,7 +353,8 @@ const NowPlaying = g(
       const isLongFormContent =
         track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
       if (isLongFormContent) {
-        const newPosition = timing.position + SKIP_DURATION_SEC
+        const position = audioPlayer?.getPosition() ?? timing.position
+        const newPosition = position + SKIP_DURATION_SEC
         seek(Math.min(newPosition, timing.duration))
         // Update mediakey so scrubber updates
         setTiming({ position: newPosition, duration: timing.duration })

@@ -5,6 +5,7 @@ import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
 import { FeedTab, ID, PlaybackSource, Name } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type {
+  CommonState,
   PlaybackTrack,
   PlaybackQuerySource,
   QueueSource
@@ -12,10 +13,11 @@ import type {
 import { Divider, Flex } from '@audius/harmony'
 import { EntityType } from '@audius/sdk'
 import cn from 'classnames'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useStore } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
 import { CollectionTile as DesktopCollectionTile } from 'components/track/desktop/CollectionTile'
+import { TrackRowTile } from 'components/track/desktop/TrackRowTile'
 import { TrackTile as TrackTileDesktop } from 'components/track/desktop/TrackTile'
 import { CollectionTile as MobileCollectionTile } from 'components/track/mobile/CollectionTile'
 import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
@@ -41,7 +43,6 @@ const LOAD_MORE_VIEWPORTS = 2
 
 const { getPlaying: getPlayerPlaying } = playbackSelectors
 const { makeGetCurrent } = playbackSelectors
-const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
 export type TrackLineupProps = {
   // Ordered list of track IDs to render. Tiles read full track data from the
@@ -74,6 +75,9 @@ export type TrackLineupProps = {
   pageSize?: number
   initialPageSize?: number
   variant?: LineupVariant
+  // 'row' renders each track as a dense single-line TrackRow instead of a
+  // tile. Desktop only; narrow and mobile layouts keep the tile.
+  tileVariant?: 'tile' | 'row'
   ordered?: boolean
   isTrending?: boolean
   isFeed?: boolean
@@ -121,6 +125,7 @@ export const TrackLineup = ({
   pageSize = 10,
   initialPageSize,
   variant = LineupVariant.MAIN,
+  tileVariant = 'tile',
   ordered = false,
   isTrending = false,
   isFeed = false,
@@ -153,21 +158,21 @@ export const TrackLineup = ({
   const isSmallTrackTile =
     isMobile || variant === LineupVariant.SECTION || isNarrow
 
-  const TrackTile = isSmallTrackTile ? MobileTrackTile : TrackTileDesktop
+  const isRowLayout = tileVariant === 'row' && !isSmallTrackTile
+  const TrackTile = isSmallTrackTile
+    ? MobileTrackTile
+    : isRowLayout
+      ? TrackRowTile
+      : TrackTileDesktop
   const CollectionTile = isSmallTrackTile
     ? MobileCollectionTile
     : DesktopCollectionTile
 
-  // For tile highlight: prefer new playback slice's current track when
-  // present, else fall back to legacy current (non-trending flows). Also
-  // reads isPlaying/isBuffering from legacy state (the audio service still
-  // drives those via the player slice).
+  // Playback state is read when a tile is clicked rather than subscribed to,
+  // so play/pause/skip don't rebuild every tile. Tiles select their own
+  // active/playing state.
+  const store = useStore<CommonState>()
   const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
-  const currentLegacy = useSelector(getCurrentQueueItem)
-  // Subscribe so tiles re-render when the playback slice's current track
-  // changes (even if legacy queue hasn't caught up yet).
-  useSelector(getPlaybackCurrentTrackId)
-  const isPlaying = useSelector(getPlayerPlaying)
 
   // Build a single ordered list of mixed track/collection entries. When the
   // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
@@ -196,6 +201,9 @@ export const TrackLineup = ({
   const togglePlay = useCallback(
     (trackId: ID, clickSource?: PlaybackSource) => {
       const analytics = clickSource || playbackSource
+      const state = store.getState()
+      const currentLegacy = getCurrentQueueItem(state)
+      const isPlaying = getPlayerPlaying(state)
       const currentTrackId = currentLegacy?.trackId ?? null
       const currentSource = currentLegacy?.source ?? null
       const isSameTile = currentTrackId === trackId && currentSource === source
@@ -241,10 +249,9 @@ export const TrackLineup = ({
       tracksForPlayback,
       playbackTrackIds,
       querySource,
-      currentLegacy?.trackId,
-      currentLegacy?.source,
+      store,
+      getCurrentQueueItem,
       source,
-      isPlaying,
       playbackSource,
       feedType
     ]
@@ -277,7 +284,10 @@ export const TrackLineup = ({
   } else if (variant === LineupVariant.GRID) {
     tileSize = TrackTileSize.SMALL
     statSize = 'small'
-    containerClassName = styles.searchTrackTileContainer
+    // Rows are full width; the two-column grid is for small tiles only.
+    containerClassName = isRowLayout
+      ? undefined
+      : styles.searchTrackTileContainer
   } else if (variant === LineupVariant.CONDENSED) {
     tileSize = TrackTileSize.SMALL
   }
@@ -369,7 +379,7 @@ export const TrackLineup = ({
             .map((_, index) => (
               <Flex
                 direction='column'
-                gap='m'
+                gap={isRowLayout ? undefined : 'm'}
                 // Position-based key so a skeleton's React identity matches
                 // its absolute position in the lineup. Without this, the same
                 // DOM node would change its rendered order number every time
@@ -395,7 +405,7 @@ export const TrackLineup = ({
         </>
       )
     },
-    [TrackTile, tileSize, ordered, tileStyles, isSmallTrackTile]
+    [TrackTile, tileSize, ordered, tileStyles, isSmallTrackTile, isRowLayout]
   )
 
   const tiles = useMemo(() => {
@@ -426,7 +436,9 @@ export const TrackLineup = ({
         playTrack: handlePlayCollectionTrack,
         pauseTrack,
         size: tileSize,
-        containerClassName,
+        containerClassName: cn(containerClassName, {
+          [styles.collectionAmongRows]: isRowLayout
+        }),
         id: item.id,
         isLoading: false,
         hasLoaded: () => {},
@@ -456,7 +468,8 @@ export const TrackLineup = ({
     onClickTile,
     showArtistPick,
     TrackTile,
-    CollectionTile
+    CollectionTile,
+    isRowLayout
   ])
 
   const isInitialLoad = isPending && tiles.length === 0
@@ -502,7 +515,7 @@ export const TrackLineup = ({
             : tiles.map((tile, index) => (
                 <Flex
                   direction='column'
-                  gap='m'
+                  gap={isRowLayout ? undefined : 'm'}
                   key={`${source}-${index}`}
                   mb={
                     index === 0 && leadingElementId !== undefined

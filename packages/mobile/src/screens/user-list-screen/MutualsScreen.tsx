@@ -1,7 +1,6 @@
 import { useMutualFollowers } from '@audius/common/api'
 import { MUTUALS_USER_LIST_TAG } from '@audius/common/store'
 
-import { IconUserFollowing } from '@audius/harmony-native'
 import { useProfileRoute } from 'app/hooks/useRoute'
 
 import { UserList } from './UserList'
@@ -18,7 +17,7 @@ export const MutualsScreen = () => {
     useMutualFollowers({ userId })
 
   return (
-    <UserListScreen title={messages.title} titleIcon={IconUserFollowing}>
+    <UserListScreen title={messages.title}>
       <UserList
         data={data}
         isFetchingNextPage={isFetchingNextPage}

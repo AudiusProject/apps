@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import { useFavoriteTrack, useUnfavoriteTrack } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   Variant,
   Status,
@@ -10,6 +11,7 @@ import {
   FavoriteSource,
   PlayableType
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   CollectionTrack,
   CollectionsPageType,
@@ -19,6 +21,7 @@ import {
 import { removeNullable } from '@audius/common/utils'
 import { Divider, Flex, Paper, Text } from '@audius/harmony'
 import { Id } from '@audius/sdk'
+import cn from 'classnames'
 
 import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
@@ -96,6 +99,9 @@ type CollectionPageProps = {
 
 const CollectionPage = ({ type }: CollectionPageProps) => {
   const mainContentRef = useMainContentRef()
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const {
     collection,
     user,
@@ -344,12 +350,17 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               dataSource.length === 0 ? (
               <NoSearchResultsContent />
             ) : (
-              <div className={styles.tableWrapper}>
+              <div
+                className={cn(styles.tableWrapper, {
+                  [styles.tableWrapperDense]: isTrackRowsEnabled
+                })}
+              >
                 <EditAwareTracksTable
                   collectionId={playlistId!}
                   // @ts-ignore
                   columns={tracksTableColumns}
                   wrapperClassName={styles.tracksTableWrapper}
+                  isDense={isTrackRowsEnabled}
                   key={playlistName}
                   scrollRef={mainContentRef}
                   loading={pageLoading}

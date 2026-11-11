@@ -2,47 +2,68 @@ import type { ReactNode } from 'react'
 import { useCallback } from 'react'
 
 import type { LayoutChangeEvent } from 'react-native'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 
-import { GlassSurface } from 'app/components/core/Screen/GlassSurface'
+import { makeStyles } from 'app/styles'
 import { zIndex } from 'app/utils/zIndex'
 
+import { CompactControls, CompactTitlePill } from './CompactHeader'
 import {
-  useChromeHiddenProgress,
-  useGlassHeaderInset,
-  useGlassScrollY,
+  useCompactControlsProgress,
+  useCompactTitleProgress,
+  useHeaderScrollOffset,
   useRootHeaderHeight,
   useSetSubHeaderHeight
 } from './GlassChromeContext'
 
 type FloatingSubHeaderProps = {
+  /** The in-flow row under the title (e.g. large tab pills). */
   children: ReactNode
-  /** Draw a hairline separator along the bottom edge of the glass stack. */
-  showBorder?: boolean
+  /**
+   * Smaller copy of the controls, shown in a glass bar under the compact
+   * title pill once the in-flow row has scrolled away.
+   */
+  compact?: ReactNode
+  /** Pads the row to the screen gutter. Off for full-width rows. */
+  padded?: boolean
+  /**
+   * The screen title. The compact title pill renders here, above this row;
+   * see `MobileRootHeader`'s `hasSubHeader`.
+   */
+  title: string
 }
 
+const useStyles = makeStyles(({ palette, spacing }) => ({
+  row: {
+    backgroundColor: palette.white
+  },
+  padded: {
+    paddingHorizontal: spacing(4),
+    paddingVertical: spacing(2)
+  }
+}))
+
 /**
- * Pins a screen's persistent top row (feed tabs, trending pills) beneath the
- * floating root header as a second glass layer, so content scrolls behind one
- * continuous frosted surface.
+ * A screen's controls row (feed tabs, trending categories) under the root
+ * header. It scrolls away with the header, then its compact copy pins under
+ * the compact title pill.
  *
  * Owned by the screen rather than passed into `MobileRootHeader`, whose
  * memoized render prop must not rebuild on tab-state changes (that remounts
  * `AccountPictureHeader` and re-fires the profile-picture fetch).
  */
 export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
-  const { children, showBorder = true } = props
+  const { children, compact, padded = true, title } = props
+  const styles = useStyles()
   const headerHeight = useRootHeaderHeight()
   const setSubHeaderHeight = useSetSubHeaderHeight()
-  const scrollY = useGlassScrollY()
-  const hidden = useChromeHiddenProgress()
-  const glassHeaderInset = useGlassHeaderInset()
+  const scrollOffset = useHeaderScrollOffset()
+  const compactProgress = useCompactControlsProgress()
+  const titleProgress = useCompactTitleProgress()
 
-  // Travels by the full stack height, not just its own, so it tucks up behind
-  // the header rather than colliding with it on the way out.
-  const hideStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -glassHeaderInset * hidden.value }]
+  const positionStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -scrollOffset.value }]
   }))
 
   const handleLayout = useCallback(
@@ -53,19 +74,28 @@ export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
   )
 
   return (
-    <Animated.View style={[styles.root, { top: headerHeight }, hideStyle]}>
-      <GlassSurface
-        showBorder={showBorder}
-        scrollY={scrollY}
+    <>
+      <Animated.View
+        style={[
+          layout.root,
+          styles.row,
+          padded ? styles.padded : null,
+          { top: headerHeight },
+          positionStyle
+        ]}
         onLayout={handleLayout}
       >
-        <View>{children}</View>
-      </GlassSurface>
-    </Animated.View>
+        {children}
+      </Animated.View>
+      <CompactTitlePill title={title} progress={titleProgress} />
+      {compact ? (
+        <CompactControls progress={compactProgress}>{compact}</CompactControls>
+      ) : null}
+    </>
   )
 }
 
-const styles = StyleSheet.create({
+const layout = StyleSheet.create({
   root: {
     position: 'absolute',
     left: 0,

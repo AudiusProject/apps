@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { OptionalId, EntityType } from '@audius/sdk'
 import {
   InfiniteData,
@@ -16,7 +18,7 @@ import { Genre } from '~/utils/genres'
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, LineupData, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
+import { useLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
 
 export const TRENDING_INITIAL_PAGE_SIZE = 10
@@ -111,10 +113,14 @@ export const useTrending = (
     enabled: options?.enabled !== false && !!timeRange
   })
 
-  const data = query.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const data = useMemo(() => query.data ?? [], [query.data])
+  const trackIds = useMemo(
+    () =>
+      data.filter((d) => d.type === EntityType.TRACK).map((d) => d.id as ID),
+    [data]
+  )
+
+  const loadNextPage = useLoadNextPage(query)
 
   return {
     // Raw data
@@ -130,7 +136,7 @@ export const useTrending = (
     isInitialLoading: query.isInitialLoading,
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
-    loadNextPage: makeLoadNextPage(query),
+    loadNextPage,
 
     // Identity
     queryKey

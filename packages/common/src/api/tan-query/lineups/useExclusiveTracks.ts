@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { EntityType, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
@@ -13,7 +15,7 @@ import { ID } from '~/models/Identifiers'
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, LineupData, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
+import { useLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
 
 const DEFAULT_PAGE_SIZE = 10
@@ -89,10 +91,14 @@ export const useExclusiveTracks = (
     enabled: options?.enabled !== false && !!userId
   })
 
-  const data = query.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const data = useMemo(() => query.data ?? [], [query.data])
+  const trackIds = useMemo(
+    () =>
+      data.filter((d) => d.type === EntityType.TRACK).map((d) => d.id as ID),
+    [data]
+  )
+
+  const loadNextPage = useLoadNextPage(query)
 
   return {
     // Raw data
@@ -108,7 +114,7 @@ export const useExclusiveTracks = (
     isInitialLoading: query.isInitialLoading,
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
-    loadNextPage: makeLoadNextPage(query),
+    loadNextPage,
 
     // Identity
     queryKey

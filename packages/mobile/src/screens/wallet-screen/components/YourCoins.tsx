@@ -20,6 +20,7 @@ import {
   Paper,
   Text
 } from '@audius/harmony-native'
+import { useManagedAccountGuard } from 'app/components/manager-mode/useManagedAccountNotAllowed'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { AudioCoinCard } from './AudioCoinCard'
@@ -44,6 +45,7 @@ const YourCoinsSkeleton = () => {
 
 const YourCoinsHeader = () => {
   const navigation = useNavigation()
+  const guard = useManagedAccountGuard()
 
   const handleBuySell = useCallback(() => {
     navigation.navigate('BuySell', {
@@ -64,7 +66,7 @@ const YourCoinsHeader = () => {
       <Text variant='heading' size='s' color='default'>
         {messages.assets}
       </Text>
-      <Button variant='secondary' size='small' onPress={handleBuySell}>
+      <Button variant='secondary' size='small' onPress={guard(handleBuySell)}>
         {messages.buySell}
       </Button>
     </Flex>

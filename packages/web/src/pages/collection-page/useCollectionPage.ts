@@ -200,7 +200,8 @@ export const useCollectionPage = (
   const playerBehavior = useSelector(getPlayerBehavior)
   const previewing = playerBehavior === PlayerBehavior.PREVIEW_OR_FULL
   const status = tracksStatus
-  const currentQueueItem = useSelector(makeGetCurrent())
+  const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
+  const currentQueueItem = useSelector(getCurrentQueueItem)
   const order = useMemo(() => {
     const map: Record<string, number> = {}
     sortedEntries.forEach((entry, idx) => {

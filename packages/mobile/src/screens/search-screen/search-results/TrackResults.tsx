@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from 'react'
 
 import { useSearchTrackResults } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 import { Kind } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { searchActions } from '@audius/common/store'
 import { Keyboard } from 'react-native'
 import { useDispatch } from 'react-redux'
@@ -21,6 +23,9 @@ import {
 const { addItem: addRecentSearch } = searchActions
 
 export const TrackResults = () => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const [query] = useSearchQuery()
   const [filters] = useSearchFilters()
   const {
@@ -68,6 +73,7 @@ export const TrackResults = () => {
   return (
     <Flex h='100%' backgroundColor='default'>
       <TrackLineup
+        tileVariant={isTrackRowsEnabled ? 'row' : 'tile'}
         trackIds={trackIds}
         source='SEARCH_TRACKS'
         querySource={querySource}

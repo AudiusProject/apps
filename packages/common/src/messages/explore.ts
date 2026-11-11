@@ -30,7 +30,6 @@ export const exploreMessages = {
   weeklyRotation: 'Your Weekly Rotation',
   weeklyRotationFor: (name: string) => `${name}'s Weekly Rotation`,
   weeklyRotationSubtitle: 'Updated every Wednesday',
-  weeklyRotationBadge: 'New',
   weeklyRotationPitch:
     'A fresh mix of tracks picked just for you. Updated every Wednesday.',
   weeklyRotationCta: 'Listen Now',

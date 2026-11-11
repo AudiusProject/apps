@@ -14,6 +14,8 @@ import { makeStyles } from 'app/styles'
 
 import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
+
+import { mostSaturated } from './useDominantArtworkColors'
 const { getPreviewing } = playbackSelectors
 const { getDominantColorsByTrack } = averageColorSelectors
 
@@ -31,6 +33,11 @@ const useStyles = makeStyles(({ palette }) => ({
     shadowOpacity: 0.2,
     shadowRadius: 8
   },
+  glow: {
+    shadowOpacity: 0.55,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 10 }
+  },
   image: {
     alignSelf: 'center',
     borderRadius: 8,
@@ -45,9 +52,11 @@ const useStyles = makeStyles(({ palette }) => ({
 
 type ArtworkProps = {
   track: Nullable<Track>
+  /** Whether the Now Playing drawer is open, so the artwork is visible */
+  isOpen: boolean
 }
 
-export const Artwork = ({ track }: ArtworkProps) => {
+export const Artwork = ({ track, isOpen }: ArtworkProps) => {
   const styles = useStyles()
 
   const dominantColors = useSelector((state: CommonState) =>
@@ -56,11 +65,15 @@ export const Artwork = ({ track }: ArtworkProps) => {
     })
   )
 
-  let shadowColor = 'rgb(0,0,0)'
-  const dominantColor = dominantColors ? dominantColors[0] : null
-  if (dominantColor) {
-    const { r, g, b } = dominantColor
-    shadowColor = `rgb(${r.toFixed()},${g.toFixed()},${b.toFixed()})`
+  // With the artwork's colors, a wide soft glow in its most colorful one;
+  // without, the plain drop shadow.
+  let shadowStyle = { shadowColor: 'rgb(0,0,0)' }
+  if (dominantColors?.length) {
+    const { r, g, b } = mostSaturated(dominantColors)
+    shadowStyle = {
+      ...styles.glow,
+      shadowColor: `rgb(${r.toFixed()},${g.toFixed()},${b.toFixed()})`
+    }
   }
 
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -76,12 +89,16 @@ export const Artwork = ({ track }: ArtworkProps) => {
     isPreviewing || canPurchase || shouldDisplayPremiumDownloadLocked
 
   return (
-    <View style={[styles.root, { shadowColor }]}>
+    <View style={[styles.root, shadowStyle]}>
       <TrackImage
         key={track?.track_id}
         trackId={track?.track_id}
         style={styles.image}
-        size={SquareSizes.SIZE_1000_BY_1000}
+        // The collapsed drawer hides the artwork, so don't load the full
+        // size for every track until the drawer opens
+        size={
+          isOpen ? SquareSizes.SIZE_1000_BY_1000 : SquareSizes.SIZE_480_BY_480
+        }
       />
       {shouldShowDogEar ? (
         <TrackDogEar trackId={track?.track_id ?? 0} borderOffset={2} />

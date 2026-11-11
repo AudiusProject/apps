@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { SquareSizes, WidthSizes } from '~/models'
 import { Maybe } from '~/utils/typeUtils'
@@ -27,6 +27,11 @@ const IMAGE_CACHE =
 const getWidth = (size: string) => {
   return parseInt(size.split('x')[0])
 }
+
+// A cached larger image is used in place of the target size only up to this
+// many times its width, e.g. 480 for 150 but not 1000, so small thumbnails
+// don't decode full-size artwork.
+const MAX_LARGER_SIZE_RATIO = 3.5
 
 type Artwork<T extends string | number | symbol> = { [key in T]?: string }
 
@@ -64,6 +69,13 @@ export const useImageSize = <
     useState<Maybe<string>>(undefined)
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
 
+  // Callers often pass an inline function. Reading it from a ref keeps the
+  // effect below from re-running (and preloading again) on every render.
+  const preloadImageFnRef = useRef(preloadImageFn)
+  useEffect(() => {
+    preloadImageFnRef.current = preloadImageFn
+  }, [preloadImageFn])
+
   const fetchWithFallback = useCallback(
     async (url: string) => {
       const mirrors = [...(artwork?.mirrors ?? [])]
@@ -71,7 +83,7 @@ export const useImageSize = <
 
       while (mirrors.length >= 0) {
         try {
-          await preloadImageFn?.(currentUrl)
+          await preloadImageFnRef.current?.(currentUrl)
           return currentUrl
         } catch {
           const nextMirror = mirrors.shift()
@@ -84,7 +96,7 @@ export const useImageSize = <
 
       throw new Error(`Failed to fetch image from all mirrors ${url}`)
     },
-    [artwork?.mirrors, preloadImageFn]
+    [artwork?.mirrors]
   )
 
   const getNextMirrorUrl = useCallback(
@@ -140,14 +152,17 @@ export const useImageSize = <
         IMAGE_CACHE.has(artwork[size as SizeType]!)
     ) as SizeType | undefined
 
-    // Check for larger size
+    // Check for the smallest cached larger size, up to MAX_LARGER_SIZE_RATIO
     // If found, set the image url to the larger size and return
-    const largerSize = Object.keys(artwork).find(
-      (size) =>
-        getWidth(size) > getWidth(targetSize) &&
-        artwork[size as SizeType] &&
-        IMAGE_CACHE.has(artwork[size as SizeType]!)
-    ) as SizeType | undefined
+    const largerSize = Object.keys(artwork)
+      .filter(
+        (size) =>
+          getWidth(size) > getWidth(targetSize) &&
+          getWidth(size) <= getWidth(targetSize) * MAX_LARGER_SIZE_RATIO &&
+          artwork[size as SizeType] &&
+          IMAGE_CACHE.has(artwork[size as SizeType]!)
+      )
+      .sort((a, b) => getWidth(a) - getWidth(b))[0] as SizeType | undefined
 
     if (largerSize) {
       setImageUrl(artwork[largerSize])

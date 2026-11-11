@@ -37,7 +37,6 @@ import {
   useSyncGlassScroll
 } from 'app/screens/app-screen/GlassChromeContext'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
-import { WeeklyRotation } from 'app/screens/explore-screen/components/WeeklyRotation'
 import { make, track } from 'app/services/analytics'
 
 import { FeedFilterButton } from './FeedFilterButton'
@@ -212,7 +211,11 @@ export const FeedScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={messages.header} showDivider={false}>
+      <MobileRootHeader
+        title={messages.header}
+        showDivider={false}
+        hasSubHeader
+      >
         {isForYou ? null : <FeedFilterButton />}
       </MobileRootHeader>
     ),
@@ -260,11 +263,18 @@ export const FeedScreen = () => {
   return (
     <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
-        {/* Pinned into the floating glass stack directly under the title, so
-            the lineups scroll behind one continuous frosted surface rather
-            than sliding under the header and colliding with an opaque tab
-            row. */}
-        <FloatingSubHeader>
+        <FloatingSubHeader
+          title={messages.header}
+          compact={
+            <FeedTabs
+              currentTab={feedTab}
+              onSelectTab={handleSelectTab}
+              size='small'
+            >
+              {isForYou ? null : <FeedFilterButton size='small' />}
+            </FeedTabs>
+          }
+        >
           <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
         </FloatingSubHeader>
         {/* Horizontal pager: swipe left/right toggles between For You and
@@ -283,8 +293,6 @@ export const FeedScreen = () => {
               <TrackLineup
                 source='DISCOVER_FEED'
                 pullToRefresh={false}
-                hideHeaderOnEmpty
-                header={<WeeklyRotation surface='feed' />}
                 LineupEmptyComponent={<SuggestedFollows />}
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
@@ -298,8 +306,6 @@ export const FeedScreen = () => {
               <TrackLineup
                 source='DISCOVER_FEED'
                 pullToRefresh
-                hideHeaderOnEmpty
-                header={<WeeklyRotation surface='feed' />}
                 LineupEmptyComponent={<SuggestedFollows />}
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />

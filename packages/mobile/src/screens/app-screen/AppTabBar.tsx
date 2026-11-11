@@ -5,9 +5,14 @@ import { Animated, StyleSheet } from 'react-native'
 import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { BottomTabBar, BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
+import {
+  BottomTabBar,
+  BOTTOM_BAR_HEIGHT,
+  useFloatingTabBar
+} from 'app/components/bottom-tab-bar'
 import { FULL_DRAWER_HEIGHT } from 'app/components/drawer'
 import { NowPlayingDrawer } from 'app/components/now-playing-drawer'
+import { OtaUpdateBanner } from 'app/components/ota-update-banner/OtaUpdateBanner'
 
 import { useTabBarHiddenProgress } from './TabBarAutoHideContext'
 
@@ -17,6 +22,7 @@ export const AppTabBar = (props: TabBarProps) => {
   const { navigation, state } = props
   const insets = useSafeAreaInsets()
   const hidden = useTabBarHiddenProgress()
+  const floating = useFloatingTabBar()
   // Set handlers for the NowPlayingDrawer and BottomTabBar
   // When the drawer is open, the bottom bar should hide (animated away).
   // When the drawer is closed, the bottom bar should reappear (animated in).
@@ -29,18 +35,27 @@ export const AppTabBar = (props: TabBarProps) => {
   }
   const translationAnim = translationAnimRef.current
 
-  // Drop the bar past the bottom edge as the chrome hides, clearing the safe
-  // area so no sliver of glass is left floating over the home indicator.
-  // Layered over the drawer's own translation rather than folded into it.
-  const hideStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: (BOTTOM_BAR_HEIGHT + insets.bottom) * hidden.value }
-    ]
-  }))
+  // Drop the classic bar past the bottom edge as the chrome hides, clearing
+  // the safe area so no sliver is left over the home indicator. Layered over
+  // the drawer's own translation rather than folded into it. The floating bar
+  // stays and collapses in place instead.
+  const hideStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          translateY: floating
+            ? 0
+            : (BOTTOM_BAR_HEIGHT + insets.bottom) * hidden.value
+        }
+      ]
+    }),
+    [floating]
+  )
 
   return (
     <>
       <NowPlayingDrawer translationAnim={translationAnim} />
+      <OtaUpdateBanner />
       <Reanimated.View style={[styles.bar, hideStyle]}>
         <BottomTabBar
           translationAnim={translationAnim}

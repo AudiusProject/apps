@@ -1,16 +1,33 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 
 import type { ID, User } from '@audius/common/models'
 import type { ListRenderItem } from '@shopify/flash-list'
 import { FlashList } from '@shopify/flash-list'
 import { range } from 'lodash'
+import { StyleSheet, View } from 'react-native'
 
-import { Divider, Flex } from '@audius/harmony-native'
+import { Flex, useTheme } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { makeStyles } from 'app/styles'
 
 import { UserListItem } from './UserListItem'
 import { UserListItemSkeleton } from './UserListItemSkeleton'
+import { UserListLargeTitleContext } from './UserListScreen'
+import { USER_LIST_AVATAR_SIZE } from './constants'
+
+/** Hairline that starts under the name, past the avatar. */
+const InsetSeparator = () => {
+  const { color, spacing } = useTheme()
+  return (
+    <View
+      style={{
+        height: StyleSheet.hairlineWidth,
+        marginLeft: spacing.l + USER_LIST_AVATAR_SIZE + spacing.m,
+        backgroundColor: color.border.default
+      }}
+    />
+  )
+}
 
 const keyExtractor = (item: { user_id: ID } | SkeletonItem) =>
   item.user_id.toString()
@@ -66,6 +83,8 @@ type UserListProps = {
    * Function to render the right content for each user row
    */
   renderRightContent?: (userId: ID, index: number) => React.ReactNode
+  /** Skip "Follows you" where every row would say it, like your own followers. */
+  hideFollowsYou?: boolean
 }
 
 export const UserList = (props: UserListProps) => {
@@ -77,9 +96,11 @@ export const UserList = (props: UserListProps) => {
     fetchNextPage,
     tag,
     showRank = false,
-    renderRightContent
+    renderRightContent,
+    hideFollowsYou
   } = props
   const styles = useStyles()
+  const largeTitle = useContext(UserListLargeTitleContext)
 
   const isEmpty = data.length === 0
 
@@ -114,9 +135,10 @@ export const UserList = (props: UserListProps) => {
           showRank={showRank}
           rank={showRank ? index + 1 : undefined}
           renderRightContent={renderRightContent}
+          hideFollowsYou={hideFollowsYou}
         />
       ),
-    [tag, showRank, renderRightContent]
+    [tag, showRank, renderRightContent, hideFollowsYou]
   )
 
   const loadingSpinner = (
@@ -130,7 +152,10 @@ export const UserList = (props: UserListProps) => {
       data={displayData}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
-      ItemSeparatorComponent={Divider}
+      ItemSeparatorComponent={InsetSeparator}
+      ListHeaderComponent={largeTitle?.header}
+      onScroll={largeTitle?.onScroll}
+      scrollEventThrottle={16}
       onEndReached={fetchNextPage}
       onEndReachedThreshold={3}
       ListFooterComponent={

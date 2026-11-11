@@ -110,6 +110,8 @@ export type TableProps = {
   isPaginated?: boolean
   isReorderable?: boolean
   isTracksTable?: boolean
+  /** Flat, 56px rows styled like Harmony's TrackRow: no card, hover fill, sentence-case header. */
+  isDense?: boolean
   isVirtualized?: boolean
   loading?: boolean
   onClickRow?: (
@@ -149,6 +151,7 @@ export const Table = ({
   isPaginated = false,
   isReorderable = false,
   isTracksTable = false,
+  isDense = false,
   isVirtualized = false,
   loading = false,
   onClickRow,
@@ -817,7 +820,11 @@ export const Table = ({
   const renderContent = useCallback(() => {
     return (
       <div
-        className={cn(styles.tableWrapper, wrapperClassName)}
+        className={cn(
+          styles.tableWrapper,
+          { [styles.dense]: isDense },
+          wrapperClassName
+        )}
         ref={setTableWrapperNode}
       >
         <table
@@ -846,7 +853,8 @@ export const Table = ({
     setTableWrapperNode,
     tableClassName,
     tableHeaderClassName,
-    wrapperClassName
+    wrapperClassName,
+    isDense
   ])
 
   // Force the window scroller to update its position
@@ -877,7 +885,11 @@ export const Table = ({
                 scrollTop
               }) => (
                 <div
-                  className={cn(styles.tableWrapper, wrapperClassName)}
+                  className={cn(
+                    styles.tableWrapper,
+                    { [styles.dense]: isDense },
+                    wrapperClassName
+                  )}
                   ref={setTableWrapperNode}
                 >
                   <table
@@ -920,7 +932,7 @@ export const Table = ({
                                 ? totalRowCount
                                 : rows.length
                             }
-                            rowHeight={64}
+                            rowHeight={isDense ? 56 : 64}
                             rowRenderer={renderRow}
                           />
                         )}
@@ -944,6 +956,7 @@ export const Table = ({
     fetchBatchSize,
     scrollRef,
     wrapperClassName,
+    isDense,
     tableClassName,
     getTableProps,
     tableHeaderClassName,

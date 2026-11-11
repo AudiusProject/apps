@@ -56,6 +56,7 @@ type CollectionsTableProps = {
   totalRowCount?: number
   tableHeaderClassName?: string
   responsiveColumns?: TableProps['responsiveColumns']
+  isDense?: boolean
 }
 
 const defaultColumns: CollectionsTableColumn[] = [
@@ -84,7 +85,8 @@ export const CollectionsTable = ({
   showMoreLimit,
   totalRowCount,
   tableHeaderClassName,
-  responsiveColumns
+  responsiveColumns,
+  isDense
 }: CollectionsTableProps) => {
   // Cell Render Functions
   const renderNameCell = useCallback((cellInfo: CollectionCell) => {
@@ -282,6 +284,7 @@ export const CollectionsTable = ({
       totalRowCount={totalRowCount}
       tableHeaderClassName={tableHeaderClassName}
       responsiveColumns={responsiveColumns}
+      isDense={isDense}
     />
   )
 }

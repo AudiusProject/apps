@@ -6,7 +6,9 @@ import {
   TRENDING_LOAD_MORE_PAGE_SIZE,
   useTrending
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { TimeRange } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   trendingPageActions,
   trendingPageSelectors
@@ -41,6 +43,9 @@ export const TrendingLineup = ({
   onScroll,
   rankIconCount
 }: TrendingLineupProps) => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const genre = useSelector(getTrendingGenre)
@@ -75,6 +80,7 @@ export const TrendingLineup = ({
 
   return (
     <TrackLineup
+      tileVariant={isTrackRowsEnabled ? 'row' : 'tile'}
       trackIds={trackIds}
       source={sourceFor(timeRange)}
       querySource={querySource}

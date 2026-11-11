@@ -1,9 +1,13 @@
 import type { ReactNode } from 'react'
-import { createContext, useContext, useEffect } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 import { useIsFocused } from '@react-navigation/native'
 import type { SharedValue } from 'react-native-reanimated'
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated'
+import {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated'
 
 import { useChromeHiddenProgress } from './GlassChromeContext'
 
@@ -36,6 +40,24 @@ export const useTabBarHiddenProgress = () => {
   const hidden = useContext(TabBarAutoHideContext)
   const fallback = useSharedValue(0)
   return hidden ?? fallback
+}
+
+/**
+ * Whether the bottom chrome is past the halfway point of collapsing, for
+ * props that can't be animated, like `pointerEvents`.
+ */
+export const useIsTabBarCollapsed = () => {
+  const hidden = useTabBarHiddenProgress()
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  useAnimatedReaction(
+    () => hidden.value > 0.5,
+    (current, previous) => {
+      if (current !== previous) runOnJS(setIsCollapsed)(current)
+    }
+  )
+
+  return isCollapsed
 }
 
 /**

@@ -5,7 +5,9 @@ import {
   useFavoriteTrack,
   useUnfavoriteTrack
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { Kind, Status, FavoriteSource, Track } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   libraryPageSelectors,
   LibraryCategory,
@@ -68,6 +70,9 @@ const tableColumns: TracksTableColumn[] = [
 ]
 
 const LibraryPage = () => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const titleRowRef = useRef<HTMLDivElement>(null)
   const tabContainerRef = useRef<HTMLDivElement>(null)
   const isCondensedHeader = useIsContainerNarrow(titleRowRef, 720)
@@ -220,7 +225,10 @@ const LibraryPage = () => {
       <TracksTable
         columns={tableColumns}
         data={dataSource}
-        wrapperClassName={styles.libraryTrackTableWrapper}
+        wrapperClassName={
+          isTrackRowsEnabled ? undefined : styles.libraryTrackTableWrapper
+        }
+        isDense={isTrackRowsEnabled}
         trackActionsHeader={trackTableHeaderFilter}
         defaultSorter={dateSorter('dateSaved')}
         fetchMore={fetchMoreTracks}

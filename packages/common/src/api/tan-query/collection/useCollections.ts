@@ -25,31 +25,58 @@ export const useCollections = (
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
 
+  // Callers often pass a new array each render, so key on the ids themselves
+  // to keep the queries below stable.
+  const collectionIdsKey = collectionIds?.join(',')
   const uniqueCollectionIds = useMemo(
     () =>
       collectionIds?.filter(
         (id, index, self) => self.indexOf(id) === index && !!id
       ),
-    [collectionIds]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [collectionIdsKey]
+  )
+
+  // Rebuilding these every render makes tanstack re-hash every key and
+  // re-sync every observer, so only rebuild when an input changes.
+  const queries = useMemo(
+    () =>
+      uniqueCollectionIds?.map((collectionId) => ({
+        queryKey: getCollectionQueryKey(collectionId),
+        queryFn: async () => {
+          const sdk = await audiusSdk()
+          return getCollectionQueryFn(
+            collectionId,
+            currentUserId,
+            queryClient,
+            sdk,
+            dispatch
+          )
+        },
+        ...options,
+        ...entityCacheOptions,
+        enabled:
+          options?.enabled !== false && !!collectionId && collectionId > 0
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      uniqueCollectionIds,
+      currentUserId,
+      audiusSdk,
+      queryClient,
+      dispatch,
+      options?.enabled,
+      options?.staleTime,
+      options?.placeholderData,
+      options?.refetchOnMount,
+      options?.throwOnError,
+      options?.refetchInterval,
+      options?.refetchOnWindowFocus
+    ]
   )
 
   const queriesResults = useQueries({
-    queries: uniqueCollectionIds?.map((collectionId) => ({
-      queryKey: getCollectionQueryKey(collectionId),
-      queryFn: async () => {
-        const sdk = await audiusSdk()
-        return getCollectionQueryFn(
-          collectionId,
-          currentUserId,
-          queryClient,
-          sdk,
-          dispatch
-        )
-      },
-      ...options,
-      ...entityCacheOptions,
-      enabled: options?.enabled !== false && !!collectionId && collectionId > 0
-    })),
+    queries,
     combine: combineQueryResults<TQCollection[]>
   })
 

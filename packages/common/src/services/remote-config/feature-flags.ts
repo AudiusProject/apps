@@ -16,7 +16,12 @@ export enum FeatureFlags {
   LAUNCHPAD_VERIFICATION = 'launchpad_verification',
   FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting',
   QUEUE_NEW_FEATURE_BADGE = 'queue_new_feature_badge',
-  WEEKLY_ROTATION = 'weekly_rotation'
+  WEEKLY_ROTATION = 'weekly_rotation',
+  TRACK_ROWS = 'track_rows',
+  NOW_PLAYING_COMMENTS = 'now_playing_comments',
+  TRACK_TILE_WAVEFORM = 'track_tile_waveform',
+  NOW_PLAYING_WAVEFORM = 'now_playing_waveform',
+  MOBILE_MANAGER_MODE = 'mobile_manager_mode'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -26,7 +31,10 @@ export const environmentFlagDefaults: Record<
   Partial<FlagDefaults>
 > = {
   development: {
-    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true
+    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
+    [FeatureFlags.TRACK_TILE_WAVEFORM]: true,
+    [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
+    [FeatureFlags.MOBILE_MANAGER_MODE]: true
   },
   production: {}
 }
@@ -51,5 +59,18 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.QUEUE_NEW_FEATURE_BADGE]: false,
   // Default on so shared links render before the Optimizely datafile loads;
   // the remote flag is the kill switch.
-  [FeatureFlags.WEEKLY_ROTATION]: true
+  [FeatureFlags.WEEKLY_ROTATION]: true,
+  // Dense track rows instead of tiles. Default off: an Optimizely false falls
+  // through to this default, so only a code default of false can turn it off.
+  [FeatureFlags.TRACK_ROWS]: false,
+  // Timestamped comments as markers and bubbles on the Now Playing scrubber.
+  // Default on; the remote flag is the kill switch.
+  [FeatureFlags.NOW_PLAYING_COMMENTS]: true,
+  // Waveform with timestamped comment avatars on desktop web track tiles.
+  [FeatureFlags.TRACK_TILE_WAVEFORM]: false,
+  // Waveform scrubber with comment avatars in the mobile Now Playing drawer.
+  [FeatureFlags.NOW_PLAYING_WAVEFORM]: true,
+  // Account switcher and manager settings on mobile. Switching back out and
+  // the manager-mode restrictions stay on regardless of this flag.
+  [FeatureFlags.MOBILE_MANAGER_MODE]: false
 }

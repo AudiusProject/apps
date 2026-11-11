@@ -1,9 +1,4 @@
-import type { CreateKey, LocalStorage, PrivateKey } from './types'
-
-const SCRYPT_N = 32768
-const SCRYPT_R = 8
-const SCRYPT_P = 1
-const SCRYPT_DK_LEN = 32
+import type { CreateKey, LocalStorage } from './types'
 
 // https://stackoverflow.com/questions/38987784/how-to-convert-a-hexadecimal-string-to-uint8array-and-back-in-javascript
 export function bufferFromHexString(hexString: string) {
@@ -74,29 +69,15 @@ export function getPlatformLocalStorage(): LocalStorage {
   )
 }
 
+/**
+ * Default scrypt createKey. Runs on the calling thread, so web passes its own
+ * worker-based createKey and mobile passes a native one.
+ */
 export function getPlatformCreateKey(): CreateKey {
-  /**
-   * Given a user encryptStr and initialization vector, generate a private key
-   * @param encryptStr String to encrypt (can be user password or some kind of lookup key)
-   * @param ivHex hex string iv value. Its utf8 bytes (not the decoded hex) are the salt.
-   *
-   * Uses the bundled @noble/hashes scrypt on every platform. The old web path
-   * ran scrypt-js loaded at runtime from a CDN, which handed the user's
-   * password to unpinned third-party code. scryptAsync yields to the event
-   * loop so the UI stays responsive while it runs.
-   */
-  const createKey = async (encryptStr: string, ivHex: string) => {
-    const { scryptAsync } = await import('@noble/hashes/scrypt')
-    const encoder = new TextEncoder()
-    const keyBuffer = await scryptAsync(
-      encoder.encode(encryptStr),
-      encoder.encode(ivHex),
-      { N: SCRYPT_N, r: SCRYPT_R, p: SCRYPT_P, dkLen: SCRYPT_DK_LEN }
-    )
-    return { keyHex: bytesToHexString(keyBuffer), keyBuffer }
+  return async (encryptStr, ivHex) => {
+    const { createKeyAsync } = await import('./scrypt')
+    return await createKeyAsync(encryptStr, ivHex)
   }
-
-  return createKey
 }
 
 /**

@@ -169,6 +169,42 @@ export class TracksApi extends GeneratedTracksApi {
     }`
   }
 
+  /**
+   * Get the url of a zip of the track's stems, optionally with the parent
+   * track. The API streams the zip, so the url can be handed straight to a
+   * browser or file downloader.
+   */
+  async getTrackStemsDownloadUrl(params: {
+    trackId: string
+    userId?: string
+    userSignature?: string
+    userData?: string
+    includeParent?: boolean
+  }): Promise<string> {
+    if (params.trackId === null || params.trackId === undefined) {
+      throw new RequiredError(
+        'trackId',
+        'Required parameter params.trackId was null or undefined when calling getTrackStemsDownloadUrl.'
+      )
+    }
+
+    const queryParams = new URLSearchParams()
+    if (params.userId) queryParams.append('user_id', params.userId)
+    if (params.userSignature)
+      queryParams.append('user_signature', params.userSignature)
+    if (params.userData) queryParams.append('user_data', params.userData)
+    if (params.includeParent) queryParams.append('include_parent', 'true')
+
+    const path = `/tracks/{track_id}/stems/download`.replace(
+      `{${'track_id'}}`,
+      encodeURIComponent(String(params.trackId))
+    )
+    const queryString = queryParams.toString()
+    return `${this.configuration.basePath}${path}${
+      queryString ? '?' + queryString : ''
+    }`
+  }
+
   /** @hidden
    * Upload track files, does not write to chain
    */

@@ -7,7 +7,7 @@ import {
 } from '@audius/harmony-native'
 
 const messages = {
-  nowPlaying: 'NOW PLAYING'
+  nowPlaying: 'Now playing'
 }
 
 type TitleBarProps = {
@@ -22,7 +22,7 @@ export const TitleBar = ({ onClose }: TitleBarProps) => {
         onPress={onClose}
         iconStyle={{ transform: [{ rotate: '90deg' }] }}
       />
-      <Text variant='label' size='xl' strength='strong' color='subdued'>
+      <Text variant='title' size='m' color='subdued'>
         {messages.nowPlaying}
       </Text>
       <Box w={24} />

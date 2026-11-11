@@ -9,7 +9,8 @@ const OTP_COUNT_LIMIT = 2
 const OTP_BYPASS_EMAILS = new Set([
   'testflight@audius.co',
   'playstore@audius.co',
-  'fb@audius.co'
+  'fb@audius.co',
+  'engineering+fb@audius.co'
 ])
 
 const requiresOtp = async ({ email }) => {

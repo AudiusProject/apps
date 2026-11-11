@@ -168,7 +168,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
     (props: ImageProps) => (
       <CollectionImage
         collectionId={collection?.playlist_id ?? 0}
-        size={SquareSizes.SIZE_480_BY_480}
+        size={SquareSizes.SIZE_150_BY_150}
         {...props}
       />
     ),

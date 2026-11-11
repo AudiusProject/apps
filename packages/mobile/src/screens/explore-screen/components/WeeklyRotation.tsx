@@ -96,9 +96,6 @@ export const WeeklyRotation = ({
           style={{ width: ART_SIZE, height: ART_SIZE, borderRadius: 8 }}
         />
         <Flex column gap='xs' style={{ flex: 1 }}>
-          <Text variant='label' size='s' color='accent'>
-            {messages.weeklyRotationBadge}
-          </Text>
           <Text variant='title' size='l' numberOfLines={1}>
             {messages.weeklyRotation}
           </Text>

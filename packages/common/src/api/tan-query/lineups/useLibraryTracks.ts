@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import {
   Id,
   EntityType,
@@ -19,7 +21,7 @@ import { userTrackMetadataFromSDK } from '../../../adapters/track'
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions, LineupData } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
+import { useLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
 
 const DEFAULT_PAGE_SIZE = 5
@@ -121,10 +123,14 @@ export const useLibraryTracks = (
     enabled: config?.enabled !== false && !!currentUserId
   })
 
-  const data = queryData.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const data = useMemo(() => queryData.data ?? [], [queryData.data])
+  const trackIds = useMemo(
+    () =>
+      data.filter((d) => d.type === EntityType.TRACK).map((d) => d.id as ID),
+    [data]
+  )
+
+  const loadNextPage = useLoadNextPage(queryData)
 
   return {
     data,
@@ -138,7 +144,7 @@ export const useLibraryTracks = (
     isInitialLoading: queryData.isInitialLoading,
     hasNextPage: queryData.hasNextPage,
     fetchNextPage: queryData.fetchNextPage,
-    loadNextPage: makeLoadNextPage(queryData),
+    loadNextPage,
     queryKey,
     pageSize
   }

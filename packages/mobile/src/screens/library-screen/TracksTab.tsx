@@ -1,8 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { useLibraryTracks, useTracks, useUsers } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { Kind, Status } from '@audius/common/models'
 import type { ID, UID, Track, User } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   libraryPageSelectors,
   LibraryCategory,
@@ -11,11 +13,11 @@ import {
   playbackSelectors,
   reachabilitySelectors
 } from '@audius/common/store'
-import type { PlaybackTrack } from '@audius/common/store'
+import type { CommonState, PlaybackTrack } from '@audius/common/store'
 import { makeStableUid, type Nullable } from '@audius/common/utils'
 import { debounce } from 'lodash'
 import { View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, useStore } from 'react-redux'
 
 import { BottomChin } from 'app/components/core/BottomChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
@@ -24,8 +26,10 @@ import { TrackList } from 'app/components/track-list'
 import { getIsDoneLoadingFromDisk } from 'app/store/offline-downloads/selectors'
 import { makeStyles } from 'app/styles'
 
+import { LibraryTrackRows } from './LibraryTrackRows'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
+import { useLibraryTabChrome } from './useLibraryTabChrome'
 
 const { getSelectedCategoryLocalTrackAdds, getCategory } = libraryPageSelectors
 const { getIsReachable } = reachabilitySelectors
@@ -44,9 +48,11 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   root: {
     flex: 1
   },
+  rows: {
+    flex: 1
+  },
   rowsContainer: {
     flex: 1,
-    marginTop: spacing(3),
     marginBottom: spacing(4),
     marginHorizontal: spacing(3),
     borderWidth: 1,
@@ -90,7 +96,11 @@ function useTracksWithUsers(trackIds: ID[]) {
 export const TracksTab = () => {
   const dispatch = useDispatch()
   const styles = useStyles()
+  const { headerInset, onScroll } = useLibraryTabChrome()
   const isReachable = useSelector(getIsReachable)
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
 
   const [filterValue, setFilterValue] = useState('')
   const [debouncedFilterValue, setDebouncedFilterValue] = useState('')
@@ -211,10 +221,9 @@ export const TracksTab = () => {
     fetchNextPage
   ])
 
-  const currentPlaybackTrackId = useSelector(
-    playbackSelectors.getCurrentTrackId
-  )
-  const isPlaying = useSelector(playbackSelectors.getPlaying)
+  // Read playback state at press time so play/pause/skip don't re-render the
+  // whole list
+  const store = useStore<CommonState>()
 
   // Matches legacy `saveTracksLineupActions.prefix` so AudioPlayer's
   // source-based offline-download check keeps working.
@@ -230,6 +239,9 @@ export const TracksTab = () => {
 
   const togglePlay = useCallback(
     (_uid: UID, id: ID) => {
+      const state = store.getState()
+      const currentPlaybackTrackId = playbackSelectors.getCurrentTrackId(state)
+      const isPlaying = playbackSelectors.getPlaying(state)
       if (currentPlaybackTrackId === id && isPlaying) {
         dispatch(playbackActions.togglePlay())
         return
@@ -248,7 +260,7 @@ export const TracksTab = () => {
         })
       )
     },
-    [dispatch, currentPlaybackTrackId, isPlaying, playbackQueue]
+    [dispatch, store, playbackQueue]
   )
 
   const commitFilterValue = useMemo(
@@ -272,26 +284,71 @@ export const TracksTab = () => {
   const shouldShowFilterInput =
     trackUids.length > 0 || filterValue || (isPending && saveCount > 0)
 
+  // Banner and filter ride in the list header so they scroll away with the
+  // page header.
+  const listHeader = (
+    <>
+      <OfflineContentBanner />
+      {shouldShowFilterInput ? (
+        <FilterInput
+          placeholder={messages.inputPlaceholder}
+          onChangeText={handleChangeFilterValue}
+        />
+      ) : null}
+    </>
+  )
+  const listChromeProps = {
+    ListHeaderComponent: listHeader,
+    contentContainerStyle: { paddingTop: headerInset },
+    onScroll,
+    scrollEventThrottle: 16
+  }
+
   const renderBody = () => {
-    if (filteredTrackUids.length === 0 && !isPending) {
-      if (!isReachable) {
-        return (
-          <View style={styles.emptyState}>
-            <NoTracksPlaceholder />
-          </View>
-        )
-      }
+    const isEmpty = filteredTrackUids.length === 0 && !isPending
+    // While filtering, keep the list (and its filter input) mounted with an
+    // empty state inside it, so the input doesn't lose focus mid-typing.
+    if (isEmpty && !filterValue) {
       return (
-        <View style={styles.emptyState}>
-          <EmptyTileCTA
-            message={filterValue ? messages.noResultsText : emptyTabText}
-          />
+        <View style={{ paddingTop: headerInset }}>
+          {listHeader}
+          <View style={styles.emptyState}>
+            {isReachable ? (
+              <EmptyTileCTA message={emptyTabText} />
+            ) : (
+              <NoTracksPlaceholder />
+            )}
+          </View>
         </View>
       )
     }
 
-    if (!showTrackSkeletonList && filteredTrackUids.length === 0) {
-      return null
+    const listEmpty = isEmpty ? (
+      <View style={styles.emptyState}>
+        <EmptyTileCTA message={messages.noResultsText} />
+      </View>
+    ) : null
+
+    if (isTrackRowsEnabled) {
+      return (
+        <View style={styles.rows}>
+          <LibraryTrackRows
+            showSkeleton={showTrackSkeletonList}
+            skeletonRowCount={trackSkeletonRowCount}
+            hasNextPage={
+              isFetchingMore && !allTracksFetched && isReachable === true
+            }
+            onEndReached={handleMoreFetchSaves}
+            onEndReachedThreshold={1.5}
+            ListFooterComponent={<BottomChin />}
+            keyboardShouldPersistTaps='handled'
+            togglePlay={togglePlay}
+            uids={showTrackSkeletonList ? undefined : filteredTrackUids}
+            ListEmptyComponent={listEmpty}
+            {...listChromeProps}
+          />
+        </View>
+      )
     }
 
     return (
@@ -309,21 +366,12 @@ export const TracksTab = () => {
           togglePlay={togglePlay}
           trackItemAction='overflow'
           uids={showTrackSkeletonList ? undefined : filteredTrackUids}
+          ListEmptyComponent={listEmpty}
+          {...listChromeProps}
         />
       </View>
     )
   }
 
-  return (
-    <View style={styles.root}>
-      <OfflineContentBanner />
-      {shouldShowFilterInput ? (
-        <FilterInput
-          placeholder={messages.inputPlaceholder}
-          onChangeText={handleChangeFilterValue}
-        />
-      ) : null}
-      {renderBody()}
-    </View>
-  )
+  return <View style={styles.root}>{renderBody()}</View>
 }

@@ -4,6 +4,8 @@ import {
   useCurrentAccountUser,
   useUserTracksByHandle
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
@@ -39,6 +41,9 @@ export const ArtistDashboardTracksTab = ({
   selectedFilter,
   filterText
 }: ArtistDashboardTracksTabProps) => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const navigate = useNavigateToPage()
   const [page, setPage] = useState(0)
 
@@ -98,6 +103,7 @@ export const ArtistDashboardTracksTab = ({
         tableHeaderClassName={styles.tableHeader}
         responsiveColumns={RESPONSIVE_TABLE_POLICIES.dashboardTracks}
         shouldShowGatedType
+        isDense={isTrackRowsEnabled}
       />
     </Flex>
   )

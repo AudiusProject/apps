@@ -1,13 +1,14 @@
 import { useCallback, useEffect, MouseEvent } from 'react'
 
 import { useCurrentUserId, useTrack, useUser } from '@audius/common/api'
-import { useGatedContentAccess } from '@audius/common/hooks'
+import { useFeatureFlag, useGatedContentAccess } from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,
   FavoriteSource,
   ID
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   tracksSocialActions,
   shareModalUIActions,
@@ -51,6 +52,7 @@ import { TrackTileSize } from '../types'
 
 import styles from './TrackTile.module.css'
 import { TrackTileDuration } from './TrackTileDuration'
+import { TrackTileWaveform } from './TrackTileWaveform'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { repostTrack, undoRepostTrack, saveTrack, unsaveTrack } =
@@ -61,6 +63,8 @@ const {
   getBuffering,
   getPlaying
 } = playbackSelectors
+
+const WAVEFORM_ARTWORK_SIZE = 176
 
 // Props from ConnectedTrackTile
 export type TrackTileProps = {
@@ -139,7 +143,9 @@ export const TrackTile = ({
     permalink,
     _co_sign: coSign,
     has_current_user_reposted: isReposted,
-    has_current_user_saved: isFavorited
+    has_current_user_saved: isFavorited,
+    duration,
+    comment_count: commentCount
   } = trackWithFallback
 
   const isArtistPick = partialUser?.artist_pick_track_id === trackId
@@ -147,6 +153,21 @@ export const TrackTile = ({
   const { isFetchingNFTAccess, hasStreamAccess, isPreviewable } =
     useGatedContentAccess(trackWithFallback)
   const loading = isLoading || isFetchingNFTAccess || isPending
+
+  const { isEnabled: isWaveformEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_TILE_WAVEFORM
+  )
+  const showWaveform =
+    isWaveformEnabled &&
+    size === TrackTileSize.LARGE &&
+    !loading &&
+    duration > 0
+  // With the waveform the right column is ~176px tall; the artwork matches it.
+  const artworkSize = showWaveform
+    ? WAVEFORM_ARTWORK_SIZE
+    : size === TrackTileSize.LARGE
+      ? 128
+      : 108
 
   const [, setLockedContentVisibility] = useModalState('LockedContent')
 
@@ -319,7 +340,12 @@ export const TrackTile = ({
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
         {
           cursor: canClickTile ? 'pointer' : 'default',
-          height: size === TrackTileSize.LARGE ? 144 : 128,
+          // The waveform tile is taller; its height comes from the content.
+          height: showWaveform
+            ? undefined
+            : size === TrackTileSize.LARGE
+              ? 144
+              : 128,
           containerType: 'inline-size',
           '&:hover .artworkIcon': { opacity: 0.75 },
           '&:hover': { transform: 'scale(1.004)' },
@@ -343,10 +369,7 @@ export const TrackTile = ({
           </Flex>
         )}
         {/* Track tile image */}
-        <Box
-          h={size === TrackTileSize.LARGE ? 128 : 108}
-          w={size === TrackTileSize.LARGE ? 128 : 108}
-        >
+        <Box h={artworkSize} w={artworkSize}>
           <button
             type='button'
             aria-label={artworkActionLabel}
@@ -440,6 +463,19 @@ export const TrackTile = ({
               </Flex>
             </Flex>
           </Flex>
+          {showWaveform ? (
+            <TrackTileWaveform
+              trackId={trackId}
+              title={title}
+              permalink={permalink}
+              duration={duration}
+              commentCount={commentCount}
+              isActive={isActive}
+              isPlaying={isTrackPlaying}
+              canSeek={hasStreamAccess}
+              onPlay={onTogglePlay}
+            />
+          ) : null}
           <TrackTileStats
             trackId={trackId}
             size={size}

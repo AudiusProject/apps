@@ -6,6 +6,7 @@ import {
   useQueryContext,
   useResendRecoveryEmail
 } from '@audius/common/api'
+import { useIsManagedAccount } from '@audius/common/hooks'
 import { modalsActions, useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { pick } from 'lodash'
@@ -105,6 +106,9 @@ export const AccountSettingsScreen = () => {
   } = accountData ?? {}
 
   const navigation = useNavigation<ProfileTabScreenParamList>()
+  // Email, password and verification belong to the signed-in user, so hide
+  // them while managing another account
+  const isManagedAccount = useIsManagedAccount()
   const { isVerified } = useTierAndVerifiedForUser(accountUserId)
 
   // Calculate badge size based on h2 font size (h2 is fontSize.medium = 16, so badge is 14)
@@ -182,47 +186,51 @@ export const AccountSettingsScreen = () => {
             </Flex>
             <Text style={styles.handle}>@{accountHandle}</Text>
           </View>
-          <AccountSettingsItem
-            title={messages.recoveryTitle}
-            titleIcon={IconRecoveryEmail}
-            description={messages.recoveryDescription}
-            buttonTitle={messages.recoveryButtonTitle}
-            onPress={handlePressRecoveryEmail}
-          />
-          <AccountSettingsItem
-            title={messages.emailVerificationTitle}
-            titleIcon={IconEmailAddress}
-            description={messages.emailVerificationDescription}
-            buttonTitle={messages.emailVerificationButtonTitle}
-            onPress={handlePressEmailVerification}
-            disabled={isSendingVerificationEmail}
-            isVerified={isEmailVerified}
-            verifiedText={messages.emailVerifiedStatus}
-            notVerifiedText={messages.emailNotVerifiedStatus}
-            hideButton={isEmailVerified}
-          />
-          <AccountSettingsItem
-            title={messages.verifyTitle}
-            titleIcon={IconVerified}
-            description={messages.verifyDescription}
-            buttonTitle={messages.verifyButtonTitle}
-            onPress={handlePressVerification}
-            disabled={isVerified}
-          />
-          <AccountSettingsItem
-            title={messages.emailTitle}
-            titleIcon={IconEmailAddress}
-            description={messages.emailDescription}
-            buttonTitle={messages.emailButtonTitle}
-            onPress={handlePressChangeEmail}
-          />
-          <AccountSettingsItem
-            title={messages.passwordTitle}
-            titleIcon={IconKey}
-            description={messages.passwordDescription}
-            buttonTitle={messages.passwordButtonTitle}
-            onPress={handlePressChangePassword}
-          />
+          {!isManagedAccount ? (
+            <>
+              <AccountSettingsItem
+                title={messages.recoveryTitle}
+                titleIcon={IconRecoveryEmail}
+                description={messages.recoveryDescription}
+                buttonTitle={messages.recoveryButtonTitle}
+                onPress={handlePressRecoveryEmail}
+              />
+              <AccountSettingsItem
+                title={messages.emailVerificationTitle}
+                titleIcon={IconEmailAddress}
+                description={messages.emailVerificationDescription}
+                buttonTitle={messages.emailVerificationButtonTitle}
+                onPress={handlePressEmailVerification}
+                disabled={isSendingVerificationEmail}
+                isVerified={isEmailVerified}
+                verifiedText={messages.emailVerifiedStatus}
+                notVerifiedText={messages.emailNotVerifiedStatus}
+                hideButton={isEmailVerified}
+              />
+              <AccountSettingsItem
+                title={messages.verifyTitle}
+                titleIcon={IconVerified}
+                description={messages.verifyDescription}
+                buttonTitle={messages.verifyButtonTitle}
+                onPress={handlePressVerification}
+                disabled={isVerified}
+              />
+              <AccountSettingsItem
+                title={messages.emailTitle}
+                titleIcon={IconEmailAddress}
+                description={messages.emailDescription}
+                buttonTitle={messages.emailButtonTitle}
+                onPress={handlePressChangeEmail}
+              />
+              <AccountSettingsItem
+                title={messages.passwordTitle}
+                titleIcon={IconKey}
+                description={messages.passwordDescription}
+                buttonTitle={messages.passwordButtonTitle}
+                onPress={handlePressChangePassword}
+              />
+            </>
+          ) : null}
           <AccountSettingsItem
             title={messages.signOutTitle}
             titleIcon={IconSignOut}
@@ -230,13 +238,15 @@ export const AccountSettingsScreen = () => {
             buttonTitle={messages.signOutButtonTitle}
             onPress={openSignOutDrawer}
           />
-          <AccountSettingsItem
-            title={messages.deleteAccountTitle}
-            titleIcon={IconSkull}
-            description={messages.deleteAccountDescription}
-            buttonTitle={messages.deleteAccountButtonTitle}
-            onPress={openDeactivateAccountDrawer}
-          />
+          {!isManagedAccount ? (
+            <AccountSettingsItem
+              title={messages.deleteAccountTitle}
+              titleIcon={IconSkull}
+              description={messages.deleteAccountDescription}
+              buttonTitle={messages.deleteAccountButtonTitle}
+              onPress={openDeactivateAccountDrawer}
+            />
+          ) : null}
         </ScrollView>
       </ScreenContent>
     </Screen>

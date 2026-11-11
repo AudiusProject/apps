@@ -39,6 +39,7 @@ import {
   ScreenContent
 } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
+import { withManagedAccountRestriction } from 'app/components/manager-mode/ManagedAccountUnavailableScreen'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
 import { light } from 'app/haptics'
 import { useRoute } from 'app/hooks/useRoute'
@@ -87,6 +88,8 @@ const {
   fetchPermissions
 } = chatActions
 const { getHasTrack } = playbackSelectors
+
+const INITIAL_MESSAGES_TO_RENDER = 20
 
 const messages = {
   title: 'Messages',
@@ -219,7 +222,7 @@ const useGetLatestMessages = (
   })
 }
 
-export const ChatScreen = () => {
+const ChatScreenContent = () => {
   const styles = useStyles()
   const palette = useThemePalette()
   const dispatch = useDispatch()
@@ -595,7 +598,12 @@ export const ChatScreen = () => {
                   renderItem={renderItem}
                   onEndReached={handleScrollToTop}
                   inverted
-                  initialNumToRender={chatMessages?.length}
+                  // Enough to show the screen and reach the earliest unread
+                  // message, without rendering the whole cached history
+                  initialNumToRender={Math.max(
+                    INITIAL_MESSAGES_TO_RENDER,
+                    (earliestUnreadIndex ?? 0) + INITIAL_MESSAGES_TO_RENDER
+                  )}
                   ref={flatListRef}
                   onScroll={handleScroll}
                   onScrollToIndexFailed={handleScrollToIndexFailed}
@@ -657,3 +665,6 @@ export const ChatScreen = () => {
     </Screen>
   )
 }
+
+// DMs act as the signed-in wallet, so they're off while managing an account
+export const ChatScreen = withManagedAccountRestriction(ChatScreenContent)

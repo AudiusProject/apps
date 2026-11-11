@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import { UseInfiniteQueryResult } from '@tanstack/react-query'
 
 /**
@@ -24,3 +26,20 @@ export const makeLoadNextPage =
     if (queryData.isFetching || !queryData.hasNextPage) return undefined
     return queryData.fetchNextPage()
   }
+
+/**
+ * `makeLoadNextPage` with a stable identity between page loads, so lineups
+ * and lists that take it as a prop don't re-render on every parent render.
+ */
+export const useLoadNextPage = ({
+  isFetching,
+  hasNextPage,
+  fetchNextPage
+}: Pick<
+  UseInfiniteQueryResult,
+  'isFetching' | 'hasNextPage' | 'fetchNextPage'
+>) =>
+  useCallback(
+    () => makeLoadNextPage({ isFetching, hasNextPage, fetchNextPage })(),
+    [isFetching, hasNextPage, fetchNextPage]
+  )

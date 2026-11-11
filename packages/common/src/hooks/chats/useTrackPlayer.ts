@@ -1,8 +1,9 @@
 import { useCallback } from 'react'
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, useStore } from 'react-redux'
 
 import { ID, Name } from '~/models'
+import { CommonState } from '~/store/commonStore'
 import {
   playbackActions,
   playbackSelectors,
@@ -17,6 +18,7 @@ import { TrackPlayback } from './types'
 
 const { playFrom, pause } = playbackActions
 const { getPlaying, getTrackId, makeGetCurrent } = playbackSelectors
+const getCurrent = makeGetCurrent()
 
 type RecordAnalytics = ({ name, id }: { name: TrackPlayback; id: ID }) => void
 
@@ -43,11 +45,12 @@ const queueablesToPlaybackTracks = (entries: Queueable[]) =>
  */
 export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
   const dispatch = useDispatch()
-  const playingTrackId = useSelector(getTrackId)
+  // Read at call time so the callback doesn't change on every track change
+  const store = useStore<CommonState>()
 
   const playTrack = useCallback(
     ({ id, entries }: { id: ID; entries: Queueable[] }) => {
-      if (playingTrackId !== id) {
+      if (getTrackId(store.getState()) !== id) {
         const tracks = queueablesToPlaybackTracks(entries)
         const startIndex = Math.max(
           0,
@@ -61,7 +64,7 @@ export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
         recordAnalytics({ name: Name.PLAYBACK_PLAY, id })
       }
     },
-    [dispatch, recordAnalytics, playingTrackId]
+    [dispatch, recordAnalytics, store]
   )
 
   return playTrack
@@ -92,15 +95,15 @@ export const useToggleTrack = ({
   recordAnalytics,
   entries: entriesProp
 }: UseToggleTrack) => {
-  const currentQueueItem = useSelector(makeGetCurrent())
-  const currentTrack = useCurrentTrack()
+  const isCurrentQueueItem = useSelector((state: CommonState) => {
+    const currentQueueItem = getCurrent(state)
+    return currentQueueItem.trackId === id && currentQueueItem.source === source
+  })
+  const hasCurrentTrack = !!useCurrentTrack({
+    select: (track) => track.track_id
+  })
   const playing = useSelector(getPlaying)
-  const isTrackPlaying = !!(
-    playing &&
-    currentTrack &&
-    currentQueueItem.trackId === id &&
-    currentQueueItem.source === source
-  )
+  const isTrackPlaying = playing && hasCurrentTrack && isCurrentQueueItem
 
   const playTrack = usePlayTrack(recordAnalytics)
   const pauseTrack = usePauseTrack(recordAnalytics)

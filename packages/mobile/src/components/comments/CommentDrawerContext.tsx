@@ -48,6 +48,7 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
     useDrawer('NowPlaying')
   const [drawerData, setDrawerData] = useState<CommentDrawerData>()
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
+  const sheetDismissedRef = useRef(false)
 
   const open = useCallback((props: CommentDrawerData) => {
     setDrawerData(props)
@@ -57,11 +58,18 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
 
   const close = useCallback(() => {
     // Closes the comment drawer only. The now-playing drawer should stay
-    // open here — the BottomSheetModal's onDismiss callback (swipe-down,
-    // backdrop tap, X button) routes through this path and historically
-    // also closed the now-playing drawer underneath, which is the bug.
-    // Navigation flows that need both drawers closed call
+    // open here. Navigation flows that need both drawers closed call
     // `closeAndExitNowPlaying` instead.
+    setIsOpen(false)
+  }, [])
+
+  // The sheet dismissed itself (swipe-down, backdrop tap, or after an X
+  // button close finished). Since @gorhom/bottom-sheet 5.2.11, calling
+  // `dismiss()` on a modal that already unmounted leaves it stuck in its
+  // DISMISSING status, and the next `present()` then never renders. Record
+  // that the sheet is already gone so the effect below skips `dismiss()`.
+  const handleSheetDismissed = useCallback(() => {
+    sheetDismissedRef.current = true
     setIsOpen(false)
   }, [])
 
@@ -74,8 +82,9 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
 
   useEffect(() => {
     if (isOpen) {
+      sheetDismissedRef.current = false
       bottomSheetModalRef.current?.present()
-    } else {
+    } else if (!sheetDismissedRef.current) {
       bottomSheetModalRef.current?.dismiss()
     }
   }, [isOpen])
@@ -90,6 +99,7 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
           {...drawerData}
           bottomSheetModalRef={bottomSheetModalRef}
           handleClose={close}
+          onSheetDismissed={handleSheetDismissed}
         />
       ) : null}
     </CommentDrawerContext.Provider>

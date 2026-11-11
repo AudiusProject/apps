@@ -456,7 +456,14 @@ export const actions = slice.actions
 const offlineDownloadsPersistConfig = {
   key: 'offline-downloads',
   storage: AsyncStorage,
-  blacklist: ['isDoneLoadingFromDisk', 'queueStatus', 'currentNetworkStateType']
+  blacklist: [
+    'isDoneLoadingFromDisk',
+    'queueStatus',
+    'currentNetworkStateType'
+  ],
+  // Each job update otherwise re-serializes and rewrites the whole slice,
+  // which adds up during large batch downloads
+  throttle: 1000
 }
 
 const persistedOfflineDownloadsReducer = persistReducer(

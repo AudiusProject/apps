@@ -20,7 +20,11 @@ import {
   type UID
 } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
-import type { PlaybackQuerySource, PlaybackTrack } from '@audius/common/store'
+import type {
+  CommonState,
+  PlaybackQuerySource,
+  PlaybackTrack
+} from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
 import { EntityType } from '@audius/sdk'
 import { range } from 'lodash'
@@ -30,12 +34,14 @@ import type {
   ViewStyle
 } from 'react-native'
 import { StyleSheet, View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useStore } from 'react-redux'
 
+import { TrackRow } from '@audius/harmony-native'
 import { SectionList } from 'app/components/core'
 import { useBottomChinHeight } from 'app/components/core/BottomChin'
 import {
   TrackTile,
+  TrackRowTile,
   CollectionTile,
   LineupTileSkeleton
 } from 'app/components/lineup-tile'
@@ -44,7 +50,6 @@ import { make, track } from 'app/services/analytics'
 
 const { makeGetCurrent } = playbackSelectors
 const { getPlaying } = playbackSelectors
-const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
 // Threshold for `onEndReachedThreshold` (fraction of viewport length).
 // 1.0 means "fetch when one full viewport of content remains below" so the
@@ -69,7 +74,10 @@ type Section = {
 
 const SkeletonTileView = memo(function SkeletonTileView(props: {
   itemStyles?: ViewStyle
+  isRow?: boolean
+  rank?: number
 }) {
+  if (props.isRow) return <TrackRow isLoading rank={props.rank} />
   return (
     <View style={[styles.item, props.itemStyles]}>
       <LineupTileSkeleton />
@@ -110,6 +118,8 @@ export type TrackLineupProps = {
   initialPageSize?: number
   maxEntries?: number
   isTrending?: boolean
+  /** 'row' renders tracks as dense rows; collections stay tiles. */
+  tileVariant?: 'tile' | 'row'
   rankIconCount?: number
   showArtistPick?: boolean
   header?: SectionListProps<unknown>['ListHeaderComponent']
@@ -163,6 +173,7 @@ export const TrackLineup = ({
   initialPageSize,
   maxEntries = Infinity,
   isTrending = false,
+  tileVariant = 'tile',
   rankIconCount = 0,
   showArtistPick = false,
   header,
@@ -183,12 +194,11 @@ export const TrackLineup = ({
   const dispatch = useDispatch()
   const ref = useRef<RNSectionList>(null)
 
+  // Playback state is read when a tile is pressed rather than subscribed to,
+  // so play/pause/skip don't re-render every tile. Tiles select their own
+  // active/playing state.
+  const store = useStore<CommonState>()
   const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
-  const currentLegacy = useSelector(getCurrentQueueItem)
-  const isPlaying = useSelector(getPlaying)
-  // playback slice is the source of truth when present; subscribed here so
-  // tiles re-render when the current track changes.
-  useSelector(getPlaybackCurrentTrackId)
 
   const uidFor = useCallback(
     (id: ID) => makeStableUid(Kind.TRACKS, id, source),
@@ -242,6 +252,9 @@ export const TrackLineup = ({
       source?: PlaybackSource
       collectionId?: ID
     }) => {
+      const state = store.getState()
+      const currentLegacy = getCurrentQueueItem(state)
+      const isPlaying = getPlaying(state)
       const currentTrackId = currentLegacy?.trackId ?? null
       const currentSource = currentLegacy?.source ?? null
       const isSameTile = currentTrackId === id && currentSource === source
@@ -290,10 +303,9 @@ export const TrackLineup = ({
       dispatch,
       tracksForPlayback,
       querySource,
-      currentLegacy?.trackId,
-      currentLegacy?.source,
+      store,
+      getCurrentQueueItem,
       source,
-      isPlaying,
       playbackSource
     ]
   )
@@ -354,13 +366,37 @@ export const TrackLineup = ({
     maxEntries
   ])
 
+  const isRow = tileVariant === 'row'
+
   const renderItem = useCallback(
     ({ item, index }: { item: RenderItem; index: number }) => {
       if ((item as LoadingItem)._loading) {
-        return <SkeletonTileView itemStyles={itemStyles} />
+        return (
+          <SkeletonTileView
+            itemStyles={itemStyles}
+            isRow={isRow}
+            rank={isTrending ? index + 1 : undefined}
+          />
+        )
       }
       const entry = item as Entry
       const delineator = delineatorMap?.[index] ?? null
+      if (isRow && entry.kind === 'track') {
+        return (
+          <>
+            <TrackRowTile
+              id={entry.trackId}
+              uid={entry.uid}
+              index={index}
+              isTrending={isTrending}
+              togglePlay={togglePlay}
+              onPress={onPressItem}
+              showArtistPick={showArtistPick}
+            />
+            {delineator}
+          </>
+        )
+      }
       return (
         <>
           <View style={[styles.item, itemStyles]}>
@@ -391,6 +427,7 @@ export const TrackLineup = ({
     },
     [
       itemStyles,
+      isRow,
       isTrending,
       togglePlay,
       onPressItem,
@@ -448,6 +485,9 @@ export const TrackLineup = ({
         ListEmptyComponent={LineupEmptyComponent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={LOAD_MORE_THRESHOLD}
+        // Keep ~5 screens of tiles mounted either side instead of the
+        // default 10, since feed/trending/profile lineups all stay mounted
+        windowSize={11}
         sections={isEmpty ? [] : sections}
         stickySectionHeadersEnabled={false}
         keyExtractor={(item: any, index: number) => {

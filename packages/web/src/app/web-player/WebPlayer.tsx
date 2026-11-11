@@ -66,9 +66,6 @@ import PlayBarProvider from 'components/play-bar/PlayBarProvider'
 import { RewardClaimedToast } from 'components/reward-claimed-toast/RewardClaimedToast'
 import { useActivityPing } from 'hooks/useActivityPing'
 import { useEnvironment } from 'hooks/useEnvironment'
-import { usePlaybackPositionPersistence } from 'hooks/usePlaybackPositionPersistence'
-import { usePlaybackPositionPolling } from 'hooks/usePlaybackPositionPolling'
-import { usePlaybackRatePersistence } from 'hooks/usePlaybackRatePersistence'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
 import { TableType } from 'pages/pay-and-earn-page/types'
 import { SubPage } from 'pages/settings-page/types'
@@ -81,6 +78,7 @@ import { shouldShowCookieBanner } from 'utils/gdpr'
 import 'utils/redirect'
 import { CREATE_PLAYLIST_PAGE, getPathname } from 'utils/route'
 
+import { PlaybackPersistence } from './PlaybackPersistence'
 import styles from './WebPlayer.module.css'
 const { getFrostedSurfaceIntensity } = themeSelectors
 const TrendingGenreSelectionPage = lazy(
@@ -510,9 +508,6 @@ const WebPlayer = (props: WebPlayerProps) => {
     useSelector(getFrostedSurfaceIntensity) ?? FrostedSurfaceIntensity.DEFAULT
 
   useActivityPing()
-  usePlaybackRatePersistence()
-  usePlaybackPositionPersistence()
-  usePlaybackPositionPolling()
 
   // Convert mapDispatchToProps to useCallback with useDispatch
   const updateRouteOnSignUpCompletion = useCallback(
@@ -1704,6 +1699,7 @@ const WebPlayer = (props: WebPlayerProps) => {
           </Suspense>
         </div>
         <PlayBarProvider />
+        <PlaybackPersistence />
 
         <Suspense fallback={null}>
           <Modals />

@@ -128,9 +128,6 @@ export const WeeklyRotationBanner = ({
           css={{ flexShrink: 0 }}
         />
         <Flex direction='column' gap='xs' css={{ minWidth: 0, flex: 1 }}>
-          <Text variant='label' size='s' color='accent'>
-            {messages.weeklyRotationBadge}
-          </Text>
           <Text
             variant={isMobile ? 'title' : 'heading'}
             size={isMobile ? 'l' : 's'}

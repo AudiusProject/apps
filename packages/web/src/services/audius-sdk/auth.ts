@@ -14,6 +14,8 @@ import { audiusChain } from 'app/audiusChain'
 import { env } from '../env'
 import { localStorage } from '../local-storage'
 
+import { createKey } from './createKey'
+
 export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
   // Check if the user has already connected Hedgehog first...
   await authService.hedgehogInstance.waitUntilReady()
@@ -102,7 +104,8 @@ export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
 
 export const authService = createAuthService({
   localStorage,
-  identityServiceEndpoint: env.IDENTITY_SERVICE
+  identityServiceEndpoint: env.IDENTITY_SERVICE,
+  createKey
 })
 
 export const solanaWalletService = createHedgehogSolanaWalletService(

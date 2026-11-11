@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 import { useNotificationEntities } from '@audius/common/api'
 import type { AddTrackToPlaylistNotification as AddTrackToPlaylistNotificationType } from '@audius/common/store'
+import { getFeaturedPlaylistName } from '@audius/common/store'
 import { View } from 'react-native'
 
 import { IconPlaylists } from '@audius/harmony-native'
@@ -14,7 +15,8 @@ import {
   NotificationTitle,
   EntityLink,
   UserNameLink,
-  NotificationProfilePicture
+  NotificationProfilePicture,
+  NotificationShareCardButton
 } from '../Notification'
 
 const messages = {
@@ -44,6 +46,8 @@ export const AddTrackToPlaylistNotification = (
 
   if (!playlistOwner || !track || !playlist) return null
 
+  const featuredPlaylistName = getFeaturedPlaylistName(notification.playlistId)
+
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
       <NotificationHeader icon={IconPlaylists}>
@@ -61,6 +65,12 @@ export const AddTrackToPlaylistNotification = (
           </NotificationText>
         </View>
       </View>
+      {featuredPlaylistName ? (
+        <NotificationShareCardButton
+          trackId={notification.trackId}
+          stat={{ kind: 'featured', playlistName: featuredPlaylistName }}
+        />
+      ) : null}
     </NotificationTile>
   )
 }

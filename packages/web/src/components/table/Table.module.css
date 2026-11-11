@@ -382,3 +382,66 @@
 .cellSectionEnd.menu {
   flex: 0 0 64px;
 }
+
+/* Dense rows: the TrackRow look on a sortable table. Flat surface, 56px rows,
+   hover fill instead of card shadows, sentence-case header. */
+.dense.tableWrapper {
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding-bottom: 0;
+}
+
+.dense .table,
+.dense .tableHead,
+.dense .tableHeadRow,
+.dense .tableHeader,
+.dense .tableBody,
+.dense .tableRow,
+.dense .tableRow > .tableCell {
+  background-color: transparent;
+}
+
+.dense .tableHead {
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--harmony-text-subdued);
+  border-bottom: 1px solid var(--harmony-border-default);
+}
+
+.dense .headerContent {
+  min-height: 36px;
+}
+
+.dense .tableRow {
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--harmony-border-radius-m);
+  transition: background-color 0.12s cubic-bezier(0.44, 0, 0.56, 1);
+}
+
+.dense .tableRow.active {
+  color: var(--harmony-secondary);
+}
+
+.dense .tableCell {
+  height: 56px;
+  padding: 4px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dense .tableRow:hover:not(.skeletonRow),
+.dense .tableRow:focus-within:not(.skeletonRow),
+.dense .tableRow:hover:not(.skeletonRow) > .tableCell,
+.dense .tableRow:focus-within:not(.skeletonRow) > .tableCell {
+  box-shadow: none;
+  background-color: var(--harmony-bg-surface-1);
+}
+
+.dense .tableRow.disabled,
+.dense .tableRow.disabled:hover {
+  background-color: transparent;
+  opacity: 0.5;
+}

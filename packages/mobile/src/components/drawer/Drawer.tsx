@@ -20,6 +20,7 @@ import type { Edge } from 'react-native-safe-area-context'
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context'
 
 import type { IconComponent } from '@audius/harmony-native'
+import { useAndroidBackHandler } from 'app/hooks/useAndroidBackHandler'
 import { makeStyles } from 'app/styles'
 import { attachToDy } from 'app/utils/animation'
 
@@ -473,6 +474,10 @@ export const Drawer: DrawerComponent = ({
       onClose()
     }
   }, [blockClose, onClose])
+
+  // Swallow back while open; blockClose keeps the drawer up without
+  // letting the press fall through to navigation underneath.
+  useAndroidBackHandler(isOpen, handleClose)
 
   const panResponder = useMemo(
     () =>

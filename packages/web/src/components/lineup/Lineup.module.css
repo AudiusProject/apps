@@ -28,3 +28,8 @@
   margin: 0px !important;
   margin-bottom: 24px !important;
 }
+
+/* Collection cards mixed into a row lineup (profile Reposts) */
+.collectionAmongRows {
+  margin-top: var(--harmony-spacing-m);
+}

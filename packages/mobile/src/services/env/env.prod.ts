@@ -8,7 +8,6 @@ export const env: Env = {
   API_KEY: '8acf5eb7436ea403ee536a7334faa5e9ada4b50f',
   API_URL: process.env.VITE_API_URL ?? 'https://api.audius.co',
   APP_NAME: 'audius-client',
-  ARCHIVE_ENDPOINT: 'https://api.audius.co',
   AUDIUS_NETWORK_CHAIN_ID: 31524,
   AUDIUS_URL: 'https://audius.co',
   BITSKI_CALLBACK_URL: 'https://audius.co/bitski-callback.html',
@@ -35,6 +34,7 @@ export const env: Env = {
   ETH_TOKEN_BRIDGE_ADDRESS: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
   EXPLORE_CONTENT_URL:
     'https://download.audius.co/static-resources/explore-content.json',
+  FACEBOOK_APP_ID: '3438219622966374',
   FCM_PUSH_PUBLIC_KEY: null,
   GA_HOSTNAME: 'audius.co',
   GA_MEASUREMENT_ID: 'UA-120325397-2',

@@ -8,6 +8,7 @@ import { useField, useFormikContext } from 'formik'
 import lazyWithPreload from 'utils/lazyWithPreload'
 
 import styles from './DatePickerField.module.css'
+import { isDateOnOrBeforeToday } from './datePickerUtils'
 
 // Lazy load react-datepicker since it's only used when the popup is open
 // Preload when the date field is focused to minimize delay (200ms auto-preload)
@@ -195,7 +196,7 @@ export const DatePicker = (props: DatePickerProps) => {
                       dayjs().add(1, 'year').add(1, 'day')
                     )
                   } else {
-                    return dateDayjs.isBefore(dayjs().add(1, 'day'))
+                    return isDateOnOrBeforeToday(date)
                   }
                 }}
                 open={isFocused}

@@ -5,12 +5,17 @@ import {
   useProfileReposts,
   getProfileRepostsQueryKey
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
 export const RepostsTab = () => {
+  const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_ROWS
+  )
   const { handle, repost_count = 0 } =
     useProfileUser({
       select: (user) => ({
@@ -45,6 +50,7 @@ export const RepostsTab = () => {
 
   return (
     <TrackLineup
+      tileVariant={isTrackRowsEnabled ? 'row' : 'tile'}
       trackIds={trackIds}
       lineupItems={data}
       source='PROFILE_FEED'

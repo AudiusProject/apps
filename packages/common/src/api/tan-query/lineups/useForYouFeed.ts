@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { EntityType, Id } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -8,7 +10,7 @@ import { ID, UserCollectionMetadata, UserTrackMetadata } from '~/models'
 import { QUERY_KEYS } from '../queryKeys'
 import { LineupData, QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
-import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
+import { useLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeCollectionData } from '../utils/primeCollectionData'
 import { primeTrackData } from '../utils/primeTrackData'
 
@@ -102,15 +104,19 @@ export const useForYouFeed = (
     enabled: options?.enabled !== false && currentUserId != null
   })
 
-  const data = query.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const data = useMemo(() => query.data ?? [], [query.data])
+  const trackIds = useMemo(
+    () =>
+      data.filter((d) => d.type === EntityType.TRACK).map((d) => d.id as ID),
+    [data]
+  )
 
   // When the query is disabled, react-query keeps isPending/isLoading true
   // (data is undefined). Surface them as false so consumers can render an
   // empty state instead of an indefinite loading state.
   const isDisabled = currentUserId == null || options?.enabled === false
+
+  const loadNextPage = useLoadNextPage(query)
 
   return {
     data,
@@ -123,7 +129,7 @@ export const useForYouFeed = (
     isInitialLoading: isDisabled ? false : query.isInitialLoading,
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
-    loadNextPage: makeLoadNextPage(query),
+    loadNextPage,
     refetch: query.refetch,
     queryKey
   }

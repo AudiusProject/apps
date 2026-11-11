@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { Id, OptionalId, EntityType } from '@audius/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -71,10 +73,12 @@ export const useWeeklyRotation = (
     enabled: options?.enabled !== false && !!userId
   })
 
-  const data = query.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const data = useMemo(() => query.data ?? [], [query.data])
+  const trackIds = useMemo(
+    () =>
+      data.filter((d) => d.type === EntityType.TRACK).map((d) => d.id as ID),
+    [data]
+  )
 
   return {
     data,
