@@ -78,6 +78,12 @@ export const advancedTrackMessages = {
     description: 'Prevent anyone from commenting on your track.',
     value: 'Comments Disabled'
   },
+  feedbackRequested: {
+    header: 'Looking for Feedback',
+    description:
+      'Ask listeners for feedback. Your track shows up in Looking for Feedback on Explore.',
+    value: 'Feedback Wanted'
+  },
   isrcTooltip: `ISRC is used to identify individual sound recordings and music videos. ISWC is used to identify the underlying musical composition – the music and lyrics`,
   isrc: {
     header: 'ISRC',

@@ -11,7 +11,11 @@ import {
   useTrackPageLineup,
   getTrackPageLineupQueryKey
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useFeatureFlag,
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   Name,
   ShareSource,
@@ -31,6 +35,7 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { CommonState, PlaybackTrack } from '@audius/common/store'
 import {
   playbackSelectors,
@@ -65,6 +70,7 @@ import {
   Divider,
   Flex,
   IconCalendarMonth,
+  IconMessage,
   IconPause,
   IconPlay,
   IconRepeatOff,
@@ -109,6 +115,7 @@ const getCurrentQueueItem = makeGetCurrent()
 
 const messages = {
   track: 'track',
+  feedbackWanted: 'Feedback Wanted',
   podcast: 'podcast',
   remix: 'remix',
   followersOnly: 'followers only',
@@ -199,6 +206,7 @@ export const TrackScreenDetailsTile = ({
     save_count: saveCount,
     comment_count: commentCount,
     comments_disabled: commentsDisabled,
+    feedback_requested: feedbackRequested,
     title,
     track_id: trackId,
     stream_conditions: streamConditions,
@@ -287,6 +295,11 @@ export const TrackScreenDetailsTile = ({
       : IconPlay
 
   const trendingRank = useTrackRank(trackId)
+  const { isEnabled: isFeedbackEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_FEEDBACK_REQUESTS
+  )
+  const shouldShowFeedbackWanted =
+    isFeedbackEnabled && feedbackRequested && !commentsDisabled && !isUnlisted
 
   const badges = [
     trendingRank ? (
@@ -305,6 +318,11 @@ export const TrackScreenDetailsTile = ({
     ) : isUnlisted ? (
       <MusicBadge icon={IconVisibilityHidden} key='hidden-badge'>
         {messages.hidden}
+      </MusicBadge>
+    ) : null,
+    shouldShowFeedbackWanted ? (
+      <MusicBadge icon={IconMessage} key='feedback-badge'>
+        {messages.feedbackWanted}
       </MusicBadge>
     ) : null
   ].filter((badge) => badge !== null)

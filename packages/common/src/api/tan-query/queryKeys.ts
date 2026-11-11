@@ -94,6 +94,7 @@ export const QUERY_KEYS = {
   profileTracks: 'profileTracks',
   trendingIds: 'trendingIds',
   trendingUnderground: 'trendingUnderground',
+  feedbackTracks: 'feedbackTracks',
   trendingWinners: 'trendingWinners',
   trendingAlbums: 'trendingAlbums',
   newReleaseAlbums: 'newReleaseAlbums',
