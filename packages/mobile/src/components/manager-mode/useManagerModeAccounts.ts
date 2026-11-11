@@ -21,7 +21,11 @@ export const useManagerModeAccounts = () => {
   const { data: currentUserId } = useCurrentUserId()
   const isManagedAccount = useIsManagedAccount()
 
-  const { data: managedAccounts = [], isSuccess } = useManagedAccounts(
+  const {
+    data: managedAccounts = [],
+    isSuccess,
+    refetch
+  } = useManagedAccounts(
     web3User?.user_id
   )
 
@@ -42,6 +46,7 @@ export const useManagerModeAccounts = () => {
     isManagedAccount,
     isManagerModeEnabled,
     isAccountsLoaded: isSuccess,
+    refetchAccounts: refetch,
     canSwitch
   }
 }
