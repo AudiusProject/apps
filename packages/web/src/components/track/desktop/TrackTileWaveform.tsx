@@ -1,4 +1,11 @@
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import {
   useTimestampedComments,
@@ -32,15 +39,16 @@ const messages = {
   openComment: (name: string) => `Open comment by ${name}`
 }
 
-const HEIGHT = 56
+const DEFAULT_HEIGHT = 56
 const BAR_WIDTH = 2
 const BAR_GAP = 1
 const MIN_BAR_HEIGHT = 2
 const AVATAR_SIZE = 24
 const MAX_AVATARS = 24
 const POLL_MS = 250
-// Matches the comments context: play first, seek once the engine has loaded.
-const SEEK_AFTER_PLAY_MS = 100
+// A seek requested before playback starts waits this long for the load.
+const PENDING_SEEK_TTL_MS = 15000
+const PENDING_SEEK_POLL_MS = 50
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value))
@@ -50,12 +58,12 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `
 
-const buildPath = (peaks: number[]) => {
+const buildPath = (peaks: number[], height: number) => {
   let d = ''
   for (let i = 0; i < peaks.length; i++) {
-    const h = Math.max(MIN_BAR_HEIGHT, Math.round(peaks[i] * HEIGHT))
+    const h = Math.max(MIN_BAR_HEIGHT, Math.round(peaks[i] * height))
     const x = i * (BAR_WIDTH + BAR_GAP)
-    d += `M${x} ${HEIGHT - h}h${BAR_WIDTH}v${h}h-${BAR_WIDTH}z`
+    d += `M${x} ${height - h}h${BAR_WIDTH}v${h}h-${BAR_WIDTH}z`
   }
   return d
 }
@@ -99,9 +107,15 @@ type CommentAvatarProps = {
   comment: TimestampedComment
   x: number
   permalink: string
+  onOpenComment?: (commentId: ID) => void
 }
 
-const CommentAvatar = ({ comment, x, permalink }: CommentAvatarProps) => {
+const CommentAvatar = ({
+  comment,
+  x,
+  permalink,
+  onOpenComment
+}: CommentAvatarProps) => {
   const dispatch = useDispatch()
   const { data: name } = useUser(comment.userId, {
     select: (user) => user.name
@@ -110,10 +124,14 @@ const CommentAvatar = ({ comment, x, permalink }: CommentAvatarProps) => {
   const handleClick = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
+      if (onOpenComment) {
+        onOpenComment(comment.id)
+        return
+      }
       // The desktop track page highlights and scrolls to this comment.
       dispatch(push(`${permalink}?commentId=${Id.parse(comment.id)}`))
     },
-    [dispatch, permalink, comment.id]
+    [dispatch, permalink, comment.id, onOpenComment]
   )
 
   if (!name) return null
@@ -163,6 +181,9 @@ type TrackTileWaveformProps = {
   canSeek: boolean
   /** Start this tile playing; the tile owns gating and queue semantics. */
   onPlay: () => void
+  /** Replaces the default of opening the comment on the track page. */
+  onOpenComment?: (commentId: ID) => void
+  height?: number
 }
 
 /**
@@ -180,13 +201,47 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
     isActive,
     isPlaying,
     canSeek,
-    onPlay
+    onPlay,
+    onOpenComment,
+    height = DEFAULT_HEIGHT
   } = props
   const dispatch = useDispatch()
   const { color } = useTheme()
   const [measureRef, { width }] = useMeasure<HTMLDivElement>()
   const { ref: inViewRef, inView } = useDeferredElement()
   const progress = useTrackProgress(isActive, isPlaying, duration)
+
+  // The player swaps in a new audio element once the stream URL resolves, and
+  // marks this track active before that, so a seek sent early lands on the old
+  // element. Hold it until this track is active on a new element.
+  const isActiveRef = useRef(isActive)
+  isActiveRef.current = isActive
+  const pendingSeekRef = useRef<number | null>(null)
+  const clearPendingSeek = useCallback(() => {
+    if (pendingSeekRef.current !== null) {
+      window.clearInterval(pendingSeekRef.current)
+      pendingSeekRef.current = null
+    }
+  }, [])
+  useEffect(() => clearPendingSeek, [clearPendingSeek])
+
+  const seekAfterLoad = useCallback(
+    (seconds: number) => {
+      clearPendingSeek()
+      const staleAudio = audioPlayer?.audio
+      const startedAt = Date.now()
+      pendingSeekRef.current = window.setInterval(() => {
+        if (Date.now() - startedAt > PENDING_SEEK_TTL_MS) {
+          clearPendingSeek()
+          return
+        }
+        if (!isActiveRef.current || audioPlayer?.audio === staleAudio) return
+        clearPendingSeek()
+        dispatch(seekTo({ seconds }))
+      }, PENDING_SEEK_POLL_MS)
+    },
+    [clearPendingSeek, dispatch]
+  )
 
   // One comments request per tile, and only for tiles that have comments and
   // have scrolled near the viewport.
@@ -204,9 +259,10 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
     return buildPath(
       realPeaks
         ? resampleWaveformPeaks(realPeaks, barCount)
-        : makeWaveformPeaks(trackId, barCount)
+        : makeWaveformPeaks(trackId, barCount),
+      height
     )
-  }, [trackId, barCount, realPeaks, isPeaksSettled])
+  }, [trackId, barCount, realPeaks, isPeaksSettled, height])
 
   const avatars = useMemo(() => {
     if (!width || !duration) return []
@@ -248,14 +304,11 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
       if (isActive) {
         dispatch(seekTo({ seconds }))
       } else {
+        seekAfterLoad(seconds)
         onPlay()
-        window.setTimeout(
-          () => dispatch(seekTo({ seconds })),
-          SEEK_AFTER_PLAY_MS
-        )
       }
     },
-    [canSeek, duration, isActive, onPlay, dispatch]
+    [canSeek, duration, isActive, onPlay, dispatch, seekAfterLoad]
   )
 
   return (
@@ -270,7 +323,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
       css={{
         position: 'relative',
         width: '100%',
-        height: HEIGHT,
+        height,
         cursor: 'pointer',
         userSelect: 'none'
       }}
@@ -279,7 +332,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
         <>
           <svg
             width={width}
-            height={HEIGHT}
+            height={height}
             css={{
               position: 'absolute',
               inset: 0,
@@ -302,7 +355,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
             }}
             aria-hidden
           >
-            <svg width={width} height={HEIGHT} css={{ display: 'block' }}>
+            <svg width={width} height={height} css={{ display: 'block' }}>
               <path d={path} fill={color.primary.p300} />
             </svg>
           </Box>
@@ -314,6 +367,7 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
           comment={comment}
           x={x}
           permalink={permalink}
+          onOpenComment={onOpenComment}
         />
       ))}
     </Box>

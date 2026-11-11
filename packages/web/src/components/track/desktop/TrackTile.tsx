@@ -52,6 +52,7 @@ import { messages } from '../trackTileMessages'
 import { TrackTileSize } from '../types'
 
 import styles from './TrackTile.module.css'
+import { TrackTileCommentComposer } from './TrackTileCommentComposer'
 import { TrackTileDuration } from './TrackTileDuration'
 import { TrackTileWaveform } from './TrackTileWaveform'
 
@@ -146,7 +147,8 @@ export const TrackTile = ({
     has_current_user_reposted: isReposted,
     has_current_user_saved: isFavorited,
     duration,
-    comment_count: commentCount
+    comment_count: commentCount,
+    comments_disabled: commentsDisabled
   } = trackWithFallback
 
   const isArtistPick = partialUser?.artist_pick_track_id === trackId
@@ -476,6 +478,12 @@ export const TrackTile = ({
               isPlaying={isTrackPlaying}
               canSeek={hasStreamAccess}
               onPlay={onTogglePlay}
+            />
+          ) : null}
+          {showWaveform && isActive && hasStreamAccess && !commentsDisabled ? (
+            <TrackTileCommentComposer
+              trackId={trackId}
+              isPlaying={isTrackPlaying}
             />
           ) : null}
           <TrackTileStats
