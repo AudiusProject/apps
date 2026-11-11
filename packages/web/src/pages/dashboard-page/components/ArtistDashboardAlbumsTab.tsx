@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
@@ -42,6 +42,9 @@ export const ArtistDashboardAlbumsTab = ({
   const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
     FeatureFlags.TRACK_ROWS
   )
+  const { isEnabled: isBulkEditEnabled } = useFeatureFlag(
+    FeatureFlags.BULK_TRACK_EDIT
+  )
   const navigate = useNavigateToPage()
   const { data: accountUser } = useCurrentAccountUser()
   const account = accountUser
@@ -50,12 +53,18 @@ export const ArtistDashboardAlbumsTab = ({
     filterText
   })
 
+  // Open albums in edit mode so their tracks can be selected and edited.
+  const albumLinkState = useMemo(
+    () => (isBulkEditEnabled ? { editMode: true } : undefined),
+    [isBulkEditEnabled]
+  )
+
   const onClickRow = useCallback(
     (collection: any) => {
       if (!account) return
-      navigate(collection.permalink)
+      navigate(collection.permalink, albumLinkState)
     },
-    [account, navigate]
+    [account, albumLinkState, navigate]
   )
 
   return !filteredData.length || !account ? (
@@ -70,6 +79,7 @@ export const ArtistDashboardAlbumsTab = ({
         data={filteredData}
         columns={albumTableColumns}
         onClickRow={onClickRow}
+        linkState={albumLinkState}
         showMoreLimit={SHOW_MORE_LIMIT}
         totalRowCount={account.track_count}
         tableHeaderClassName={styles.tableHeader}

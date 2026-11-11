@@ -1,5 +1,6 @@
 import { act } from '@testing-library/react'
 import { setupServer } from 'msw/node'
+import { MemoryRouter } from 'react-router'
 import {
   afterAll,
   afterEach,
@@ -117,5 +118,40 @@ describe('PlaylistEditModeContext access staging', () => {
         testCollection.playlist_name
       )
     })
+  })
+})
+
+describe('PlaylistEditModeContext opening in edit mode', () => {
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }))
+  afterEach(() => server.resetHandlers())
+  afterAll(() => server.close())
+
+  const renderAt = (state: unknown, isOwner: boolean) => {
+    server.use(mockCollectionById(testAlbum))
+    return render(
+      <MemoryRouter initialEntries={[{ pathname: '/artist/album/a', state }]}>
+        <PlaylistEditModeProvider collectionId={1} isOwner={isOwner}>
+          <Probe />
+        </PlaylistEditModeProvider>
+      </MemoryRouter>,
+      { skipRouter: true }
+    )
+  }
+
+  it('enters edit mode when the link asks for it', async () => {
+    renderAt({ editMode: true }, true)
+    await waitFor(() => expect(editMode.isEditMode).toBe(true))
+  })
+
+  it('stays out of edit mode for a plain link', async () => {
+    renderAt(null, true)
+    await waitFor(() => expect(editMode.collectionId).toBe(1))
+    expect(editMode.isEditMode).toBe(false)
+  })
+
+  it('stays out of edit mode for someone who is not the owner', async () => {
+    renderAt({ editMode: true }, false)
+    await waitFor(() => expect(editMode.collectionId).toBe(1))
+    expect(editMode.isEditMode).toBe(false)
   })
 })

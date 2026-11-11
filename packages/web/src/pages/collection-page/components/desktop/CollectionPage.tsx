@@ -337,6 +337,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               <TrackBulkActionsBar
                 collectionId={playlistId}
                 orderedTrackIds={orderedTrackIds}
+                isAlbum={isAlbum}
               />
             ) : null}
             {!pageLoading && isEmpty ? (

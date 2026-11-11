@@ -3,9 +3,8 @@ import { useCallback, useMemo, useState } from 'react'
 import { ID } from '@audius/common/models'
 import { Button, Checkbox, Flex, IconPencil, Text } from '@audius/harmony'
 
+import { BulkEditTracksModal } from 'components/bulk-edit-tracks/BulkEditTracksModal'
 import { useTrackSelection } from 'components/collection/desktop/edit-mode/tracks/TrackSelectionContext'
-
-import { BulkEditTracksModal } from './BulkEditTracksModal'
 
 const messages = {
   selectAll: 'Select all',

@@ -19,7 +19,7 @@ import {
 import { Nullable } from '@audius/common/utils'
 import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 import { isDraftCollection, removeDraftCollection } from './draftCollections'
 import { useCreateDraftPlaylist } from './useCreateDraftPlaylist'
@@ -149,6 +149,7 @@ export const PlaylistEditModeProvider = ({
 }: ProviderProps) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const { data: collection } = useCollection(collectionId)
   const { data: tracks } = useCollectionTracks(collectionId)
   const publishDraft = useCreateDraftPlaylist()
@@ -200,6 +201,19 @@ export const PlaylistEditModeProvider = ({
       enterEditMode()
     }
   }, [isCreate, enterEditMode])
+
+  // Links can ask for the page to open in edit mode via router state.
+  const shouldOpenInEditMode =
+    !!(location.state as { editMode?: boolean } | null)?.editMode &&
+    isOwner &&
+    collectionId != null &&
+    !isCreate
+  useEffect(() => {
+    if (shouldOpenInEditMode && !autoEnteredRef.current) {
+      autoEnteredRef.current = true
+      enterEditMode()
+    }
+  }, [shouldOpenInEditMode, enterEditMode])
 
   const setField = useCallback<PlaylistEditModeContextValue['setField']>(
     (field, value) => {
