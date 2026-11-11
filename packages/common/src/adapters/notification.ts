@@ -717,6 +717,26 @@ export const notificationFromSDK = (
             ...formatBaseNotification(notification)
           }
         }
+        if (n.type === 'weekly_artist_recap') {
+          const data = n.actions[0].data as unknown as Record<
+            string,
+            string | number | undefined
+          >
+          const topCity = data.topCity ?? data.top_city
+          return {
+            type: NotificationType.WeeklyArtistRecap,
+            playCount: Number(data.playCount ?? data.play_count),
+            followerCount: Number(data.followerCount ?? data.follower_count),
+            saveCount: Number(data.saveCount ?? data.save_count),
+            rotationSaveCount: Number(
+              data.rotationSaveCount ?? data.rotation_save_count ?? 0
+            ),
+            topCity: topCity ? String(topCity) : undefined,
+            year: Number(data.year),
+            week: Number(data.week),
+            ...formatBaseNotification(notification)
+          }
+        }
         if (n.type === 'remix_contest_update') {
           const data = n.actions[0].data as unknown as Record<string, string>
           return {

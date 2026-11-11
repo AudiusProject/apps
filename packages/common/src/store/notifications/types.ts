@@ -48,6 +48,7 @@ export enum NotificationType {
   ListenStreakReminder = 'ListenStreakReminder',
   WeeklyRotation = 'WeeklyRotation',
   WeeklyRotationFeatured = 'WeeklyRotationFeatured',
+  WeeklyArtistRecap = 'WeeklyArtistRecap',
   ArtistRemixContestEnded = 'ArtistRemixContestEnded',
   ArtistRemixContestEndingSoon = 'ArtistRemixContestEndingSoon',
   ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions',
@@ -98,6 +99,7 @@ export enum PushNotificationType {
   ListenStreakReminder = 'ListenStreakReminder',
   WeeklyRotation = 'WeeklyRotation',
   WeeklyRotationFeatured = 'WeeklyRotationFeatured',
+  WeeklyArtistRecap = 'WeeklyArtistRecap',
   FanClubTextPost = 'FanClubTextPost'
 }
 
@@ -653,6 +655,23 @@ export type WeeklyRotationFeaturedPushNotification = {
   entityId: ID
 }
 
+/**
+ * Sent to an artist on the Wednesday rollover with their numbers for the week
+ * that just closed. topCity is missing when no play had a city.
+ */
+export type WeeklyArtistRecapNotification = BaseNotification & {
+  type: NotificationType.WeeklyArtistRecap
+  playCount: number
+  followerCount: number
+  saveCount: number
+  /** Saves from listeners whose Weekly Rotation included the track. */
+  rotationSaveCount: number
+  topCity?: string
+  /** The week reported, as a Weekly Rotation ISO (year, week) pair. */
+  year: number
+  week: number
+}
+
 export type FanRemixContestStartedNotification = BaseNotification & {
   type: NotificationType.FanRemixContestStarted
   entityId: ID
@@ -760,6 +779,7 @@ export type Notification =
   | ListenStreakReminderNotification
   | WeeklyRotationNotification
   | WeeklyRotationFeaturedNotification
+  | WeeklyArtistRecapNotification
   | ArtistRemixContestEndedNotification
   | FanRemixContestEndedNotification
   | FanRemixContestWinnersSelectedNotification
