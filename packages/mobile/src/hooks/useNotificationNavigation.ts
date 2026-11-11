@@ -361,6 +361,10 @@ export const useNotificationNavigation = () => {
       [NotificationType.WeeklyRotation]: () => {
         navigation.navigate('WeeklyRotationScreen')
       },
+      // The push carries no entity; the full recap is in Notifications.
+      [NotificationType.WeeklyArtistRecap]: () => {
+        navigation.navigate('notifications', { screen: 'Notifications' })
+      },
       // One featured track opens it; several open the artist's profile. The
       // push says which via entityType. The tile only has the top track, so
       // read its owner from the cache that its useNotificationEntity primed.

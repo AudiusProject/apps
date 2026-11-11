@@ -44,6 +44,7 @@ import { TrendingUndergroundNotification } from './TrendingUndergroundNotificati
 import { USDCPurchaseBuyerNotification } from './USDCPurchaseBuyerNotification'
 import { USDCPurchaseSellerNotification } from './USDCPurchaseSellerNotification'
 import { UserSubscriptionNotification } from './UserSubscriptionNotification'
+import { WeeklyArtistRecapNotification } from './WeeklyArtistRecapNotification'
 import { WeeklyRotationFeaturedNotification } from './WeeklyRotationFeaturedNotification'
 import { WeeklyRotationNotification } from './WeeklyRotationNotification'
 
@@ -156,6 +157,9 @@ export const Notification = (props: NotificationProps) => {
         return (
           <WeeklyRotationFeaturedNotification notification={notification} />
         )
+      }
+      case NotificationType.WeeklyArtistRecap: {
+        return <WeeklyArtistRecapNotification notification={notification} />
       }
       case NotificationType.FanRemixContestEndingSoon: {
         return (
