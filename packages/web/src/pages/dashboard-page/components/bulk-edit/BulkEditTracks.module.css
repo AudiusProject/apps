@@ -1,0 +1,17 @@
+.selected,
+.selected td {
+  background-color: color-mix(
+    in srgb,
+    var(--harmony-secondary) 8%,
+    var(--harmony-white)
+  ) !important;
+}
+
+.selected:hover,
+.selected:hover > td {
+  background-color: color-mix(
+    in srgb,
+    var(--harmony-secondary) 12%,
+    var(--harmony-white)
+  ) !important;
+}
