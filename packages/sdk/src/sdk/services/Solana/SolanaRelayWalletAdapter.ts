@@ -62,14 +62,17 @@ export class SolanaRelayWalletAdapter implements SolanaWalletAdapter {
    */
   public async connect() {
     this._connecting = true
-    this._publicKey = await this.solanaRelay.getFeePayer()
-    if (!this._publicKey) {
-      throw new Error(
-        'Failed to connect SolanaRelayWalletAdapter: Failed to get fee payer.'
-      )
+    try {
+      this._publicKey = await this.solanaRelay.getFeePayer()
+      if (!this._publicKey) {
+        throw new Error(
+          'Failed to connect SolanaRelayWalletAdapter: Failed to get fee payer.'
+        )
+      }
+      this._connected = true
+    } finally {
+      this._connecting = false
     }
-    this._connecting = false
-    this._connected = true
   }
 
   public async disconnect() {

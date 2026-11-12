@@ -146,8 +146,12 @@ export class SolanaRelay extends BaseAPI {
       // SendTransactionError to transparently raise to the caller.
       if (e instanceof Error && e.name === 'ResponseError') {
         const resp = (e as runtime.ResponseError).response.clone()
-        const body = await resp.json()
+        // The error body isn't always JSON; if it can't be parsed, surface the
+        // original ResponseError instead of a SyntaxError
+        const body = await resp.json().catch(() => null)
         if (
+          body !== null &&
+          typeof body === 'object' &&
           'error' in body &&
           'transactionMessage' in body &&
           'signature' in body

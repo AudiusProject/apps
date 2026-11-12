@@ -1,3 +1,4 @@
+import { generatePrivateKey } from 'viem/accounts'
 import { describe, it, expect, vi } from 'vitest'
 
 import { createAppWalletClient, Logger } from '../services'
@@ -103,6 +104,39 @@ describe('addRequestSignatureMiddleware', () => {
     // Should return the original context without signature headers
     expect(ctx?.init.headers).not.toHaveProperty('Encoded-Data-Message')
     expect(ctx?.init.headers).not.toHaveProperty('Encoded-Data-Signature')
+  })
+
+  it('does not reuse a cached signature once the wallet is gone', async () => {
+    const appWalletClient = createAppWalletClient({
+      apiKey: '',
+      apiSecret: generatePrivateKey()
+    })
+    const getAddresses = vi.fn(() => appWalletClient.getAddresses())
+    const services = {
+      audiusWalletClient: {
+        ...appWalletClient,
+        getAddresses,
+        signMessage: appWalletClient.signMessage.bind(appWalletClient)
+      } as any,
+      logger: { warn: vi.fn() } as any
+    }
+
+    const m = addRequestSignatureMiddleware({ services })
+    const request = () =>
+      m.pre?.({
+        fetch,
+        url: 'example.com',
+        init: { headers: { 'x-something': 'value' } }
+      })
+
+    const ctx = await request()
+    expect(ctx?.init.headers).toHaveProperty('Encoded-Data-Signature')
+
+    // Simulate logging out
+    getAddresses.mockRejectedValue(new HedgehogWalletNotFoundError())
+    const ctx2 = await request()
+    expect(ctx2?.init.headers).not.toHaveProperty('Encoded-Data-Message')
+    expect(ctx2?.init.headers).not.toHaveProperty('Encoded-Data-Signature')
   })
 
   it('logs warning for other errors', async () => {

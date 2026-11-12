@@ -78,6 +78,8 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     }
 
     this.nodes = contentNodes
+    // Drop any ordering computed from the bootstrap nodes
+    this.orderedNodes = undefined
     this.selectionState = 'healthy_only'
     return true
   }
@@ -127,22 +129,24 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     if (!this.orderedNodes?.length) {
       this.orderedNodes = this.orderNodes(new Date().toString())
     }
+    // A node list refresh can replace this.orderedNodes while we await below
+    const orderedNodes = this.orderedNodes
 
-    if (this.orderedNodes.length === 0) {
+    if (orderedNodes.length === 0) {
       return undefined
     }
 
     const currentNodeIndex = this.selectedNode
-      ? this.orderedNodes.indexOf(this.selectedNode)
+      ? orderedNodes.indexOf(this.selectedNode)
       : -1
 
     let selectedNode: string | undefined
     let nextNodeIndex = currentNodeIndex
 
-    while (nextNodeIndex !== this.orderedNodes.length - 1) {
+    while (nextNodeIndex !== orderedNodes.length - 1) {
       nextNodeIndex++
-      const nextNode = this.orderedNodes[nextNodeIndex]
-      if (!nextNode) continue // should never happen unless this.orderedNodes has falsy values
+      const nextNode = orderedNodes[nextNodeIndex]
+      if (!nextNode) continue // should never happen unless orderedNodes has falsy values
       if (await isNodeHealthy(nextNode)) {
         selectedNode = nextNode
         break

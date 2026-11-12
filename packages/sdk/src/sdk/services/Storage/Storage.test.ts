@@ -137,6 +137,30 @@ describe('pollProcessingStatus', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1)
   })
 
+  it('stops polling once the upload is aborted', async () => {
+    const ac = new AbortController()
+    mockFetch.mockImplementation(async () => {
+      ac.abort()
+      return statusResponse({ id: 'upload-1', status: 'busy' })
+    })
+
+    const storage = new Storage({ storageNodeSelector: nodeSelector })
+    const pollWithSignal = (
+      storage as unknown as {
+        pollProcessingStatus: (
+          id: string,
+          template: string,
+          total: number,
+          onProgress: undefined,
+          abortSignal: AbortSignal
+        ) => Promise<unknown>
+      }
+    ).pollProcessingStatus('upload-1', 'audio', 1, undefined, ac.signal)
+
+    await expect(pollWithSignal).rejects.toThrow('Upload aborted')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  }, 20000)
+
   // Image resizes have no '320' result to wait for; the gate is audio-only.
   it('does not require a 320 result for image templates', async () => {
     mockFetch.mockResolvedValue(
