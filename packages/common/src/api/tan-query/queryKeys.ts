@@ -31,6 +31,7 @@ export const QUERY_KEYS = {
   userPlaylists: 'userPlaylists',
   userAlbums: 'userAlbums',
   userTracksDownloadCount: 'userTracksDownloadCount',
+  listenerCities: 'listenerCities',
   collection: 'collection',
   collections: 'collections',
   collectionByPermalink: 'collectionByPermalink',
