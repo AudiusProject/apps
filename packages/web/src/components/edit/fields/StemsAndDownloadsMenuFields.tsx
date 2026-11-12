@@ -251,6 +251,17 @@ export const StemsAndDownloadsMenuFields = (
     [props, setStemsValue, stemsValue]
   )
 
+  const handleSelectCategoryForStems = useCallback(
+    (category: StemCategory, indices: number[]) => {
+      const newStems = stemsValue.map((stem, i) =>
+        indices.includes(i) ? { ...stem, category } : stem
+      )
+      setStemsValue(newStems)
+      indices.forEach((i) => props.onSelectCategory?.(category, i))
+    },
+    [props, setStemsValue, stemsValue]
+  )
+
   const handleDeleteStem = useCallback(
     (index: number) => {
       // Make a copy to be sure children reading this value will re-render.
@@ -283,6 +294,7 @@ export const StemsAndDownloadsMenuFields = (
         stems={stemsValue}
         onAddStems={handleAddStems}
         onSelectCategory={handleSelectCategory}
+        onSelectCategoryForStems={handleSelectCategoryForStems}
         onDeleteStem={handleDeleteStem}
       />
     </div>

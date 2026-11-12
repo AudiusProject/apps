@@ -30,6 +30,7 @@ export const CollectionNavigationPrompt = (
   return (
     <NavigationPrompt
       when={dirty && !isSubmitting && !disabled}
+      blockInAppNavigation={isUpload}
       messages={
         isUpload
           ? messages.uploadNavigationPrompt

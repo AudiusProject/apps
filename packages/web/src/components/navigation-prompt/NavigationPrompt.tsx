@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect } from 'react'
 
 import {
   Modal,
@@ -9,8 +9,7 @@ import {
   Text
 } from '@audius/harmony'
 import cn from 'classnames'
-import type { Location } from 'history'
-import { useNavigate, useLocation } from 'react-router'
+import { useBlocker, type Location } from 'react-router'
 
 import layoutStyles from 'components/layout/layout.module.css'
 
@@ -19,6 +18,12 @@ import styles from './NavigationPrompt.module.css'
 interface Props {
   when?: boolean | undefined
   shouldBlockNavigation?: (location: Location) => boolean
+  /**
+   * Also block in-app navigation (link clicks, navigate()), not just
+   * back/forward. Only safe where the form never navigates away itself
+   * after a save, e.g. the upload flow.
+   */
+  blockInAppNavigation?: boolean
   messages: {
     title: string
     body: string
@@ -28,32 +33,21 @@ interface Props {
 }
 
 /**
- * Navigation prompt that works with BrowserRouter (non-data router).
- * Adapted from https://gist.github.com/michchan/0b142324b2a924a108a689066ad17038#file-routeleavingguard-function-ts-ca839f5faf39-tsx
- *
- * This implementation uses useBeforeUnload for browser navigation and
- * popstate events for back/forward button navigation.
- * Note: Programmatic navigation (via navigate() or Link clicks) cannot be
- * easily intercepted with BrowserRouter, but browser navigation is handled.
+ * Asks before leaving a page with unsaved changes: tab close/refresh,
+ * back/forward, and in-app navigation when `blockInAppNavigation` is set.
  */
 export const NavigationPrompt = (props: Props) => {
-  const { when, shouldBlockNavigation, messages } = props
-  const [modalVisible, setModalVisible] = useState(false)
-  const navigate = useNavigate()
-  const location = useLocation()
-  const pendingNavigationRef = useRef<string | null>(null)
+  const { when, shouldBlockNavigation, blockInAppNavigation, messages } = props
 
-  // Check if navigation should be blocked
-  const checkShouldBlock = useCallback(
-    (nextLocation: Location) => {
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation, historyAction }) => {
       if (when !== true) return false
-      if (!shouldBlockNavigation) return true
-      return shouldBlockNavigation(nextLocation)
-    },
-    [when, shouldBlockNavigation]
+      if (currentLocation.pathname === nextLocation.pathname) return false
+      if (!blockInAppNavigation && historyAction !== 'POP') return false
+      return shouldBlockNavigation ? shouldBlockNavigation(nextLocation) : true
+    }
   )
 
-  // Handle browser navigation (closing tab, refreshing, etc.)
   useEffect(() => {
     if (!when) return
 
@@ -69,84 +63,53 @@ export const NavigationPrompt = (props: Props) => {
     }
   }, [when])
 
-  // Listen for popstate events (browser back/forward button)
+  // Release a pending navigation if the form stops needing protection.
   useEffect(() => {
-    if (!when) return
-
-    const handlePopState = (e: PopStateEvent) => {
-      const currentPath = location.pathname + location.search
-      const nextPath = window.location.pathname + window.location.search
-
-      // Check if we're navigating to a different path
-      if (currentPath !== nextPath) {
-        const nextLocation = {
-          pathname: window.location.pathname,
-          search: window.location.search,
-          hash: window.location.hash,
-          state: e.state,
-          key: 'default'
-        } as Location
-
-        if (checkShouldBlock(nextLocation)) {
-          // Prevent navigation by pushing current location back
-          window.history.pushState(null, '', currentPath)
-          setModalVisible(true)
-          pendingNavigationRef.current = nextPath
-        }
-      }
+    if (blocker.state === 'blocked' && !when) {
+      blocker.proceed()
     }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-    }
-  }, [when, location, checkShouldBlock])
+  }, [blocker, when])
 
   const closeModal = () => {
-    setModalVisible(false)
-    pendingNavigationRef.current = null
+    if (blocker.state === 'blocked') blocker.reset()
   }
 
   const handleConfirmNavigationClick = () => {
-    setModalVisible(false)
-    const pendingPath = pendingNavigationRef.current
-    pendingNavigationRef.current = null
-
-    if (pendingPath) {
-      navigate(pendingPath)
-    }
+    if (blocker.state === 'blocked') blocker.proceed()
   }
 
   return (
-    <>
-      <Modal isOpen={modalVisible} onClose={closeModal} size='small'>
-        <ModalHeader>
-          <ModalTitle title={messages.title} />
-        </ModalHeader>
-        <ModalContent>
-          <div className={cn(layoutStyles.col, layoutStyles.gap6)}>
-            <Text variant='body' size='l' textAlign='center'>
-              {messages.body}
-            </Text>
-            <div className={cn(layoutStyles.row, layoutStyles.gap2)}>
-              <Button
-                className={styles.button}
-                variant='secondary'
-                onClick={closeModal}
-              >
-                {messages.cancel}
-              </Button>
-              <Button
-                className={styles.button}
-                variant='destructive'
-                onClick={handleConfirmNavigationClick}
-              >
-                {messages.proceed}
-              </Button>
-            </div>
+    <Modal
+      isOpen={blocker.state === 'blocked'}
+      onClose={closeModal}
+      size='small'
+    >
+      <ModalHeader>
+        <ModalTitle title={messages.title} />
+      </ModalHeader>
+      <ModalContent>
+        <div className={cn(layoutStyles.col, layoutStyles.gap6)}>
+          <Text variant='body' size='l' textAlign='center'>
+            {messages.body}
+          </Text>
+          <div className={cn(layoutStyles.row, layoutStyles.gap2)}>
+            <Button
+              className={styles.button}
+              variant='secondary'
+              onClick={closeModal}
+            >
+              {messages.cancel}
+            </Button>
+            <Button
+              className={styles.button}
+              variant='destructive'
+              onClick={handleConfirmNavigationClick}
+            >
+              {messages.proceed}
+            </Button>
           </div>
-        </ModalContent>
-      </Modal>
-    </>
+        </div>
+      </ModalContent>
+    </Modal>
   )
 }
