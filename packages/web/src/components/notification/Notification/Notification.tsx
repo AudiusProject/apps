@@ -39,6 +39,7 @@ import { TierChangeNotification } from './TierChangeNotification'
 import { TrackAddedToPurchasedAlbumNotification } from './TrackAddedToPurchasedAlbumNotification'
 import { TrackCollaboratorAcceptNotification } from './TrackCollaboratorAcceptNotification'
 import { TrackCollaboratorInviteNotification } from './TrackCollaboratorInviteNotification'
+import { TrendingGenreNotification } from './TrendingGenreNotification'
 import { TrendingTrackNotification } from './TrendingTrackNotification'
 import { TrendingUndergroundNotification } from './TrendingUndergroundNotification'
 import { USDCPurchaseBuyerNotification } from './USDCPurchaseBuyerNotification'
@@ -160,6 +161,9 @@ export const Notification = (props: NotificationProps) => {
       }
       case NotificationType.WeeklyArtistRecap: {
         return <WeeklyArtistRecapNotification notification={notification} />
+      }
+      case NotificationType.TrendingGenre: {
+        return <TrendingGenreNotification notification={notification} />
       }
       case NotificationType.FanRemixContestEndingSoon: {
         return (

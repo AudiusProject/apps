@@ -31,6 +31,11 @@ export const getStatHeadline = (stat: ShareMilestoneStat) => {
         value: stat.playlistName,
         label: messages.milestoneFeaturedLabel
       }
+    case 'genre':
+      return {
+        value: `#${stat.rank}`,
+        label: messages.milestoneGenreLabel(stat.genre)
+      }
   }
 }
 
@@ -123,6 +128,7 @@ export const getXShareText = async (content: ShareContent) => {
           )
         case 'trending':
         case 'underground':
+        case 'genre':
           return messages.milestoneRankShareText(
             title,
             stat.rank,

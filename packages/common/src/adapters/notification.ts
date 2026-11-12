@@ -737,6 +737,24 @@ export const notificationFromSDK = (
             ...formatBaseNotification(notification)
           }
         }
+        if (n.type === 'trending_genre') {
+          const data = n.actions[0].data as unknown as Record<
+            string,
+            string | number
+          >
+          const entityId = OptionalHashId.parse(
+            (data.trackId ?? data.track_id) as string
+          )
+          if (!entityId || !data.genre) return undefined
+          return {
+            type: NotificationType.TrendingGenre,
+            rank: Number(data.rank),
+            genre: String(data.genre),
+            entityType: Entity.Track,
+            entityId,
+            ...formatBaseNotification(notification)
+          }
+        }
         if (n.type === 'remix_contest_update') {
           const data = n.actions[0].data as unknown as Record<string, string>
           return {

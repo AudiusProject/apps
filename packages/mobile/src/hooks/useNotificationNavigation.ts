@@ -27,6 +27,7 @@ import type {
   RemixCosignNotification,
   RemixCosignPushNotification,
   TrendingTrackNotification,
+  TrendingGenreNotification,
   TrendingUndergroundNotification,
   TrendingPushFields,
   ShareMilestoneStat,
@@ -438,6 +439,19 @@ export const useNotificationNavigation = () => {
       },
       [NotificationType.TrendingTrack]: trendingHandler,
       [NotificationType.TrendingUnderground]: trendingHandler,
+      [NotificationType.TrendingGenre]: (
+        notification: TrendingGenreNotification & TrendingPushFields
+      ) => {
+        const trackId = Number(notification.entityId)
+        navigation.navigate('Track', { trackId, canBeUnlisted: false })
+        if (notification.shareCard && notification.rank) {
+          openShareCard(trackId, {
+            kind: 'genre',
+            rank: notification.rank,
+            genre: notification.genre
+          })
+        }
+      },
       [NotificationType.UserSubscription]: (
         notification: UserSubscriptionNotification
       ) => {

@@ -26,7 +26,8 @@ export enum FeatureFlags {
   WEEKLY_ARTIST_RECAP = 'weekly_artist_recap',
   TRACK_FEEDBACK_REQUESTS = 'track_feedback_requests',
   GROUP_MESSAGES = 'group_messages',
-  DASHBOARD_TOP_CITIES = 'dashboard_top_cities'
+  DASHBOARD_TOP_CITIES = 'dashboard_top_cities',
+  TRENDING_GENRE_NOTIFICATION = 'trending_genre_notification'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -44,7 +45,8 @@ export const environmentFlagDefaults: Record<
     [FeatureFlags.WEEKLY_ARTIST_RECAP]: true,
     [FeatureFlags.TRACK_FEEDBACK_REQUESTS]: true,
     [FeatureFlags.GROUP_MESSAGES]: true,
-    [FeatureFlags.DASHBOARD_TOP_CITIES]: true
+    [FeatureFlags.DASHBOARD_TOP_CITIES]: true,
+    [FeatureFlags.TRENDING_GENRE_NOTIFICATION]: true
   },
   production: {}
 }
@@ -93,5 +95,7 @@ export const flagDefaults: FlagDefaults = {
   // Creating group DMs. Existing groups always render.
   [FeatureFlags.GROUP_MESSAGES]: false,
   // Top cities card on the web Artist Dashboard.
-  [FeatureFlags.DASHBOARD_TOP_CITIES]: false
+  [FeatureFlags.DASHBOARD_TOP_CITIES]: false,
+  // Friday tile for artists whose track is top 10 in its genre chart.
+  [FeatureFlags.TRENDING_GENRE_NOTIFICATION]: false
 }
