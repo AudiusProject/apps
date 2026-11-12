@@ -38,8 +38,8 @@ export const useUserbank = (
       })
       return accountInfo.toString()
     },
-    enabled: options?.enabled !== false && !!mint && !!wallet,
-    ...options
+    ...options,
+    enabled: options?.enabled !== false && !!mint && !!wallet
   })
 
   return {

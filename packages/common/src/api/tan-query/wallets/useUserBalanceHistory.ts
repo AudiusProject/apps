@@ -86,7 +86,7 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
         })) ?? []
       )
     },
-    enabled: options?.enabled !== false && !!params.userId,
-    ...options
+    ...options,
+    enabled: options?.enabled !== false && !!params.userId
   })
 }

@@ -32,7 +32,7 @@ export const useManagers = <TResult = UserManagerMetadata[] | undefined>(
       const data = rawData.filter((g: any) => g.grant.isApproved !== false)
       return userManagerListFromSDK(data) as TResult
     },
-    enabled: isValidId(userId),
-    ...options
+    ...options,
+    enabled: isValidId(userId) && options?.enabled !== false
   })
 }

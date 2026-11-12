@@ -57,10 +57,10 @@ export const usePlaylistUpdates = <TResult = PlaylistUpdate[]>(
         playlistUpdateFromSDK
       )
     },
-    enabled: !!currentUserId,
     refetchInterval: PLAYLIST_UPDATES_POLLING_FREQ_MS,
     refetchOnWindowFocus: true,
-    ...options
+    ...options,
+    enabled: !!currentUserId && options?.enabled !== false
   })
 }
 

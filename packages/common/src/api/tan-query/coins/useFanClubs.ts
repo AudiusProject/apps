@@ -133,9 +133,9 @@ export const useFanClubs = <TData = Coin[]>(
       // Otherwise, return the next offset
       return allPages.length * pageSize
     },
-    enabled: options?.enabled !== false,
     select: options?.select ?? ((data) => data.pages.flat() as TData),
-    ...options
+    ...options,
+    enabled: options?.enabled !== false
   })
 }
 

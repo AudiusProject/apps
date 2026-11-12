@@ -91,8 +91,8 @@ export const useDestinationUsdcAccountCheck = (
 
       return { hasUsdcAccount: false, ataCreationFeeUsdc }
     },
-    enabled: isValidAddress && options?.enabled !== false,
     staleTime: 60_000,
-    ...options
+    ...options,
+    enabled: isValidAddress && options?.enabled !== false
   })
 }

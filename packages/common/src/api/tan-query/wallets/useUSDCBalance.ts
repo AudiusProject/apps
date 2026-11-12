@@ -96,12 +96,12 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
         throw e
       }
     },
-    enabled: !!ethAddress,
     // TanStack Query's built-in polling - only poll when isPolling is true
     refetchInterval: isPolling ? pollingInterval : false,
     // Prevent refetching when window regains focus during polling to avoid conflicts
     refetchOnWindowFocus: !isPolling,
-    ...queryOptions
+    ...queryOptions,
+    enabled: !!ethAddress && queryOptions.enabled !== false
   })
 
   // Map TanStack Query states to the Status enum for API compatibility

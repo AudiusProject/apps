@@ -79,7 +79,7 @@ export const useWalletCoins = <TResult = UserCoin[]>(
       }
       return []
     },
-    enabled: options?.enabled !== false && !!params.walletAddress,
-    ...options
+    ...options,
+    enabled: options?.enabled !== false && !!params.walletAddress
   })
 }

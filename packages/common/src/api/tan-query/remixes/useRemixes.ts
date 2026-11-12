@@ -161,8 +161,8 @@ export const useRemixes = (
         type: EntityType.TRACK
       }))
     },
-    enabled: options?.enabled !== false && !!trackId,
-    ...options
+    ...options,
+    enabled: options?.enabled !== false && !!trackId
   })
 
   return queryData
@@ -198,7 +198,7 @@ export const useRemixesCount = (
       dispatch(remixesPageActions.setCount({ count }))
       return count
     },
-    enabled: options?.enabled !== false && !!trackId,
-    ...options
+    ...options,
+    enabled: options?.enabled !== false && !!trackId
   })
 }
