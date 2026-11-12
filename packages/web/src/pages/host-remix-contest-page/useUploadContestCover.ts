@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 
-import { useQueryContext } from '@audius/common/api'
+import { uploadBackdropImage, useQueryContext } from '@audius/common/api'
 
 /**
- * Handles mediorum upload of a contest cover photo. Mirrors the pattern
- * used by useLaunchCoin / useUpdateFanClub for banner images — uploads the
- * file with `img_backdrop` template (wide aspect-ratio) and resolves to a
- * content-node URL the form can persist in `eventData.coverPhotoUrl`.
+ * Handles upload of a contest cover photo. Uses the shared
+ * `uploadBackdropImage` helper (also used for fan club banners), which uploads
+ * the file with the `img_backdrop` template (wide aspect-ratio) and resolves
+ * to a validator node URL the form can persist in `eventData.coverPhotoUrl`.
  */
 export const useUploadContestCover = () => {
   const { audiusSdk } = useQueryContext()
@@ -17,33 +17,7 @@ export const useUploadContestCover = () => {
       setIsUploading(true)
       try {
         const sdk = await audiusSdk()
-        const uploadResponse = await sdk.services.storage
-          .uploadFile({
-            file,
-            metadata: { template: 'img_backdrop' }
-          })
-          .start()
-
-        const results = (uploadResponse.results ?? {}) as Record<string, string>
-        const prioritizedSizes = ['2000x', '1500x', '1280x', '1000x', '640x']
-        let cid: string | undefined
-        for (const size of prioritizedSizes) {
-          if (results[size]) {
-            cid = results[size]
-            break
-          }
-        }
-        if (!cid) cid = Object.values(results)[0]
-        if (!cid) throw new Error('Upload returned no CID')
-
-        const contentNodeEndpoint = await (
-          sdk.services.storage as any
-        ).storageNodeSelector?.getSelectedNode()
-        if (!contentNodeEndpoint) {
-          throw new Error('No content node available')
-        }
-
-        return `${contentNodeEndpoint}/content/${cid}`
+        return await uploadBackdropImage(sdk, file)
       } catch (error) {
         console.error('HostRemixContest', error as Error)
         return null

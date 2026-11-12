@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { Coin } from '~/adapters/coin'
 import { useCurrentUserId } from '~/api'
-import { useQueryContext } from '~/api/tan-query/utils'
+import { uploadBackdropImage, useQueryContext } from '~/api/tan-query/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
 
@@ -41,29 +41,10 @@ export const useUpdateFanClub = () => {
       let bannerImageUrl: string | undefined
 
       if (updateCoinRequest.bannerImageFile) {
-        const uploadResponse = await sdk.services.storage
-          .uploadFile({
-            file: updateCoinRequest.bannerImageFile,
-            metadata: {
-              template: 'img_backdrop'
-            }
-          })
-          .start()
-        const cid = getBannerImageUrl(uploadResponse.results)
-        if (!cid) {
-          throw new Error('Failed to process banner image upload')
-        }
-
-        // Convert CID to content node URL (same pattern as logo_uri from relay service)
-        const contentNodeEndpoint = await (
-          sdk.services.storage as any
-        ).storageNodeSelector?.getSelectedNode()
-
-        if (!contentNodeEndpoint) {
-          throw new Error('No content node available')
-        }
-
-        bannerImageUrl = `${contentNodeEndpoint}/content/${cid}`
+        bannerImageUrl = await uploadBackdropImage(
+          sdk,
+          updateCoinRequest.bannerImageFile
+        )
       } else if (updateCoinRequest.removeBanner) {
         bannerImageUrl = ''
       }
@@ -124,15 +105,4 @@ export const useUpdateFanClub = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.coinByTicker] })
     }
   })
-}
-
-const getBannerImageUrl = (results: Record<string, string> = {}) => {
-  const prioritizedSizes = ['2000x', '1500x', '1280x', '1000x', '640x']
-  for (const size of prioritizedSizes) {
-    if (results[size]) {
-      return results[size]
-    }
-  }
-  const firstResult = Object.values(results)[0]
-  return firstResult
 }
