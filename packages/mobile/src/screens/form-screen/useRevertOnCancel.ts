@@ -13,14 +13,11 @@ export const useRevertOnCancel = (active?: boolean) => {
 
   useEffect(() => {
     if (!active || !initialValues) return
-    const listener = navigation.addListener('beforeRemove', ({ data }) => {
+    // addListener returns an unsubscribe function (not the listener itself)
+    return navigation.addListener('beforeRemove', ({ data }) => {
       if (data.action.type === 'POP') {
         setValues(initialValues)
       }
     })
-
-    return () => {
-      navigation.removeListener('beforeRemove', listener)
-    }
   }, [navigation, initialValues, setValues, active])
 }

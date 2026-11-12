@@ -18,7 +18,7 @@ import {
 } from 'react-native-google-cast'
 import TrackPlayer, { Event } from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
-import { useAsync, usePrevious } from 'react-use'
+import { usePrevious } from 'react-use'
 
 const { setIsCasting } = castActions
 const { getPlaying, getSeek, getCounter } = playbackSelectors
@@ -118,16 +118,23 @@ export const useChromecast = () => {
   }, [prevTrack, track, counter, internalCounter, setInternalCounter])
 
   // Load media when the cast connects
-  useAsync(async () => {
-    if (castState === CastState.CONNECTED) {
+  useEffect(() => {
+    if (castState !== CastState.CONNECTED) return
+    let cancelled = false
+    let activeTrackSubscription:
+      | ReturnType<typeof TrackPlayer.addEventListener>
+      | undefined
+
+    const load = async () => {
       const { position: currentPosition } = await TrackPlayer.getProgress()
       const currentPlaying = await TrackPlayer.getActiveTrack()
+      if (cancelled) return
       if (currentPlaying) {
         loadCast(track, currentPosition, currentPlaying?.url)
       } else {
         // If nothing is currently playing, listen for something to start
         // playing and then load it to cast.
-        TrackPlayer.addEventListener(
+        activeTrackSubscription = TrackPlayer.addEventListener(
           Event.PlaybackActiveTrackChanged,
           async () => {
             const { position: currentPosition } =
@@ -137,6 +144,14 @@ export const useChromecast = () => {
           }
         )
       }
+    }
+    load().catch((e) => {
+      console.error('Failed to load media onto cast device', e)
+    })
+
+    return () => {
+      cancelled = true
+      activeTrackSubscription?.remove()
     }
   }, [castState, track, loadCast])
 

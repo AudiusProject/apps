@@ -38,6 +38,9 @@ const MountStripeSession = ({ session }: { session: OnrampSession }) => {
     }
     session.mount('#stripe-onramp-modal')
     session.addEventListener('onramp_session_updated', handleSessionUpdate)
+    return () => {
+      session.removeEventListener('onramp_session_updated', handleSessionUpdate)
+    }
   }, [session, handleSessionUpdate])
 
   return (
@@ -78,7 +81,11 @@ export const StripeOnRampModal = () => {
           clientSecret: stripeClientSecret
         })
       }
-      initializeStripeSession().then(setSession)
+      initializeStripeSession()
+        .then(setSession)
+        .catch((e) => {
+          console.error('Failed to initialize Stripe onramp session', e)
+        })
     }
   }, [isOpen, stripeClientSecret])
 

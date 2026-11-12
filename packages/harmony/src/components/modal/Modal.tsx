@@ -228,22 +228,21 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
   }, [isOpenProp, modalState])
 
   useEffect(() => {
-    if (isOpen) {
-      if (bgModal) {
-        bgModal.classList.add('bgModalVisible')
-      }
-
-      // Need to prevent safari iOS bounce
-      // overscroll effect by intercepting
-      // touchmove events.
-      if (modalRoot) modalRoot.addEventListener('touchmove', onTouchMove)
-      return () => {
-        if (bgModal) bgModal.classList.remove('bgModalVisible')
-      }
+    if (!isOpen) {
+      if (bgModal) bgModal.classList.remove('bgModalVisible')
+      return
     }
-    if (bgModal) bgModal.classList.remove('bgModalVisible')
-    if (modalRoot) modalRoot.removeEventListener('touchmove', onTouchMove)
-    return () => {}
+
+    if (bgModal) bgModal.classList.add('bgModalVisible')
+
+    // Need to prevent safari iOS bounce
+    // overscroll effect by intercepting
+    // touchmove events.
+    if (modalRoot) modalRoot.addEventListener('touchmove', onTouchMove)
+    return () => {
+      if (bgModal) bgModal.classList.remove('bgModalVisible')
+      if (modalRoot) modalRoot.removeEventListener('touchmove', onTouchMove)
+    }
   }, [isOpen, bgModal, onTouchMove, modalRoot])
 
   const transition = useTransition(isOpenProp, null, {
