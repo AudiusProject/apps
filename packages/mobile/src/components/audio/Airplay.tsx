@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { castActions } from '@audius/common/store'
+import type { EmitterSubscription } from 'react-native'
 import {
   requireNativeComponent,
   NativeEventEmitter,
@@ -36,7 +37,7 @@ export const useAirplay = () => {
  * codebase.
  */
 const Airplay = () => {
-  const listenerRef = useRef<any>(null)
+  const listenerRef = useRef<EmitterSubscription | null>(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -68,7 +69,7 @@ const Airplay = () => {
     )
 
     return () => {
-      listenerRef.current?.stop?.()
+      listenerRef.current?.remove()
     }
   }, [listenerRef, dispatch])
 

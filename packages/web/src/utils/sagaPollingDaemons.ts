@@ -21,33 +21,36 @@ export function* foregroundPollingDaemon(
   const isNativeMobile = yield* getContext('isNativeMobile')
 
   let isBrowserInBackground = false
+  const handleVisibilityChange = () => {
+    isBrowserInBackground = document.hidden
+  }
   if (!isNativeMobile) {
-    document.addEventListener(
-      'visibilitychange',
-      () => {
-        if (document.hidden) {
-          isBrowserInBackground = true
-        } else {
-          isBrowserInBackground = false
-        }
-      },
-      false
-    )
+    document.addEventListener('visibilitychange', handleVisibilityChange, false)
   }
 
-  while (true) {
-    if (!isBrowserInBackground || isElectron() || isNativeMobile) {
-      yield put(action)
-    }
-    if (customDelayTimeConfig && !isNativeMobile) {
-      const currentRoute: string = yield select(getLocationPathname)
-      if (customDelayTimeConfig[currentRoute]) {
-        yield delay(customDelayTimeConfig[currentRoute])
+  try {
+    while (true) {
+      if (!isBrowserInBackground || isElectron() || isNativeMobile) {
+        yield put(action)
+      }
+      if (customDelayTimeConfig && !isNativeMobile) {
+        const currentRoute: string = yield select(getLocationPathname)
+        if (customDelayTimeConfig[currentRoute]) {
+          yield delay(customDelayTimeConfig[currentRoute])
+        } else {
+          yield delay(defaultDelayTimeMs)
+        }
       } else {
         yield delay(defaultDelayTimeMs)
       }
-    } else {
-      yield delay(defaultDelayTimeMs)
+    }
+  } finally {
+    if (!isNativeMobile) {
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibilityChange,
+        false
+      )
     }
   }
 }

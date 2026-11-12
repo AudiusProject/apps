@@ -60,7 +60,7 @@ const initSdk = async () => {
 export const audiusSdk = async () => {
   if (inProgress) {
     await new Promise((resolve) => {
-      sdkEventEmitter.addListener(SDK_LOADED_EVENT_NAME, resolve)
+      sdkEventEmitter.once(SDK_LOADED_EVENT_NAME, resolve)
     })
     return sdkInstance
   } else if (!sdkInstance) {

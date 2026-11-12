@@ -228,6 +228,24 @@ export const Slider = ({
     setDragPercentTouch(e)
   }
 
+  // Detach any in-progress drag listeners if unmounted mid-drag
+  useEffect(() => {
+    return () => {
+      if (mouseMoveRef.current) {
+        document.removeEventListener('mousemove', mouseMoveRef.current)
+      }
+      if (mouseUpRef.current) {
+        document.removeEventListener('mouseup', mouseUpRef.current)
+      }
+      if (touchMoveRef.current) {
+        document.removeEventListener('touchmove', touchMoveRef.current)
+      }
+      if (touchEndRef.current) {
+        document.removeEventListener('touchend', touchEndRef.current)
+      }
+    }
+  }, [])
+
   // Watch interactions to the scrubber and call to animate
   useEffect(() => {
     if (!dragPercent.current) {

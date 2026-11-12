@@ -220,7 +220,7 @@ const useGetLatestMessages = (
 
     // Remove listener on unmount
     return () => handle.remove()
-  })
+  }, [fetchLatestMessagesCallback])
 }
 
 const ChatScreenContent = () => {
