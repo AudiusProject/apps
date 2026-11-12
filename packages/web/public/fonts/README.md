@@ -10,3 +10,7 @@ preloaded by `LandingPage2026.tsx`.
 
 Files under `/fonts/` are served with a one-year immutable cache, so ship a
 changed font under a new filename.
+
+# Avenir
+
+`avenir/` holds the Avenir Next LT Pro woff2 files. The `@font-face` rules and preloads are inlined in `index.html`.
