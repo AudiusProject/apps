@@ -1,12 +1,17 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import { useTrackFileInfo } from '@audius/common/api'
-import { StemCategory, StemUploadWithFile } from '@audius/common/models'
-import { Box, Flex, Text } from '@audius/harmony'
+import {
+  StemCategory,
+  StemUploadWithFile,
+  stemCategoryFriendlyNames
+} from '@audius/common/models'
+import { Box, Checkbox, FilterButton, Flex, Text } from '@audius/harmony'
 import cn from 'classnames'
 
 import { Dropzone } from 'components/upload/Dropzone'
 import { TrackPreview, TrackPreviewProps } from 'components/upload/TrackPreview'
+import zIndex from 'utils/zIndex'
 
 import styles from './StemFilesView.module.css'
 
@@ -18,8 +23,18 @@ const messages = {
   maxCapacity: `Reached upload limit of ${MAX_ROWS} files.`,
   stemTypeHeader: 'Select Stem Type',
   stemTypeDescription: 'Please select a stem type for each of your files.',
-  duplicateStems: 'Some files with duplicate names could not be uploaded.'
+  duplicateStems: 'Some files with duplicate names could not be uploaded.',
+  selectAll: 'Select all',
+  selected: (count: number) => `${count} selected`,
+  setType: 'Set Type'
 }
+
+const stemCategoryOptions = Object.keys(stemCategoryFriendlyNames).map(
+  (value) => ({
+    value: value as StemCategory,
+    label: stemCategoryFriendlyNames[value as StemCategory]
+  })
+)
 
 const makeStemKey = (stem: StemUploadWithFile) => {
   return stem.metadata.track_id ?? stem.metadata.orig_filename
@@ -29,6 +44,7 @@ type StemFilesViewProps = {
   onAddStems: (stems: any) => void
   stems: StemUploadWithFile[]
   onSelectCategory: (category: StemCategory, index: number) => void
+  onSelectCategoryForStems: (category: StemCategory, indices: number[]) => void
   onDeleteStem: (index: number) => void
 }
 
@@ -63,8 +79,47 @@ export const StemFilesView = ({
   onAddStems,
   stems,
   onSelectCategory,
+  onSelectCategoryForStems,
   onDeleteStem
 }: StemFilesViewProps) => {
+  // Multi-select so a batch of stems can be given one type at once.
+  const [selectedKeys, setSelectedKeys] = useState<
+    Set<ReturnType<typeof makeStemKey>>
+  >(() => new Set())
+  const isSelectable = stems.length > 1
+  const selectableIndices = stems
+    .map((stem, i) => (stem.allowCategorySwitch === false ? -1 : i))
+    .filter((i) => i >= 0)
+  const selectedIndices = selectableIndices.filter((i) =>
+    selectedKeys.has(makeStemKey(stems[i]))
+  )
+  const allSelected =
+    selectableIndices.length > 0 &&
+    selectedIndices.length === selectableIndices.length
+
+  const toggleSelected = (stem: StemUploadWithFile) => {
+    const key = makeStemKey(stem)
+    setSelectedKeys((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const toggleAll = () => {
+    setSelectedKeys(
+      allSelected
+        ? new Set()
+        : new Set(selectableIndices.map((i) => makeStemKey(stems[i])))
+    )
+  }
+
+  const handleSetTypeForSelected = (category: StemCategory) => {
+    onSelectCategoryForStems(category, selectedIndices)
+    setSelectedKeys(new Set())
+  }
+
   const renderStemFiles = () => {
     return stems.length > 0 ? (
       <>
@@ -76,6 +131,35 @@ export const StemFilesView = ({
             <Text variant='body'>{messages.stemTypeDescription}</Text>
           </Box>
         </Flex>
+        {isSelectable ? (
+          <Flex alignItems='center' justifyContent='space-between' gap='m'>
+            <Flex alignItems='center' gap='m' pl='l'>
+              <Checkbox
+                checked={selectedIndices.length > 0}
+                indeterminate={selectedIndices.length > 0 && !allSelected}
+                onChange={toggleAll}
+                aria-label={messages.selectAll}
+              />
+              <Text variant='body' size='s' color='subdued'>
+                {selectedIndices.length > 0
+                  ? messages.selected(selectedIndices.length)
+                  : messages.selectAll}
+              </Text>
+            </Flex>
+            <FilterButton
+              label={messages.setType}
+              options={stemCategoryOptions}
+              value={null}
+              onChange={handleSetTypeForSelected}
+              disabled={selectedIndices.length === 0}
+              menuProps={{
+                anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+                transformOrigin: { vertical: 'top', horizontal: 'right' },
+                zIndex: zIndex.STEMS_AND_DOWNLOADS_FILTER_BUTTON_POPUP
+              }}
+            />
+          </Flex>
+        ) : null}
         <Flex
           role='list'
           direction='column'
@@ -96,6 +180,12 @@ export const StemFilesView = ({
               onEditStemCategory={(category) => onSelectCategory(category, i)}
               allowCategorySwitch={stem.allowCategorySwitch}
               allowDelete={stem.allowDelete}
+              isSelected={selectedKeys.has(makeStemKey(stem))}
+              onToggleSelected={
+                isSelectable && stem.allowCategorySwitch !== false
+                  ? () => toggleSelected(stem)
+                  : undefined
+              }
               isStem
             />
           ))}

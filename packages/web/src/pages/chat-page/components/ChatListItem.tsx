@@ -7,6 +7,7 @@ import cn from 'classnames'
 
 import styles from './ChatListItem.module.css'
 import { ChatUser } from './ChatUser'
+import { GroupChatUser } from './GroupChatUser'
 import { useChatCategoryMenuItems } from './useChatCategoryMenuItems'
 
 const messages = {
@@ -35,9 +36,22 @@ export const ChatListItem = memo(function ChatListItem(
     onChatClicked(chat.chat_id)
   }, [onChatClicked, chat])
 
-  if (users.length === 0) {
+  const isGroup = !!chat.is_group
+  if (users.length === 0 && !isGroup) {
     return null
   }
+  const unreadIndicator =
+    chat.unread_message_count > 0 ? (
+      <>
+        <div className={styles.minimizedUnreadIndicatorTag} />
+        <div className={styles.unreadIndicatorTag}>
+          {chat.unread_message_count > 9
+            ? messages.ninePlus
+            : chat.unread_message_count}
+          {messages.new}
+        </div>
+      </>
+    ) : null
   // The row stays a single native button; the options trigger is a sibling
   // (not a nested button) so the row keeps its accessible name and click.
   return (
@@ -51,23 +65,19 @@ export const ChatListItem = memo(function ChatListItem(
         onClick={handleClick}
         aria-current={isCurrentChat ? 'page' : undefined}
       >
-        <ChatUser
-          user={users[0]}
-          textClassName={styles.userText}
-          disableNavigation
-        >
-          {chat.unread_message_count > 0 ? (
-            <>
-              <div className={styles.minimizedUnreadIndicatorTag} />
-              <div className={styles.unreadIndicatorTag}>
-                {chat.unread_message_count > 9
-                  ? messages.ninePlus
-                  : chat.unread_message_count}
-                {messages.new}
-              </div>
-            </>
-          ) : null}
-        </ChatUser>
+        {isGroup ? (
+          <GroupChatUser users={users} textClassName={styles.userText}>
+            {unreadIndicator}
+          </GroupChatUser>
+        ) : (
+          <ChatUser
+            user={users[0]}
+            textClassName={styles.userText}
+            disableNavigation
+          >
+            {unreadIndicator}
+          </ChatUser>
+        )}
         <div className={styles.messagePreview}>{chat.last_message}</div>
       </button>
       {!isCompact && categoryMenuItems.length > 0 ? (

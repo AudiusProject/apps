@@ -2,6 +2,7 @@
 
 // Only imports CSS files, no TypeScript/JavaScript exports
 import './foundations/reset/reset.css'
+import './foundations/typography/avenir.css'
 import './foundations/typography/fonts.css'
 import './foundations/spacing/spacing.css'
 import './foundations/color/primitive.css'

@@ -59,7 +59,10 @@
 }
 
 .typeLabelRow {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--harmony-spacing-l);
 }
 
 .statsDesktop {

@@ -1,11 +1,7 @@
 import type { PrimitiveColors } from './primitive'
 import { primitiveTheme } from './primitive'
 
-// Neue headings are plain text; Classic and Matrix keep the gradient.
-const createSemanticTheme = (
-  primitives: PrimitiveColors,
-  { gradientHeading = false } = {}
-) => ({
+const createSemanticTheme = (primitives: PrimitiveColors) => ({
   text: {
     default: primitives.neutral.n800,
     subdued: primitives.neutral.n400,
@@ -15,9 +11,7 @@ const createSemanticTheme = (
     inverse: primitives.neutral.n950,
 
     // Legacy compatibility
-    heading: gradientHeading
-      ? primitives.special.gradient
-      : primitives.neutral.n800,
+    heading: primitives.special.gradient,
     active: primitives.primary.p300,
     white: primitives.special.white,
     staticWhite: primitives.static.staticWhite,
@@ -37,9 +31,7 @@ const createSemanticTheme = (
     inverse: primitives.static.staticWhite,
 
     // Legacy compatibility
-    heading: gradientHeading
-      ? primitives.special.gradient
-      : primitives.neutral.n800,
+    heading: primitives.special.gradient,
     active: primitives.primary.p300,
     white: primitives.special.white,
     staticWhite: primitives.static.staticWhite,
@@ -88,23 +80,13 @@ const createSemanticTheme = (
 export const semanticTheme = {
   defaultLight: createSemanticTheme(primitiveTheme.defaultLight),
   defaultDark: createSemanticTheme(primitiveTheme.defaultDark),
-  classicLight: createSemanticTheme(primitiveTheme.classicLight, {
-    gradientHeading: true
-  }),
-  classicDark: createSemanticTheme(primitiveTheme.classicDark, {
-    gradientHeading: true
-  }),
-  matrix: createSemanticTheme(primitiveTheme.matrix, {
-    gradientHeading: true
-  }),
+  classicLight: createSemanticTheme(primitiveTheme.classicLight),
+  classicDark: createSemanticTheme(primitiveTheme.classicDark),
+  matrix: createSemanticTheme(primitiveTheme.matrix),
   /** @deprecated Use classicLight */
-  day: createSemanticTheme(primitiveTheme.day, {
-    gradientHeading: true
-  }),
+  day: createSemanticTheme(primitiveTheme.day),
   /** @deprecated Use classicDark */
-  dark: createSemanticTheme(primitiveTheme.dark, {
-    gradientHeading: true
-  })
+  dark: createSemanticTheme(primitiveTheme.dark)
 }
 
 export type SemanticColors = typeof semanticTheme.day

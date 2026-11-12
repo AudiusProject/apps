@@ -1,5 +1,8 @@
 import type { CommonState } from '@audius/common/store'
-import { tokenDashboardPageSelectors } from '@audius/common/store'
+import {
+  tokenDashboardPageActions,
+  tokenDashboardPageSelectors
+} from '@audius/common/store'
 import { waitForValue } from '@audius/common/utils'
 import bs58 from 'bs58'
 import { addWalletToUser } from 'common/store/pages/token-dashboard/addWalletToUser'
@@ -12,6 +15,11 @@ import { setConnectionStatus, signMessage } from '../slice'
 import type { SignMessageAction } from '../types'
 import { decryptPayload } from '../utils'
 const { getError, getConfirmingWallet } = tokenDashboardPageSelectors
+const { updateWalletError } = tokenDashboardPageActions
+
+const messages = {
+  signError: 'Could not verify your wallet. Please try again.'
+}
 
 type SignMessagePayload = {
   signature: string
@@ -21,17 +29,16 @@ type SignMessagePayload = {
 // TODO-NOW: verify on mobile to the best of ability
 function* signMessageAsync(action: SignMessageAction) {
   const { wallet, chain } = yield* select(getConfirmingWallet)
-  if (!wallet || !chain) return
+  if (!wallet || !chain) throw new Error('No wallet being confirmed')
 
   switch (action.payload.connectionType) {
     case null:
-      console.error('No connection type set')
-      break
+      throw new Error('No connection type set')
     case 'phantom': {
       const { data, nonce } = action.payload
       const sharedSecret = yield* select(getSharedSecret)
-      if (!sharedSecret) return
-      if (!nonce) return
+      if (!sharedSecret) throw new Error('Missing shared secret')
+      if (!nonce) throw new Error('Missing nonce')
 
       const { signature }: SignMessagePayload = decryptPayload(
         data,
@@ -96,6 +103,10 @@ export function* watchSignMessage() {
   yield* takeEvery(signMessage.type, function* (action: SignMessageAction) {
     try {
       yield* call(signMessageAsync, action)
-    } catch {}
+    } catch (e) {
+      console.error('Failed to sign wallet message', e)
+      // Clears the Connecting status and shows a toast
+      yield* put(updateWalletError({ errorMessage: messages.signError }))
+    }
   })
 }

@@ -397,7 +397,8 @@ export enum ShareSource {
   NOW_PLAYING = 'now playing',
   OVERFLOW = 'overflow',
   LEFT_NAV = 'left-nav',
-  UPLOAD = 'upload'
+  UPLOAD = 'upload',
+  NOTIFICATION = 'notification'
 }
 export enum RepostSource {
   TILE = 'tile',
@@ -779,6 +780,7 @@ export type ExploreSectionName =
   | 'Fan Clubs'
   | 'Featured Remix Contests'
   | 'Underground Trending Tracks'
+  | 'Looking for Feedback'
   | 'Trending Genres'
   | 'Artist Spotlight'
   | 'Label Spotlight'

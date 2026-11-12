@@ -287,3 +287,18 @@
 .error svg path {
   fill: var(--harmony-red);
 }
+
+.senderName {
+  /* line up with the bubble, past the avatar */
+  padding-left: calc(var(--harmony-unit-8) + var(--harmony-unit-2));
+}
+
+.senderAvatar {
+  flex-shrink: 0;
+  width: var(--harmony-unit-8);
+  height: var(--harmony-unit-8);
+}
+
+.groupMessage .meta {
+  padding-left: calc(var(--harmony-unit-8) + var(--harmony-unit-2));
+}

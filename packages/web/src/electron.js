@@ -1,5 +1,7 @@
 const fs = require('fs')
 const path = require('path')
+const { Readable } = require('stream')
+const { pipeline } = require('stream/promises')
 const url = require('url')
 const util = require('util')
 const stat = util.promisify(fs.stat)
@@ -16,7 +18,6 @@ const {
 } = require('electron')
 const logger = require('electron-log')
 const { autoUpdater } = require('electron-updater')
-const fetch = require('node-fetch')
 const semver = require('semver')
 const tar = require('tar')
 
@@ -156,17 +157,20 @@ const getNewestBuildDirectory = () => {
 const downloadWebUpdateAndNotify = async (newVersion) => {
   const newBuildPath = appDataPath(`${buildName}.tar.gz`)
   const webUpdateDir = appDataPath('web-update')
-  const fileStream = fs.createWriteStream(newBuildPath)
 
-  // Fetch the build tar.gz file and write to file
+  // Fetch the build tar.gz file and write to file. Native fetch returns a web
+  // ReadableStream, so convert it to a Node stream to pipe it to disk.
   const data = await fetch(
     `https://s3.us-west-1.amazonaws.com/${s3Bucket}/${buildName}.tar.gz`
   )
-  await new Promise((resolve, reject) => {
-    data.body.pipe(fileStream)
-    data.body.on('error', reject)
-    fileStream.on('finish', resolve)
-  })
+  if (!data.ok || !data.body) {
+    logger.error(`Failed to download web update: ${data.status}`)
+    return
+  }
+  await pipeline(
+    Readable.fromWeb(data.body),
+    fs.createWriteStream(newBuildPath)
+  )
 
   // Create web-update directory and untar the build inside
   if (!fs.existsSync(webUpdateDir)) fs.mkdirSync(webUpdateDir)

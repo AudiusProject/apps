@@ -183,13 +183,6 @@ registerLazyModal('DeleteTrackConfirmation', () =>
     default: m.DeleteTrackConfirmationModal
   }))
 )
-registerLazyModal('DownloadTrackArchive', () =>
-  import(
-    'components/download-track-archive-modal/DownloadTrackArchiveModal'
-  ).then((m) => ({
-    default: m.DownloadTrackArchiveModal
-  }))
-)
 registerLazyModal('DuplicateAddConfirmation', () =>
   import(
     'components/duplicate-add-confirmation-modal/DuplicateAddConfirmationModal'

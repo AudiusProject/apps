@@ -47,6 +47,9 @@ export enum NotificationType {
   CommentReaction = 'CommentReaction',
   ListenStreakReminder = 'ListenStreakReminder',
   WeeklyRotation = 'WeeklyRotation',
+  WeeklyRotationFeatured = 'WeeklyRotationFeatured',
+  WeeklyArtistRecap = 'WeeklyArtistRecap',
+  TrendingGenre = 'TrendingGenre',
   ArtistRemixContestEnded = 'ArtistRemixContestEnded',
   ArtistRemixContestEndingSoon = 'ArtistRemixContestEndingSoon',
   ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions',
@@ -96,6 +99,9 @@ export enum PushNotificationType {
   CommentReaction = 'CommentReaction',
   ListenStreakReminder = 'ListenStreakReminder',
   WeeklyRotation = 'WeeklyRotation',
+  WeeklyRotationFeatured = 'WeeklyRotationFeatured',
+  WeeklyArtistRecap = 'WeeklyArtistRecap',
+  TrendingGenre = 'TrendingGenre',
   FanClubTextPost = 'FanClubTextPost'
 }
 
@@ -343,6 +349,9 @@ export type MilestoneListenPushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneListen
+  /** Set on pushes that should open the milestone stat card */
+  shareCard?: boolean
+  threshold?: number
   metadata: {
     threshold: number
     entity_type: Entity
@@ -456,6 +465,9 @@ export type TrendingTrackNotification = BaseNotification & {
   entityId: ID
 }
 
+/** Trending pushes carry `shareCard` when tapping should open the stat card */
+export type TrendingPushFields = { shareCard?: boolean }
+
 export type TrendingUndergroundNotification = BaseNotification & {
   type: NotificationType.TrendingUnderground
   rank: number
@@ -504,6 +516,12 @@ export type TrackAddedToPurchasedAlbumNotification = BaseNotification & {
   trackId: ID
   playlistId: ID
   playlistOwnerId: ID
+}
+
+/** Editorial playlist pushes carry these when tapping should open the stat card */
+export type AddTrackToPlaylistPushFields = {
+  shareCard?: boolean
+  trackId?: ID
 }
 
 export type AddTrackToPlaylistPushNotification = {
@@ -613,6 +631,61 @@ export type WeeklyRotationNotification = BaseNotification & {
   week: number
 }
 
+/**
+ * Sent to an artist on the Wednesday rollover: how many listeners' Weekly
+ * Rotations included their tracks in the period that just closed.
+ */
+export type WeeklyRotationFeaturedNotification = BaseNotification & {
+  type: NotificationType.WeeklyRotationFeatured
+  entityType: Entity.Track
+  /** The most-featured track; the only one when trackCount is 1. */
+  entityId: ID
+  trackCount: number
+  rotationCount: number
+  /** The rotation period reported, as an ISO (year, week) pair. */
+  year: number
+  week: number
+}
+
+/**
+ * Push payload for WeeklyRotationFeatured: a Track when one track was
+ * featured, otherwise the artist (User) whose profile the tap opens.
+ */
+export type WeeklyRotationFeaturedPushNotification = {
+  type: NotificationType.WeeklyRotationFeatured
+  entityType: Entity.Track | Entity.User
+  entityId: ID
+}
+
+/**
+ * Sent to an artist on the Wednesday rollover with their numbers for the week
+ * that just closed. topCity is missing when no play had a city.
+ */
+export type WeeklyArtistRecapNotification = BaseNotification & {
+  type: NotificationType.WeeklyArtistRecap
+  playCount: number
+  followerCount: number
+  saveCount: number
+  /** Saves from listeners whose Weekly Rotation included the track. */
+  rotationSaveCount: number
+  topCity?: string
+  /** The week reported, as a Weekly Rotation ISO (year, week) pair. */
+  year: number
+  week: number
+}
+
+/**
+ * Sent on Friday when the artist's track is in the top 10 of its genre's
+ * weekly trending chart.
+ */
+export type TrendingGenreNotification = BaseNotification & {
+  type: NotificationType.TrendingGenre
+  rank: number
+  genre: string
+  entityType: Entity.Track
+  entityId: ID
+}
+
 export type FanRemixContestStartedNotification = BaseNotification & {
   type: NotificationType.FanRemixContestStarted
   entityId: ID
@@ -719,6 +792,9 @@ export type Notification =
   | CommentReactionNotification
   | ListenStreakReminderNotification
   | WeeklyRotationNotification
+  | WeeklyRotationFeaturedNotification
+  | WeeklyArtistRecapNotification
+  | TrendingGenreNotification
   | ArtistRemixContestEndedNotification
   | FanRemixContestEndedNotification
   | FanRemixContestWinnersSelectedNotification

@@ -1,6 +1,5 @@
 import { createPublicClient, createWalletClient, http, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { mainnet } from 'viem/chains'
 
 import { ResolveApi } from './api/ResolveApi'
 import { AlbumsApi } from './api/albums/AlbumsApi'
@@ -64,6 +63,7 @@ import {
 import { SolanaWallet } from './solanaWallet'
 import { SdkConfig, SdkConfigSchema, ServicesContainer } from './types'
 import fetch from './utils/fetch'
+import { mainnet } from './utils/mainnet'
 
 const ensureHex = (str: string): Hex =>
   str.startsWith('0x') ? (str as Hex) : `0x${str}`

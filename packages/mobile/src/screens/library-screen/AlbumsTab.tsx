@@ -20,6 +20,7 @@ import { makeStyles } from 'app/styles'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
 import { useLibraryCollections } from './useLibraryCollections'
+import { useLibraryTabChrome } from './useLibraryTabChrome'
 
 const { getCategory } = libraryPageSelectors
 const { getIsReachable } = reachabilitySelectors
@@ -44,6 +45,7 @@ const useStyles = makeStyles(() => ({
 
 export const AlbumsTab = () => {
   const styles = useStyles()
+  const { headerInset, onScroll } = useLibraryTabChrome()
   const [filterValue, setFilterValue] = useState('')
   const [debouncedFilterValue, setDebouncedFilterValue] = useState('')
 
@@ -94,24 +96,33 @@ export const AlbumsTab = () => {
   return (
     <View style={styles.root}>
       {noItemsLoaded ? (
-        !isReachable ? (
-          <NoTracksPlaceholder />
-        ) : (
-          <EmptyTileCTA message={emptyTabText} />
-        )
+        <View style={{ paddingTop: headerInset }}>
+          {!isReachable ? (
+            <NoTracksPlaceholder />
+          ) : (
+            <EmptyTileCTA message={emptyTabText} />
+          )}
+        </View>
       ) : (
         <>
-          <OfflineContentBanner />
-          <FilterInput
-            value={filterValue}
-            placeholder={messages.inputPlaceholder}
-            onChangeText={(text) => {
-              setFilterValue(text)
-              handleChangeFilterValue(text)
-            }}
-          />
           <View style={styles.list}>
             <CollectionList
+              ListHeaderComponent={
+                <>
+                  <OfflineContentBanner />
+                  <FilterInput
+                    value={filterValue}
+                    placeholder={messages.inputPlaceholder}
+                    onChangeText={(text) => {
+                      setFilterValue(text)
+                      handleChangeFilterValue(text)
+                    }}
+                  />
+                </>
+              }
+              contentContainerStyle={{ paddingTop: headerInset }}
+              onScroll={onScroll}
+              scrollEventThrottle={16}
               collectionType='album'
               onEndReached={handleEndReached}
               onEndReachedThreshold={0.5}

@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react'
+import { useCallback, useRef } from 'react'
 
 import { useTheme } from '@emotion/react'
 import { Pressable, View } from 'react-native'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming
+} from 'react-native-reanimated'
 
 import { Skeleton } from '../Skeleton'
 import { Text } from '../Text/Text'
@@ -10,8 +18,17 @@ export const TRACK_ROW_HEIGHT = 64
 const ARTWORK_SIZE = 48
 const RANK_WIDTH = 20
 
+// Press settles the row slightly into the page. A long-press dips further
+// and springs back, marking the moment the actions open.
+const PRESS_SCALE = 0.985
+const LONG_PRESS_SCALE = 0.96
+const releaseSpring = { damping: 18, stiffness: 320, mass: 0.6 }
+const popSpring = { damping: 11, stiffness: 280, mass: 0.7 }
+
 // Skeleton fills its parent absolutely by default; rows lay it out inline.
 const skeletonStyle = { position: 'relative' as const, borderRadius: 4 }
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 export type TrackRowProps = {
   /** 1-based position shown before the artwork. Omit for unranked lists. */
@@ -19,6 +36,8 @@ export type TrackRowProps = {
   /** 48px square artwork, including any playing overlay. */
   artwork?: ReactNode
   title?: string
+  /** Small element after the title, such as a download indicator. */
+  titleAdornment?: ReactNode
   /** Artist line under the title. */
   subtitle?: ReactNode
   /** Shown in place of the duration, e.g. a price button on a locked track. */
@@ -43,6 +62,7 @@ export const TrackRow = (props: TrackRowProps) => {
     rank,
     artwork,
     title,
+    titleAdornment,
     subtitle,
     status,
     duration,
@@ -54,7 +74,42 @@ export const TrackRow = (props: TrackRowProps) => {
     onLongPress,
     accessibilityLabel
   } = props
-  const { color, spacing } = useTheme()
+  const { color, spacing, motion } = useTheme()
+
+  const scale = useSharedValue(1)
+  const highlight = useSharedValue(0)
+  const longPressFiredRef = useRef(false)
+
+  const handlePressIn = useCallback(() => {
+    longPressFiredRef.current = false
+    scale.value = withTiming(PRESS_SCALE, motion.press)
+    highlight.value = withTiming(1, motion.press)
+  }, [scale, highlight, motion.press])
+
+  const handlePressOut = useCallback(() => {
+    highlight.value = withTiming(0, motion.expressive)
+    // The long-press pop already ends at rest; don't cut it short.
+    if (longPressFiredRef.current) return
+    scale.value = withSpring(1, releaseSpring)
+  }, [scale, highlight, motion.expressive])
+
+  const handleLongPress = useCallback(() => {
+    if (!onLongPress) return
+    longPressFiredRef.current = true
+    scale.value = withSequence(
+      withTiming(LONG_PRESS_SCALE, motion.quick),
+      withSpring(1, popSpring)
+    )
+    highlight.value = withTiming(0, motion.calm)
+    onLongPress()
+  }, [onLongPress, scale, highlight, motion.quick, motion.calm])
+
+  const rowStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }]
+  }))
+  const highlightStyle = useAnimatedStyle(() => ({
+    opacity: highlight.value
+  }))
 
   const rankCell =
     rank === undefined ? null : (
@@ -116,9 +171,11 @@ export const TrackRow = (props: TrackRowProps) => {
   }
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
-      onLongPress={onLongPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onLongPress={onLongPress ? handleLongPress : undefined}
       delayLongPress={300}
       accessibilityRole='button'
       accessibilityLabel={accessibilityLabel}
@@ -128,18 +185,34 @@ export const TrackRow = (props: TrackRowProps) => {
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === 'longpress') onLongPress?.()
       }}
-      style={({ pressed }) => ({
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.m,
-        minHeight: TRACK_ROW_HEIGHT,
-        paddingVertical: spacing.s,
-        paddingLeft,
-        paddingRight: spacing.l,
-        backgroundColor: pressed ? color.background.surface1 : undefined,
-        opacity: isDisabled ? 0.5 : 1
-      })}
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.m,
+          minHeight: TRACK_ROW_HEIGHT,
+          paddingVertical: spacing.s,
+          paddingLeft,
+          paddingRight: spacing.l,
+          opacity: isDisabled ? 0.5 : 1
+        },
+        rowStyle
+      ]}
     >
+      <Animated.View
+        pointerEvents='none'
+        style={[
+          {
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: color.background.surface2
+          },
+          highlightStyle
+        ]}
+      />
       {rankCell}
       <View
         style={{
@@ -153,15 +226,25 @@ export const TrackRow = (props: TrackRowProps) => {
       </View>
       <View style={{ flex: 1, minWidth: 0, justifyContent: 'center' }}>
         {context}
-        <Text
-          variant='body'
-          size='l'
-          strength='strong'
-          color={isActive ? 'accent' : 'default'}
-          numberOfLines={1}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs
+          }}
         >
-          {title}
-        </Text>
+          <Text
+            variant='body'
+            size='l'
+            strength='strong'
+            color={isActive ? 'accent' : 'default'}
+            numberOfLines={1}
+            style={{ flexShrink: 1 }}
+          >
+            {title}
+          </Text>
+          {titleAdornment}
+        </View>
         {subtitle}
       </View>
       {status ??
@@ -170,6 +253,6 @@ export const TrackRow = (props: TrackRowProps) => {
             {duration}
           </Text>
         ) : null)}
-    </Pressable>
+    </AnimatedPressable>
   )
 }

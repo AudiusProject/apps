@@ -33,16 +33,12 @@ import {
   PlainButton,
   Paper,
   Divider,
-  spacing,
   Button,
-  LoadingSpinner
+  LoadingSpinner,
+  spacing
 } from '@audius/harmony-native'
-import {
-  TokenIcon,
-  Screen,
-  ScreenContent,
-  FixedFooter
-} from 'app/components/core'
+import { TokenIcon, Screen, ScreenContent } from 'app/components/core'
+import { ScreenFooterLayout } from 'app/components/core/ScreenFooterLayout'
 import { TextAreaField } from 'app/components/fields/TextAreaField'
 import { TextField } from 'app/components/fields/TextField'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
@@ -221,7 +217,9 @@ const SocialLinksSection = () => {
             <TextField
               key={index}
               name={`socialLinks.${index}`}
-              label={`${coinDetailsMessages.editCoinDetails.socialLink} ${index + 1}`}
+              label={`${coinDetailsMessages.editCoinDetails.socialLink} ${
+                index + 1
+              }`}
               placeholder={coinDetailsMessages.editCoinDetails.pasteLink}
               hideLabel
               value={link}
@@ -381,67 +379,71 @@ export const EditCoinDetailsScreen = () => {
       {({ handleSubmit: formikSubmit }) => (
         <Screen title={coin?.name ?? `$${coin?.ticker}`} topbarRight={null}>
           <ScreenContent>
-            <KeyboardAwareScrollView keyboardShouldPersistTaps='handled'>
-              <Paper
-                borderRadius='l'
-                shadow='far'
-                border='default'
-                mh='s'
-                mt='2xl'
-                mb='5xl'
-              >
-                {/* Banner Image Section */}
-                <BannerImageSection
-                  bannerImageUrl={bannerPreviewUrl}
-                  defaultBannerImageUrl={defaultBannerImageUrl ?? null}
-                  onFileSelect={handleBannerFileSelect}
-                  isProcessing={isProcessingBanner}
-                  error={bannerError}
-                />
-
-                <Divider />
-
-                <Flex row alignItems='center' gap='l' ph='l' pv='xl'>
-                  <TokenIcon logoURI={coin?.logoUri} size='4xl' />
-                  <Flex>
-                    <Text variant='heading' size='s'>
-                      {coin?.name}
-                    </Text>
-                    <Text variant='title' size='l' color='subdued'>
-                      {`$${coin?.ticker}`}
-                    </Text>
-                  </Flex>
-                </Flex>
-
-                <Divider />
-
-                <Flex gap='s' p='xl'>
-                  <Text variant='title' size='m'>
-                    {coinDetailsMessages.editCoinDetails.description}
-                  </Text>
-                  <TextAreaField
-                    name='description'
-                    label={''}
-                    placeholder={
-                      coinDetailsMessages.editCoinDetails.descriptionPlaceholder
-                    }
-                    maxLength={MAX_COIN_DESCRIPTION_LENGTH}
-                    style={{ paddingHorizontal: 0 }}
+            <ScreenFooterLayout
+              footer={
+                <Button onPress={() => formikSubmit()} fullWidth>
+                  {coinDetailsMessages.editCoinDetails.saveChanges}
+                </Button>
+              }
+            >
+              <KeyboardAwareScrollView keyboardShouldPersistTaps='handled'>
+                <Paper
+                  borderRadius='l'
+                  shadow='far'
+                  border='default'
+                  mh='s'
+                  mt='2xl'
+                  mb='l'
+                >
+                  {/* Banner Image Section */}
+                  <BannerImageSection
+                    bannerImageUrl={bannerPreviewUrl}
+                    defaultBannerImageUrl={defaultBannerImageUrl ?? null}
+                    onFileSelect={handleBannerFileSelect}
+                    isProcessing={isProcessingBanner}
+                    error={bannerError}
                   />
-                </Flex>
 
-                <Divider />
+                  <Divider />
 
-                <Flex p='xl'>
-                  <SocialLinksSection />
-                </Flex>
-              </Paper>
-            </KeyboardAwareScrollView>
-            <FixedFooter keyboardShowingOffset={spacing.unit24} avoidKeyboard>
-              <Button onPress={() => formikSubmit()} fullWidth>
-                {coinDetailsMessages.editCoinDetails.saveChanges}
-              </Button>
-            </FixedFooter>
+                  <Flex row alignItems='center' gap='l' ph='l' pv='xl'>
+                    <TokenIcon logoURI={coin?.logoUri} size='4xl' />
+                    <Flex>
+                      <Text variant='heading' size='s'>
+                        {coin?.name}
+                      </Text>
+                      <Text variant='title' size='l' color='subdued'>
+                        {`$${coin?.ticker}`}
+                      </Text>
+                    </Flex>
+                  </Flex>
+
+                  <Divider />
+
+                  <Flex gap='s' p='xl'>
+                    <Text variant='title' size='m'>
+                      {coinDetailsMessages.editCoinDetails.description}
+                    </Text>
+                    <TextAreaField
+                      name='description'
+                      label={''}
+                      placeholder={
+                        coinDetailsMessages.editCoinDetails
+                          .descriptionPlaceholder
+                      }
+                      maxLength={MAX_COIN_DESCRIPTION_LENGTH}
+                      style={{ paddingHorizontal: 0 }}
+                    />
+                  </Flex>
+
+                  <Divider />
+
+                  <Flex p='xl'>
+                    <SocialLinksSection />
+                  </Flex>
+                </Paper>
+              </KeyboardAwareScrollView>
+            </ScreenFooterLayout>
           </ScreenContent>
         </Screen>
       )}

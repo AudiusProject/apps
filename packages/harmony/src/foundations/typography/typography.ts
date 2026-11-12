@@ -1,12 +1,5 @@
 export const typography = {
-  /**
-   * UI text face. Loaded by the app (web: @fontsource-variable/inter). Apps on
-   * harmony.css without Inter fall back to its bundled Avenir.
-   */
-  font: "'Inter Variable', Inter, 'Avenir Next LT Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  /** Display face for page titles and display text. */
-  fontDisplay:
-    "'Bricolage Grotesque Variable', 'Bricolage Grotesque', 'Inter Variable', Inter, 'Avenir Next LT Pro', sans-serif",
+  font: "'Avenir Next LT Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   weight: {
     ultraLight: 100,
     thin: 200,

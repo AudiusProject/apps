@@ -5,6 +5,7 @@ import { useEffectOnce } from 'react-use'
 
 import { IconClose, IconWallet } from '@audius/harmony-native'
 import { Text, Screen, ScreenContent } from 'app/components/core'
+import { WalletHelpLink } from 'app/components/wallet-help-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 
@@ -83,6 +84,7 @@ export const ExternalWalletsScreen = () => {
           </View>
           <ConnectNewWalletButton />
           <LinkedWallets />
+          <WalletHelpLink mt='xl' />
         </View>
       </ScreenContent>
     </Screen>

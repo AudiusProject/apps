@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { useIsManagedAccount } from '@audius/common/hooks'
 import { chatSelectors } from '@audius/common/store'
 import { useSelector } from 'react-redux'
 
@@ -12,6 +13,10 @@ const { getHasUnreadMessages, getUnreadMessagesCount } = chatSelectors
 export const MessagesNavItem = () => {
   const hasUnreadMessages = useSelector(getHasUnreadMessages)
   const unreadMessagesCount = useSelector(getUnreadMessagesCount)
+  const isManagedAccount = useIsManagedAccount()
+
+  // DMs aren't available while managing another account
+  if (isManagedAccount) return null
 
   return (
     <LeftNavLink

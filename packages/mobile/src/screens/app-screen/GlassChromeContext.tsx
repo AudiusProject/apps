@@ -10,7 +10,9 @@ import {
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import {
+  Easing,
   useAnimatedReaction,
+  useDerivedValue,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
@@ -32,8 +34,8 @@ type GlassChromeContextValue = {
   directionAnchorY: SharedValue<number>
 }
 
-/** Avatar row (40) plus `spacing(3)` padding top and bottom. */
-const ESTIMATED_HEADER_ROW_HEIGHT = 64
+/** Avatar/title row: 32 line height plus 12 above and below. */
+const ESTIMATED_HEADER_ROW_HEIGHT = 56
 
 /**
  * Distance (px) the user must move in one direction before the chrome flips
@@ -43,12 +45,25 @@ const ESTIMATED_HEADER_ROW_HEIGHT = 64
 const DIRECTION_THRESHOLD = 6
 
 /**
- * Below this offset the chrome is always shown, so the top of a list never
- * opens with the header already dismissed.
+ * A compact pill fades in from this far before its in-flow row has scrolled
+ * away until this far after, so the two barely overlap.
  */
-const ALWAYS_SHOWN_OFFSET = 40
+const COMPACT_FADE_BEFORE = 20
+const COMPACT_FADE_AFTER = 8
 
-const HIDE_DURATION_MS = 180
+/** 0..1 progress of a compact pill whose in-flow row is gone at `end`. */
+const compactFadeProgress = (scrollY: number, end: number) => {
+  'worklet'
+  const start = end - COMPACT_FADE_BEFORE
+  const t = (scrollY - start) / (COMPACT_FADE_BEFORE + COMPACT_FADE_AFTER)
+  return Math.min(1, Math.max(0, t))
+}
+
+// Long enough for the tab bar's collapse to read as a morph rather than a cut.
+const HIDE_TIMING = {
+  duration: 380,
+  easing: Easing.bezier(0.4, 0, 0.2, 1)
+}
 
 const GlassChromeContext = createContext<GlassChromeContextValue | undefined>(
   undefined
@@ -62,8 +77,7 @@ const GlassChromeContext = createContext<GlassChromeContextValue | undefined>(
  * so content scrolls behind the glass. Screens pad their own scrollable
  * content by these heights: the root header plus an optional
  * `FloatingSubHeader` row. Heights are measured because the safe-area inset
- * varies per device and `OtaUpdateBanner` adds a row when an update is
- * pending.
+ * varies per device.
  *
  * Mounted per tab stack in `AppTabScreen`.
  */
@@ -81,25 +95,26 @@ export const GlassChromeProvider = (props: { children: ReactNode }) => {
   const scrollY = useSharedValue(0)
   const hidden = useSharedValue(0)
   const directionAnchorY = useSharedValue(0)
+  const headerRowHeight = headerHeight - insets.top
 
-  // Scrolling down hides the chrome and scrolling up brings it back. Near the
-  // top, and during rubber-band overscroll (negative offset), it stays shown.
+  // Scrolling down hides the chrome and scrolling up brings it back. Until the
+  // title row has scrolled away, and during rubber-band overscroll (negative
+  // offset), it stays shown.
   useAnimatedReaction(
     () => scrollY.value,
     (current, previous) => {
       if (previous === null) return
-      if (current < ALWAYS_SHOWN_OFFSET) {
-        hidden.value = withTiming(0, { duration: HIDE_DURATION_MS })
+      if (current < headerRowHeight) {
+        hidden.value = withTiming(0, HIDE_TIMING)
         directionAnchorY.value = current
         return
       }
       const delta = current - directionAnchorY.value
       if (Math.abs(delta) < DIRECTION_THRESHOLD) return
-      hidden.value = withTiming(delta > 0 ? 1 : 0, {
-        duration: HIDE_DURATION_MS
-      })
+      hidden.value = withTiming(delta > 0 ? 1 : 0, HIDE_TIMING)
       directionAnchorY.value = current
-    }
+    },
+    [headerRowHeight]
   )
 
   // Guard against re-render loops: onLayout fires on every layout pass, and
@@ -157,6 +172,9 @@ const useGlassChrome = () => {
 /** Height of the floating root header alone. */
 export const useRootHeaderHeight = () => useGlassChrome().headerHeight
 
+/** Height of the floating sub-header row alone, 0 when there is none. */
+export const useSubHeaderHeight = () => useGlassChrome().subHeaderHeight
+
 /**
  * Total height of the floating glass stack (header + sub-header). This is the
  * top padding a screen's scrollable content needs so it starts below the glass
@@ -182,6 +200,42 @@ export const useGlassScrollY = () => useGlassChrome().scrollY
  * moving in opposite directions.
  */
 export const useChromeHiddenProgress = () => useGlassChrome().hidden
+
+/**
+ * How far the header stack (root header + sub-header) has scrolled up with
+ * the list, capped once it is fully off screen. Negative during overscroll so
+ * it follows the rubber band.
+ */
+export const useHeaderScrollOffset = () => {
+  const scrollY = useGlassScrollY()
+  const { headerHeight, subHeaderHeight } = useGlassChrome()
+  const max = headerHeight + subHeaderHeight
+  return useDerivedValue(() => Math.min(scrollY.value, max))
+}
+
+/**
+ * 0 while the title row is on screen, 1 once it has scrolled away. Drives the
+ * compact title pill, which finishes forming as the row leaves.
+ */
+export const useCompactTitleProgress = () => {
+  const scrollY = useGlassScrollY()
+  const { headerHeight } = useGlassChrome()
+  const insets = useSafeAreaInsets()
+  const end = headerHeight - insets.top
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
+}
+
+/**
+ * Same as `useCompactTitleProgress`, but for the compact controls under the
+ * pill, which form as the in-flow sub-header row leaves.
+ */
+export const useCompactControlsProgress = () => {
+  const scrollY = useGlassScrollY()
+  const { headerHeight, subHeaderHeight } = useGlassChrome()
+  const insets = useSafeAreaInsets()
+  const end = headerHeight - insets.top + subHeaderHeight
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
+}
 
 /**
  * Points the chrome at a list that is already scrolled to `offset`. Call when

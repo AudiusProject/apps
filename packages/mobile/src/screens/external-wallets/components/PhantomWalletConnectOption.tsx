@@ -14,6 +14,11 @@ import { buildUrl, serializeKeyPair } from 'app/store/wallet-connect/utils'
 
 import { WalletConnectOption } from './WalletConnectOption'
 
+const messages = {
+  // Without the app, the Phantom link opens phantom.app in the browser
+  requiresApp: 'Requires the Phantom app'
+}
+
 export const PhantomWalletConnectOption = () => {
   const dispatch = useDispatch()
 
@@ -38,6 +43,7 @@ export const PhantomWalletConnectOption = () => {
     <WalletConnectOption
       name='Phantom'
       icon={<IconPhantom height={64} width={64} />}
+      description={messages.requiresApp}
       onPress={handleConnectWallet}
     />
   )

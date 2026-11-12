@@ -1,23 +1,40 @@
 import { useCallback } from 'react'
 
-import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
 import {
   useGatedContentAccess,
   useQueueNewFeatureBadge
 } from '@audius/common/hooks'
-import { FavoriteSource, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import type { Track, User } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { TouchableOpacity, Animated, View } from 'react-native'
+import Reanimated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 import { useSelector } from 'react-redux'
 
-import { IconButton, IconIndent, IconLock } from '@audius/harmony-native'
-import { FavoriteButton } from 'app/components/favorite-button'
+import {
+  IconButton,
+  IconIndent,
+  IconLock,
+  useTheme
+} from '@audius/harmony-native'
+import {
+  COLLAPSED_PLAY_BAR_INSET,
+  COLLAPSE_SHRINK_END,
+  FLOATING_BAR_SIDE_MARGIN
+} from 'app/components/bottom-tab-bar/constants'
+import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
 import Text from 'app/components/text'
 import { useDrawer } from 'app/hooks/useDrawer'
+import {
+  useIsTabBarCollapsed,
+  useTabBarHiddenProgress
+} from 'app/screens/app-screen/TabBarAutoHideContext'
 import { makeStyles } from 'app/styles'
-import { useColor } from 'app/utils/theme'
+import { isDarkTheme, useColor, useThemeVariant } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
 
 import { LockedStatusBadge } from '../core'
@@ -27,6 +44,10 @@ import { PlayButton } from './PlayButton'
 import { TrackingBar } from './TrackingBar'
 import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
 const { getPreviewing } = playbackSelectors
+
+// Queue button (24px icon plus its padding). Collapses to nothing while the
+// play bar sits between the collapsed tab bar's buttons.
+const QUEUE_BUTTON_WIDTH = 32
 
 const messages = {
   preview: 'PREVIEW',
@@ -40,20 +61,29 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     alignItems: 'center',
     zIndex: zIndex.PLAY_BAR
   },
-  // Group: Favorite Button, Track Content, Play Button
+  floatingPillFrame: {
+    flex: 1,
+    alignSelf: 'stretch'
+  },
+  floatingPill: {
+    flex: 1,
+    borderRadius: PLAY_BAR_HEIGHT / 2,
+    overflow: 'hidden'
+  },
+  // Group: Track Content, Queue Button, Play Button
   container: {
     height: '100%',
     width: '100%',
     paddingLeft: spacing(3),
-    paddingRight: spacing(3),
-    gap: spacing(3),
+    paddingRight: spacing(2),
+    gap: spacing(2),
     flexDirection: 'row',
     alignItems: 'center'
   },
-  favoriteContainer: {
-    flexShrink: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+  // Keep the artwork and play button clear of the pill's rounded ends.
+  floatingContainer: {
+    paddingLeft: spacing(3),
+    paddingRight: spacing(3)
   },
   trackContainer: {
     paddingRight: spacing(1),
@@ -69,7 +99,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   queueContainer: {
     flexShrink: 0,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    overflow: 'hidden'
   },
   playContainer: {
     flexShrink: 1,
@@ -77,47 +108,34 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     justifyContent: 'center'
   },
   playIcon: {
-    width: spacing(8),
-    height: spacing(8)
-  },
-  icon: {
-    width: 28,
-    height: 28
+    width: spacing(10),
+    height: spacing(10)
   },
   // Group: Artwork, Text
   artworkContainer: {
-    borderRadius: 2,
+    borderRadius: 8,
     overflow: 'hidden'
   },
   trackTextContainer: {
     flexGrow: 1,
     flexShrink: 1,
-    width: '100%',
-    alignItems: 'center',
-    flexDirection: 'row'
+    justifyContent: 'center'
   },
-  // Group: Title, separator, artist
+  // Group: Title over artist
   title: {
-    flexShrink: 1,
     color: palette.neutral,
-    fontSize: spacing(3)
-  },
-  separator: {
-    color: palette.neutral,
-    marginLeft: spacing(1),
-    marginRight: spacing(1),
-    fontSize: spacing(4)
+    fontSize: 14,
+    lineHeight: 18
   },
   artist: {
-    flexGrow: 1,
-    flexShrink: 1,
-    color: palette.neutral,
-    fontSize: spacing(3)
+    color: palette.neutralLight2,
+    fontSize: 12,
+    lineHeight: 16
   },
   // Artwork interior
   artwork: {
-    height: 26,
-    width: 26,
+    height: 40,
+    width: 40,
     backgroundColor: palette.neutralLight7
   },
   lockOverlay: {
@@ -142,12 +160,23 @@ type PlayBarProps = {
   onPress: () => void
   translationAnim: Animated.Value
   mediaKey: string
+  /** Render as a glass pill above the floating tab bar. */
+  floating?: boolean
 }
 
 export const PlayBar = (props: PlayBarProps) => {
-  const { track, user, onPress, translationAnim, mediaKey, duration } = props
+  const {
+    track,
+    user,
+    onPress,
+    translationAnim,
+    mediaKey,
+    duration,
+    floating
+  } = props
+  const isDarkMode = isDarkTheme(useThemeVariant())
   const styles = useStyles()
-  const { data: accountUserId } = useCurrentUserId()
+  const { spacing } = useTheme()
   const neutral = useColor('neutral')
 
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -157,11 +186,6 @@ export const PlayBar = (props: PlayBarProps) => {
     (track?.stream_conditions &&
       'usdc_purchase' in track.stream_conditions &&
       !hasStreamAccess)
-
-  const onPressFavoriteButton = useToggleFavoriteTrack({
-    trackId: track?.track_id,
-    source: FavoriteSource.PLAYBAR
-  })
 
   const { onOpen: openQueue } = useDrawer('Queue')
   const {
@@ -175,16 +199,32 @@ export const PlayBar = (props: PlayBarProps) => {
     openQueue()
   }, [showQueueNewFeatureBadge, dismissQueueNewFeatureBadge, openQueue])
 
-  const renderFavoriteButton = () => {
-    return (
-      <FavoriteButton
-        isDisabled={accountUserId === track?.owner_id || track?.is_unlisted}
-        onPress={onPressFavoriteButton}
-        isActive={track?.has_current_user_saved ?? false}
-        wrapperStyle={styles.icon}
-      />
+  // Narrows to fit between the collapsed tab bar's buttons, dropping the queue
+  // button to make room for the title.
+  const hidden = useTabBarHiddenProgress()
+  const isCollapsed = useIsTabBarCollapsed()
+  const pillFrameStyle = useAnimatedStyle(() => ({
+    marginHorizontal: interpolate(
+      hidden.value,
+      [0, COLLAPSE_SHRINK_END],
+      [FLOATING_BAR_SIDE_MARGIN, COLLAPSED_PLAY_BAR_INSET],
+      'clamp'
     )
-  }
+  }))
+  const queueStyle = useAnimatedStyle(() => {
+    const shrink = interpolate(
+      hidden.value,
+      [0, COLLAPSE_SHRINK_END],
+      [0, 1],
+      'clamp'
+    )
+    return {
+      opacity: interpolate(hidden.value, [0, 0.3], [1, 0], 'clamp'),
+      width: QUEUE_BUTTON_WIDTH * (1 - shrink),
+      // Fold the row gap in with the button so no extra space is left behind.
+      marginLeft: -spacing.s * shrink
+    }
+  })
 
   const rootOpacityAnimation = translationAnim.interpolate({
     // Interpolate the animation such that the play bar fades out
@@ -198,17 +238,17 @@ export const PlayBar = (props: PlayBarProps) => {
     extrapolate: 'extend'
   })
 
-  return (
-    <Animated.View style={[styles.root, { opacity: rootOpacityAnimation }]}>
+  const content = (
+    <>
       <TrackingBar
+        floating={floating}
         duration={duration}
         mediaKey={mediaKey}
         translateYAnimation={translationAnim}
       />
-      <View style={styles.container}>
-        {shouldShowPreviewLock ? null : (
-          <View style={styles.favoriteContainer}>{renderFavoriteButton()}</View>
-        )}
+      <View
+        style={[styles.container, floating ? styles.floatingContainer : null]}
+      >
         <TouchableOpacity
           activeOpacity={1}
           style={styles.trackContainer}
@@ -225,19 +265,13 @@ export const PlayBar = (props: PlayBarProps) => {
                 trackId={track?.track_id}
                 style={styles.artwork}
                 size={SquareSizes.SIZE_150_BY_150}
+                borderRadius='m'
               />
             </View>
           ) : null}
           <View style={styles.trackTextContainer}>
             <Text numberOfLines={1} weight='bold' style={styles.title}>
               {track?.title ?? ''}
-            </Text>
-            <Text
-              weight='bold'
-              style={styles.separator}
-              accessibilityElementsHidden
-            >
-              {track ? '•' : ''}
             </Text>
             <Text numberOfLines={1} weight='medium' style={styles.artist}>
               {user?.name ?? ''}
@@ -255,7 +289,10 @@ export const PlayBar = (props: PlayBarProps) => {
             </View>
           ) : null}
         </TouchableOpacity>
-        <View style={styles.queueContainer}>
+        <Reanimated.View
+          pointerEvents={floating && isCollapsed ? 'none' : 'auto'}
+          style={[styles.queueContainer, floating ? queueStyle : null]}
+        >
           <IconButton
             icon={IconIndent}
             onPress={handleOpenQueue}
@@ -263,11 +300,29 @@ export const PlayBar = (props: PlayBarProps) => {
             color={showQueueNewFeatureBadge ? 'active' : 'default'}
             aria-label={messages.queueLabel}
           />
-        </View>
+        </Reanimated.View>
         <View style={styles.playContainer}>
           <PlayButton wrapperStyle={styles.playIcon} />
         </View>
       </View>
+    </>
+  )
+
+  return (
+    <Animated.View style={[styles.root, { opacity: rootOpacityAnimation }]}>
+      {floating ? (
+        <Reanimated.View style={[styles.floatingPillFrame, pillFrameStyle]}>
+          <LiquidGlassView
+            effect='regular'
+            colorScheme={isDarkMode ? 'dark' : 'light'}
+            style={styles.floatingPill}
+          >
+            {content}
+          </LiquidGlassView>
+        </Reanimated.View>
+      ) : (
+        content
+      )}
     </Animated.View>
   )
 }

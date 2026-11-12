@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 
 import {
   AlbumSchema,
@@ -56,10 +56,12 @@ type EditCollectionFormProps = {
   isAlbum: boolean
   isUpload: boolean
   focus?: Nullable<string>
+  /** Rendered inside the Formik context, e.g. a draft autosaver. */
+  children?: ReactNode
 }
 
 export const EditCollectionForm = (props: EditCollectionFormProps) => {
-  const { initialValues, onSubmit, isAlbum, isUpload, focus } = props
+  const { initialValues, onSubmit, isAlbum, isUpload, focus, children } = props
   const {
     playlist_id,
     is_private: initiallyHidden,
@@ -120,7 +122,11 @@ export const EditCollectionForm = (props: EditCollectionFormProps) => {
       validationSchema={toFormikValidationSchema(validationSchema)}
     >
       <Form className={styles.root} id={formId}>
-        <CollectionNavigationPrompt disabled={isDeleteConfirmationOpen} />
+        <CollectionNavigationPrompt
+          isUpload={isUpload}
+          disabled={isDeleteConfirmationOpen}
+        />
+        {children}
         <Tile className={styles.collectionFields} elevation='mid'>
           <div className={styles.row}>
             <ArtworkField

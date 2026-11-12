@@ -33,6 +33,7 @@ import type { AppTabNavigation } from 'app/screens/app-screen/AppTabNavigationPr
 import { AudioScreen } from 'app/screens/audio-screen'
 import { CashScreen } from 'app/screens/cash-screen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
+import { ChatMembersScreen } from 'app/screens/chat-screen/ChatMembersScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
 import {
@@ -53,7 +54,10 @@ import {
   InboxSettingsScreen,
   CommentSettingsScreen,
   NotificationSettingsScreen,
-  SettingsScreen
+  SettingsScreen,
+  AccountsManagingYouScreen,
+  AccountsYouManageScreen,
+  FindAccountManagerScreen
 } from 'app/screens/settings-screen'
 import { TrackScreen } from 'app/screens/track-screen'
 import { TrackRemixesScreen } from 'app/screens/track-screen/TrackRemixesScreen'
@@ -123,6 +127,9 @@ export type AppTabScreenParamList = {
   CommentSettingsScreen: undefined
   DownloadSettingsScreen: undefined
   NotificationSettingsScreen: undefined
+  AccountsManagingYouScreen: undefined
+  AccountsYouManageScreen: undefined
+  FindAccountManagerScreen: undefined
 
   AudioScreen: undefined
   RewardsScreen: undefined
@@ -161,6 +168,7 @@ export type AppTabScreenParamList = {
     chatId: string
     presetMessage?: string
   }
+  ChatMembers: { chatId: string }
   ChatBlastSelectContent: {
     valueName: string
     title: string
@@ -401,6 +409,18 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
                 name='NotificationSettingsScreen'
                 getComponent={() => NotificationSettingsScreen}
               />
+              <Stack.Screen
+                name='AccountsManagingYouScreen'
+                getComponent={() => AccountsManagingYouScreen}
+              />
+              <Stack.Screen
+                name='AccountsYouManageScreen'
+                getComponent={() => AccountsYouManageScreen}
+              />
+              <Stack.Screen
+                name='FindAccountManagerScreen'
+                getComponent={() => FindAccountManagerScreen}
+              />
             </Stack.Group>
 
             <Stack.Screen
@@ -429,6 +449,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
                   params?.chatId
                 }
                 options={{ ...screenOptions, fullScreenGestureEnabled: false }}
+              />
+              <Stack.Screen
+                name='ChatMembers'
+                getComponent={() => ChatMembersScreen}
               />
             </Stack.Group>
           </Stack.Navigator>

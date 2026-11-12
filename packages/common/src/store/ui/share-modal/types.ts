@@ -11,6 +11,7 @@ export type ShareType =
   | 'playlist'
   | 'contest'
   | 'weeklyRotation'
+  | 'milestone'
 
 type ShareTrackContent = {
   type: 'track'
@@ -61,6 +62,24 @@ type ShareWeeklyRotationContent = {
   user: User
 }
 
+export type ShareMilestoneStat =
+  | { kind: 'listens'; count: number }
+  | { kind: 'trending' | 'underground'; rank: number }
+  | { kind: 'featured'; playlistName: string }
+  | { kind: 'genre'; rank: number; genre: string }
+
+/**
+ * A track milestone (play count, trending rank, editorial feature) shared as a
+ * stat card.
+ * Links to the track like a track share.
+ */
+type ShareMilestoneContent = {
+  type: 'milestone'
+  track: Track
+  artist: User
+  stat: ShareMilestoneStat
+}
+
 export type ShareContent =
   | ShareTrackContent
   | ShareContestContent
@@ -68,6 +87,7 @@ export type ShareContent =
   | ShareAlbumContent
   | SharePlaylistContent
   | ShareWeeklyRotationContent
+  | ShareMilestoneContent
 
 export type ShareModalRequest =
   | { type: 'track'; trackId: ID }
@@ -75,6 +95,7 @@ export type ShareModalRequest =
   | { type: 'profile'; profileId: ID }
   | { type: 'collection'; collectionId: ID }
   | { type: 'weeklyRotation'; userId: ID }
+  | { type: 'milestone'; trackId: ID; stat: ShareMilestoneStat }
 
 export type ShareModalState = {
   source: Nullable<ShareSource>

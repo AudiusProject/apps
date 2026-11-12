@@ -175,8 +175,6 @@ export const TrackRow = forwardRef<HTMLDivElement, TrackRowProps>(
     })
 
     const rankFace = css({
-      fontFamily: typography.fontDisplay,
-      '--harmony-font-family': typography.fontDisplay,
       transition: `opacity ${motion.hover}`
     })
 

@@ -1,33 +1,102 @@
-import Animated, { Layout } from 'react-native-reanimated'
+import { useCallback, useState } from 'react'
 
-import type { PaperProps, TextInputProps } from '@audius/harmony-native'
+import type { TextInputProps as RNTextInputProps } from 'react-native'
+import { Pressable, TextInput as RNTextInput } from 'react-native'
+import Animated, { LinearTransition } from 'react-native-reanimated'
+
+import type { FlexProps } from '@audius/harmony-native'
 import {
-  IconFilter,
-  Paper,
-  TextInput,
-  TextInputSize
+  Flex,
+  IconCloseAlt,
+  IconSearch,
+  useTheme
 } from '@audius/harmony-native'
 
-type FilterInputProps = PaperProps &
-  Pick<TextInputProps, 'onChangeText' | 'placeholder' | 'value' | 'autoFocus'>
+const messages = {
+  clear: 'Clear filter'
+}
 
+const INPUT_HEIGHT = 40
+
+type FilterInputProps = Omit<FlexProps, 'children'> &
+  Pick<RNTextInputProps, 'onChangeText' | 'placeholder' | 'value' | 'autoFocus'>
+
+/**
+ * A search-style text field for narrowing a list in place. Sits flush on the
+ * page above the list it filters, with no card around it.
+ */
 export const FilterInput = (props: FilterInputProps) => {
-  const { onChangeText, placeholder, value, autoFocus, ...paperProps } = props
+  const {
+    onChangeText,
+    placeholder,
+    value: valueProp,
+    autoFocus,
+    ...flexProps
+  } = props
+  const { color, typography, spacing } = useTheme()
+
+  // Mirror the text so the clear button works for uncontrolled callers too.
+  const [internalValue, setInternalValue] = useState(valueProp ?? '')
+  const value = valueProp ?? internalValue
+
+  const handleChangeText = useCallback(
+    (text: string) => {
+      setInternalValue(text)
+      onChangeText?.(text)
+    },
+    [onChangeText]
+  )
+
+  const handleClear = useCallback(() => {
+    handleChangeText('')
+  }, [handleChangeText])
 
   return (
-    <Animated.View layout={Layout}>
-      <Paper mv='l' mh='m' p='s' {...paperProps}>
-        <TextInput
-          label='filter'
-          size={TextInputSize.SMALL}
+    <Animated.View layout={LinearTransition}>
+      <Flex
+        row
+        alignItems='center'
+        gap='s'
+        mh='l'
+        mv='s'
+        ph='m'
+        h={INPUT_HEIGHT}
+        backgroundColor='surface2'
+        style={{ borderRadius: INPUT_HEIGHT / 2 }}
+        {...flexProps}
+      >
+        <IconSearch color='subdued' size='s' />
+        <RNTextInput
+          accessibilityLabel={placeholder}
           placeholder={placeholder}
-          onChangeText={onChangeText}
+          placeholderTextColor={color.text.subdued}
           value={value}
-          returnKeyType='search'
-          endAdornment={<IconFilter color='subdued' size='m' />}
+          onChangeText={handleChangeText}
           autoFocus={autoFocus}
+          autoCorrect={false}
+          autoCapitalize='none'
+          returnKeyType='search'
+          clearButtonMode='never'
+          style={{
+            flex: 1,
+            height: INPUT_HEIGHT,
+            padding: 0,
+            fontFamily: typography.fontByWeight.medium,
+            fontSize: typography.size.m,
+            color: color.text.default
+          }}
         />
-      </Paper>
+        {value ? (
+          <Pressable
+            onPress={handleClear}
+            accessibilityRole='button'
+            accessibilityLabel={messages.clear}
+            hitSlop={spacing.s}
+          >
+            <IconCloseAlt color='subdued' size='s' />
+          </Pressable>
+        ) : null}
+      </Flex>
     </Animated.View>
   )
 }

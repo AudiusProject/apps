@@ -9,7 +9,6 @@ export type Env = {
   API_URL: string
   APP_NAME: string
   API_KEY: string
-  ARCHIVE_ENDPOINT: string
   AUDIUS_NETWORK_CHAIN_ID: number
   AUDIUS_URL: string
   BITSKI_CALLBACK_URL: string
@@ -33,6 +32,7 @@ export type Env = {
   ETH_TOKEN_ADDRESS: string
   ETH_TOKEN_BRIDGE_ADDRESS: Nullable<string>
   EXPLORE_CONTENT_URL: string
+  FACEBOOK_APP_ID: string
   FCM_PUSH_PUBLIC_KEY: Nullable<string>
   GA_HOSTNAME: string
   GA_MEASUREMENT_ID: string

@@ -12,6 +12,15 @@ on:
       - 'packages/sdk/**'
       - 'package-lock.json'
       - '.github/workflows/mobile.yml'
+  pull_request:
+    paths:
+      - 'packages/mobile/**'
+      - 'packages/common/**'
+      - 'packages/harmony/**'
+      - 'packages/libs/**'
+      - 'packages/sdk/**'
+      - 'package-lock.json'
+      - '.github/workflows/mobile.yml'
   workflow_dispatch:
     inputs:
       ota_channel:
@@ -64,7 +73,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -91,16 +100,18 @@ jobs:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
             # Ensure dotenv-linter binary is installed (install script downloads it)
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             # Clear npm cache to avoid EEXIST conflicts
             npm cache clean --force || true
             # Try npm ci first, fallback to npm install if lock file is out of sync
@@ -127,7 +138,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -159,15 +170,17 @@ jobs:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             npm cache clean --force || true
             npm ci --prefer-offline || npm install --prefer-offline
           fi
@@ -255,7 +268,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -282,15 +295,17 @@ jobs:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             npm cache clean --force || true
             npm ci --prefer-offline || npm install --prefer-offline
           fi
@@ -382,7 +397,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -409,15 +424,17 @@ jobs:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             npm cache clean --force || true
             npm ci --prefer-offline || npm install --prefer-offline
           fi
@@ -486,7 +503,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -530,16 +547,18 @@ jobs:
           SKIP_POD_INSTALL: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
             # Ensure dotenv-linter binary is installed (install script downloads it)
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             # Clear npm cache to avoid EEXIST conflicts
             npm cache clean --force || true
             # Try npm ci first, fallback to npm install if lock file is out of sync
@@ -727,7 +746,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -770,11 +789,14 @@ jobs:
           SKIP_ANDROID_INSTALL: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
+            :
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             # Clear npm cache to avoid EEXIST conflicts
             npm cache clean --force || true
             # Try npm ci first, fallback to npm install if lock file is out of sync
@@ -887,7 +909,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -925,16 +947,18 @@ jobs:
           SKIP_POD_INSTALL: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
             # Ensure dotenv-linter binary is installed (install script downloads it)
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             # Clear npm cache to avoid EEXIST conflicts
             npm cache clean --force || true
             # Try npm ci first, fallback to npm install if lock file is out of sync
@@ -1115,7 +1139,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules
@@ -1158,11 +1182,14 @@ jobs:
           SKIP_ANDROID_INSTALL: true
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if [[ -d node_modules ]]; then
-            echo "Using cached node_modules, running postinstall..."
-            npm run postinstall
+          # A partial cache restore can hold node_modules patched with an older
+          # patch file, which patch-package cannot re-apply. Fall back to a fresh
+          # install when postinstall fails on the cache.
+          if [[ -d node_modules ]] && echo "Using cached node_modules, running postinstall..." && npm run postinstall; then
+            :
           else
-            echo "No cache found, running fresh install..."
+            echo "No usable cache, running fresh install..."
+            rm -rf node_modules packages/*/node_modules
             # Clear npm cache to avoid EEXIST conflicts
             npm cache clean --force || true
             # Try npm ci first, fallback to npm install if lock file is out of sync

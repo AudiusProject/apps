@@ -49,6 +49,8 @@ type ScrubberProps = {
    * Callback invoked when focus is lost on the scrubber
    */
   onPressOut: () => void
+  /** Rail positions, 0 to 1, marked with a dot. */
+  markers?: number[]
 }
 
 /**
@@ -59,7 +61,8 @@ export const Scrubber = ({
   isPlaying,
   duration,
   onPressIn,
-  onPressOut
+  onPressOut,
+  markers
 }: ScrubberProps) => {
   const styles = useStyles()
   const dispatch = useDispatch()
@@ -120,6 +123,7 @@ export const Scrubber = ({
         onDrag={handleDrag}
         onDragRelease={handleDragRelease}
         duration={duration}
+        markers={markers}
       />
       <Text style={styles.timestamp} weight='regular' numberOfLines={1}>
         {formatSeconds(duration)}

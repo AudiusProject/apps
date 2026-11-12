@@ -27,9 +27,11 @@ export type Drawer =
   | 'BlockMessages'
   | 'MuteComments'
   | 'DeleteChat'
+  | 'LeaveChat'
   | 'OfflineListening'
   | 'Welcome'
   | 'ManagerMode'
+  | 'AccountSwitcher'
   | 'Comment'
   | 'EditTrackFormOverflowMenu'
   | 'PickWinners'
@@ -74,9 +76,11 @@ export type DrawerData = {
   }
   MuteComments: { userId: number; isMuted: boolean }
   DeleteChat: { chatId: string }
+  LeaveChat: { chatId: string }
   InboxUnavailable: { userId: number; shouldOpenChat: boolean }
   Welcome: undefined
   ManagerMode: undefined
+  AccountSwitcher: undefined
   Comment: { userId: ID; entityId: ID; isEntityOwner: boolean; artistId: ID }
   EditTrackFormOverflowMenu: undefined
   PickWinners: undefined
@@ -118,8 +122,10 @@ const initialState: DrawersState = {
   BlockMessages: false,
   MuteComments: false,
   DeleteChat: false,
+  LeaveChat: false,
   Welcome: false,
   ManagerMode: false,
+  AccountSwitcher: false,
   Comment: false,
   EditTrackFormOverflowMenu: false,
   PickWinners: false,

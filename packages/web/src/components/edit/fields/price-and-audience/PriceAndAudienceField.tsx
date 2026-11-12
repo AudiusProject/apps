@@ -18,7 +18,7 @@ import {
   EditCollectionValues,
   useEditAccessConfirmationModal
 } from '@audius/common/store'
-import { getUsersMayLoseAccess } from '@audius/common/utils'
+import { getCoinLogoUrl, getUsersMayLoseAccess } from '@audius/common/utils'
 import {
   IconCart,
   IconVisibilityHidden as IconHidden,
@@ -416,7 +416,13 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
         {
           label: messages.coinGated,
           startAdornment: (
-            <Artwork src={token?.logoUri} hex h={20} w={20} borderWidth={0} />
+            <Artwork
+              src={getCoinLogoUrl(token?.logoUri, 20)}
+              hex
+              h={20}
+              w={20}
+              borderWidth={0}
+            />
           )
         }
       ]

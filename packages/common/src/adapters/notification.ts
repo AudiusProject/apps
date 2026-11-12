@@ -697,6 +697,64 @@ export const notificationFromSDK = (
           type: string
           actions: typeof notification.actions
         }
+        if (n.type === 'weekly_rotation_featured') {
+          const data = n.actions[0].data as unknown as Record<
+            string,
+            string | number
+          >
+          const entityId = HashId.parse(
+            (data.trackId ?? data.track_id) as string
+          )
+          if (!entityId) return undefined
+          return {
+            type: NotificationType.WeeklyRotationFeatured,
+            entityType: Entity.Track,
+            entityId,
+            trackCount: Number(data.trackCount ?? data.track_count),
+            rotationCount: Number(data.rotationCount ?? data.rotation_count),
+            year: Number(data.year),
+            week: Number(data.week),
+            ...formatBaseNotification(notification)
+          }
+        }
+        if (n.type === 'weekly_artist_recap') {
+          const data = n.actions[0].data as unknown as Record<
+            string,
+            string | number | undefined
+          >
+          const topCity = data.topCity ?? data.top_city
+          return {
+            type: NotificationType.WeeklyArtistRecap,
+            playCount: Number(data.playCount ?? data.play_count),
+            followerCount: Number(data.followerCount ?? data.follower_count),
+            saveCount: Number(data.saveCount ?? data.save_count),
+            rotationSaveCount: Number(
+              data.rotationSaveCount ?? data.rotation_save_count ?? 0
+            ),
+            topCity: topCity ? String(topCity) : undefined,
+            year: Number(data.year),
+            week: Number(data.week),
+            ...formatBaseNotification(notification)
+          }
+        }
+        if (n.type === 'trending_genre') {
+          const data = n.actions[0].data as unknown as Record<
+            string,
+            string | number
+          >
+          const entityId = OptionalHashId.parse(
+            (data.trackId ?? data.track_id) as string
+          )
+          if (!entityId || !data.genre) return undefined
+          return {
+            type: NotificationType.TrendingGenre,
+            rank: Number(data.rank),
+            genre: String(data.genre),
+            entityType: Entity.Track,
+            entityId,
+            ...formatBaseNotification(notification)
+          }
+        }
         if (n.type === 'remix_contest_update') {
           const data = n.actions[0].data as unknown as Record<string, string>
           return {

@@ -27,6 +27,11 @@ const useStyles = makeStyles(({ palette }) => ({
     backgroundColor: palette.neutralLight7,
     overflow: 'hidden'
   },
+  // Inside the floating glass pill the empty rail reads as a stray gray line
+  // along the rounded top, so only the progress itself is drawn.
+  floatingRail: {
+    backgroundColor: 'transparent'
+  },
   tracker: {
     height: 3,
     // flexGrow: 1,
@@ -45,10 +50,11 @@ type TrackingBarProps = {
    * Animation that signals how "open" the now playing drawer is.
    */
   translateYAnimation: Animated.Value
+  floating?: boolean
 }
 
 export const TrackingBar = (props: TrackingBarProps) => {
-  const { mediaKey, duration, translateYAnimation } = props
+  const { mediaKey, duration, translateYAnimation, floating } = props
   const styles = useStyles()
   const { primaryLight2, primaryDark2 } = useThemeColors()
 
@@ -139,7 +145,13 @@ export const TrackingBar = (props: TrackingBarProps) => {
   ]
 
   return (
-    <Animated.View style={[styles.rail, { opacity: rootOpacity }]}>
+    <Animated.View
+      style={[
+        styles.rail,
+        floating ? styles.floatingRail : null,
+        { opacity: rootOpacity }
+      ]}
+    >
       <Animated.View style={[styles.tracker, { transform: trackerTransform }]}>
         <LinearGradient
           angle={135}

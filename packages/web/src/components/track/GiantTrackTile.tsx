@@ -6,6 +6,7 @@ import {
   useTrack,
   useStems
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   isContentUSDCPurchaseGated,
   ID,
@@ -14,8 +15,11 @@ import {
   AccessConditions,
   FavoriteSource
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
+  CommonState,
   PurchaseableContentType,
+  playbackSelectors,
   useEarlyReleaseConfirmationModal,
   usePublishConfirmationModal
 } from '@audius/common/store'
@@ -41,10 +45,13 @@ import {
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
 import IconTrending from '@audius/harmony/src/assets/icons/Trending.svg'
 import IconVisibilityHidden from '@audius/harmony/src/assets/icons/VisibilityHidden.svg'
+import { Id } from '@audius/sdk'
 import { useTheme } from '@emotion/react'
 import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
 import { pick } from 'lodash'
+import { useSelector } from 'react-redux'
+import { useSearchParams } from 'react-router'
 import { useToggle } from 'react-use'
 import useMeasure from 'react-use-measure'
 
@@ -57,6 +64,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 
 import { CardTitle } from './CardTitle'
 import { DownloadSection } from './DownloadSection'
+import { FeedbackWantedTag } from './FeedbackWantedTag'
 import { GatedContentSection } from './GatedContentSection'
 import GiantArtwork from './GiantArtwork'
 import styles from './GiantTrackTile.module.css'
@@ -65,12 +73,14 @@ import { PlayPauseButton } from './PlayPauseButton'
 import { TrackDogEar } from './TrackDogEar'
 import { TrackMetadataList } from './TrackMetadataList'
 import { TrackStats } from './TrackStats'
+import { TrackTileWaveform } from './desktop/TrackTileWaveform'
 
 // Toast timeouts in ms
 const REPOST_TIMEOUT = 1000
 const SAVED_TIMEOUT = 1000
 const MAX_DESCRIPTION_LINES = 8
 const DEFAULT_LINE_HEIGHT = spacing.xl
+const WAVEFORM_HEIGHT = 72
 
 const messages = {
   makePublic: 'MAKE PUBLIC',
@@ -192,6 +202,27 @@ export const GiantTrackTile = ({
   const { data: track } = useTrack(trackId, {
     select: (track) => pick(track, ['is_downloadable', 'preview_cid'])
   })
+  const { isEnabled: isWaveformEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_TILE_WAVEFORM
+  )
+  const { data: waveformTrack } = useTrack(trackId, {
+    select: (track) => pick(track, ['permalink', 'comment_count'])
+  })
+  const isActiveTrack = useSelector(
+    (state: CommonState) => playbackSelectors.getTrackId(state) === trackId
+  )
+  const [searchParams, setSearchParams] = useSearchParams()
+  const handleOpenComment = useCallback(
+    (commentId: ID) => {
+      // The comment section shows the comment in the URL at the top.
+      const next = new URLSearchParams(searchParams)
+      next.set('commentId', Id.parse(commentId))
+      setSearchParams(next, { replace: true })
+      // Replacing history resets the scroll, so scroll once that has run.
+      window.setTimeout(scrollToCommentSection, 0)
+    },
+    [searchParams, setSearchParams, scrollToCommentSection]
+  )
   const { data: collaborators } = useTrack(trackId, {
     select: (track) => track.collaborators
   })
@@ -203,6 +234,11 @@ export const GiantTrackTile = ({
     isUSDCPurchaseGated && (isOwner || !hasStreamAccess) && track?.preview_cid
   // Play button is conditionally hidden for USDC-gated tracks when the user does not have access
   const showPlay = isUSDCPurchaseGated ? hasStreamAccess : true
+  const showWaveform =
+    isWaveformEnabled &&
+    !loading &&
+    duration > 0 &&
+    (hasStreamAccess || !!showPreview)
   const shouldShowScheduledRelease =
     isScheduledRelease && dayjs(releaseDate).isAfter(dayjs())
   const [isDescriptionExpanded, toggleDescriptionExpanded] = useToggle(false)
@@ -513,6 +549,7 @@ export const GiantTrackTile = ({
             <Flex column gap='l' className={styles.titleArtistSection}>
               <div className={styles.typeLabelRow}>
                 {renderCardTitle(cn(fadeIn))}
+                <FeedbackWantedTag trackId={trackId} />
               </div>
               <Box>
                 <Text
@@ -633,6 +670,24 @@ export const GiantTrackTile = ({
           <div className={styles.badgesSection}>{renderBadges()}</div>
         </div>
       </div>
+
+      {showWaveform && waveformTrack ? (
+        <Box ph='l' pb='l' className={cn(fadeIn)}>
+          <TrackTileWaveform
+            trackId={trackId}
+            title={trackTitle}
+            permalink={waveformTrack.permalink}
+            duration={duration}
+            commentCount={waveformTrack.comment_count ?? 0}
+            isActive={isActiveTrack}
+            isPlaying={playing && !previewing}
+            canSeek={hasStreamAccess}
+            onPlay={hasStreamAccess ? onPlay : onPreview}
+            onOpenComment={handleOpenComment}
+            height={WAVEFORM_HEIGHT}
+          />
+        </Box>
+      ) : null}
 
       {isStreamGated && streamConditions ? (
         <Box p='l' pb='xl' w='100%' backgroundColor='surface1'>

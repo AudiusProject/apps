@@ -1,7 +1,7 @@
 /* Semantic Token Definitions */
 :root {
   /* Text */
-  --harmony-text-heading: var(--harmony-neutral);
+  --harmony-text-heading: var(--harmony-gradient);
   --harmony-text-default: var(--harmony-neutral);
   --harmony-text-subdued: var(--harmony-n-400);
   --harmony-text-disabled: var(--harmony-n-150);
@@ -23,12 +23,4 @@
     var(--harmony-secondary) 70%,
     transparent
   );
-}
-
-html[data-theme='day'],
-html[data-theme='dark'],
-html[data-theme='classic-light'],
-html[data-theme='classic-dark'],
-html[data-theme='matrix'] {
-  --harmony-text-heading: var(--harmony-gradient);
 }

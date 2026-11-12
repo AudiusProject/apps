@@ -333,6 +333,7 @@ export const trackMetadataForUploadToSdk = (
         'is_custom_bpm',
         'is_custom_musical_key',
         'comments_disabled',
+        'feedback_requested',
         'ddex_release_ids',
         'parental_warning_type',
         'allowed_api_keys'

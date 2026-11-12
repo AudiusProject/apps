@@ -3,21 +3,24 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState
 } from 'react'
 
-import { useUser } from '@audius/common/api'
-import { useCurrentTrack } from '@audius/common/hooks'
+import { useUser, useTimestampedComments } from '@audius/common/api'
+import { useCurrentTrack, useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useNavigationState } from '@react-navigation/native'
 import type {
-  Animated,
   GestureResponderEvent,
   PanResponderGestureState
 } from 'react-native'
 import {
+  Animated,
   Keyboard,
   Platform,
   View,
@@ -25,13 +28,23 @@ import {
   Pressable,
   StyleSheet
 } from 'react-native'
-import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
+import Reanimated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
+import {
+  BOTTOM_BAR_HEIGHT,
+  COLLAPSE_DROP_START,
+  FLOATING_BAR_HEIGHT,
+  FLOATING_BAR_TOP_GAP,
+  useFloatingTabBar
+} from 'app/components/bottom-tab-bar'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
+import { SetPlayBarVisibilityContext } from 'app/components/core/BottomBarInsetContext'
 import Drawer, {
   DrawerAnimationStyle,
   FULL_DRAWER_HEIGHT
@@ -48,12 +61,15 @@ import { zIndex } from 'app/utils/zIndex'
 import { ActionsBar } from './ActionsBar'
 import { Artwork } from './Artwork'
 import { AudioControls } from './AudioControls'
+import { CommentBubble } from './CommentBubble'
 import { Logo } from './Logo'
 import { PlayBar } from './PlayBar'
 import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
+import { WaveformScrubber } from './WaveformScrubber'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
+import { useDominantArtworkColors } from './useDominantArtworkColors'
 const { seekTo: seek, reset, next, previous } = playbackActions
 
 const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
@@ -66,7 +82,7 @@ const RESTART_THRESHOLD_SEC = 3
 // the status bar will be hidden when the drawer is open
 const INSET_STATUS_BAR_HIDE_THRESHOLD = 20
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ palette, spacing }) => ({
   container: {
     paddingTop: 0,
     height: FULL_DRAWER_HEIGHT,
@@ -76,6 +92,18 @@ const useStyles = makeStyles(({ spacing }) => ({
     position: 'absolute',
     width: '100%',
     top: 0
+  },
+  // With the floating tab bar the collapsed drawer is see-through, so content
+  // shows around the play bar and tab bar pills. The background fades in as
+  // the drawer opens.
+  floatingDrawer: {
+    overflow: 'visible',
+    backgroundColor: 'transparent'
+  },
+  floatingBackground: {
+    backgroundColor: palette.white,
+    borderTopLeftRadius: spacing(10),
+    borderTopRightRadius: spacing(10)
   },
   controlsContainer: {
     marginHorizontal: spacing(6),
@@ -94,6 +122,11 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   scrubberContainer: {
     marginHorizontal: spacing(6)
+  },
+  // Room for the comment bubble, which floats under the waveform, so it
+  // clears the play button.
+  commentBubbleSpace: {
+    height: spacing(8)
   }
 }))
 
@@ -128,6 +161,10 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
   const [isPlayBarShowing, setIsPlayBarShowing] = useState(false)
+  const setPlayBarVisible = useContext(SetPlayBarVisibilityContext)
+  useLayoutEffect(() => {
+    setPlayBarVisible(isPlayBarShowing)
+  }, [isPlayBarShowing, setPlayBarVisible])
 
   const { drawerNavigation } = useContext(AppDrawerContext)
 
@@ -180,21 +217,53 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     isOpen && isDrawerFullyOpen ? staticTopInset.current : insets.top
   const effectiveBottomInset = isOpen && isDrawerFullyOpen ? 0 : insets.bottom
 
-  // Slide the collapsed drawer out with the tab bar. Translates the whole
-  // drawer because the play bar's background belongs to the drawer root.
-  // Pinned to 0 while open, since the open drawer is the full-screen player.
+  const floating = useFloatingTabBar()
+
+  // When the tab bar hides, the collapsed play bar drops into its place rather
+  // than leaving with it, so what's playing and play/pause stay on screen.
+  // Floating, it drops level with the collapsed tab bar, between the
+  // active-tab and search buttons; classic, down onto the safe area.
+  // Translates the whole drawer because the play bar's background belongs to
+  // the drawer root. Pinned to 0 while open, since the open drawer is the
+  // full-screen player.
+  const playBarDrop = floating
+    ? FLOATING_BAR_HEIGHT +
+      FLOATING_BAR_TOP_GAP -
+      (FLOATING_BAR_HEIGHT - PLAY_BAR_HEIGHT) / 2
+    : BOTTOM_BAR_HEIGHT
   const chromeHideStyle = useAnimatedStyle(
     () => ({
       transform: [
         {
           translateY: isOpen
             ? 0
-            : (PLAY_BAR_HEIGHT + BOTTOM_BAR_HEIGHT + insets.bottom) *
-              tabBarHidden.value
+            : playBarDrop *
+              (floating
+                ? // Drops once the tab bar has shrunk out of the way.
+                  interpolate(
+                    tabBarHidden.value,
+                    [COLLAPSE_DROP_START, 1],
+                    [0, 1],
+                    'clamp'
+                  )
+                : tabBarHidden.value)
         }
       ]
     }),
-    [isOpen, insets.bottom]
+    [isOpen, playBarDrop, floating]
+  )
+
+  // Collapsed, with the play bar resting on the tab bar.
+  const collapsedPosition =
+    FULL_DRAWER_HEIGHT - insets.bottom - BOTTOM_BAR_HEIGHT - PLAY_BAR_HEIGHT
+  const fullPlayerOpacity = useMemo(
+    () =>
+      translationAnim.interpolate({
+        inputRange: [collapsedPosition - 160, collapsedPosition],
+        outputRange: [1, 0],
+        extrapolate: 'clamp'
+      }),
+    [translationAnim, collapsedPosition]
   )
 
   useEffect(() => {
@@ -256,6 +325,28 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const { data: user } = useUser(track?.owner_id)
   const [mediaKey, setMediaKey] = useState(0)
 
+  const { isEnabled: isNowPlayingCommentsEnabled } = useFeatureFlag(
+    FeatureFlags.NOW_PLAYING_COMMENTS
+  )
+  const { isEnabled: isWaveformEnabled } = useFeatureFlag(
+    FeatureFlags.NOW_PLAYING_WAVEFORM
+  )
+  // Feeds the artwork's colored glow.
+  useDominantArtworkColors(trackId, isWaveformEnabled && isOpen)
+  const timestampedComments = useTimestampedComments(
+    trackId,
+    (isNowPlayingCommentsEnabled || isWaveformEnabled) && isOpen
+  )
+  const commentMarkers = useMemo(
+    () =>
+      trackDuration > 0 && timestampedComments.length > 0
+        ? timestampedComments.map((comment) =>
+            Math.min(1, comment.trackTimestampS / trackDuration)
+          )
+        : undefined,
+    [timestampedComments, trackDuration]
+  )
+
   useEffect(() => {
     setMediaKey((mediaKey) => mediaKey + 1)
   }, [playCounter, currentTrackId])
@@ -307,6 +398,20 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     onClose()
   }, [onClose, navigation, trackId])
 
+  const playBar = (
+    <View style={styles.playBarContainer}>
+      <PlayBar
+        mediaKey={`${mediaKey}`}
+        duration={trackDuration}
+        track={track}
+        user={user}
+        onPress={onDrawerOpen}
+        translationAnim={translationAnim}
+        floating={!!floating}
+      />
+    </View>
+  )
+
   return (
     // The wrapper is a new stacking context, so restate the drawer's z-order.
     // `box-none` lets touches reach the screen behind it.
@@ -328,9 +433,9 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
         shouldCloseToInitialOffset={isPlayBarShowing}
         animationStyle={DrawerAnimationStyle.SPRINGY}
         shouldBackgroundDim={false}
-        shouldShowShadow={!isInChatScreen}
+        shouldShowShadow={!isInChatScreen && !floating}
         shouldAnimateShadow={false}
-        drawerStyle={{ overflow: 'visible' }}
+        drawerStyle={floating ? styles.floatingDrawer : { overflow: 'visible' }}
         onPercentOpen={onDrawerPercentOpen}
         onPanResponderMove={onPanResponderMove}
         onPanResponderRelease={onPanResponderRelease}
@@ -340,25 +445,29 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
         // Disable safe area view edges because they are handled manually
         disableSafeAreaView
       >
-        <View
+        {floating ? (
+          <Animated.View
+            pointerEvents='none'
+            style={[
+              StyleSheet.absoluteFill,
+              styles.floatingBackground,
+              { opacity: fullPlayerOpacity }
+            ]}
+          />
+        ) : null}
+        {floating ? playBar : null}
+        <Animated.View
+          pointerEvents='box-none'
           style={[
             styles.container,
             {
               paddingTop: effectiveTopInset,
               paddingBottom: effectiveBottomInset
-            }
+            },
+            floating ? { opacity: fullPlayerOpacity } : null
           ]}
         >
-          <View style={styles.playBarContainer}>
-            <PlayBar
-              mediaKey={`${mediaKey}`}
-              duration={trackDuration}
-              track={track}
-              user={user}
-              onPress={onDrawerOpen}
-              translationAnim={translationAnim}
-            />
-          </View>
+          {floating ? null : playBar}
           <Logo translationAnim={translationAnim} />
           <View style={styles.titleBarContainer}>
             <TitleBar onClose={onClose} />
@@ -374,14 +483,39 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             />
           </View>
           <View style={styles.scrubberContainer}>
-            <Scrubber
-              mediaKey={`${mediaKey}`}
-              isPlaying={isPlaying && !isBuffering}
-              onPressIn={onPressScrubberIn}
-              onPressOut={onPressScrubberOut}
-              duration={trackDuration}
-            />
+            {isWaveformEnabled && trackId ? (
+              <WaveformScrubber
+                trackId={trackId}
+                duration={trackDuration}
+                mediaKey={`${mediaKey}`}
+                isOpen={isOpen}
+                isPlaying={isPlaying && !isBuffering}
+                comments={timestampedComments}
+                onPressIn={onPressScrubberIn}
+                onPressOut={onPressScrubberOut}
+              />
+            ) : (
+              <Scrubber
+                mediaKey={`${mediaKey}`}
+                isPlaying={isPlaying && !isBuffering}
+                onPressIn={onPressScrubberIn}
+                onPressOut={onPressScrubberOut}
+                duration={trackDuration}
+                markers={commentMarkers}
+              />
+            )}
           </View>
+          {isNowPlayingCommentsEnabled && trackId ? (
+            <CommentBubble
+              trackId={trackId}
+              comments={timestampedComments}
+              isActive={isOpen && isPlaying && !isBuffering}
+              mediaKey={`${mediaKey}`}
+            />
+          ) : null}
+          {isWaveformEnabled ? (
+            <View style={styles.commentBubbleSpace} />
+          ) : null}
           <View style={styles.controlsContainer}>
             <AudioControls
               onNext={onNext}
@@ -393,7 +527,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             />
             <ActionsBar track={track} />
           </View>
-        </View>
+        </Animated.View>
       </Drawer>
     </Reanimated.View>
   )

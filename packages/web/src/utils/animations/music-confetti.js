@@ -95,7 +95,7 @@ class Particle {
       const heightMultipler = this.y / 100
 
       // Draw the letter
-      ctx.font = "14px 'Inter Variable', Inter, sans-serif"
+      ctx.font = '14px Avenir Next LT Pro'
       ctx.fillStyle = 'rgba(12, 241, 12, 1)'
       ctx.fillText(this.randomLetter, 0, 0)
 

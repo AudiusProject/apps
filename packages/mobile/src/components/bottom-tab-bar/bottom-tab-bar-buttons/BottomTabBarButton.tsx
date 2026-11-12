@@ -18,6 +18,8 @@ export type BaseBottomTabBarButtonProps = {
   onPress: (isActive: boolean, routeName: string, routeKey: string) => void
   onLongPress: () => void
   routeKey: string
+  /** Laid out inside the floating glass pill rather than the classic bar. */
+  floating?: boolean
 }
 
 export type BottomTabBarButtonProps = BaseBottomTabBarButtonProps & {
@@ -30,6 +32,11 @@ const styles = StyleSheet.create({
     width: '20%',
     alignItems: 'center',
     paddingTop: BOTTOM_BAR_TOP_PADDING
+  },
+  floatingRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   iconWrapper: {
     width: 28,
@@ -49,6 +56,7 @@ export const BottomTabBarButton = (props: BottomTabBarButtonProps) => {
     isActive,
     onPress,
     onLongPress,
+    floating,
     children,
     colorKeypaths: keypaths,
     ...lottieProps
@@ -101,12 +109,13 @@ export const BottomTabBarButton = (props: BottomTabBarButtonProps) => {
       onPress={handlePress}
       onLongPress={handleLongPress}
       pointerEvents='box-only'
-      style={styles.root}
+      style={floating ? styles.floatingRoot : styles.root}
     >
       {({ pressed }) => {
         return (
           <>
-            {pressed ? (
+            {/* The glass gives its own press feedback when floating. */}
+            {pressed && !floating ? (
               <LinearGradient
                 style={styles.underlay}
                 colors={[color.neutral.n100, color.neutral.n25]}

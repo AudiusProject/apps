@@ -16,7 +16,7 @@ export type TrendingTabScreenParamList = AppTabScreenParamList & {
 // — the switch from native-bar positioning to custom-header positioning causes
 // a visible double-shift of the content.
 const renderTrendingHeader = () => (
-  <MobileRootHeader title='Trending Tracks' showDivider={false}>
+  <MobileRootHeader title='Trending Tracks' showDivider={false} hasSubHeader>
     <TrendingFilterButton />
   </MobileRootHeader>
 )

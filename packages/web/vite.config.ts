@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 import fixReactVirtualized from 'esbuild-plugin-react-virtualized'
 import { visualizer } from 'rollup-plugin-visualizer'
 import vike from 'vike/plugin'

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import { useCurrentAccountUser, useUserByParams } from '@audius/common/api'
+import { useIsManagedAccount } from '@audius/common/hooks'
 import { FollowSource, statusIsNotFinalized } from '@audius/common/models'
 import {
   chatActions,
@@ -54,6 +55,8 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
   const profileUserId = user_id
   const { canCreateChat } = useCanCreateChat(profileUserId)
   const chatPermissionStatus = useSelector(getChatPermissionsStatus)
+  // DMs and token transfers aren't available while managing another account
+  const isManagedAccount = useIsManagedAccount()
 
   useEffect(() => {
     dispatch(fetchBlockees())
@@ -80,7 +83,7 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
       <EditProfileButton />
     ) : (
       <>
-        {!isOwner ? (
+        {!isOwner && !isManagedAccount ? (
           statusIsNotFinalized(chatPermissionStatus) ? (
             <Skeleton width={32} height={32} />
           ) : canCreateChat ? (
@@ -89,7 +92,7 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
             <MessageLockedButton userId={user_id} />
           )
         ) : null}
-        {!isOwner ? <SendCoinsButton /> : null}
+        {!isOwner && !isManagedAccount ? <SendCoinsButton /> : null}
         {does_current_user_follow ? <SubscribeButton userId={user_id} /> : null}
         <FollowButton
           userId={user_id}

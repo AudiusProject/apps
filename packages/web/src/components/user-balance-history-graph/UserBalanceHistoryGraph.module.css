@@ -22,7 +22,7 @@
 }
 
 .tooltipDate {
-  font-family: var(--harmony-font-family);
+  font-family: 'Avenir Next LT Pro', sans-serif;
   font-size: 12px;
   font-weight: 700;
   line-height: 16px;
@@ -31,7 +31,7 @@
 }
 
 .tooltipValue {
-  font-family: var(--harmony-font-family);
+  font-family: 'Avenir Next LT Pro', sans-serif;
   font-size: 18px;
   font-weight: 700;
   line-height: 24px;

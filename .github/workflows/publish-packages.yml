@@ -71,7 +71,7 @@ jobs:
       - name: Create concatenated patch file
         id: patch-file
         run: |
-          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
           echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache node modules

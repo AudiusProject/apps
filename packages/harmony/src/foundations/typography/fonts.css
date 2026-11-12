@@ -1,17 +1,12 @@
 /**
  * Audius Type System
  *
- * When using, ensure the Inter Variable and Bricolage Grotesque Variable
- * font-faces are available (web loads them from @fontsource-variable).
- * Without them, harmony.css falls back to its bundled Avenir.
+ * When using, ensure that the Avenir Next LT Pro font-face is available.
  */
 :root,
 root {
-  --harmony-font-family: 'Inter Variable', Inter, 'Avenir Next LT Pro',
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --harmony-font-family-display: 'Bricolage Grotesque Variable',
-    'Bricolage Grotesque', 'Inter Variable', Inter, 'Avenir Next LT Pro',
-    sans-serif;
+  --harmony-font-family: 'Avenir Next LT Pro', 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
 
   /* Font Sizes */
   --harmony-font-2xs: 10px;

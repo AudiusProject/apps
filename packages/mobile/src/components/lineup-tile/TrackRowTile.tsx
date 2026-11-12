@@ -37,6 +37,7 @@ import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
 import { setVisibility } from 'app/store/drawers/slice'
 
 import { TrackImage } from '../image/TrackImage'
+import { TrackDownloadStatusIndicator } from '../offline-downloads/TrackDownloadStatusIndicator'
 
 import { LineupTileAccessStatus } from './LineupTileAccessStatus'
 import { useOpenTrackOverflow } from './useOpenTrackOverflow'
@@ -65,7 +66,12 @@ const overlayStyle = {
   backgroundColor: 'rgba(0,0,0,0.45)'
 }
 
-const TrackRowTileComponent = (props: TrackTileProps) => {
+export type TrackRowTileProps = TrackTileProps & {
+  /** Shows the offline download state after the title (Library). */
+  showDownloadStatus?: boolean
+}
+
+const TrackRowTileComponent = (props: TrackRowTileProps) => {
   const {
     id,
     uid,
@@ -74,6 +80,7 @@ const TrackRowTileComponent = (props: TrackTileProps) => {
     togglePlay,
     onPress,
     showArtistPick = false,
+    showDownloadStatus = false,
     source
   } = props
 
@@ -209,6 +216,11 @@ const TrackRowTileComponent = (props: TrackTileProps) => {
         </>
       }
       title={track.title}
+      titleAdornment={
+        showDownloadStatus ? (
+          <TrackDownloadStatusIndicator trackId={track.track_id} size='s' />
+        ) : undefined
+      }
       subtitle={
         <Flex row alignItems='center' gap='xs'>
           <Text

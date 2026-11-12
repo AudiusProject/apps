@@ -3,11 +3,15 @@ import { useCallback } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import type { UserMetadata } from '@audius/common/models'
 import { SquareSizes, WidthSizes } from '@audius/common/models'
-import { MAX_BIO_LENGTH } from '@audius/common/services'
+import {
+  MAX_BIO_LENGTH,
+  MAX_DISPLAY_NAME_LENGTH
+} from '@audius/common/services'
 import { profilePageActions } from '@audius/common/store'
 import type { FormikProps } from 'formik'
 import { Formik } from 'formik'
-import { pick } from 'lodash'
+import { isEmpty, pick } from 'lodash'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { useDispatch } from 'react-redux'
 
 import {
@@ -17,36 +21,42 @@ import {
   IconTikTok,
   IconX
 } from '@audius/harmony-native'
-import { ScrollView } from 'app/components/core'
-import { TextField } from 'app/components/fields'
+import { useBottomBarInset } from 'app/components/core/BottomBarInsetContext'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { useProfilePicture } from 'app/components/image/UserImage'
 import { useNavigation } from 'app/hooks/useNavigation'
-import { makeStyles } from 'app/styles'
 import type { Image } from 'app/types/image'
 import { isImageUriSource } from 'app/utils/image'
 
 import { FanClubFlairSelector } from './FanClubFlairSelector'
+import { FormGroup } from './FormGroup'
 import { FormScreen } from './FormScreen'
+import { GroupedTextField } from './GroupedTextField'
 import { ProfileHeader } from './ProfileHeader'
-import { ProfileInputCard } from './ProfileInputCard'
 import type { FanClubBadge, ProfileValues, UpdatedProfile } from './types'
 
 const { updateProfile } = profilePageActions
 
-const useStyles = makeStyles(({ spacing }) => ({
-  scrollContent: {
-    paddingTop: spacing(6),
-    paddingHorizontal: 16, // 16px horizontal margin
-    paddingBottom: spacing(24) // Extra padding for bottom action bar
-  }
-}))
+const messages = {
+  profile: 'Profile',
+  social: 'Social',
+  fanClubFlair: 'Fan club flair',
+  name: 'Name',
+  namePlaceholder: 'Your name',
+  bio: 'Bio',
+  bioPlaceholder: 'Tell people about yourself',
+  location: 'Location',
+  locationPlaceholder: 'City, country',
+  handlePlaceholder: 'username',
+  website: 'Website',
+  websitePlaceholder: 'yourwebsite.com'
+}
 
 type EditProfileFormProps = FormikProps<ProfileValues>
 
 const EditProfileForm = (props: EditProfileFormProps) => {
-  const { handleSubmit, handleReset, errors, values, setFieldValue } = props
-  const styles = useStyles()
+  const { handleSubmit, errors, dirty, values, setFieldValue } = props
+  const bottomBarInset = useBottomBarInset()
 
   const handleFanClubBadgeChange = useCallback(
     (badge: FanClubBadge | null) => {
@@ -56,82 +66,87 @@ const EditProfileForm = (props: EditProfileFormProps) => {
   )
 
   return (
-    <FormScreen onReset={handleReset} onSubmit={handleSubmit} errors={errors}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Flex direction='column' gap='l' w='100%'>
-          {/* Profile Header with Cover Photo, Avatar, and Display Name */}
+    <FormScreen onSubmit={handleSubmit} canSubmit={dirty && isEmpty(errors)}>
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps='handled'
+        contentContainerStyle={{
+          padding: 16,
+          paddingBottom: bottomBarInset + 32
+        }}
+      >
+        <Flex gap='xl' w='100%'>
           <ProfileHeader />
 
-          {/* About You Section */}
-          <ProfileInputCard title='About You'>
-            <Flex direction='column' gap='xs'>
-              <TextField
-                name='bio'
-                label='Bio'
-                placeholder='Tell us about yourself'
-                multiline
-                maxLength={MAX_BIO_LENGTH}
-                noGutter
-              />
-              <TextField
-                name='location'
-                label='Location'
-                placeholder='City, Country'
-                noGutter
-              />
-            </Flex>
-          </ProfileInputCard>
-
-          {/* Fan Club Flair Section */}
-          <ProfileInputCard title='Fan Club Flair'>
-            <FanClubFlairSelector
-              selectedBadge={values.fan_club_badge}
-              onChange={handleFanClubBadgeChange}
+          <FormGroup title={messages.profile}>
+            <GroupedTextField
+              name='name'
+              label={messages.name}
+              placeholder={messages.namePlaceholder}
+              maxLength={MAX_DISPLAY_NAME_LENGTH}
             />
-          </ProfileInputCard>
+            <GroupedTextField
+              name='bio'
+              label={messages.bio}
+              placeholder={messages.bioPlaceholder}
+              maxLength={MAX_BIO_LENGTH}
+              multiline
+            />
+            <GroupedTextField
+              name='location'
+              label={messages.location}
+              placeholder={messages.locationPlaceholder}
+            />
+          </FormGroup>
 
-          {/* Social Handles Section */}
-          <ProfileInputCard title='Social Handles'>
-            <Flex direction='column' gap='xs'>
-              <TextField
-                name='twitter_handle'
-                label='X'
-                placeholder='username'
-                startAdornmentText='@'
-                startIcon={IconX}
-                noGutter
-              />
-              <TextField
-                name='instagram_handle'
-                label='Instagram'
-                placeholder='username'
-                startAdornmentText='@'
-                startIcon={IconInstagram}
-                noGutter
-              />
-              <TextField
-                name='tiktok_handle'
-                label='TikTok'
-                placeholder='username'
-                startAdornmentText='@'
-                startIcon={IconTikTok}
-                noGutter
-              />
-            </Flex>
-          </ProfileInputCard>
-
-          {/* Website Section */}
-          <ProfileInputCard title='Website'>
-            <TextField
+          <FormGroup title={messages.social}>
+            <GroupedTextField
+              name='twitter_handle'
+              label='X'
+              icon={IconX}
+              prefix='@'
+              placeholder={messages.handlePlaceholder}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <GroupedTextField
+              name='instagram_handle'
+              label='Instagram'
+              icon={IconInstagram}
+              prefix='@'
+              placeholder={messages.handlePlaceholder}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <GroupedTextField
+              name='tiktok_handle'
+              label='TikTok'
+              icon={IconTikTok}
+              prefix='@'
+              placeholder={messages.handlePlaceholder}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <GroupedTextField
               name='website'
-              label='Website'
-              placeholder='yourwebsite.com'
-              startIcon={IconLink}
-              noGutter
+              label={messages.website}
+              icon={IconLink}
+              placeholder={messages.websitePlaceholder}
+              autoCapitalize='none'
+              autoCorrect={false}
+              keyboardType='url'
             />
-          </ProfileInputCard>
+          </FormGroup>
+
+          <FormGroup title={messages.fanClubFlair}>
+            <Flex p='l'>
+              <FanClubFlairSelector
+                selectedBadge={values.fan_club_badge}
+                onChange={handleFanClubBadgeChange}
+              />
+            </Flex>
+          </FormGroup>
         </Flex>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </FormScreen>
   )
 }

@@ -12,6 +12,8 @@ import {
   TrackEditFormValues
 } from 'components/edit-track/types'
 
+import { UploadDraftAutosave } from '../components/UploadDraftAutosave'
+
 type UploadTrackFormProps = {
   formState: TrackFormState
   onContinue: (formState: TrackFormState) => void
@@ -76,5 +78,9 @@ export const UploadTrackForm = (props: UploadTrackFormProps) => {
     [tracks, formState, onContinue]
   )
 
-  return <EditTrackForm initialValues={initialValues} onSubmit={onSubmit} />
+  return (
+    <EditTrackForm initialValues={initialValues} onSubmit={onSubmit}>
+      <UploadDraftAutosave uploadType={formState.uploadType} />
+    </EditTrackForm>
+  )
 }

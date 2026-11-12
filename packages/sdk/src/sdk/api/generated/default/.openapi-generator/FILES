@@ -204,6 +204,8 @@ models/ListenCount.ts
 models/ListenStreakReminderNotification.ts
 models/ListenStreakReminderNotificationAction.ts
 models/ListenStreakReminderNotificationActionData.ts
+models/ListenerCitiesResponse.ts
+models/ListenerCity.ts
 models/ManagedUser.ts
 models/ManagedUsersResponse.ts
 models/ManagersResponse.ts

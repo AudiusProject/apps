@@ -211,7 +211,11 @@ export const FeedScreen = () => {
   // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
-      <MobileRootHeader title={messages.header} showDivider={false}>
+      <MobileRootHeader
+        title={messages.header}
+        showDivider={false}
+        hasSubHeader
+      >
         {isForYou ? null : <FeedFilterButton />}
       </MobileRootHeader>
     ),
@@ -259,11 +263,18 @@ export const FeedScreen = () => {
   return (
     <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
-        {/* Pinned into the floating glass stack directly under the title, so
-            the lineups scroll behind one continuous frosted surface rather
-            than sliding under the header and colliding with an opaque tab
-            row. */}
-        <FloatingSubHeader>
+        <FloatingSubHeader
+          title={messages.header}
+          compact={
+            <FeedTabs
+              currentTab={feedTab}
+              onSelectTab={handleSelectTab}
+              size='small'
+            >
+              {isForYou ? null : <FeedFilterButton size='small' />}
+            </FeedTabs>
+          }
+        >
           <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
         </FloatingSubHeader>
         {/* Horizontal pager: swipe left/right toggles between For You and

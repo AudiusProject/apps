@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useUser } from '@audius/common/api'
 import { FanClubTextPostNotification as FanClubTextPostNotificationType } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import { getCoinLogoUrl, route } from '@audius/common/utils'
 import { Artwork, Flex, IconFanClub } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -50,7 +50,12 @@ export const FanClubTextPostNotification = (
             <ProfilePicture user={user} />
           </Flex>
           {user.fan_club_badge?.logo_uri ? (
-            <Artwork src={user.fan_club_badge.logo_uri} hex w={40} h={40} />
+            <Artwork
+              src={getCoinLogoUrl(user.fan_club_badge.logo_uri, 40)}
+              hex
+              w={40}
+              h={40}
+            />
           ) : null}
         </Flex>
       </NotificationHeader>
