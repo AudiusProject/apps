@@ -4,10 +4,10 @@ import { NavigationPrompt } from 'components/navigation-prompt/NavigationPrompt'
 
 const messages = {
   uploadNavigationPrompt: {
-    title: 'Discard upload?',
-    body: "Are you sure you want to leave this page?\nAny changes you've made will be lost.",
-    cancel: 'Cancel',
-    proceed: 'Discard'
+    title: 'Leave upload?',
+    body: 'Your upload is saved as a draft on this device. Come back to the upload page to pick up where you left off.',
+    cancel: 'Stay',
+    proceed: 'Leave'
   },
   editNavigationPrompt: {
     title: 'Discard Edit?',

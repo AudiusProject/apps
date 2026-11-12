@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 
 import { DownloadQuality } from '@audius/common/models'
 import { TrackMetadataFormSchema } from '@audius/common/schemas'
@@ -64,10 +71,10 @@ const messages = {
   next: 'Next Track',
   preview: 'Preview',
   uploadNavigationPrompt: {
-    title: 'Discard upload?',
-    body: "Are you sure you want to leave this page?\nAny changes you've made will be lost.",
-    cancel: 'Cancel',
-    proceed: 'Discard'
+    title: 'Leave upload?',
+    body: 'Your upload is saved as a draft on this device. Come back to the upload page to pick up where you left off.',
+    cancel: 'Stay',
+    proceed: 'Leave'
   },
   editNavigationPrompt: {
     title: 'Discard Edit?',
@@ -83,6 +90,8 @@ type EditTrackFormProps = {
   onSubmit: (values: TrackEditFormValues) => void | Promise<void>
   hideContainer?: boolean
   disableNavigationPrompt?: boolean
+  /** Rendered inside the Formik context, e.g. a draft autosaver. */
+  children?: ReactNode
 }
 
 const EditFormValidationSchema = z.object({
@@ -90,8 +99,13 @@ const EditFormValidationSchema = z.object({
 })
 
 export const EditTrackForm = (props: EditTrackFormProps) => {
-  const { initialValues, onSubmit, hideContainer, disableNavigationPrompt } =
-    props
+  const {
+    initialValues,
+    onSubmit,
+    hideContainer,
+    disableNavigationPrompt,
+    children
+  } = props
   const initialTrackValues = initialValues.trackMetadatas[0] ?? {}
   const isUpload = initialTrackValues.track_id === undefined
   const initiallyHidden = initialTrackValues.is_unlisted
@@ -156,6 +170,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
               disableNavigationPrompt={disableNavigationPrompt}
               updatedArtwork={initialTrackValues.artwork}
             />
+            {children}
           </>
         )}
       </Formik>
