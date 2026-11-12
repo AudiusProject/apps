@@ -20,9 +20,9 @@ import {
 const messages = {
   price: {
     tooLow: (minPrice: number) =>
-      `Price must be at least $${USDC(minPrice / 100).toLocaleString()}.`,
+      `Price must be at least ${USDC(minPrice / 100).toLocaleString()}.`,
     tooHigh: (maxPrice: number) =>
-      `Price must be less than $${USDC(maxPrice / 100).toLocaleString()}.`
+      `Price must be less than ${USDC(maxPrice / 100).toLocaleString()}.`
   },
   preview: {
     tooEarly: 'Preview must start during the track.',

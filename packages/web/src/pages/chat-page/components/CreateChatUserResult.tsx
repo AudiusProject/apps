@@ -9,6 +9,7 @@ import {
 } from '@audius/common/store'
 import { removeNullable, route } from '@audius/common/utils'
 import {
+  Checkbox,
   IconButton,
   IconKebabHorizontal,
   IconMessage,
@@ -37,7 +38,8 @@ const messages = {
   unblock: 'Unblock Messages',
   notPermitted: 'Cannot Be Messaged',
   unblockRequired: 'Blocked',
-  followRequired: 'Follow to Message'
+  followRequired: 'Follow to Message',
+  select: (name: string) => `Add ${name} to group`
 }
 
 type UserResultComposeProps = {
@@ -45,6 +47,14 @@ type UserResultComposeProps = {
   closeParentModal: () => void
   openInboxUnavailableModal: (user: User) => void
   presetMessage?: string
+  // Group selection, only passed when group messages are enabled
+  selection?: {
+    isSelected: boolean
+    // At least one user is selected, so clicking a row toggles it
+    isSelecting: boolean
+    isFull: boolean
+    onToggle: (user: User) => void
+  }
 }
 
 const { blockUser, unblockUser } = chatActions
@@ -91,8 +101,13 @@ const renderCustomChip = (callToAction: ChatPermissionAction) => {
 
 export const CreateChatUserResult = (props: UserResultComposeProps) => {
   const dispatch = useDispatch()
-  const { user, closeParentModal, openInboxUnavailableModal, presetMessage } =
-    props
+  const {
+    user,
+    closeParentModal,
+    openInboxUnavailableModal,
+    presetMessage,
+    selection
+  } = props
   const { data: currentUserId } = useCurrentUserId()
   const blockeeList = useSelector(chatSelectors.getBlockees)
   const isBlockee = blockeeList.includes(user.user_id)
@@ -141,6 +156,14 @@ export const CreateChatUserResult = (props: UserResultComposeProps) => {
         }
   ].filter(removeNullable)
 
+  const canSelect =
+    !!selection && canCreateChat && (selection.isSelected || !selection.isFull)
+  const handleToggle = useCallback(() => {
+    if (canSelect) selection?.onToggle(user)
+  }, [canSelect, selection, user])
+  const handleNameClicked =
+    selection?.isSelecting && canSelect ? handleToggle : handleComposeClicked
+
   if (currentUserId === user.user_id) {
     return null
   }
@@ -152,8 +175,17 @@ export const CreateChatUserResult = (props: UserResultComposeProps) => {
         userId={user.user_id}
         showPopover={false}
         customChips={canCreateChat ? null : renderCustomChip(callToAction)}
-        onClickArtistName={handleComposeClicked}
+        onClickArtistName={handleNameClicked}
       />
+      {selection ? (
+        <Checkbox
+          aria-label={messages.select(user.name)}
+          checked={selection.isSelected}
+          disabled={!canSelect}
+          onChange={handleToggle}
+          css={{ alignSelf: 'center', marginRight: 8 }}
+        />
+      ) : null}
       <PopupMenu
         renderTrigger={renderTrigger}
         items={items}

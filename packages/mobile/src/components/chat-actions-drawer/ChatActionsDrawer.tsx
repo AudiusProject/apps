@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { useIsGroupChat } from '@audius/common/hooks'
 import { chatActions, chatSelectors } from '@audius/common/store'
 import { ChatCategory } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
@@ -23,7 +24,9 @@ const messages = {
   blockMessages: 'Block Messages',
   unblockMessages: 'Unblock Messages',
   reportAbuse: 'Report Abuse',
-  deleteConversation: 'Delete Conversation'
+  deleteConversation: 'Delete Conversation',
+  members: 'Members',
+  leaveGroup: 'Leave Group'
 }
 
 export const ChatActionsDrawer = () => {
@@ -36,6 +39,7 @@ export const ChatActionsDrawer = () => {
   )
   const chat = useSelector((state: AppState) => getChat(state, chatId))
   const category = chat && !chat.is_blast ? (chat.category ?? null) : null
+  const isGroup = useIsGroupChat(chatId)
 
   const closeDrawer = useCallback(() => {
     dispatch(
@@ -83,6 +87,22 @@ export const ChatActionsDrawer = () => {
     dispatch(setChatCategory({ chatId, category: ChatCategory.GENERAL }))
   }, [chatId, closeDrawer, dispatch])
 
+  const handleMembersPress = useCallback(() => {
+    closeDrawer()
+    navigation.push('ChatMembers', { chatId })
+  }, [chatId, closeDrawer, navigation])
+
+  const handleLeavePress = useCallback(() => {
+    closeDrawer()
+    dispatch(
+      setVisibility({
+        drawer: 'LeaveChat',
+        visible: true,
+        data: { chatId }
+      })
+    )
+  }, [chatId, closeDrawer, dispatch])
+
   const handleDeletePress = useCallback(() => {
     closeDrawer()
     dispatch(
@@ -98,10 +118,15 @@ export const ChatActionsDrawer = () => {
     <ActionDrawer
       drawerName={CHAT_ACTIONS_MODAL_NAME}
       rows={[
-        {
-          text: messages.visitProfile,
-          callback: handleVisitProfilePress
-        },
+        isGroup
+          ? {
+              text: messages.members,
+              callback: handleMembersPress
+            }
+          : {
+              text: messages.visitProfile,
+              callback: handleVisitProfilePress
+            },
         ...(category !== ChatCategory.PRIORITY
           ? [
               {
@@ -118,16 +143,26 @@ export const ChatActionsDrawer = () => {
               }
             ]
           : []),
-        {
-          text: doesBlockUser
-            ? messages.unblockMessages
-            : messages.blockMessages,
-          callback: handleBlockMessagesPress
-        },
-        {
-          text: messages.reportAbuse,
-          callback: handleReportPress
-        },
+        ...(isGroup
+          ? [
+              {
+                text: messages.leaveGroup,
+                callback: handleLeavePress,
+                isDestructive: true
+              }
+            ]
+          : [
+              {
+                text: doesBlockUser
+                  ? messages.unblockMessages
+                  : messages.blockMessages,
+                callback: handleBlockMessagesPress
+              },
+              {
+                text: messages.reportAbuse,
+                callback: handleReportPress
+              }
+            ]),
         {
           text: messages.deleteConversation,
           callback: handleDeletePress,

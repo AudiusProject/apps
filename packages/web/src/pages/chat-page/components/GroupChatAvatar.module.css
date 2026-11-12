@@ -1,0 +1,29 @@
+.root {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--harmony-unit-12);
+  height: var(--harmony-unit-12);
+}
+
+.picture {
+  position: absolute;
+  width: var(--harmony-unit-8);
+  height: var(--harmony-unit-8);
+  border: 2px solid var(--harmony-white);
+  border-radius: 50%;
+}
+
+.first {
+  top: 0;
+  left: 0;
+}
+
+.second {
+  right: 0;
+  bottom: 0;
+}
+
+.single {
+  width: var(--harmony-unit-12);
+  height: var(--harmony-unit-12);
+}

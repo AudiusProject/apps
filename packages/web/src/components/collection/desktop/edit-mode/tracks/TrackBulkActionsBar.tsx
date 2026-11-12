@@ -1,17 +1,22 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useTracks } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { toastActions } from '@audius/common/store'
 import {
   Button,
   Flex,
   IconCopy,
+  IconPencil,
   IconTrash,
   Text,
   useTheme
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
+
+import { BulkEditTracksModal } from 'components/bulk-edit-tracks/BulkEditTracksModal'
 
 import { usePlaylistEditMode } from '../PlaylistEditModeContext'
 
@@ -22,6 +27,7 @@ const { toast } = toastActions
 const messages = {
   selected: (n: number) => `${n} selected`,
   copy: 'Copy URLs',
+  editTracks: 'Edit Tracks',
   remove: 'Remove',
   clear: 'Clear',
   selectAll: 'Select all',
@@ -36,14 +42,21 @@ const messages = {
 type Props = {
   collectionId: ID
   orderedTrackIds: ID[]
+  /** Albums only hold the owner's tracks, so they can be bulk edited. */
+  isAlbum?: boolean
 }
 
 export const TrackBulkActionsBar = (props: Props) => {
-  const { collectionId, orderedTrackIds } = props
+  const { collectionId, orderedTrackIds, isAlbum } = props
   const dispatch = useDispatch()
   const { color } = useTheme()
   const editMode = usePlaylistEditMode()
   const selection = useTrackSelection()
+  const { isEnabled: isBulkEditEnabled } = useFeatureFlag(
+    FeatureFlags.BULK_TRACK_EDIT
+  )
+  const canEditTracks = !!isAlbum && isBulkEditEnabled
+  const [isEditTracksOpen, setIsEditTracksOpen] = useState(false)
 
   // Tracks already staged for removal are hidden from the table and should not
   // be re-selected (e.g. by Select all).
@@ -56,6 +69,14 @@ export const TrackBulkActionsBar = (props: Props) => {
     [selectableTrackIds, selection]
   )
   const { data: selectedTracks } = useTracks(selectedIds)
+  const tracksToEdit = useMemo(
+    () =>
+      (selectedTracks ?? []).map(({ track_id, title }) => ({
+        track_id,
+        title
+      })),
+    [selectedTracks]
+  )
 
   const copyUrls = useCallback(async () => {
     if (!selectedTracks?.length) return
@@ -102,6 +123,8 @@ export const TrackBulkActionsBar = (props: Props) => {
   // Keyboard shortcuts: only active while in edit mode
   useEffect(() => {
     if (!editMode.isEditMode || editMode.collectionId !== collectionId) return
+    // The edit modal owns the keyboard while it is open.
+    if (isEditTracksOpen) return
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
       const isInputFocused =
@@ -150,6 +173,7 @@ export const TrackBulkActionsBar = (props: Props) => {
     editMode.isEditMode,
     handleRedo,
     handleUndo,
+    isEditTracksOpen,
     selectableTrackIds,
     removeSelected,
     selection
@@ -158,82 +182,106 @@ export const TrackBulkActionsBar = (props: Props) => {
   if (!editMode.isEditMode || editMode.collectionId !== collectionId) {
     return null
   }
+  // Rendered apart from the bar, which hides once the selection clears.
+  const editTracksModal = canEditTracks ? (
+    <BulkEditTracksModal
+      isOpen={isEditTracksOpen}
+      onClose={() => setIsEditTracksOpen(false)}
+      onUpdated={selection.clear}
+      tracks={tracksToEdit}
+    />
+  ) : null
+
   if (
     selection.count === 0 &&
     !editMode.canUndoRemoval &&
     !editMode.canRedoRemoval
   ) {
-    return null
+    return editTracksModal
   }
 
   return (
-    <Flex
-      data-bulk-actions
-      css={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 4,
-        backgroundColor: color.background.surface1,
-        borderBottom: `1px solid ${color.border.strong}`
-      }}
-      p='m'
-      gap='m'
-      alignItems='center'
-      justifyContent='space-between'
-    >
-      <Flex gap='m' alignItems='center'>
-        <Text variant='body' strength='strong'>
-          {messages.selected(selection.count)}
-        </Text>
-        {selection.count > 0 ? (
-          <Button variant='secondary' size='small' onClick={selection.clear}>
-            {messages.clear}
+    <>
+      <Flex
+        data-bulk-actions
+        css={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 4,
+          backgroundColor: color.background.surface1,
+          borderBottom: `1px solid ${color.border.strong}`
+        }}
+        p='m'
+        gap='m'
+        alignItems='center'
+        justifyContent='space-between'
+      >
+        <Flex gap='m' alignItems='center'>
+          <Text variant='body' strength='strong'>
+            {messages.selected(selection.count)}
+          </Text>
+          {selection.count > 0 ? (
+            <Button variant='secondary' size='small' onClick={selection.clear}>
+              {messages.clear}
+            </Button>
+          ) : null}
+          <Button
+            variant='secondary'
+            size='small'
+            onClick={() => selection.selectAll(selectableTrackIds)}
+          >
+            {messages.selectAll}
           </Button>
-        ) : null}
-        <Button
-          variant='secondary'
-          size='small'
-          onClick={() => selection.selectAll(selectableTrackIds)}
-        >
-          {messages.selectAll}
-        </Button>
+        </Flex>
+        <Flex gap='m' alignItems='center'>
+          <Button
+            variant='secondary'
+            size='small'
+            iconLeft={IconCopy}
+            disabled={selection.count === 0}
+            onClick={copyUrls}
+          >
+            {messages.copy}
+          </Button>
+          {canEditTracks ? (
+            <Button
+              variant='secondary'
+              size='small'
+              iconLeft={IconPencil}
+              disabled={tracksToEdit.length === 0}
+              onClick={() => setIsEditTracksOpen(true)}
+            >
+              {messages.editTracks}
+            </Button>
+          ) : null}
+          <Button
+            variant='destructive'
+            size='small'
+            iconLeft={IconTrash}
+            disabled={selection.count === 0}
+            onClick={removeSelected}
+          >
+            {messages.remove}
+          </Button>
+          <Button
+            variant='secondary'
+            size='small'
+            disabled={!editMode.canUndoRemoval}
+            onClick={handleUndo}
+          >
+            {messages.undo}
+          </Button>
+          <Button
+            variant='secondary'
+            size='small'
+            disabled={!editMode.canRedoRemoval}
+            onClick={handleRedo}
+          >
+            {messages.redo}
+          </Button>
+        </Flex>
       </Flex>
-      <Flex gap='m' alignItems='center'>
-        <Button
-          variant='secondary'
-          size='small'
-          iconLeft={IconCopy}
-          disabled={selection.count === 0}
-          onClick={copyUrls}
-        >
-          {messages.copy}
-        </Button>
-        <Button
-          variant='destructive'
-          size='small'
-          iconLeft={IconTrash}
-          disabled={selection.count === 0}
-          onClick={removeSelected}
-        >
-          {messages.remove}
-        </Button>
-        <Button
-          variant='secondary'
-          size='small'
-          disabled={!editMode.canUndoRemoval}
-          onClick={handleUndo}
-        >
-          {messages.undo}
-        </Button>
-        <Button
-          variant='secondary'
-          size='small'
-          disabled={!editMode.canRedoRemoval}
-          onClick={handleRedo}
-        >
-          {messages.redo}
-        </Button>
-      </Flex>
-    </Flex>
+      {editTracksModal}
+    </>
   )
 }

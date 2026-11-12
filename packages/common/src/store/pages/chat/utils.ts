@@ -19,6 +19,9 @@ export const getChatCategoryKey = (chat: Categorizable): ChatCategoryKey =>
 export const getInboxTabForChat = (chat: Categorizable): InboxTab =>
   chat.category === ChatCategory.GENERAL ? InboxTab.GENERAL : InboxTab.PRIORITY
 
+/** Max members in a group chat, creator included. Matches the api. */
+export const MAX_GROUP_CHAT_MEMBERS = 10
+
 export const makeChatId = (userIds: ID[]) => {
   return userIds
     .map((id) => Id.parse(id))

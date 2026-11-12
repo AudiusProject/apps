@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useCanSendMessage } from '@audius/common/hooks'
+import { useOtherChatUsers } from '@audius/common/api'
+import { useCanSendMessage, useIsGroupChat } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { chatActions, chatSelectors, InboxTab } from '@audius/common/store'
+import { formatGroupChatTitle } from '@audius/common/utils'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 import { useParams, useLocation, useNavigate } from 'react-router'
@@ -47,6 +49,11 @@ export const ChatPage = () => {
   // All hooks must be called before any early returns
   const dispatch = useDispatch()
   const { firstOtherUser, canSendMessage } = useCanSendMessage(currentChatId)
+  const isGroup = useIsGroupChat(currentChatId)
+  const otherUsers = useOtherChatUsers(currentChatId)
+  const chatTitle = isGroup
+    ? formatGroupChatTitle(otherUsers)
+    : firstOtherUser?.name
   const chat = useSelector((state) => getChat(state, currentChatId ?? ''))
 
   const layoutRef = useRef<HTMLDivElement>(null)
@@ -106,10 +113,10 @@ export const ChatPage = () => {
   }, [navigate, location.pathname, presetMessage])
 
   useEffect(() => {
-    if (firstOtherUser && !isMobile) {
+    if (firstOtherUser && !isMobile && !isGroup) {
       dispatch(fetchPermissions({ userIds: [firstOtherUser.user_id] }))
     }
-  }, [dispatch, firstOtherUser, isMobile])
+  }, [dispatch, firstOtherUser, isMobile, isGroup])
 
   if (isMobile) {
     return <MobileChatPage />
@@ -117,9 +124,7 @@ export const ChatPage = () => {
 
   return (
     <Page
-      title={`${firstOtherUser ? firstOtherUser.name + ' •' : ''} ${
-        messages.messages
-      }`}
+      title={`${chatTitle ? chatTitle + ' •' : ''} ${messages.messages}`}
       containerClassName={cn(styles.page, {
         [styles.narrowActiveChat]: isNarrowLayout && !!currentChatId
       })}

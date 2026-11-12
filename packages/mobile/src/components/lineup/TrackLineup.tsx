@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
 })
 
 type LoadingItem = { _loading: true }
-type TrackEntry = { kind: 'track'; trackId: ID; uid: UID }
-type CollectionEntry = { kind: 'collection'; collectionId: ID }
+type TrackEntry = { kind: 'track'; trackId: ID; uid: UID; key: string }
+type CollectionEntry = { kind: 'collection'; collectionId: ID; key: string }
 type Entry = TrackEntry | CollectionEntry
 type RenderItem = Entry | LoadingItem
 
@@ -310,19 +310,31 @@ export const TrackLineup = ({
     ]
   )
 
-  const entries: Entry[] = useMemo(
-    () =>
-      visibleItems.map((item) =>
-        item.type === EntityType.TRACK
-          ? {
-              kind: 'track' as const,
-              trackId: item.id,
-              uid: uidFor(item.id)
-            }
-          : { kind: 'collection' as const, collectionId: item.id }
-      ),
-    [visibleItems, uidFor]
-  )
+  // Keys follow the entity, not its position, so a refetch that reorders the
+  // list moves tiles instead of remounting them. A repeated entity gets a
+  // suffix to keep keys unique.
+  const entries: Entry[] = useMemo(() => {
+    const seen = new Map<string, number>()
+    const keyFor = (base: string) => {
+      const count = seen.get(base) ?? 0
+      seen.set(base, count + 1)
+      return count === 0 ? base : `${base}-${count}`
+    }
+    return visibleItems.map((item) =>
+      item.type === EntityType.TRACK
+        ? {
+            kind: 'track' as const,
+            trackId: item.id,
+            uid: uidFor(item.id),
+            key: keyFor(`track-${item.id}`)
+          }
+        : {
+            kind: 'collection' as const,
+            collectionId: item.id,
+            key: keyFor(`collection-${item.id}`)
+          }
+    )
+  }, [visibleItems, uidFor])
 
   // Synchronous "load more was triggered" flag — set the moment the scroll
   // handler fires so skeletons render on the next frame, without waiting for
@@ -342,10 +354,12 @@ export const TrackLineup = ({
 
   const sections: Section[] = useMemo(() => {
     const getSkeletonCount = () => {
-      if (entries.length === 0 && isPending) {
+      if (entries.length === 0 && (isPending || isFetching)) {
         return Math.min(maxEntries, initialPageSize ?? pageSize)
       }
-      if (isFetching || isLoadMoreTriggered) {
+      // Only a load-more gets trailing skeletons. A background refetch
+      // replaces the list in place.
+      if (isLoadMoreTriggered) {
         return Math.min(maxEntries, pageSize)
       }
       return 0
@@ -492,10 +506,7 @@ export const TrackLineup = ({
         stickySectionHeadersEnabled={false}
         keyExtractor={(item: any, index: number) => {
           if ((item as LoadingItem)._loading) return `skeleton-${index}`
-          const entry = item as Entry
-          return entry.kind === 'track'
-            ? `track-${entry.uid}-${index}`
-            : `collection-${entry.collectionId}-${index}`
+          return (item as Entry).key
         }}
         renderItem={renderItem}
         scrollIndicatorInsets={{ right: Number.MIN_VALUE }}

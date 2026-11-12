@@ -3,6 +3,7 @@ import {
   ChatCategory,
   HashId,
   Id,
+  makeGroupChatId,
   OptionalHashId,
   OptionalId,
   type ChatMessage,
@@ -93,13 +94,19 @@ const {
   fetchLinkUnfurl,
   fetchLinkUnfurlSucceeded,
   deleteChat,
+  leaveChat,
   deleteChatSucceeded,
   setChatCategory,
   setChatCategorySucceeded,
   setChatCategoryFailed
 } = chatActions
-const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
-  chatSelectors
+const {
+  getChatsSummary,
+  getChat,
+  getChats,
+  getUnfurlMetadata,
+  getNonOptimisticChat
+} = chatSelectors
 const { toast } = toastActions
 const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
@@ -394,7 +401,7 @@ function* doSetMessageReaction(action: ReturnType<typeof setMessageReaction>) {
   }
 }
 
-function* doCreateChat(action: ReturnType<typeof createChat>) {
+export function* doCreateChat(action: ReturnType<typeof createChat>) {
   const { userIds, skipNavigation, presetMessage, replaceNavigation } =
     action.payload
   try {
@@ -404,8 +411,23 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
     if (!currentUserId) {
       throw new Error('User not found')
     }
-    // Try to get existing chat:
-    const chatId = makeChatId([currentUserId, ...userIds])
+    // Groups get a new random id unless one with exactly these members exists
+    const isGroup = userIds.length > 1
+    let chatId = makeChatId([currentUserId, ...userIds])
+    if (isGroup) {
+      const memberKey = makeChatId([currentUserId, ...userIds])
+      const chats = yield* select(getChats)
+      const existingGroup = chats.find(
+        (c) =>
+          !c.is_blast &&
+          c.is_group &&
+          c.chat_members
+            .map((m) => m.user_id)
+            .sort()
+            .join(':') === memberKey
+      )
+      chatId = existingGroup?.chat_id ?? makeGroupChatId()
+    }
 
     // Optimistically go to the chat. If we fail to create it, we'll toast
     if (!skipNavigation) {
@@ -420,7 +442,8 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
       // Create new chat
       yield* call([sdk.chats, sdk.chats.create], {
         userId: Id.parse(currentUserId),
-        invitedUserIds: userIds.map((id) => Id.parse(id))
+        invitedUserIds: userIds.map((id) => Id.parse(id)),
+        chatId: isGroup ? chatId : undefined
       })
 
       const res = yield* call([sdk.chats, sdk.chats.get], { chatId })
@@ -442,6 +465,18 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
         openInboxUnavailableModal({
           userId: userIds[0],
           presetMessage
+        })
+      )
+    } else if (userIds.length > 1) {
+      // Back out of the optimistic navigation to a chat that doesn't exist
+      if (!skipNavigation) {
+        yield* put(goToChat({}))
+      }
+      yield* put(
+        toast({
+          type: 'error',
+          content:
+            "Couldn't create the group. Someone in it may not accept messages from you."
         })
       )
     } else {
@@ -649,7 +684,7 @@ function* doFetchChat({ chatId }: { chatId: string }) {
   }
 }
 
-function* doFetchChatIfNecessary(args: { chatId: string }) {
+export function* doFetchChatIfNecessary(args: { chatId: string }) {
   const { chatId } = args
   const existingChat = yield* select((state) => getChat(state, chatId))
   if (!existingChat) {
@@ -788,6 +823,28 @@ function* doDeleteChat(action: ReturnType<typeof deleteChat>) {
   }
 }
 
+export function* doLeaveChat(action: ReturnType<typeof leaveChat>) {
+  const { chatId } = action.payload
+  try {
+    const audiusSdk = yield* getContext('audiusSdk')
+    const sdk = yield* call(audiusSdk)
+    yield* call([sdk.chats, sdk.chats.leave], { chatId })
+    yield* put(goToChat({}))
+    // Wait for render, as in doDeleteChat
+    yield* delay(1)
+    yield* put(deleteChatSucceeded({ chatId }))
+    yield* put(toast({ content: 'You left the group' }))
+  } catch (e) {
+    yield* put(
+      toast({
+        type: 'error',
+        content: "Couldn't leave the group. Please try again."
+      })
+    )
+    console.error('Chats', e as Error)
+  }
+}
+
 function* doLogError({ payload: { error } }: ReturnType<typeof logError>) {
   console.error(error)
 }
@@ -880,6 +937,10 @@ function* watchDeleteChat() {
   yield takeEvery(deleteChat, doDeleteChat)
 }
 
+function* watchLeaveChat() {
+  yield takeEvery(leaveChat, doLeaveChat)
+}
+
 export function* doSetChatCategory(action: ReturnType<typeof setChatCategory>) {
   const { chatId, category } = action.payload
   try {
@@ -943,6 +1004,7 @@ export const sagas = () => {
     watchFetchPermissions,
     watchFetchLinkUnfurlMetadata,
     watchDeleteChat,
+    watchLeaveChat,
     watchSetChatCategory,
     watchLogError
   ]

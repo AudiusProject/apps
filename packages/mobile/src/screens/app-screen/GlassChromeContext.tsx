@@ -34,8 +34,8 @@ type GlassChromeContextValue = {
   directionAnchorY: SharedValue<number>
 }
 
-/** Header capsule (52) plus its top and bottom margins. */
-const ESTIMATED_HEADER_ROW_HEIGHT = 64
+/** Avatar/title row: 32 line height plus 12 above and below. */
+const ESTIMATED_HEADER_ROW_HEIGHT = 56
 
 /**
  * Distance (px) the user must move in one direction before the chrome flips
@@ -45,10 +45,19 @@ const ESTIMATED_HEADER_ROW_HEIGHT = 64
 const DIRECTION_THRESHOLD = 6
 
 /**
- * Gap between the status bar and a pinned sub-header, so the status bar fade
- * ends before the pill bar's glass starts.
+ * A compact pill fades in from this far before its in-flow row has scrolled
+ * away until this far after, so the two barely overlap.
  */
-export const SUB_HEADER_PIN_GAP = 8
+const COMPACT_FADE_BEFORE = 20
+const COMPACT_FADE_AFTER = 8
+
+/** 0..1 progress of a compact pill whose in-flow row is gone at `end`. */
+const compactFadeProgress = (scrollY: number, end: number) => {
+  'worklet'
+  const start = end - COMPACT_FADE_BEFORE
+  const t = (scrollY - start) / (COMPACT_FADE_BEFORE + COMPACT_FADE_AFTER)
+  return Math.min(1, Math.max(0, t))
+}
 
 // Long enough for the tab bar's collapse to read as a morph rather than a cut.
 const HIDE_TIMING = {
@@ -193,25 +202,39 @@ export const useGlassScrollY = () => useGlassChrome().scrollY
 export const useChromeHiddenProgress = () => useGlassChrome().hidden
 
 /**
- * How far the root header has scrolled up with the list, capped once it is
- * fully off screen. Negative during overscroll so it follows the rubber band.
+ * How far the header stack (root header + sub-header) has scrolled up with
+ * the list, capped once it is fully off screen. Negative during overscroll so
+ * it follows the rubber band.
  */
 export const useHeaderScrollOffset = () => {
   const scrollY = useGlassScrollY()
-  const { headerHeight } = useGlassChrome()
-  return useDerivedValue(() => Math.min(scrollY.value, headerHeight))
+  const { headerHeight, subHeaderHeight } = useGlassChrome()
+  const max = headerHeight + subHeaderHeight
+  return useDerivedValue(() => Math.min(scrollY.value, max))
 }
 
 /**
- * How far a sub-header has scrolled up with the list. It stops just under the
- * status bar and stays pinned there.
+ * 0 while the title row is on screen, 1 once it has scrolled away. Drives the
+ * compact title pill, which finishes forming as the row leaves.
  */
-export const useSubHeaderScrollOffset = () => {
+export const useCompactTitleProgress = () => {
   const scrollY = useGlassScrollY()
   const { headerHeight } = useGlassChrome()
   const insets = useSafeAreaInsets()
-  const pinOffset = headerHeight - insets.top - SUB_HEADER_PIN_GAP
-  return useDerivedValue(() => Math.min(scrollY.value, pinOffset))
+  const end = headerHeight - insets.top
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
+}
+
+/**
+ * Same as `useCompactTitleProgress`, but for the compact controls under the
+ * pill, which form as the in-flow sub-header row leaves.
+ */
+export const useCompactControlsProgress = () => {
+  const scrollY = useGlassScrollY()
+  const { headerHeight, subHeaderHeight } = useGlassChrome()
+  const insets = useSafeAreaInsets()
+  const end = headerHeight - insets.top + subHeaderHeight
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
 }
 
 /**

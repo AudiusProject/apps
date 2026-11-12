@@ -1,6 +1,6 @@
 import { memo, useCallback, useRef, useState } from 'react'
 
-import { useCurrentUserId, useUsers } from '@audius/common/api'
+import { useCurrentUserId, useUser, useUsers } from '@audius/common/api'
 import { useCanSendMessage } from '@audius/common/hooks'
 import { Status, ChatMessageWithExtras } from '@audius/common/models'
 import { chatActions, chatSelectors } from '@audius/common/store'
@@ -9,13 +9,14 @@ import {
   isCollectionUrl,
   isTrackUrl
 } from '@audius/common/utils'
-import { Flex, IconError, IconPlus } from '@audius/harmony'
+import { Flex, IconError, IconPlus, Text } from '@audius/harmony'
 import { HashId, Id, OptionalHashId, ReactionTypes } from '@audius/sdk'
 import cn from 'classnames'
 import { find } from 'linkifyjs'
 import { useDispatch } from 'react-redux'
 
 import { useSelector } from 'common/hooks/useSelector'
+import { ProfilePicture } from 'components/notification/Notification/components/ProfilePicture'
 import { reactionMap } from 'components/notification/Notification/components/Reaction'
 import { UserGeneratedTextV2 } from 'components/user-generated-text/UserGeneratedTextV2'
 
@@ -36,6 +37,9 @@ type ChatMessageListItemProps = {
   chatId: string
   message: ChatMessageWithExtras
   hasTail: boolean
+  // Group chats show who sent each run of messages
+  isGroup?: boolean
+  isFirstInRun?: boolean
 }
 
 const messages = {
@@ -46,7 +50,7 @@ const messages = {
 export const ChatMessageListItem = memo(function ChatMessageListItem(
   props: ChatMessageListItemProps
 ) {
-  const { chatId, message, hasTail } = props
+  const { chatId, message, hasTail, isGroup, isFirstInRun } = props
 
   // Refs
   const reactionButtonRef = useRef<HTMLDivElement>(null)
@@ -62,11 +66,13 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   const { byId: reactionUsers } = useUsers(
     message.reactions?.map((r) => HashId.parse(r.user_id))
   )
+  const senderUserId = HashId.parse(message.sender_user_id)
+  const isAuthor = userId === senderUserId
+  const showSender = !!isGroup && !isAuthor
+  const { data: sender } = useUser(showSender ? senderUserId : null)
   const chat = useSelector((state) => getChat(state, chatId ?? ''))
 
   // Derived
-  const senderUserId = HashId.parse(message.sender_user_id)
-  const isAuthor = userId === senderUserId
   const links = find(message.message)
   const link = links.filter((link) => link.type === 'url' && link.isLink)[0]
   const linkValue = link?.value
@@ -199,79 +205,107 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
     <Flex
       className={cn(styles.root, {
         [styles.isAuthor]: isAuthor,
-        [styles.hasReaction]: !hasTail && message.reactions?.length > 0
+        [styles.hasReaction]: !hasTail && message.reactions?.length > 0,
+        [styles.groupMessage]: showSender
       })}
     >
+      {showSender && isFirstInRun && sender ? (
+        <Text
+          variant='body'
+          size='xs'
+          color='subdued'
+          className={styles.senderName}
+        >
+          {sender.name}
+        </Text>
+      ) : null}
       <Flex
-        ref={bubbleRef}
-        className={cn(styles.bubble, {
-          [styles.nonInteractive]: !canSendMessage,
-          [styles.hideMessage]: hideMessage
-        })}
+        gap='s'
+        alignItems='flex-end'
+        css={{ maxWidth: '100%', minWidth: 0 }}
       >
-        <Flex className={styles.bubbleCorners}>
-          <Flex column className={styles.bubbleContent}>
-            <FanClubHeader
-              userId={senderUserId}
-              audience={message.audience}
-              className={styles.fanClubHeader}
-            />
-            {isCollectionUrl(linkValue) ? (
-              <ChatMessagePlaylist
-                className={cn(styles.unfurl, styles.playlistUnfurl)}
-                link={link.value}
-                chatId={chatId}
-                messageId={message.message_id}
-                onEmpty={onUnfurlEmpty}
-                onSuccess={onUnfurlSuccess}
-              />
-            ) : isTrackUrl(linkValue) ? (
-              <ChatMessageTrack
-                className={cn(styles.unfurl, styles.trackUnfurl)}
-                link={link.value}
-                chatId={chatId}
-                messageId={message.message_id}
-                onEmpty={onUnfurlEmpty}
-                onSuccess={onUnfurlSuccess}
-              />
-            ) : link ? (
-              <LinkPreview
-                className={styles.unfurl}
-                href={link.href}
-                chatId={chatId}
-                messageId={message.message_id}
-                onEmpty={onUnfurlEmpty}
-                onSuccess={onUnfurlSuccess}
+        {showSender ? (
+          <Flex className={styles.senderAvatar}>
+            {hasTail && sender ? (
+              <ProfilePicture
+                user={sender}
+                className={styles.senderAvatar}
+                disablePopover
               />
             ) : null}
-            {!hideMessage ? (
-              <Flex
-                ph='l'
-                pb='l'
-                pt={hasRenderedUnfurl ? '8px' : 'l'}
-                className={styles.textWrapper}
-              >
-                <UserGeneratedTextV2
-                  className={styles.text}
-                  color={isAuthor ? 'white' : 'default'}
-                  textAlign='left'
-                  linkProps={{
-                    variant: isAuthor ? 'inverted' : 'visible',
-                    showUnderline: true
-                  }}
-                >
-                  {message.message}
-                </UserGeneratedTextV2>
-              </Flex>
-            ) : null}
-          </Flex>
-        </Flex>
-        {renderReactions()}
-        {hasTail ? (
-          <Flex className={styles.tail}>
-            <ChatTail />
           </Flex>
         ) : null}
+        <Flex
+          ref={bubbleRef}
+          className={cn(styles.bubble, {
+            [styles.nonInteractive]: !canSendMessage,
+            [styles.hideMessage]: hideMessage
+          })}
+        >
+          <Flex className={styles.bubbleCorners}>
+            <Flex column className={styles.bubbleContent}>
+              <FanClubHeader
+                userId={senderUserId}
+                audience={message.audience}
+                className={styles.fanClubHeader}
+              />
+              {isCollectionUrl(linkValue) ? (
+                <ChatMessagePlaylist
+                  className={cn(styles.unfurl, styles.playlistUnfurl)}
+                  link={link.value}
+                  chatId={chatId}
+                  messageId={message.message_id}
+                  onEmpty={onUnfurlEmpty}
+                  onSuccess={onUnfurlSuccess}
+                />
+              ) : isTrackUrl(linkValue) ? (
+                <ChatMessageTrack
+                  className={cn(styles.unfurl, styles.trackUnfurl)}
+                  link={link.value}
+                  chatId={chatId}
+                  messageId={message.message_id}
+                  onEmpty={onUnfurlEmpty}
+                  onSuccess={onUnfurlSuccess}
+                />
+              ) : link ? (
+                <LinkPreview
+                  className={styles.unfurl}
+                  href={link.href}
+                  chatId={chatId}
+                  messageId={message.message_id}
+                  onEmpty={onUnfurlEmpty}
+                  onSuccess={onUnfurlSuccess}
+                />
+              ) : null}
+              {!hideMessage ? (
+                <Flex
+                  ph='l'
+                  pb='l'
+                  pt={hasRenderedUnfurl ? '8px' : 'l'}
+                  className={styles.textWrapper}
+                >
+                  <UserGeneratedTextV2
+                    className={styles.text}
+                    color={isAuthor ? 'white' : 'default'}
+                    textAlign='left'
+                    linkProps={{
+                      variant: isAuthor ? 'inverted' : 'visible',
+                      showUnderline: true
+                    }}
+                  >
+                    {message.message}
+                  </UserGeneratedTextV2>
+                </Flex>
+              ) : null}
+            </Flex>
+          </Flex>
+          {renderReactions()}
+          {hasTail ? (
+            <Flex className={styles.tail}>
+              <ChatTail />
+            </Flex>
+          ) : null}
+        </Flex>
       </Flex>
       {message.status === Status.ERROR ? (
         <Flex

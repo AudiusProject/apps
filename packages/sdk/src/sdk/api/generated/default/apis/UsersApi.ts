@@ -37,6 +37,7 @@ import type {
   GetSupporters,
   GetSupporting,
   HistoryResponse,
+  ListenerCitiesResponse,
   ManagedUsersResponse,
   ManagersResponse,
   MutualFollowersResponse,
@@ -122,6 +123,8 @@ import {
     GetSupportingToJSON,
     HistoryResponseFromJSON,
     HistoryResponseToJSON,
+    ListenerCitiesResponseFromJSON,
+    ListenerCitiesResponseToJSON,
     ManagedUsersResponseFromJSON,
     ManagedUsersResponseToJSON,
     ManagersResponseFromJSON,
@@ -346,6 +349,15 @@ export interface GetGranteeUsersRequest {
     isApproved?: boolean;
     isRevoked?: boolean;
     userId?: string;
+}
+
+export interface GetListenerCitiesRequest {
+    id: string;
+    time?: GetListenerCitiesTimeEnum;
+    limit?: number;
+    userId?: string;
+    encodedDataMessage?: string;
+    encodedDataSignature?: string;
 }
 
 export interface GetManagedUsersRequest {
@@ -1928,6 +1940,64 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getGranteeUsers(params: GetGranteeUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowersResponse> {
         const response = await this.getGranteeUsersRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the cities whose listeners played the user\'s tracks the most. Plays by the user and plays with no known city are not counted. Locations come from the listener\'s IP address and can be wrong for VPN and mobile carrier traffic. Only the user or one of their managers can call this.
+     */
+    async getListenerCitiesRaw(params: GetListenerCitiesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ListenerCitiesResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getListenerCities.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.time !== undefined) {
+            queryParameters['time'] = params.time;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (params.encodedDataMessage !== undefined && params.encodedDataMessage !== null) {
+            headerParameters['Encoded-Data-Message'] = String(params.encodedDataMessage);
+        }
+
+        if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
+            headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/listener_cities`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ListenerCitiesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the cities whose listeners played the user\'s tracks the most. Plays by the user and plays with no known city are not counted. Locations come from the listener\'s IP address and can be wrong for VPN and mobile carrier traffic. Only the user or one of their managers can call this.
+     */
+    async getListenerCities(params: GetListenerCitiesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ListenerCitiesResponse> {
+        const response = await this.getListenerCitiesRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -5373,6 +5443,15 @@ export const GetContestsByUserStatusEnum = {
     All: 'all'
 } as const;
 export type GetContestsByUserStatusEnum = typeof GetContestsByUserStatusEnum[keyof typeof GetContestsByUserStatusEnum];
+/**
+ * @export
+ */
+export const GetListenerCitiesTimeEnum = {
+    Week: 'week',
+    Month: 'month',
+    All: 'all'
+} as const;
+export type GetListenerCitiesTimeEnum = typeof GetListenerCitiesTimeEnum[keyof typeof GetListenerCitiesTimeEnum];
 /**
  * @export
  */

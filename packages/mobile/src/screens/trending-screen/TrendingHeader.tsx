@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 import { TimeRange } from '@audius/common/models'
 import type { Modals, TrendingCategory } from '@audius/common/store'
@@ -37,11 +37,14 @@ type TrendingHeaderProps = {
   /** When false, only the category pills are shown (title row is in native header) */
   showTitleRow?: boolean
   styles?: StylesProp<{ root: ViewStyle }>
+  /** `small` for the compact copy under the collapsed header pill. */
+  size?: 'small' | 'large'
+  /** Extra controls after the category pills. */
+  children?: ReactNode
 }
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
-  // No backgroundColor: inside `FloatingSubHeader` the glass pill bar owns
-  // the fill.
+  // No backgroundColor: `FloatingSubHeader` owns the fill.
   root: {
     borderBottomWidth: 1,
     borderBottomColor: palette.neutralLight8,
@@ -89,7 +92,9 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
     icon: Icon,
     filterModal,
     showTitleRow = true,
-    styles: stylesProp
+    styles: stylesProp,
+    size = 'large',
+    children
   } = props
   const styles = useStyles()
   const dispatch = useDispatch()
@@ -148,14 +153,14 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
       <Flex
         direction='row'
         alignItems='center'
-        gap='xs'
+        gap='s'
         style={showTitleRow ? styles.pillsContainer : undefined}
       >
         {categories.map((cat) => (
           <SelectablePill
             key={cat}
             type='radio'
-            size='large'
+            size={size}
             value={cat}
             label={categoryLabels[cat]}
             isSelected={category === cat}
@@ -163,6 +168,7 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
             disableUnselectAnimation
           />
         ))}
+        {children}
       </Flex>
     </View>
   )

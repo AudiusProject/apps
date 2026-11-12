@@ -29,6 +29,7 @@ import { makeStyles } from 'app/styles'
 import { LibraryTrackRows } from './LibraryTrackRows'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
+import { useLibraryTabChrome } from './useLibraryTabChrome'
 
 const { getSelectedCategoryLocalTrackAdds, getCategory } = libraryPageSelectors
 const { getIsReachable } = reachabilitySelectors
@@ -52,7 +53,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   },
   rowsContainer: {
     flex: 1,
-    marginTop: spacing(3),
     marginBottom: spacing(4),
     marginHorizontal: spacing(3),
     borderWidth: 1,
@@ -96,6 +96,7 @@ function useTracksWithUsers(trackIds: ID[]) {
 export const TracksTab = () => {
   const dispatch = useDispatch()
   const styles = useStyles()
+  const { headerInset, onScroll } = useLibraryTabChrome()
   const isReachable = useSelector(getIsReachable)
   const { isEnabled: isTrackRowsEnabled } = useFeatureFlag(
     FeatureFlags.TRACK_ROWS
@@ -283,27 +284,50 @@ export const TracksTab = () => {
   const shouldShowFilterInput =
     trackUids.length > 0 || filterValue || (isPending && saveCount > 0)
 
+  // Banner and filter ride in the list header so they scroll away with the
+  // page header.
+  const listHeader = (
+    <>
+      <OfflineContentBanner />
+      {shouldShowFilterInput ? (
+        <FilterInput
+          placeholder={messages.inputPlaceholder}
+          onChangeText={handleChangeFilterValue}
+        />
+      ) : null}
+    </>
+  )
+  const listChromeProps = {
+    ListHeaderComponent: listHeader,
+    contentContainerStyle: { paddingTop: headerInset },
+    onScroll,
+    scrollEventThrottle: 16
+  }
+
   const renderBody = () => {
-    if (filteredTrackUids.length === 0 && !isPending) {
-      if (!isReachable) {
-        return (
-          <View style={styles.emptyState}>
-            <NoTracksPlaceholder />
-          </View>
-        )
-      }
+    const isEmpty = filteredTrackUids.length === 0 && !isPending
+    // While filtering, keep the list (and its filter input) mounted with an
+    // empty state inside it, so the input doesn't lose focus mid-typing.
+    if (isEmpty && !filterValue) {
       return (
-        <View style={styles.emptyState}>
-          <EmptyTileCTA
-            message={filterValue ? messages.noResultsText : emptyTabText}
-          />
+        <View style={{ paddingTop: headerInset }}>
+          {listHeader}
+          <View style={styles.emptyState}>
+            {isReachable ? (
+              <EmptyTileCTA message={emptyTabText} />
+            ) : (
+              <NoTracksPlaceholder />
+            )}
+          </View>
         </View>
       )
     }
 
-    if (!showTrackSkeletonList && filteredTrackUids.length === 0) {
-      return null
-    }
+    const listEmpty = isEmpty ? (
+      <View style={styles.emptyState}>
+        <EmptyTileCTA message={messages.noResultsText} />
+      </View>
+    ) : null
 
     if (isTrackRowsEnabled) {
       return (
@@ -320,6 +344,8 @@ export const TracksTab = () => {
             keyboardShouldPersistTaps='handled'
             togglePlay={togglePlay}
             uids={showTrackSkeletonList ? undefined : filteredTrackUids}
+            ListEmptyComponent={listEmpty}
+            {...listChromeProps}
           />
         </View>
       )
@@ -340,21 +366,12 @@ export const TracksTab = () => {
           togglePlay={togglePlay}
           trackItemAction='overflow'
           uids={showTrackSkeletonList ? undefined : filteredTrackUids}
+          ListEmptyComponent={listEmpty}
+          {...listChromeProps}
         />
       </View>
     )
   }
 
-  return (
-    <View style={styles.root}>
-      <OfflineContentBanner />
-      {shouldShowFilterInput ? (
-        <FilterInput
-          placeholder={messages.inputPlaceholder}
-          onChangeText={handleChangeFilterValue}
-        />
-      ) : null}
-      {renderBody()}
-    </View>
-  )
+  return <View style={styles.root}>{renderBody()}</View>
 }

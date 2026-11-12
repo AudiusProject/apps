@@ -1,12 +1,13 @@
 import { memo, useCallback, useState } from 'react'
 
-import { useCurrentUserId } from '@audius/common/api'
+import { useCurrentUserId, useUser } from '@audius/common/api'
 import { useFanClubMessageHeader } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { chatSelectors } from '@audius/common/store'
 import {
   formatMessageDate,
   isCollectionUrl,
+  isFirstInSenderRun,
   isTrackUrl
 } from '@audius/common/utils'
 import { HashId } from '@audius/sdk'
@@ -19,7 +20,11 @@ import { useSelector } from 'react-redux'
 
 import { Flex, spacing, Text } from '@audius/harmony-native'
 import ChatTail from 'app/assets/images/ChatTail.svg'
-import { Pressable, UserGeneratedText } from 'app/components/core'
+import {
+  Pressable,
+  ProfilePicture,
+  UserGeneratedText
+} from 'app/components/core'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
@@ -33,9 +38,12 @@ import { LinkPreview } from './LinkPreview'
 import { ResendMessageButton } from './ResendMessageButton'
 import { REACTION_LONGPRESS_DELAY } from './constants'
 
-const { isIdEqualToReactionsPopupMessageId, getChatMessageById } = chatSelectors
+const { isIdEqualToReactionsPopupMessageId, getChatMessageById, getBlockees } =
+  chatSelectors
 
 const TAIL_HORIZONTAL_OFFSET = 7
+const GROUP_AVATAR_SIZE = 24
+const GROUP_AVATAR_GAP = 10
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   bubble: {
@@ -99,6 +107,17 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   reactionMarginBottom: {
     marginBottom: spacing(2)
   },
+  groupSenderName: {
+    marginTop: spacing(2),
+    marginLeft: GROUP_AVATAR_SIZE + GROUP_AVATAR_GAP + spacing(2)
+  },
+  groupAvatarSlot: {
+    width: GROUP_AVATAR_SIZE,
+    marginRight: GROUP_AVATAR_GAP
+  },
+  groupIndent: {
+    marginLeft: GROUP_AVATAR_SIZE + GROUP_AVATAR_GAP
+  },
   unfurl: {
     width: Dimensions.get('window').width - 48,
     minHeight: 72,
@@ -143,6 +162,10 @@ type ChatMessageListItemProps = {
   onLongPress?: (id: string) => void
   handleClosePopup?: () => void
   itemsRef?: any
+  /** Group chats show sender names and avatars on others' messages. */
+  isGroup?: boolean
+  /** The next older message, used to find the start of a sender run. */
+  previousMessageId?: string
 }
 
 export const ChatMessageListItem = memo(function ChatMessageListItem(
@@ -155,7 +178,9 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
     style: styleProp,
     onLongPress,
     handleClosePopup,
-    itemsRef
+    itemsRef,
+    isGroup = false,
+    previousMessageId
   } = props
   const styles = useStyles()
   const { data: userId } = useCurrentUserId()
@@ -164,6 +189,21 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   )
   const senderUserId = message ? HashId.parse(message.sender_user_id) : null
   const isAuthor = senderUserId === userId
+  const isGroupOther = isGroup && !isAuthor
+  const previousMessage = useSelector((state) =>
+    isGroupOther && previousMessageId
+      ? getChatMessageById(state, chatId, previousMessageId)
+      : undefined
+  )
+  const { data: senderName } = useUser(isGroupOther ? senderUserId : null, {
+    select: (user) => user.name
+  })
+  const isHiddenSender = useSelector(
+    (state) =>
+      isGroupOther &&
+      !!senderUserId &&
+      getBlockees(state).includes(senderUserId)
+  )
   const [isPressed, setIsPressed] = useState(false)
   const [emptyUnfurl, setEmptyUnfurl] = useState(false)
   const links = find(message?.message ?? '')
@@ -211,6 +251,9 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   const borderBottomWidth = hideMessage || isCollection || isTrack ? 0 : 1
   const unfurlStyles = {
     ...styles.unfurl,
+    ...(isGroupOther
+      ? { width: styles.unfurl.width - GROUP_AVATAR_SIZE - GROUP_AVATAR_GAP }
+      : null),
     borderBottomColor,
     borderBottomWidth
   }
@@ -221,6 +264,145 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   })
 
   const hasHeader = fanClubSymbol || isCollection || isTrack || link
+
+  if (!message || isHiddenSender) return null
+
+  const showSenderName =
+    isGroupOther &&
+    !isPopup &&
+    !!senderName &&
+    isFirstInSenderRun(message, previousMessage)
+
+  const groupSenderNameElement = showSenderName ? (
+    <Text size='xs' color='subdued' style={styles.groupSenderName}>
+      {senderName}
+    </Text>
+  ) : null
+
+  const pressableElement = (
+    <Pressable
+      onLongPress={handleLongPress}
+      delayLongPress={REACTION_LONGPRESS_DELAY}
+      onPressIn={isPopup ? handleClosePopup : handlePressIn}
+      onPressOut={isPopup ? handleClosePopup : handlePressOut}
+      style={{
+        opacity: isUnderneathPopup ? 0 : 1
+      }}
+    >
+      <Flex
+        style={[
+          styles.bubble,
+          isPressed
+            ? isAuthor
+              ? styles.pressedIsAuthor
+              : styles.pressed
+            : null
+        ]}
+        shadow='mid'
+        ref={
+          itemsRef
+            ? (el) => {
+                if (el) {
+                  itemsRef.current[messageId] = el
+                }
+              }
+            : null
+        }
+      >
+        {senderUserId ? (
+          <FanClubHeader userId={senderUserId} audience={message?.audience} />
+        ) : null}
+        {isCollection ? (
+          <ChatMessagePlaylist
+            key={`${link.value}-${link.start}-${link.end}`}
+            chatId={chatId}
+            messageId={messageId}
+            link={link.value}
+            onEmpty={onUnfurlEmpty}
+            onSuccess={onUnfurlSuccess}
+            styles={unfurlStyles}
+          />
+        ) : isTrack ? (
+          <ChatMessageTrack
+            key={`${link.value}-${link.start}-${link.end}`}
+            chatId={chatId}
+            messageId={messageId}
+            link={link.value}
+            onEmpty={onUnfurlEmpty}
+            onSuccess={onUnfurlSuccess}
+            styles={unfurlStyles}
+          />
+        ) : link ? (
+          <LinkPreview
+            key={`${link.value}-${link.start}-${link.end}`}
+            chatId={chatId}
+            messageId={messageId}
+            href={link.href}
+            onLongPress={handleLongPress}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            isPressed={isPressed}
+            onEmpty={onUnfurlEmpty}
+            onSuccess={onUnfurlSuccess}
+            style={unfurlStyles}
+          />
+        ) : null}
+        {!hideMessage ? (
+          <Flex
+            style={[
+              styles.messageContainer,
+              isAuthor && styles.messageContainerAuthor,
+              hasHeader && styles.messageContainerHasHeader
+            ]}
+          >
+            <UserGeneratedText
+              variant='body'
+              lineHeight='multi'
+              color={isAuthor ? 'white' : 'default'}
+              textAlign='left'
+              linkProps={{
+                variant: isAuthor ? 'inverted' : 'visible',
+                showUnderline: true
+              }}
+              onPress={Keyboard.dismiss}
+              onLongPress={handleLongPress}
+            >
+              {message.message}
+            </UserGeneratedText>
+          </Flex>
+        ) : null}
+      </Flex>
+      {message.hasTail ? (
+        <ChatTail
+          fill={tailColor}
+          style={[
+            styles.tail,
+            isAuthor ? styles.tailIsAuthor : styles.tailOtherUser
+          ]}
+        />
+      ) : null}
+      {message.reactions?.length > 0 ? (
+        <>
+          {!isUnderneathPopup ? (
+            <Flex
+              style={[
+                styles.reactionContainer,
+                isAuthor
+                  ? styles.reactionContainerIsAuthor
+                  : styles.reactionContainerOtherUser
+              ]}
+            >
+              {message?.reactions.map((reaction) => {
+                return (
+                  <ChatReaction key={reaction.created_at} reaction={reaction} />
+                )
+              })}
+            </Flex>
+          ) : null}
+        </>
+      ) : null}
+    </Pressable>
+  )
 
   return message ? (
     <>
@@ -234,141 +416,39 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
           styleProp
         ]}
       >
-        <Pressable
-          onLongPress={handleLongPress}
-          delayLongPress={REACTION_LONGPRESS_DELAY}
-          onPressIn={isPopup ? handleClosePopup : handlePressIn}
-          onPressOut={isPopup ? handleClosePopup : handlePressOut}
-          style={{
-            opacity: isUnderneathPopup ? 0 : 1
-          }}
-        >
-          <Flex
-            style={[
-              styles.bubble,
-              isPressed
-                ? isAuthor
-                  ? styles.pressedIsAuthor
-                  : styles.pressed
-                : null
-            ]}
-            shadow='mid'
-            ref={
-              itemsRef
-                ? (el) => {
-                    if (el) {
-                      itemsRef.current[messageId] = el
-                    }
-                  }
-                : null
-            }
-          >
-            {senderUserId ? (
-              <FanClubHeader
-                userId={senderUserId}
-                audience={message?.audience}
-              />
-            ) : null}
-            {isCollection ? (
-              <ChatMessagePlaylist
-                key={`${link.value}-${link.start}-${link.end}`}
-                chatId={chatId}
-                messageId={messageId}
-                link={link.value}
-                onEmpty={onUnfurlEmpty}
-                onSuccess={onUnfurlSuccess}
-                styles={unfurlStyles}
-              />
-            ) : isTrack ? (
-              <ChatMessageTrack
-                key={`${link.value}-${link.start}-${link.end}`}
-                chatId={chatId}
-                messageId={messageId}
-                link={link.value}
-                onEmpty={onUnfurlEmpty}
-                onSuccess={onUnfurlSuccess}
-                styles={unfurlStyles}
-              />
-            ) : link ? (
-              <LinkPreview
-                key={`${link.value}-${link.start}-${link.end}`}
-                chatId={chatId}
-                messageId={messageId}
-                href={link.href}
-                onLongPress={handleLongPress}
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                isPressed={isPressed}
-                onEmpty={onUnfurlEmpty}
-                onSuccess={onUnfurlSuccess}
-                style={unfurlStyles}
-              />
-            ) : null}
-            {!hideMessage ? (
-              <Flex
-                style={[
-                  styles.messageContainer,
-                  isAuthor && styles.messageContainerAuthor,
-                  hasHeader && styles.messageContainerHasHeader
-                ]}
-              >
-                <UserGeneratedText
-                  variant='body'
-                  lineHeight='multi'
-                  color={isAuthor ? 'white' : 'default'}
-                  textAlign='left'
-                  linkProps={{
-                    variant: isAuthor ? 'inverted' : 'visible',
-                    showUnderline: true
-                  }}
-                  onPress={Keyboard.dismiss}
-                  onLongPress={handleLongPress}
-                >
-                  {message.message}
-                </UserGeneratedText>
-              </Flex>
-            ) : null}
-          </Flex>
-          {message.hasTail ? (
-            <ChatTail
-              fill={tailColor}
-              style={[
-                styles.tail,
-                isAuthor ? styles.tailIsAuthor : styles.tailOtherUser
-              ]}
-            />
-          ) : null}
-          {message.reactions?.length > 0 ? (
-            <>
-              {!isUnderneathPopup ? (
-                <Flex
-                  style={[
-                    styles.reactionContainer,
-                    isAuthor
-                      ? styles.reactionContainerIsAuthor
-                      : styles.reactionContainerOtherUser
-                  ]}
-                >
-                  {message?.reactions.map((reaction) => {
-                    return (
-                      <ChatReaction
-                        key={reaction.created_at}
-                        reaction={reaction}
-                      />
-                    )
+        {groupSenderNameElement}
+        {isGroupOther ? (
+          <Flex row alignItems='flex-end'>
+            <Flex style={styles.groupAvatarSlot}>
+              {message.hasTail && senderUserId ? (
+                <ProfilePicture
+                  userId={senderUserId}
+                  style={css({
+                    width: GROUP_AVATAR_SIZE,
+                    height: GROUP_AVATAR_SIZE
                   })}
-                </Flex>
+                />
               ) : null}
-            </>
-          ) : null}
-        </Pressable>
+            </Flex>
+            {pressableElement}
+          </Flex>
+        ) : (
+          pressableElement
+        )}
         {isAuthor && message.status === Status.ERROR ? (
           <ResendMessageButton messageId={messageId} chatId={chatId} />
         ) : null}
         {message.hasTail ? (
           <>
             {!isPopup ? (
-              <Flex mt='s' mb='xl' style={css({ zIndex: -1 })}>
+              <Flex
+                mt='s'
+                mb='xl'
+                style={[
+                  css({ zIndex: -1 }),
+                  isGroupOther ? styles.groupIndent : null
+                ]}
+              >
                 <Text size='xs' color='subdued'>
                   {isUnderneathPopup
                     ? ' '

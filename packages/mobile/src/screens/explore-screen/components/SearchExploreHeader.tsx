@@ -8,9 +8,12 @@ import React, {
 
 import { exploreMessages as messages } from '@audius/common/messages'
 import { useIsFocused, useNavigation } from '@react-navigation/native'
-import type { ScrollView } from 'react-native'
-import { Keyboard } from 'react-native'
-import { useSharedValue } from 'react-native-reanimated'
+import type { LayoutChangeEvent, ScrollView } from 'react-native'
+import { Keyboard, StyleSheet, View } from 'react-native'
+import Animated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDebounce } from 'react-use'
 
@@ -23,16 +26,28 @@ import {
   TextInputSize,
   useTheme
 } from '@audius/harmony-native'
-import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AccountPictureHeader } from 'app/screens/app-screen/AccountPictureHeader'
+import { CompactTitlePill } from 'app/screens/app-screen/CompactHeader'
+import {
+  useCompactTitleProgress,
+  useGlassScrollY,
+  useHeaderScrollOffset,
+  useSetRootHeaderHeight
+} from 'app/screens/app-screen/GlassChromeContext'
+import {
+  EDGE_FADE_FROM_OPACITY,
+  EDGE_FADE_TAIL,
+  GlassEdgeFade
+} from 'app/screens/app-screen/GlassEdgeFade'
 import { SearchCategoriesAndFilters } from 'app/screens/search-screen/SearchCategoriesAndFilters'
 
 import { useSearchQuery } from '../../search-screen/searchState'
 import { useExploreRoute } from '../hooks'
 
-const SEARCH_CAPSULE_HEIGHT = 52
+/** Scroll distance over which the status bar fade comes in. */
+const EDGE_FADE_DISTANCE = 24
 
 type SearchExploreHeaderProps = {
   scrollRef?: React.RefObject<ScrollView | null>
@@ -40,7 +55,7 @@ type SearchExploreHeaderProps = {
 
 export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   const { scrollRef } = props
-  const { spacing, cornerRadius } = useTheme()
+  const { spacing, color } = useTheme()
   const { params } = useExploreRoute<'SearchExplore'>()
   const { drawerHelpers } = useContext(AppDrawerContext)
   const navigation = useNavigation()
@@ -71,11 +86,13 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   // off-screen with autoFocus: true already on its route.
   useEffect(() => {
     if (params?.autoFocus === true && isFocused) {
+      // The field may have scrolled away with the header.
+      scrollRef?.current?.scrollTo?.({ y: 0, animated: false })
       textInputRef.current?.focus()
       // @ts-expect-error: setParams is not typed on the generic NavigationProp, but is available on StackNavigationProp
       navigation.setParams?.({ autoFocus: false })
     }
-  }, [params?.autoFocus, navigation, isFocused])
+  }, [params?.autoFocus, navigation, isFocused, scrollRef])
 
   const handleOpenLeftNavDrawer = useCallback(() => {
     if (isNowPlayingDrawerOpen) return
@@ -100,56 +117,113 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   )
 
   const { top } = useSafeAreaInsets()
-  const flat = useSharedValue(0)
+  const setHeaderHeight = useSetRootHeaderHeight()
+  const scrollY = useGlassScrollY()
+  const scrollOffset = useHeaderScrollOffset()
+  const compactProgress = useCompactTitleProgress()
+
+  const scrollStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -scrollOffset.value }]
+  }))
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, EDGE_FADE_DISTANCE],
+      [0, 1],
+      'clamp'
+    )
+  }))
+
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      setHeaderHeight(event.nativeEvent.layout.height)
+    },
+    [setHeaderHeight]
+  )
 
   return (
-    <>
+    <View pointerEvents='box-none' style={styles.root}>
       {/*
-        Same capsule as the other tabs' headers, with the search field in
-        place of the title. Explore's content scrolls below it rather than
-        under it, so it stays flat and never hides.
+        The classic header: avatar + search field, then categories. It
+        scrolls away with the explore content and contracts to a title pill.
+        While searching the list is swapped out and the chrome scroll resets,
+        so it stays put.
       */}
-      <Flex pt={top + spacing.xs} pb='s' style={{ zIndex: 2 }}>
-        <GlassCapsule height={SEARCH_CAPSULE_HEIGHT} floatProgress={flat}>
-          <Flex
-            flex={1}
-            direction='row'
-            alignItems='center'
-            gap='m'
-            pl='s'
-            pr='s'
-          >
-            <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
-            <Flex flex={1}>
-              <TextInput
-                ref={textInputRef}
-                label='Search'
-                autoCorrect={false}
-                placeholder={messages.searchPlaceholder}
-                size={TextInputSize.SMALL}
-                startIcon={IconSearch}
-                onChangeText={handleSearchInputChange}
-                value={inputValue}
-                inputStyle={{ borderRadius: cornerRadius['2xl'] }}
-                endIcon={(props) =>
-                  inputValue ? (
-                    <IconButton
-                      icon={IconCloseAlt}
-                      color='subdued'
-                      onPress={handleClearSearch}
-                      hitSlop={10}
-                      {...props}
-                    />
-                  ) : null
-                }
-              />
-            </Flex>
+      <Animated.View style={scrollStyle} onLayout={handleLayout}>
+        <Flex backgroundColor='white' style={styles.overscrollFill} />
+        <Flex
+          direction='row'
+          alignItems='center'
+          gap='m'
+          backgroundColor='white'
+          ph='l'
+          pt={top + spacing.m}
+          pb='m'
+        >
+          <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
+          <Flex flex={1}>
+            <TextInput
+              ref={textInputRef}
+              label='Search'
+              autoCorrect={false}
+              placeholder={messages.searchPlaceholder}
+              size={TextInputSize.SMALL}
+              startIcon={IconSearch}
+              onChangeText={handleSearchInputChange}
+              value={inputValue}
+              endIcon={(props) =>
+                inputValue ? (
+                  <IconButton
+                    icon={IconCloseAlt}
+                    color='subdued'
+                    onPress={handleClearSearch}
+                    hitSlop={10}
+                    {...props}
+                  />
+                ) : null
+              }
+            />
           </Flex>
-        </GlassCapsule>
-      </Flex>
-      <Flex style={{ zIndex: 1 }}>
-        <SearchCategoriesAndFilters />
-      </Flex>
-    </>
+        </Flex>
+        <Flex
+          backgroundColor='white'
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: color.border.strong
+          }}
+        >
+          <SearchCategoriesAndFilters />
+        </Flex>
+      </Animated.View>
+      <GlassEdgeFade
+        height={top + EDGE_FADE_TAIL}
+        fromOpacity={EDGE_FADE_FROM_OPACITY}
+        toOpacity={0}
+        style={fadeStyle}
+      />
+      <CompactTitlePill
+        title={messages.explore}
+        progress={compactProgress}
+        leading={<IconSearch size='s' color='default' />}
+      />
+    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  // Fills the gap above the header when overscroll pulls it down.
+  overscrollFill: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: '100%',
+    height: 1000
+  },
+  root: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2
+  }
+})

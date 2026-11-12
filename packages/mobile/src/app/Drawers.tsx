@@ -28,6 +28,7 @@ import { FanClubDetailsDrawer } from 'app/components/fan-club-details-drawer/Fan
 import { ForgotPasswordDrawer } from 'app/components/forgot-password-drawer'
 import { HostRemixContestDrawer } from 'app/components/host-remix-contest-drawer/HostRemixContestDrawer'
 import { InboxUnavailableDrawer } from 'app/components/inbox-unavailable-drawer/InboxUnavailableDrawer'
+import { LeaveChatDrawer } from 'app/components/leave-chat-drawer'
 import { LeavingAudiusDrawer } from 'app/components/leaving-audius-drawer'
 import { LockedContentDrawer } from 'app/components/locked-content-drawer'
 import { LockedTextPostDrawer } from 'app/components/locked-text-post-drawer'
@@ -177,6 +178,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: LazyComponent } = {
   BlockMessages: () => BlockMessagesDrawer,
   MuteComments: () => MuteCommentsConfirmationDrawer,
   DeleteChat: () => DeleteChatDrawer,
+  LeaveChat: () => LeaveChatDrawer,
   Welcome: () => WelcomeDrawer,
   ConnectNewWallet: () => ConnectNewWalletDrawer,
   PickWinners: () => PickWinnersDrawer,

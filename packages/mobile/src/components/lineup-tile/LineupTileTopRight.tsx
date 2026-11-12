@@ -8,6 +8,7 @@ import { IconCheck, IconPin, IconText } from '@audius/harmony-native'
 import Text from 'app/components/text'
 import { useThemeColors } from 'app/utils/theme'
 
+import { FeedbackWantedTag } from './FeedbackWantedTag'
 import { useStyles as useTrackTileStyles } from './styles'
 
 const { getTrackPosition } = playbackPositionSelectors
@@ -83,6 +84,11 @@ export const LineupTileTopRight = ({
             <IconText icons={[{ icon: IconPin }]}>
               {messages.artistPick}
             </IconText>
+          </View>
+        ) : null}
+        {!isCollection && trackId ? (
+          <View style={{ marginRight: 8 }}>
+            <FeedbackWantedTag trackId={trackId} />
           </View>
         ) : null}
         <Text

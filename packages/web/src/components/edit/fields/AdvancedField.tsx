@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react'
 
+import { useFeatureFlag } from '@audius/common/hooks'
 import { advancedTrackMessages as messages } from '@audius/common/messages'
+import { FeatureFlags } from '@audius/common/services'
 import {
   License,
   creativeCommons,
@@ -58,6 +60,7 @@ const BPM = 'bpm'
 const MUSICAL_KEY = 'musical_key'
 const IS_UNLISTED = 'is_unlisted'
 const COMMENTS_DISABLED = 'comments_disabled'
+const FEEDBACK_REQUESTED = 'feedback_requested'
 const COVER_ORIGINAL_SONG_TITLE = 'cover_original_song_title'
 const COVER_ORIGINAL_ARTIST = 'cover_original_artist'
 const IS_COVER = 'is_cover'
@@ -151,6 +154,11 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
     { setValue: setIsCommentsDisabled }
   ] = useTrackField<boolean>(COMMENTS_DISABLED)
   const [
+    { value: feedbackRequested },
+    _ignored13,
+    { setValue: setFeedbackRequested }
+  ] = useTrackField<boolean | undefined>(FEEDBACK_REQUESTED)
+  const [
     { value: coverOriginalSongTitle },
     _ignored11,
     { setValue: setCoverOriginalSongTitle }
@@ -182,6 +190,7 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
     set(initialValues, RELEASE_DATE, releaseDate)
     set(initialValues, IS_UNLISTED, isHidden)
     set(initialValues, COMMENTS_DISABLED, commentsDisabled)
+    set(initialValues, FEEDBACK_REQUESTED, !!feedbackRequested)
     set(initialValues, COVER_ORIGINAL_SONG_TITLE, coverOriginalSongTitle)
     set(initialValues, COVER_ORIGINAL_ARTIST, coverOriginalArtist)
     set(initialValues, IS_COVER, isCover)
@@ -196,6 +205,7 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
     releaseDate,
     isHidden,
     commentsDisabled,
+    feedbackRequested,
     coverOriginalSongTitle,
     coverOriginalArtist,
     isCover
@@ -230,7 +240,15 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
       setBpm(typeof bpmValue !== 'undefined' ? Number(bpmValue) : bpm)
       setMusicalKey(get(values, MUSICAL_KEY) ?? musicalKey)
       setReleaseDate(get(values, RELEASE_DATE) ?? releaseDate)
-      setIsCommentsDisabled(get(values, COMMENTS_DISABLED) ?? commentsDisabled)
+      const nextCommentsDisabled =
+        get(values, COMMENTS_DISABLED) ?? commentsDisabled
+      setIsCommentsDisabled(nextCommentsDisabled)
+      // Feedback comes in as comments, so it can't stay on without them.
+      const nextFeedbackRequested =
+        !nextCommentsDisabled && (get(values, FEEDBACK_REQUESTED) ?? false)
+      if (nextFeedbackRequested !== !!feedbackRequested) {
+        setFeedbackRequested(nextFeedbackRequested)
+      }
     },
     [
       setIsrc,
@@ -246,6 +264,8 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
       releaseDate,
       setIsCommentsDisabled,
       commentsDisabled,
+      setFeedbackRequested,
+      feedbackRequested,
       setAllowedApiKeys,
       setCoverOriginalSongTitle,
       coverOriginalSongTitle,
@@ -306,6 +326,15 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
       )
     }
 
+    if (feedbackRequested && !commentsDisabled) {
+      value.push(
+        <SelectedValue
+          key={messages.feedbackRequested.value}
+          label={messages.feedbackRequested.value}
+        />
+      )
+    }
+
     if (isCover) {
       value.push(
         <SelectedValue
@@ -323,6 +352,7 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
     bpm,
     musicalKey,
     commentsDisabled,
+    feedbackRequested,
     isCover
   ])
 
@@ -345,7 +375,11 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
   const [{ value: commercialUse }] = useField<boolean>(COMMERCIAL_USE)
   const [{ value: derivativeWorks }] = useField<boolean>(DERIVATIVE_WORKS)
   const [{ value: isHidden }] = useField<boolean>(IS_UNLISTED)
+  const [{ value: commentsDisabled }] = useField<boolean>(COMMENTS_DISABLED)
   const [, , { setValue: setBpmValue }] = useField<string>(BPM)
+  const { isEnabled: isFeedbackEnabled } = useFeatureFlag(
+    FeatureFlags.TRACK_FEEDBACK_REQUESTS
+  )
 
   const bpmMaskedInputProps = useBpmMaskedInput({
     onChange: (e) => {
@@ -426,6 +460,13 @@ const AdvancedModalFields = ({ isUpload }: { isUpload?: boolean }) => {
         header={messages.disableComments.header}
         description={messages.disableComments.description}
       />
+      {isFeedbackEnabled && !commentsDisabled && !isHidden ? (
+        <SwitchRowField
+          name={FEEDBACK_REQUESTED}
+          header={messages.feedbackRequested.header}
+          description={messages.feedbackRequested.description}
+        />
+      ) : null}
       <Divider />
       <div className={cn(layoutStyles.col, layoutStyles.gap6)}>
         <Text variant='title' size='l' tag='h3'>

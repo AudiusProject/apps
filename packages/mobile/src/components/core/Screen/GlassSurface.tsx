@@ -21,14 +21,6 @@ import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 const IOS_TINT_OPACITY = 0.72
 
 /**
- * Android has no backdrop blur (too costly on a surface composited every
- * scroll frame), so the tint is fully opaque. Without blur, any translucency
- * leaves the content behind legible through the header, especially in dark
- * mode.
- */
-const ANDROID_TINT_OPACITY = 1
-
-/**
  * Scroll distance (px) over which the bottom edge fades from invisible to
  * fully drawn. Short enough that the edge is there by the time the first tile
  * is meaningfully behind the glass, long enough not to snap.
@@ -64,8 +56,7 @@ type GlassSurfaceProps = ViewProps & {
  * full control of its own layout — drop it in as the first child of a
  * position-relative container and the surface fills it.
  *
- * iOS gets a backdrop blur; Android gets an opaque tint. See the opacity
- * constants above.
+ * iOS gets a backdrop blur under a tint; Android gets an opaque tint.
  */
 export const GlassSurface = (props: GlassSurfaceProps) => {
   const {
@@ -80,9 +71,6 @@ export const GlassSurface = (props: GlassSurfaceProps) => {
   const isDarkMode = isDarkTheme(useThemeVariant())
   const { backgroundSurface, borderStrong } = useThemeColors()
 
-  const tintOpacity =
-    Platform.OS === 'ios' ? IOS_TINT_OPACITY : ANDROID_TINT_OPACITY
-
   const edgeStyle = useAnimatedStyle(() => {
     // Without scrollY the edge is always drawn.
     if (!scrollY) return { opacity: 1 }
@@ -96,8 +84,16 @@ export const GlassSurface = (props: GlassSurfaceProps) => {
     }
   })
 
+  // Android has no backdrop blur (too costly on a surface composited every
+  // scroll frame), so the tint is opaque there, and it goes on the root. Gesture
+  // handler's Android hit test treats a view group without a background as
+  // see-through: a tap between this surface's buttons would also reach a
+  // gesture handler underneath it, like a track tile's tap to play.
+  const androidTint =
+    Platform.OS === 'android' ? { backgroundColor: backgroundSurface } : null
+
   return (
-    <View style={[styles.root, style]} {...other}>
+    <View style={[styles.root, androidTint, style]} {...other}>
       <View style={StyleSheet.absoluteFill} pointerEvents='none'>
         {Platform.OS === 'ios' ? (
           <BlurView
@@ -107,12 +103,14 @@ export const GlassSurface = (props: GlassSurfaceProps) => {
             style={StyleSheet.absoluteFill}
           />
         ) : null}
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: backgroundSurface, opacity: tintOpacity }
-          ]}
-        />
+        {Platform.OS === 'ios' ? (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: backgroundSurface, opacity: IOS_TINT_OPACITY }
+            ]}
+          />
+        ) : null}
         {showBorder ? (
           <Animated.View
             style={[

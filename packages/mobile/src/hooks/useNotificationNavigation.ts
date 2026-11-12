@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
-import { getEventQueryKey } from '@audius/common/api'
+import { getEventQueryKey, getTrackQueryKey } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { ShareSource } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
@@ -27,6 +27,7 @@ import type {
   RemixCosignNotification,
   RemixCosignPushNotification,
   TrendingTrackNotification,
+  TrendingGenreNotification,
   TrendingUndergroundNotification,
   TrendingPushFields,
   ShareMilestoneStat,
@@ -57,7 +58,9 @@ import type {
   FanRemixContestSubmissionNotification,
   ArtistRemixContestEndedNotification,
   ArtistRemixContestEndingSoonNotification,
-  ArtistRemixContestSubmissionsNotification
+  ArtistRemixContestSubmissionsNotification,
+  WeeklyRotationFeaturedNotification,
+  WeeklyRotationFeaturedPushNotification
 } from '@audius/common/store'
 import {
   NotificationType,
@@ -359,6 +362,37 @@ export const useNotificationNavigation = () => {
       [NotificationType.WeeklyRotation]: () => {
         navigation.navigate('WeeklyRotationScreen')
       },
+      // The push carries no entity; the full recap is in Notifications.
+      [NotificationType.WeeklyArtistRecap]: () => {
+        navigation.navigate('notifications', { screen: 'Notifications' })
+      },
+      // One featured track opens it; several open the artist's profile. The
+      // push says which via entityType. The tile only has the top track, so
+      // read its owner from the cache that its useNotificationEntity primed.
+      [NotificationType.WeeklyRotationFeatured]: (
+        notification:
+          | WeeklyRotationFeaturedNotification
+          | WeeklyRotationFeaturedPushNotification
+      ) => {
+        const { entityType, entityId } = notification
+        if (entityType === Entity.User) {
+          navigation.navigate('Profile', { id: entityId })
+          return
+        }
+        if ('trackCount' in notification && notification.trackCount > 1) {
+          const cachedTrack = queryClient.getQueryData(
+            getTrackQueryKey(entityId)
+          ) as { owner_id?: number } | undefined
+          if (cachedTrack?.owner_id) {
+            navigation.navigate('Profile', { id: cachedTrack.owner_id })
+            return
+          }
+        }
+        navigation.navigate('Track', {
+          trackId: entityId,
+          canBeUnlisted: false
+        })
+      },
       [PushNotificationType.FavoriteAlbum]: socialActionHandler,
       [PushNotificationType.FavoritePlaylist]: socialActionHandler,
       [PushNotificationType.FavoriteTrack]: socialActionHandler,
@@ -405,6 +439,19 @@ export const useNotificationNavigation = () => {
       },
       [NotificationType.TrendingTrack]: trendingHandler,
       [NotificationType.TrendingUnderground]: trendingHandler,
+      [NotificationType.TrendingGenre]: (
+        notification: TrendingGenreNotification & TrendingPushFields
+      ) => {
+        const trackId = Number(notification.entityId)
+        navigation.navigate('Track', { trackId, canBeUnlisted: false })
+        if (notification.shareCard && notification.rank) {
+          openShareCard(trackId, {
+            kind: 'genre',
+            rank: notification.rank,
+            genre: notification.genre
+          })
+        }
+      },
       [NotificationType.UserSubscription]: (
         notification: UserSubscriptionNotification
       ) => {
@@ -501,7 +548,8 @@ export const useNotificationNavigation = () => {
       userIdHandler,
       messagesHandler,
       openShareCard,
-      navigation
+      navigation,
+      queryClient
     ]
   )
 
