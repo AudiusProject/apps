@@ -181,6 +181,8 @@ export * from './ListenCount';
 export * from './ListenStreakReminderNotification';
 export * from './ListenStreakReminderNotificationAction';
 export * from './ListenStreakReminderNotificationActionData';
+export * from './ListenerCitiesResponse';
+export * from './ListenerCity';
 export * from './ManagedUser';
 export * from './ManagedUsersResponse';
 export * from './ManagersResponse';

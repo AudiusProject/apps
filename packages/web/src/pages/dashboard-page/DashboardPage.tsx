@@ -12,6 +12,8 @@ import {
   useCurrentAccountUser,
   useUserTrackDownloadCountTotal
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { themeSelectors } from '@audius/common/store'
 import { dayjs, Dayjs, formatCount } from '@audius/common/utils'
 import { encodeHashId } from '@audius/sdk'
@@ -27,6 +29,7 @@ import lazyWithPreload from 'utils/lazyWithPreload'
 import styles from './DashboardPage.module.css'
 import { ArtistCard } from './components/ArtistCard'
 import { ArtistContentSection } from './components/ArtistContentSection'
+import { TopCitiesCard } from './components/TopCitiesCard'
 import { useFormattedTrackData } from './components/hooks'
 
 const { getTheme } = themeSelectors
@@ -122,6 +125,9 @@ export const DashboardPage = () => {
   const { data: listenData, isPending: listenDataPending } =
     useArtistDashboardListenData(listenWindow)
   const theme = useSelector(getTheme)
+  const { isEnabled: isTopCitiesEnabled } = useFeatureFlag(
+    FeatureFlags.DASHBOARD_TOP_CITIES
+  )
 
   const header = <Header primary={messages.title} />
 
@@ -206,6 +212,9 @@ export const DashboardPage = () => {
           <div className={styles.sectionContainer}>
             {renderChart()}
             {renderStats()}
+            {isTopCitiesEnabled && account.track_count > 0 ? (
+              <TopCitiesCard userId={account.user_id} />
+            ) : null}
             <ArtistContentSection />
           </div>
         </>
