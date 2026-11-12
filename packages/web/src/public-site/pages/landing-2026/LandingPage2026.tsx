@@ -30,7 +30,7 @@ const BASE_PUBLIC_PATH =
 const LANDING_FONTS_CSS_HREF = `${BASE_PUBLIC_PATH}/fonts-landing-2026.css`
 const URBANIST_HREF =
   'https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap'
-const DUST_BUCER_WOFF2_HREF = `${BASE_PUBLIC_PATH}/fonts/DustBucer.woff2`
+const DUST_BUCER_WOFF2_HREF = `${BASE_PUBLIC_PATH}/fonts/DustBucer-v2.woff2`
 
 type LandingPage2026Props = {
   isMobile: boolean
