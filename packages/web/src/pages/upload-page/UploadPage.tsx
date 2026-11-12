@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useTrack, useUpload } from '@audius/common/api'
+import { useCurrentUserId, useTrack, useUpload } from '@audius/common/api'
 import {
   uploadActions,
   UploadFormState,
@@ -23,9 +23,16 @@ import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { EditFormScrollContext } from 'pages/edit-page/EditTrackPage'
 
 import styles from './UploadPage.module.css'
+import { UploadDraftBanner } from './components/UploadDraftBanner'
 import { EditPage } from './pages/EditPage'
 import { FinishPage } from './pages/FinishPage'
 import SelectPage from './pages/SelectPage'
+import {
+  clearUploadDraft,
+  draftToFormState,
+  loadUploadDraft,
+  UploadDraft
+} from './store/utils/uploadDraft'
 
 const { reset } = uploadActions
 const { toast } = toastActions
@@ -131,6 +138,44 @@ export const UploadPage = (props: UploadPageProps) => {
     }
   }, [uploadSuccess, uploadError, dispatch])
 
+  // Offer to resume a saved draft when starting fresh.
+  const { data: currentUserId } = useCurrentUserId()
+  const [draft, setDraft] = useState<UploadDraft | null>(null)
+  useEffect(() => {
+    if (!currentUserId || formStateFromStore) return
+    let cancelled = false
+    loadUploadDraft(currentUserId)
+      .then((loaded) => {
+        if (!cancelled) setDraft(loaded)
+      })
+      .catch((e) => console.warn('Unable to load upload draft', e))
+    return () => {
+      cancelled = true
+    }
+  }, [currentUserId, formStateFromStore])
+
+  const handleResumeDraft = useCallback(() => {
+    if (!draft) return
+    const draftFormState = draftToFormState(draft)
+    setDraft(null)
+    setFormState(draftFormState)
+    setPhase(Phase.EDIT)
+    startUpload(draftFormState as CollectionFormState | TrackFormState)
+  }, [draft, startUpload])
+
+  const handleDiscardDraft = useCallback(() => {
+    setDraft(null)
+    if (currentUserId) clearUploadDraft(currentUserId)
+  }, [currentUserId])
+
+  // Once publishing starts the draft has done its job. This runs after the
+  // edit form unmounts, so its final autosave is queued before the clear.
+  useEffect(() => {
+    if (phase === Phase.FINISH && currentUserId) {
+      clearUploadDraft(currentUserId)
+    }
+  }, [phase, currentUserId])
+
   const { tracks, uploadType } = formState
 
   const pageTitleUploadType =
@@ -174,15 +219,24 @@ export const UploadPage = (props: UploadPageProps) => {
   switch (phase) {
     case Phase.SELECT:
       page = (
-        <SelectPage
-          formState={formState}
-          initialMetadata={initialMetadata}
-          onContinue={(formState: UploadFormState) => {
-            setFormState(formState)
-            setPhase(Phase.EDIT)
-            startUpload(formState as CollectionFormState | TrackFormState)
-          }}
-        />
+        <>
+          {draft ? (
+            <UploadDraftBanner
+              draft={draft}
+              onResume={handleResumeDraft}
+              onDiscard={handleDiscardDraft}
+            />
+          ) : null}
+          <SelectPage
+            formState={formState}
+            initialMetadata={initialMetadata}
+            onContinue={(formState: UploadFormState) => {
+              setFormState(formState)
+              setPhase(Phase.EDIT)
+              startUpload(formState as CollectionFormState | TrackFormState)
+            }}
+          />
+        </>
       )
       break
     case Phase.EDIT:
