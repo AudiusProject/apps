@@ -45,12 +45,6 @@ const config = convict({
     env: 'acdcChainId',
     default: 1000000000001
   },
-  nethermindEnabled: {
-    doc: 'writing to ACDC chain feature flag',
-    format: Boolean,
-    env: 'nethermindEnabled',
-    default: true
-  },
   nethermindWeb3Provider: {
     doc: 'nethermind web3 provider url',
     format: String,
