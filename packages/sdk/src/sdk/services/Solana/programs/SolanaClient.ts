@@ -128,9 +128,12 @@ export class SolanaClient {
           0
         )
         const baseFee = (orderedFees[percentileIndex] ?? 0) * multiplier
-        const microLamports = Math.min(
-          Math.max(baseFee, priorityFee.minimumMicroLamports ?? 0),
-          priorityFee.maximumMicroLamports ?? Number.MAX_SAFE_INTEGER
+        // setComputeUnitPrice converts to BigInt, which throws on fractions
+        const microLamports = Math.round(
+          Math.min(
+            Math.max(baseFee, priorityFee.minimumMicroLamports ?? 0),
+            priorityFee.maximumMicroLamports ?? Number.MAX_SAFE_INTEGER
+          )
         )
         if (microLamports !== undefined) {
           instructions.push(

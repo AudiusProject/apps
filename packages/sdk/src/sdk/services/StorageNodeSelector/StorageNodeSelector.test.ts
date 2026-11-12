@@ -179,4 +179,43 @@ describe('StorageNodeSelector', () => {
     expect(second).toEqual(storageNodeC.endpoint)
     expect(healthCheckCalls).toBe(1)
   })
+
+  it('reorders with the refreshed node list after a failed fetch', async () => {
+    let healthCheckCalls = 0
+    const storageNodeC = {
+      endpoint: 'https://node-c.audius.co',
+      delegateOwnerWallet: '0xc0ffee254729296a45a3885639AC7E10F9d54973'
+    }
+    server.use(
+      rest.get(`${discoveryNode}/health_check`, (_req, res, ctx) => {
+        healthCheckCalls++
+        if (healthCheckCalls === 1) {
+          return res.networkError('Failed to connect')
+        }
+        const data: HealthCheckResponseData = {
+          network: { content_nodes: [storageNodeC] }
+        }
+        return res(ctx.status(200), ctx.json({ data }))
+      }),
+      rest.get(`${storageNodeC.endpoint}/health_check`, (_req, res, ctx) => {
+        return res(ctx.status(200), ctx.json({ data: { diskHasSpace: true } }))
+      })
+    )
+
+    const storageNodeSelector = new StorageNodeSelector({
+      bootstrapNodes: [storageNodeA, storageNodeB],
+      logger,
+      endpoint: discoveryNode
+    })
+
+    // The first fetch fails, so selection falls back to the bootstrap nodes
+    expect([storageNodeA.endpoint, storageNodeB.endpoint]).toContain(
+      await storageNodeSelector.getSelectedNode()
+    )
+
+    expect(await storageNodeSelector.getSelectedNode(true)).toEqual(
+      storageNodeC.endpoint
+    )
+    expect(healthCheckCalls).toBe(2)
+  })
 })

@@ -82,6 +82,11 @@ export const addRequestSignatureMiddleware = ({
           timestamp = currentTimestamp
         }
       } catch (e) {
+        // Don't keep sending a stale signature, e.g. after logout
+        message = null
+        signature = null
+        signatureAddress = null
+        timestamp = null
         // Don't log a warning for HedgehogWalletNotFoundError as it's expected when user is logged out
         if (!(e instanceof HedgehogWalletNotFoundError)) {
           logger?.warn(`Unable to add request signature: ${e}`)

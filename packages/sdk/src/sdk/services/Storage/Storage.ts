@@ -117,20 +117,22 @@ export class Storage implements StorageService {
                     transcode: 0
                   })
                 },
-                onSuccess: async () => {
+                onSuccess: () => {
                   const uploadId = upload?.url?.split('/').pop()
                   if (!uploadId) {
                     reject(new Error('No upload ID received'))
                     return
                   }
-                  const res = await this.pollProcessingStatus(
+                  // tus doesn't await onSuccess, so forward polling failures
+                  this.pollProcessingStatus(
                     uploadId,
                     metadata.template,
                     cachedTotal,
                     onProgress,
                     ac.signal
                   )
-                  resolve(res)
+                    .then(resolve)
+                    .catch(reject)
                 }
               })
 
@@ -241,10 +243,11 @@ export class Storage implements StorageService {
         : MAX_IMAGE_RESIZE_TIMEOUT_MS
 
     while (Date.now() - start < maxPollingMs) {
+      // Outside the try so the abort isn't caught and retried
+      if (abortSignal?.aborted) {
+        throw new Error('Upload aborted')
+      }
       try {
-        if (abortSignal?.aborted) {
-          throw new Error('Upload aborted')
-        }
         const resp = await this.getProcessingStatus(id)
         if (resp?.status === 'done') {
           if (template !== 'audio' || resp.results?.['320']) {
