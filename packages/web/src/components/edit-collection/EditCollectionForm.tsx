@@ -120,7 +120,10 @@ export const EditCollectionForm = (props: EditCollectionFormProps) => {
       validationSchema={toFormikValidationSchema(validationSchema)}
     >
       <Form className={styles.root} id={formId}>
-        <CollectionNavigationPrompt disabled={isDeleteConfirmationOpen} />
+        <CollectionNavigationPrompt
+          isUpload={isUpload}
+          disabled={isDeleteConfirmationOpen}
+        />
         <Tile className={styles.collectionFields} elevation='mid'>
           <div className={styles.row}>
             <ArtworkField

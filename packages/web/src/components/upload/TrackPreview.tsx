@@ -4,6 +4,7 @@ import { StemCategory, stemCategoryFriendlyNames } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
 import {
   Box,
+  Checkbox,
   FilterButton,
   Flex,
   IconButton,
@@ -33,7 +34,8 @@ import styles from './TrackPreview.module.css'
 const messages = {
   selectType: 'Select Type',
   edit: 'Edit Track',
-  remove: 'Remove Track'
+  remove: 'Remove Track',
+  select: (name: string) => `Select ${name}`
 }
 
 // Used https://mimetype.io to see the list of related mime types to have a more comprehensive list.
@@ -87,6 +89,8 @@ export type TrackPreviewProps = ComponentPropsWithoutRef<'div'> & {
   allowCategorySwitch?: boolean
   allowDelete?: boolean
   className?: string
+  isSelected?: boolean
+  onToggleSelected?: () => void
 }
 
 export const TrackPreview = (props: TrackPreviewProps) => {
@@ -103,6 +107,8 @@ export const TrackPreview = (props: TrackPreviewProps) => {
     allowCategorySwitch = true,
     allowDelete = true,
     className,
+    isSelected,
+    onToggleSelected,
     ...divProps
   } = props
   const {
@@ -129,6 +135,13 @@ export const TrackPreview = (props: TrackPreviewProps) => {
 
   return (
     <div className={cn(styles.trackPreviewNew, className)} {...divProps}>
+      {onToggleSelected ? (
+        <Checkbox
+          checked={!!isSelected}
+          onChange={onToggleSelected}
+          aria-label={messages.select(trackTitle)}
+        />
+      ) : null}
       {displayIndex ? (
         <Text variant='body' className={styles.indexText} size='s'>
           {index + 1}

@@ -311,6 +311,7 @@ const TrackEditForm = (
     <Form id={formId}>
       <NavigationPrompt
         when={dirty && !isSubmitting && !disableNavigationPrompt}
+        blockInAppNavigation={isUpload}
         messages={
           isUpload
             ? messages.uploadNavigationPrompt
