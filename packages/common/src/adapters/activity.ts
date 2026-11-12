@@ -36,26 +36,6 @@ function normalizeActivityItem(
   )
 }
 
-export const activityFromSDK = (input: Activity) => {
-  const { timestamp, itemType: item_type, item } = input
-  if (item_type === ActivityItemTypeEnum.Track) {
-    const normalized = normalizeActivityItem(item as object, item_type)
-    return {
-      timestamp,
-      item_type,
-      item: userTrackMetadataFromSDK(normalized as Track)
-    }
-  } else if (item_type === ActivityItemTypeEnum.Playlist) {
-    const normalized = normalizeActivityItem(item as object, item_type)
-    return {
-      timestamp,
-      item_type,
-      item: userCollectionMetadataFromSDK(normalized as Playlist)
-    }
-  }
-  return undefined
-}
-
 export const trackActivityFromSDK = (input: Activity) => {
   const { timestamp, itemType: item_type, item } = input
   if (item_type === ActivityItemTypeEnum.Track) {

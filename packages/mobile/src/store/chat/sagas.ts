@@ -20,7 +20,6 @@ function* watchGoToChat() {
             StackActions.replace('Chat', { chatId, presetMessage })
           )
         } else {
-          // @ts-ignore navigationRef is not parametrized correctly (PAY-1141)
           navigationRef.navigate('Chat', { chatId, presetMessage })
         }
       }

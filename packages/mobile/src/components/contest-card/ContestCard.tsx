@@ -282,7 +282,7 @@ export const ContestCard = (props: ContestCardProps) => {
   }
 
   // Skip contests hosted by deactivated users — same filter as the web
-  // ContestCard. The discovery endpoint can still surface tombstoned
+  // ContestCard. The validator node API can still surface tombstoned
   // hosts (the fake "Audius" / life-audius-airdrop accounts) and
   // rendering them on explore was the QA bug we needed to suppress.
   if (user.is_deactivated) {

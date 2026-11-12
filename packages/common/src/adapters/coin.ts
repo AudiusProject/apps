@@ -91,12 +91,6 @@ export const coinFromSdk = (input: CoinSDK | undefined): Coin | undefined => {
 }
 
 /**
- * Converts a list of SDK `Coin` responses to CoinMetadata list
- */
-export const coinMetadataListFromSDK = (input?: CoinSDK[]): CoinMetadata[] =>
-  input ? input.map(coinMetadataFromCoin).filter(removeNullable) : []
-
-/**
  * Converts a SDK `UserCoin` response to UserCoin, parsing ownerId from HashId string to number
  */
 export const userCoinFromSdk = (input: UserCoinSdk): UserCoin | undefined => {
@@ -123,40 +117,3 @@ export const coinListFromSDK = (input?: CoinSDK[]): Coin[] =>
  */
 export const userCoinListFromSDK = (input?: UserCoinSdk[]): UserCoin[] =>
   input ? input.map(userCoinFromSdk).filter(removeNullable) : []
-
-/**
- * Creates a map of coins keyed by ticker symbol
- */
-export const coinMapFromSDK = (
-  input?: CoinSDK[]
-): Record<string, CoinMetadata> => {
-  const coinMap: Record<string, CoinMetadata> = {}
-
-  if (input) {
-    input.forEach((coin) => {
-      const coinMetadata = coinMetadataFromCoin(coin)
-      if (coinMetadata.ticker) {
-        coinMap[coinMetadata.ticker] = coinMetadata
-      }
-    })
-  }
-
-  return coinMap
-}
-
-/**
- * Gets all token symbols from a list of coins
- */
-export const getTokenSymbolsFromCoins = (coins: CoinMetadata[]): string[] =>
-  coins.map((coin) => coin.ticker || '').filter(Boolean)
-
-/**
- * Gets token mints by symbol from a list of coins
- */
-export const getTokenMintsBySymbolsFromCoins = (
-  coins: CoinMetadata[],
-  symbols: string[]
-): string[] =>
-  coins
-    .filter((coin) => coin.ticker && symbols.includes(coin.ticker))
-    .map((coin) => coin.mint)

@@ -442,17 +442,6 @@ export const isPlayCountChallenge = (
   )
 }
 
-export const isAudioMatchingChallenge = (
-  challenge: ChallengeRewardID
-): challenge is
-  | ChallengeName.AudioMatchingSell
-  | ChallengeName.AudioMatchingBuy => {
-  return (
-    challenge === ChallengeName.AudioMatchingSell ||
-    challenge === ChallengeName.AudioMatchingBuy
-  )
-}
-
 /** Returns true if the challenge is not a cooldown challenge by checking
  * whether it has `cooldown_days` defined and whether the challenge has been
  * created for more than `cooldown_days` days.

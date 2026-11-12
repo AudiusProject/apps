@@ -11,6 +11,7 @@ import { productionConfig } from '../../config/production'
 import fetch, { Headers } from '../../utils/fetch'
 import { mergeConfigWithDefaults } from '../../utils/mergeConfigs'
 import { getNonce } from '../../utils/nonce'
+import { wait } from '../../utils/wait'
 import type { AudiusWalletClient } from '../AudiusWalletClient'
 import type { LoggerService } from '../Logger'
 
@@ -201,9 +202,7 @@ export class EntityManagerClient implements EntityManagerService {
           `Could not confirm write within ${confirmationTimeout}ms`
         )
       }
-      await new Promise((resolve) =>
-        setTimeout(resolve, confirmationPollingInterval)
-      )
+      await wait(confirmationPollingInterval)
       confirmation = await confirmBlock()
     }
 

@@ -5,7 +5,6 @@ import { User } from '~/models/User'
 import { getContext } from '~/store/effects'
 import { getSDK } from '~/store/sdkUtils'
 
-import { QUERY_KEYS } from '../queryKeys'
 import { getUserQueryFn, getUserQueryKey } from '../users/useUser'
 import {
   getUserByHandleQueryFn,
@@ -79,20 +78,4 @@ export function* queryUsers(ids: ID[], queryOptions?: QueryOptions) {
   })
 
   return users
-}
-
-export function* queryAllCachedUsers() {
-  const queryClient = yield* getContext('queryClient')
-  const queries = queryClient.getQueriesData<User>({
-    queryKey: [QUERY_KEYS.user]
-  })
-  return queries.reduce(
-    (acc, [_, user]) => {
-      if (user?.user_id) {
-        acc[user.user_id] = user
-      }
-      return acc
-    },
-    {} as Record<ID, User>
-  )
 }

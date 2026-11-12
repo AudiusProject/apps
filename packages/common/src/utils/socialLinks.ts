@@ -104,10 +104,3 @@ export const getUserSocialLinks = (user?: UserSocialSource | null) => {
 
   return links.slice(0, 4)
 }
-
-export const socialLinksUtils = {
-  SOCIAL_BASE_URLS,
-  getUserSocialLinks,
-  sanitizeSocialHandle,
-  sanitizeWebsiteUrl
-}

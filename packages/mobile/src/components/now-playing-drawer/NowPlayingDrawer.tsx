@@ -37,6 +37,10 @@ import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
+  RESTART_THRESHOLD_SEC,
+  SKIP_DURATION_SEC
+} from 'app/components/audio/constants'
+import {
   BOTTOM_BAR_HEIGHT,
   COLLAPSE_DROP_START,
   FLOATING_BAR_HEIGHT,
@@ -75,8 +79,6 @@ const { seekTo: seek, reset, next, previous } = playbackActions
 const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
-const SKIP_DURATION_SEC = 15
-const RESTART_THRESHOLD_SEC = 3
 
 // If the top screen inset is greater than this,
 // the status bar will be hidden when the drawer is open

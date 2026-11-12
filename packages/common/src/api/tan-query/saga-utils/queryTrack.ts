@@ -4,7 +4,7 @@ import { Track } from '~/models'
 import { ID } from '~/models/Identifiers'
 import { getContext } from '~/store/effects'
 import { getSDK } from '~/store/sdkUtils'
-import { removeNullable, Uid } from '~/utils'
+import { removeNullable } from '~/utils'
 
 import { TQTrack } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
@@ -67,12 +67,6 @@ export function* queryAllTracks() {
     },
     {} as Record<ID, TQTrack>
   )
-}
-
-export function* queryTrackByUid(uid: string | null | undefined) {
-  if (!uid) return null
-  const trackId = Number(Uid.fromString(uid).id)
-  return yield* queryTrack(trackId)
 }
 
 export function* queryCollectionTracks(

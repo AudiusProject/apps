@@ -25,17 +25,17 @@ import {
 } from './types'
 
 /**
- * Client for the Solana Relay Plugin on Discovery.
+ * Client for the Solana Relay Plugin on validator nodes.
  */
 export class SolanaRelay extends BaseAPI {
   /**
    * Public key of the currently selected transaction fee payer
-   * from the selected Discovery Node.
+   * from the selected validator node.
    */
   private feePayer: PublicKey | null = null
 
   /**
-   * Gets a random fee payer public key from the selected discovery node's
+   * Gets a random fee payer public key from the selected validator node's
    * Solana relay plugin.
    *
    * Used when relay transactions don't specify a fee payer override.
@@ -110,7 +110,7 @@ export class SolanaRelay extends BaseAPI {
   }
 
   /**
-   * Relays a transaction to the selected discovery node's Solana relay plugin.
+   * Relays a transaction to the selected validator node's Solana relay plugin.
    */
   public async relay(
     params: RelayRequest,
@@ -286,7 +286,7 @@ export class SolanaRelay extends BaseAPI {
     const noTokenInput = !tokenOutputAmount
     if (noAudioInput && noTokenInput) {
       throw new Error(
-        'Invalid arguments. Either solInputAmount or tokenOutputAmount must be provided'
+        'Invalid arguments. Either audioInputAmount or tokenOutputAmount must be provided'
       )
     }
 

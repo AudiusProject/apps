@@ -32,12 +32,12 @@ export enum IntKeys {
   CLIENT_ATTESTATION_PARALLELIZATION = 'CLIENT_ATTESTATION_PARALLELIZATION',
 
   /**
-   * The time to spend polling DN for updates to the challenge being claimed to check if it has been indexed as complete.
+   * The time to spend polling the validator node for updates to the challenge being claimed to check if it has been indexed as complete.
    */
   CHALLENGE_CLAIM_COMPLETION_POLL_TIMEOUT_MS = 'CHALLENGE_CLAIM_COMPLETION_POLL_TIMEOUT_MS',
 
   /**
-   * The interval between polls to DN for updates to the challenge being claimed to check if it has been indexed as complete.
+   * The interval between polls to the validator node for updates to the challenge being claimed to check if it has been indexed as complete.
    */
   CHALLENGE_CLAIM_COMPLETION_POLL_FREQUENCY_MS = 'CHALLENGE_CLAIM_COMPLETION_POLL_FREQUENCY_MS',
 

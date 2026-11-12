@@ -2,8 +2,6 @@ import type { AudiusSdkWithServices } from '@audius/sdk'
 import { SwapInstructionsResponse, SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
-  createCloseAccountInstruction,
-  createTransferCheckedInstruction,
   getAccount,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
@@ -15,10 +13,7 @@ import {
   VersionedTransaction
 } from '@solana/web3.js'
 
-import {
-  getJupiterQuoteByMintWithRetry,
-  jupiterInstance
-} from '~/services/Jupiter'
+import { jupiterInstance } from '~/services/Jupiter'
 import {
   INTERNAL_TRANSFER_MEMO_STRING,
   MEMO_PROGRAM_ID
@@ -99,46 +94,6 @@ export async function addTransferFromUserBankInstructions({
     )
   }
   return ata
-}
-
-export async function addTransferToUserBankInstructions({
-  tokenInfo,
-  userPublicKey,
-  ethAddress,
-  amountLamports,
-  sourceAta,
-  sdk,
-  feePayer,
-  instructions
-}: {
-  tokenInfo: UserBankManagedTokenInfo
-  userPublicKey: PublicKey
-  ethAddress: string
-  amountLamports: bigint
-  sourceAta: PublicKey
-  sdk: AudiusSdkWithServices
-  feePayer: PublicKey
-  instructions: TransactionInstruction[]
-}): Promise<PublicKey> {
-  const mint = new PublicKey(tokenInfo.mintAddress)
-  const userBankAddress =
-    await sdk.services.claimableTokensClient.deriveUserBank({
-      ethWallet: ethAddress,
-      mint: tokenInfo.claimableTokenMint
-    })
-
-  instructions.push(
-    createTransferCheckedInstruction(
-      sourceAta,
-      mint,
-      userBankAddress,
-      userPublicKey,
-      amountLamports,
-      tokenInfo.decimals
-    ),
-    createCloseAccountInstruction(sourceAta, feePayer, userPublicKey)
-  )
-  return userBankAddress
 }
 
 /**
@@ -312,45 +267,4 @@ export const prepareOutputUserBank = async (
     mint: outputTokenConfig.claimableTokenMint
   })
   return result.userBank.toBase58()
-}
-
-/**
-  @deprecated - We're moving away from Jupiter as the SO for stuff - use getIsDirectSwappable instead + meteora quotes if needed
-*/
-export const isDirectRouteAvailable = async (
-  inputMint: string,
-  outputMint: string,
-  amountUi: number,
-  tokens: Record<string, CoinInfo>
-): Promise<boolean> => {
-  try {
-    // Validate tokens and create configs
-    const tokenConfigsResult = validateAndCreateTokenConfigs(
-      inputMint,
-      outputMint,
-      tokens
-    )
-
-    if ('error' in tokenConfigsResult) {
-      return false
-    }
-
-    const { inputTokenConfig, outputTokenConfig } = tokenConfigsResult
-
-    // Try to get a direct quote
-    await getJupiterQuoteByMintWithRetry({
-      inputMint,
-      outputMint,
-      inputDecimals: inputTokenConfig.decimals,
-      outputDecimals: outputTokenConfig.decimals,
-      amountUi,
-      swapMode: 'ExactIn',
-      onlyDirectRoutes: false
-    })
-
-    return true
-  } catch (error) {
-    // If quote fails, there's no direct path available
-    return false
-  }
 }

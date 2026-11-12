@@ -344,7 +344,7 @@ export const audiusBackend = ({
   }
 
   /**
-   * Records a first-party internal notification campaign push open in Discovery (API).
+   * Records a first-party internal notification campaign push open via the validator node API.
    * Fire-and-forget; failures are logged and swallowed.
    */
   async function reportNotificationCampaignPushOpen({

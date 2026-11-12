@@ -80,7 +80,7 @@ type Token = {
 
 type NotificationNavigation = { navigate: (notification: any) => void }
 
-/** First-party Discovery campaign open — mobile remote push opens only. */
+/** Reports a first-party campaign open to the API — mobile remote push opens only. */
 async function reportNotificationCampaignPushOpen(
   campaignId: string
 ): Promise<void> {

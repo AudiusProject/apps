@@ -20,14 +20,6 @@ export const getUserQueryKey = (userId: ID | null | undefined) => {
   return [QUERY_KEYS.user, userId] as unknown as QueryKey<User>
 }
 
-export const getUserComputedPropsQueryKey = (userId: ID | null | undefined) => {
-  return [
-    QUERY_KEYS.user,
-    userId,
-    QUERY_KEYS.computedProps
-  ] as unknown as QueryKey<User>
-}
-
 export const getUserQueryFn = async (
   userId: ID,
   currentUserId: ID | null | undefined,

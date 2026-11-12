@@ -64,7 +64,6 @@ export const ProfileSocials = () => {
   const styles = useStyles()
 
   const { tier } = useTierAndVerifiedForUser(user_id)
-  // const tier = 'none'
 
   // Need to start opacity at 1 so skeleton is visible.
   const opacity = useRef(new Animated.Value(1)).current

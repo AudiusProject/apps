@@ -81,11 +81,3 @@ export const useAllPlaylistUpdateIds = () =>
   usePlaylistUpdates({
     select: (updates) => updates.map((u) => u.playlist_id)
   })
-
-/**
- * Returns the count of playlists with unviewed updates.
- */
-export const usePlaylistUpdatesCount = () =>
-  usePlaylistUpdates({
-    select: (updates) => updates.length
-  })

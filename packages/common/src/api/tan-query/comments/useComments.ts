@@ -5,16 +5,12 @@ import { keyBy } from 'lodash'
 
 import { ID } from '~/models/Identifiers'
 
-import { QueryKey, QueryOptions } from '../types'
+import { QueryOptions } from '../types'
 import { combineQueryResults } from '../utils/combineQueryResults'
 import { useQueries } from '../utils/useQueries'
 
 import { CommentOrReply } from './types'
 import { getCommentQueryKey } from './utils'
-
-export const getCommentsQueryKey = (commentIds: ID[] | null | undefined) => {
-  return ['comments', commentIds] as unknown as QueryKey<CommentOrReply[]>
-}
 
 export const useComments = (
   commentIds: ID[] | null | undefined,

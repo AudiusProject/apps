@@ -45,7 +45,7 @@ export const getAllRemixContestsQueryKey = ({
 
 /**
  * Hook to fetch all remix contest events with infinite query support.
- * Calls the dedicated discovery endpoint `GET /v1/events/remix-contests`
+ * Calls the dedicated validator node endpoint `GET /v1/events/remix-contests`
  * (SDK: `events.getRemixContests`), which returns events ordered with
  * currently-active contests first (by soonest-ending end_date) followed by
  * ended contests.
@@ -85,7 +85,7 @@ export const useAllRemixContests = (
       })
 
       // Prime related tracks + users (full objects, delivered alongside the
-      // event list on the discovery endpoint). This turns ContestCard's
+      // event list on the validator node endpoint). This turns ContestCard's
       // useTrack / useUser into cache hits so the grid can paint with one
       // network round-trip instead of N+1.
       primeRelatedData({ related, queryClient })

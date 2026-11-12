@@ -54,7 +54,6 @@ export const SolanaPhoneOption = () => {
     let publicKey: string
 
     const {
-      // @ts-ignore: wallet adapter types are wrong
       signed_payloads: [signature]
     } = await transact(async (wallet) => {
       const freshAccount = await authorizeSession(wallet)

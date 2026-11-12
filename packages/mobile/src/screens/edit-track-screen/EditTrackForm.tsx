@@ -314,7 +314,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
                       values.title ||
                       messages.untitled
                     }
-                    // @ts-ignore
                     filePath={selectedTrackFile || streamUrl || ''}
                     trackId={values.track_id}
                     isUpload={isUpload}

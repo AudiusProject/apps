@@ -19,8 +19,6 @@ export const isInternalAudiusUrl = (url: string) =>
   url.startsWith('/') ||
   (isAudiusUrl(url) &&
     !externalAudiusLinks.some((externalLink) => externalLink.includes(url)))
-export const isExternalAudiusUrl = (url: string) =>
-  new RegExp(audiusUrlRegex).test(url)
 export const getPathFromAudiusUrl = (url: string) =>
   url.startsWith('/')
     ? url

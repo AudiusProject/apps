@@ -88,8 +88,6 @@ export const FollowButton = forwardRef(
       setIsPressing(false)
     }, [])
 
-    useEffect(() => {}, [value])
-
     const handleClick = useCallback(() => {
       if (value) {
         onUnfollow?.()

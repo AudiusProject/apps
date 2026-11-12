@@ -78,22 +78,3 @@ export function* queryCollectionByPermalink(
   const collection = yield* call(queryCollection, collectionId, queryOptions)
   return collection
 }
-
-export function* queryCollectionsByPermalink(
-  permalinks: string[],
-  queryOptions?: QueryOptions
-) {
-  const collections = {} as Record<string, TQCollection>
-  for (const permalink of permalinks) {
-    // Call each queryCollectionByPermalink individually. They will be batched together in the queryFn (if necessary)
-    const collection = yield* call(
-      queryCollectionByPermalink,
-      permalink,
-      queryOptions
-    )
-    if (collection) {
-      collections[permalink] = collection
-    }
-  }
-  return collections
-}

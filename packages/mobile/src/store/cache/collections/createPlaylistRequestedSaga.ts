@@ -34,7 +34,6 @@ export function* createPlaylistRequestedSaga() {
         }
         case 'route': {
           if (navigationRef.isReady()) {
-            // @ts-ignore navigationRef is not parametrized correctly (PAY-1141)
             navigationRef.navigate('Collection', { id: playlistId })
           }
           break

@@ -11,7 +11,7 @@ import type { SolanaRelay } from './SolanaRelay'
 import type { SolanaWalletAdapter } from './types'
 
 /**
- * Wallet adapter that uses the Solana Relay Plugin on Discovery Node.
+ * Wallet adapter that uses the Solana Relay Plugin on validator nodes.
  *
  * Implementing this interface allows consumers to choose to pay for their own
  * transactions rather than using our relay, simply by using their own wallet
@@ -58,7 +58,7 @@ export class SolanaRelayWalletAdapter implements SolanaWalletAdapter {
   }
 
   /**
-   * On connection, grabs the fee payer from the Discovery Node plugin.
+   * On connection, grabs the fee payer from the validator node's relay plugin.
    */
   public async connect() {
     this._connecting = true
@@ -78,7 +78,7 @@ export class SolanaRelayWalletAdapter implements SolanaWalletAdapter {
   }
 
   /**
-   * Sends a transaction using the relay to Discovery Node.
+   * Sends a transaction using the relay on a validator node.
    * @param transaction the transaction to send.
    */
   public async sendTransaction(

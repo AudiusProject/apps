@@ -8,11 +8,6 @@ export const isContentPartialTrack = <T extends Partial<Track>>(
   content?: Nullable<Partial<Track | Collection>>
 ): content is T => !!content && 'track_id' in content
 
-/** Typeguard for determining if content is a Collection but can return as a subset of the Collection type */
-export const isContentPartialCollection = <T extends Partial<Collection>>(
-  content?: Nullable<Partial<Track | Collection>>
-): content is T => !!content && 'playlist_id' in content
-
 /** Typeguard for determiniing if content is a Track */
 export const isContentTrack = (
   content?: Nullable<Partial<Track | Collection>>

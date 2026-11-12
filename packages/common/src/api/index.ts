@@ -75,7 +75,6 @@ export * from './tan-query/purchases/useSalesAggregate'
 
 // Reactions
 export * from './tan-query/reactions/types'
-export * from './tan-query/reactions/utils'
 
 // Remixes
 export * from './tan-query/remixes/useRemixesLineup'

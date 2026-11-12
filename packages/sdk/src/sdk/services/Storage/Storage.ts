@@ -194,14 +194,14 @@ export class Storage implements StorageService {
     secondOffset: number
     userId: number
   }) {
-    const contentNodeEndpoint = await this.storageNodeSelector.getSelectedNode()
+    const storageNodeEndpoint = await this.storageNodeSelector.getSelectedNode()
 
-    if (!contentNodeEndpoint) {
-      throw new Error('No content node available')
+    if (!storageNodeEndpoint) {
+      throw new Error('No validator node available')
     }
 
     const url = new URL(
-      `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`
+      `${storageNodeEndpoint}/generate_preview/${cid}/${secondOffset}`
     )
     url.searchParams.set('userId', String(userId))
 
