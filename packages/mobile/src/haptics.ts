@@ -8,7 +8,6 @@ const options = {
 
 export const light = () => {
   if (Platform.OS === 'android') {
-    // @ts-ignore
     ReactNativeHapticFeedback.trigger('keyboardPress', options)
   } else {
     ReactNativeHapticFeedback.trigger('impactLight', options)
@@ -18,7 +17,6 @@ export const light = () => {
 export const medium = () => {
   if (Platform.OS === 'android') {
     // This should be updated to match ios impactMedium
-    // @ts-ignore
     ReactNativeHapticFeedback.trigger('keyboardPress', options)
   } else {
     ReactNativeHapticFeedback.trigger('impactMedium', options)

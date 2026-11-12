@@ -75,10 +75,6 @@ export const useUpdateUser = () => {
           forceReplace: true
         })
       }
-    },
-    onSettled: (_, __) => {
-      // Always refetch after error or success to ensure cache is in sync with server
-      // queryClient.invalidateQueries({ queryKey: ['user', userId] })
     }
   })
 }

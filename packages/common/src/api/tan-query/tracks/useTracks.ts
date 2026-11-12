@@ -7,7 +7,6 @@ import { useDispatch } from 'react-redux'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models/Identifiers'
 
-import { getTracksBatcher } from '../batchers/getTracksBatcher'
 import { TQTrack } from '../models'
 import { QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
@@ -16,26 +15,6 @@ import { entityCacheOptions } from '../utils/entityCacheOptions'
 import { useQueries } from '../utils/useQueries'
 
 import { getTrackQueryFn, getTrackQueryKey } from './useTrack'
-
-// This function is only used for batch operations in saga utilities
-export const getTracksQueryFn = async (
-  trackIds: ID[],
-  currentUserId: ID | null,
-  queryClient: any,
-  sdk: any,
-  dispatch: any
-) => {
-  const batchGetTracks = getTracksBatcher({
-    sdk,
-    currentUserId,
-    queryClient,
-    dispatch
-  })
-  const tracks = await Promise.all(
-    trackIds.map((trackId) => batchGetTracks.fetch(trackId))
-  )
-  return tracks.filter((track): track is TQTrack => !!track)
-}
 
 export const useTracks = (
   trackIds: ID[] | null | undefined,

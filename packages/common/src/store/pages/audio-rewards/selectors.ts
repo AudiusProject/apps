@@ -62,4 +62,3 @@ export const getHCaptchaStatus = (state: CommonState) =>
 
 export const getShowRewardClaimedToast = (state: CommonState) =>
   state.pages.audioRewards.showRewardClaimedToast
-

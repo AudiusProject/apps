@@ -286,9 +286,7 @@ export const useTheme = (baseStyles: object, toTheme: object) => {
 
   const newStyles = {}
   Object.keys(toTheme).forEach((key) => {
-    // @ts-ignore
     if (toTheme[key] in themeStyles) {
-      // @ts-ignore
       newStyles[key] = themeStyles[toTheme[key]]
     }
   })

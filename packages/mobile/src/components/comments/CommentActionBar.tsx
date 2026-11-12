@@ -24,7 +24,7 @@ export const CommentActionBar = (props: CommentActionBarProps) => {
   const { isCurrentUserReacted, reactCount, id: commentId } = comment
 
   const [reactToComment] = useReactToComment()
-  const [reactionState, setReactionState] = useState(isCurrentUserReacted) // TODO: need to pull starting value from metadata
+  const [reactionState, setReactionState] = useState(isCurrentUserReacted)
   const { setReplyingAndEditingState } = useCurrentCommentSection()
 
   const handleCommentReact = useCallback(() => {

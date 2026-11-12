@@ -66,39 +66,6 @@ export class Uid {
   }
 }
 
-export function makeUids(
-  kinds: string[],
-  ids: (number | string)[],
-  source?: string
-) {
-  if (Array.isArray(kinds)) {
-    // Multiple kinds in the ids array.
-    const totals: Record<string, number> = {}
-    const counts: Record<string, number> = {}
-    ids.forEach((id, i) => {
-      const key = `${kinds[i]}${id}`
-      if (key in totals) totals[key] += 1
-      else totals[key] = 0
-      counts[i] = totals[key]
-    })
-    const uids = ids.map((id, i) => Uid.build(kinds[i], id, source, counts[i]))
-    return uids.map((uid) => uid.toString())
-  } else {
-    // Single kind.
-    const kind = kinds
-
-    const totals: Record<number, number> = {}
-    const counts: Record<number, number> = {}
-    ids.forEach((id, i) => {
-      if (id in totals) totals[id] += 1
-      else totals[id] = 0
-      counts[i] = totals[id]
-    })
-    const uids = ids.map((id, i) => Uid.build(kind, id, source, counts[i]))
-    return uids.map((uid) => uid.toString())
-  }
-}
-
 export function makeUid(kind: string, id: ID, source?: string) {
   const uid = Uid.build(kind, id, source)
   return uid.toString()
@@ -131,12 +98,6 @@ export const makeKindId = (kind: string, id: ID | string | undefined) =>
  * @param kindId
  */
 export const getIdFromKindId = (kindId: string) => kindId.split('-')[1]
-
-/**
- * Gets the kind from a kind id
- * @param kindId
- */
-export const getKindFromKindId = (kindId: string) => kindId.split('-')[0]
 
 /**
  * Gets the numeric id from a uid

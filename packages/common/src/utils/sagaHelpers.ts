@@ -1,19 +1,9 @@
 /** Helper Sagas */
 
 import { QueryClient } from '@tanstack/react-query'
-import { eventChannel, END, EventChannel } from 'redux-saga'
-import { ActionPattern, GetContextEffect } from 'redux-saga/effects'
-import {
-  all,
-  call,
-  delay,
-  getContext,
-  put,
-  select,
-  spawn,
-  take,
-  takeEvery
-} from 'typed-redux-saga'
+import { EventChannel } from 'redux-saga'
+import { GetContextEffect } from 'redux-saga/effects'
+import { call, getContext, put, select, take } from 'typed-redux-saga'
 import { Action } from 'typesafe-actions'
 
 // this import needs to be very specific for SSR bundlesize
@@ -28,22 +18,6 @@ const messages = {
 }
 
 /**
- * Calls the provided array of calls in batches with delayMs milliseconds between each batch.
- */
-export function* batchYield(
-  calls: Generator[],
-  batchSize: number,
-  delayMs: number
-) {
-  let remainingCalls = calls
-  while (remainingCalls.length > 0) {
-    yield all(remainingCalls.slice(0, batchSize))
-    remainingCalls = remainingCalls.slice(batchSize)
-    yield delay(delayMs)
-  }
-}
-
-/**
  * Takes a channel that yields the value of a Redux action, waits for it to yield and then
  * dispatches the action.
  * @param {Object} channel
@@ -55,14 +29,6 @@ export function* actionChannelDispatcher(channel: EventChannel<any>) {
       yield put(action)
     }
   }
-}
-
-export function* channelCanceller(
-  channel: EventChannel<Action<any>>,
-  action: ActionPattern<Action<any>>
-) {
-  yield take(action)
-  channel.close()
 }
 
 /**
@@ -88,28 +54,6 @@ export function* waitForValue(
   return value
 }
 
-function doEveryImpl(millis: number, times: number | null) {
-  return eventChannel((emitter) => {
-    // Emit once at the start
-    emitter(times || true)
-
-    // Emit once every millis
-    const iv = setInterval(() => {
-      if (times !== null) {
-        times -= 1
-      }
-      if (times === null || times > 0) {
-        emitter(times || true)
-      } else {
-        emitter(END)
-      }
-    }, millis)
-    return () => {
-      clearInterval(iv)
-    }
-  })
-}
-
 /**
  * Waits for a query function to return a truthy value.
  * Similar to waitForValue but for tanstack query data.
@@ -131,24 +75,6 @@ export function* waitForQueryValue<TResult>(
     value = yield* call(query, args)
   }
   return value as TResult
-}
-
-/**
- * Repeatedly calls a saga/async function on an interval for up to a set number of times.
- * @param {number} millis
- * @param {function *} fn
- * @param {number?} times
- */
-export function* doEvery(
-  millis: number,
-  fn: (...args: any) => any,
-  times: number | null = null
-) {
-  const chan: EventChannel<any> = yield call(doEveryImpl, millis, times)
-  yield spawn(function* () {
-    yield takeEvery(chan, fn)
-  })
-  return chan
 }
 
 /**

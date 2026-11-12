@@ -1,4 +1,3 @@
-// TODO: Not sure if still needed
 export enum ChallengeId {
   TRACK_UPLOADS = 'u',
   REFERRALS = 'r',

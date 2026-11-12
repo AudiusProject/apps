@@ -4,7 +4,7 @@ import { RendezvousHash } from '../../utils/rendezvous'
 import type { LoggerService } from '../Logger'
 
 import { getDefaultStorageNodeSelectorConfig } from './getDefaultConfig'
-import { isNodeHealthy } from './getNStorageNodes'
+import { isNodeHealthy } from './isNodeHealthy'
 import type {
   HealthCheckResponseData,
   StorageNode,

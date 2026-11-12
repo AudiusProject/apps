@@ -101,10 +101,3 @@ export const useCoinPair = (
     data: queryResult.data || createFallbackPair()
   }
 }
-
-// Hook for getting default AUDIO/USDC pair
-export const useDefaultTokenPair = (
-  options?: Partial<ReturnType<typeof getTokenPairOptions>>
-) => {
-  return useCoinPair({ baseSymbol: 'AUDIO', quoteSymbol: 'USDC' }, options)
-}

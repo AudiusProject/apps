@@ -92,10 +92,6 @@ export const formatNumberCommas = (num: number | string) => {
   )
 }
 
-export const trimRightZeros = (number: string) => {
-  return number.replace(/(\d)0+$/gm, '$1')
-}
-
 export const checkOnlyNumeric = (number: string) => {
   const reg = /^\d+$/
   return reg.test(number)
@@ -110,10 +106,6 @@ export const checkOnlyWeiFloat = (number: string) => {
   if (!checkOnlyNumeric(nums[0]) || !checkOnlyNumeric(nums[1])) return false
   if (nums[1].length > 18) return false
   return true
-}
-
-export const checkWeiNumber = (number: string) => {
-  return checkOnlyNumeric(number) || checkOnlyWeiFloat(number)
 }
 
 /** Capitalizes the given input string */
@@ -183,12 +175,6 @@ export const getHash = (str: string) =>
       return a & a
     }, 0)
   ).toString(36)
-
-/**
- * Formats a number to be a double digit
- */
-export const formatDoubleDigit = (value: number) =>
-  value.toString().padStart(2, '0')
 
 /**
  * Formats a ticker to be uppercase and trimmed

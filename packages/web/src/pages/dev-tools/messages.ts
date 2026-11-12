@@ -37,7 +37,7 @@ export const messages = {
   aaoButton: 'Open AAO UI',
   healthzTitle: 'Health Monitor (Healthz)',
   healthzDescription:
-    'Access the health monitoring dashboard for Audius network services including discovery nodes, content nodes, and other protocol infrastructure.',
+    'Access the health monitoring dashboard for Audius network services including Open Audio validator nodes and other protocol infrastructure.',
   healthzButton: 'Open Healthz Dashboard',
   userIdParserTitle: 'User ID Parser',
   userIdParserDescription:

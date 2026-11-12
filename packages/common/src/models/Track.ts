@@ -115,11 +115,6 @@ export const isContentTokenGated = (
 ): gatedConditions is TokenGatedConditions =>
   !!gatedConditions && 'token_gate' in (gatedConditions ?? {})
 
-export const isContentNftGated = (
-  gatedConditions?: Nullable<AccessConditions>
-): gatedConditions is NftGatedConditions =>
-  !!gatedConditions && 'nft_collection' in (gatedConditions ?? {})
-
 export const isContentUSDCPurchaseGated = (
   gatedConditions?: Nullable<
     AccessConditions | DeepOmit<USDCPurchaseConditions, 'splits'>

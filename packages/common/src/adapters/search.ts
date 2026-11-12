@@ -95,15 +95,3 @@ export const searchResultsFromSDK = (
     saved_albums
   }
 }
-
-export const AUTOCOMPLETE_TOTAL_RESULTS = 3
-
-export const limitAutocompleteResults = (
-  results: SearchResults,
-  maxResults: number = AUTOCOMPLETE_TOTAL_RESULTS
-): SearchResults => {
-  return Object.keys(results).reduce((acc, key) => {
-    acc[key] = results[key].slice(0, Math.min(maxResults, results[key].length))
-    return acc
-  }, {} as SearchResults)
-}

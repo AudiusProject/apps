@@ -48,7 +48,6 @@ export const SettingsRow = (props: SettingsRowProps) => {
 
   return (
     <View style={[styles.root, firstItem && styles.firstItem]}>
-      {/* @ts-ignore */}
       <Row url={url as string} onPress={onPress} style={[styles.row, style]}>
         <View style={styles.content}>{children}</View>
         {onPress || url ? (

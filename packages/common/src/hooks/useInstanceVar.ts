@@ -19,8 +19,7 @@ export const useInstanceVar = <T>(
   const setter = useCallback(
     (updated: T | ((old: T) => T)) => {
       if (typeof updated === 'function') {
-        // @ts-ignore
-        ref.current = updated(ref.current)
+        ref.current = (updated as (old: T) => T)(ref.current)
       } else {
         ref.current = updated
       }

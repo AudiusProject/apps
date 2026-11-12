@@ -1,8 +1,5 @@
 import { z } from 'zod'
 
-// @ts-ignore:next-line ignore the unused import, used in jsdoc
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { ChallengesApi } from '../../api/challenges/ChallengesApi'
 import { ChallengeId } from '../../api/challenges/types'
 import { AntiAbuseOracleSelectorService } from '../AntiAbuseOracleSelector'
 
@@ -11,11 +8,7 @@ export const GetAttestationSchema = z.object({
   handle: z.string(),
   /** The challenge identifier. As in, the challenge "name." */
   challengeId: z.nativeEnum(ChallengeId),
-  /**
-   * Identifier for the completed challenge instance.
-   *
-   * @see {@link ChallengesApi.generateSpecifier}
-   */
+  /** Identifier for the completed challenge instance. */
   specifier: z.string(),
   /** The amount being claimed, in decimal wAUDIO. */
   amount: z.number()
@@ -33,13 +26,13 @@ export type AttestationResponse = {
 export type AntiAbuseOracleHealthCheckResponse = {
   /** The version number of AAO deployed. */
   version: number
-  /** The discovery node endpoint the AAO is using. */
+  /** The validator node endpoint the AAO is using. */
   selectedDiscoveryNode: string
   /** A list of other AAO endpoints. (note: Empty at time of writing!) */
   otherAntiAbuseOracleEndpoints: string[]
   /** The wallet public key address for this AAO. */
   walletPubkey: string
-  /** The wallet public key address for this AAO from a discovery node plugin. */
+  /** The wallet public key address for this AAO from a validator node plugin. */
   antiAbuseWalletPubkey?: string
   /** Whether the database container is healthy (UP) or unhealthy (DOWN). */
   db: 'UP' | 'DOWN'

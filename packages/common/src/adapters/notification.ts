@@ -494,8 +494,7 @@ export const notificationFromSDK = (
               const data = action.data
               entityId = HashId.parse(data.entityId)
               commentId = OptionalHashId.parse(data.commentId)
-              // @ts-ignore
-              entityType = data.type
+              entityType = data.type as Entity
               return HashId.parse(data.commentUserId)
             })
             .filter(removeNullable)
@@ -523,8 +522,7 @@ export const notificationFromSDK = (
               entityId = HashId.parse(data.entityId)
               entityUserId = HashId.parse(data.entityUserId)
               commentId = OptionalHashId.parse(data.commentId)
-              // @ts-ignore
-              entityType = data.type
+              entityType = data.type as Entity
               return HashId.parse(data.commentUserId)
             })
             .filter(removeNullable)
@@ -551,8 +549,7 @@ export const notificationFromSDK = (
           entityId = HashId.parse(data.entityId)
           entityUserId = HashId.parse(data.entityUserId)
           commentId = OptionalHashId.parse(data.commentId)
-          // @ts-ignore
-          entityType = data.type
+          entityType = data.type as Entity
           return HashId.parse(data.commentUserId)
         })
         .filter(removeNullable)
@@ -577,8 +574,7 @@ export const notificationFromSDK = (
           entityId = HashId.parse(data.entityId)
           entityUserId = HashId.parse(data.entityUserId)
           commentId = OptionalHashId.parse(data.commentId)
-          // @ts-ignore
-          entityType = data.type
+          entityType = data.type as Entity
           return HashId.parse(data.reacterUserId)
         })
         .filter(removeNullable)

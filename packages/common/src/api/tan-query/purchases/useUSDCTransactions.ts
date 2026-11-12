@@ -140,8 +140,6 @@ export const useUSDCTransactions = (
     })
   }, [queryClient, queryKey])
 
-  // @ts-ignore
-  queryData.reset = reset
   // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
   // doesn't change every render. We read the latest queryData from a ref
   // at call time instead of capturing it in the closure deps.
@@ -152,9 +150,12 @@ export const useUSDCTransactions = (
     if (q.isFetching || !q.hasNextPage) return undefined
     return q.fetchNextPage()
   }, [])
-  // @ts-ignore
-  queryData.loadNextPage = loadNextPageCallback
-  return queryData as UseInfiniteQueryResult<USDCTransactionDetails[]> & {
+  // Attach helpers directly onto the query result object (rather than
+  // spreading it) so TanStack Query's tracked-property access keeps working.
+  return Object.assign(queryData, {
+    reset,
+    loadNextPage: loadNextPageCallback
+  }) as UseInfiniteQueryResult<USDCTransactionDetails[]> & {
     reset: typeof reset
     loadNextPage: typeof loadNextPageCallback
   }

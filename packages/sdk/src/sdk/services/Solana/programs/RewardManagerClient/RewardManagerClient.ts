@@ -65,7 +65,7 @@ export class RewardManagerError extends Error {
  * Connected client to the Solana RewardManager program.
  *
  * The RewardManager program is in charge of disbursing the community awards
- * based on attestations from N uniquely owned discovery nodes and an anti abuse
+ * based on attestations from N uniquely owned validator nodes and an anti abuse
  * oracle node.
  */
 export class RewardManagerClient {

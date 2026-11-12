@@ -84,7 +84,7 @@ export const useUpdateProfile = () => {
     onSuccess: (_data, variables) => {
       // Re-confirm the mutation in the cache after server success.
       // We re-apply mutation variables rather than the raw server response
-      // to guard against discovery-node propagation lag: the node answering
+      // to guard against validator node propagation lag: the node answering
       // getUser may not yet have indexed the confirmed block.
       const currentCache = queryClient.getQueryData<UserMetadata>(
         getUserQueryKey(currentUserId)

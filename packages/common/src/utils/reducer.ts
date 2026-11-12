@@ -1,13 +1,4 @@
-// TODO(nkang): Note - this is copied from web/utils/reducer.ts. Uncomment the commented code if needed for the common store later on.
-
-// import { UseSelectorHook } from './selectorHook'
-// import { useSelector as untypedUseSelector } from 'react-redux'
 import { Action } from 'redux'
-
-/**
- * Typed version of Redux useSelector
- */
-// export const useSelector: UseSelectorHook<AppState> = untypedUseSelector
 
 /**
  * Handy util for generating a reducer function from an actionmap.

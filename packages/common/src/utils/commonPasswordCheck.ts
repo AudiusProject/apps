@@ -1,4 +1,5 @@
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 const HIBP_URL = 'https://api.pwnedpasswords.com/range/'
 
@@ -24,8 +25,7 @@ export const commonPasswordCheck = async (
     ])
 
     if (result) {
-      // @ts-ignore
-      const text = (await result?.text()) as string
+      const text = await result.text()
       const hashArr = text.split(/\s+/g).map((s) => s.slice(0, s.indexOf(':')))
 
       // If there is no match, return false

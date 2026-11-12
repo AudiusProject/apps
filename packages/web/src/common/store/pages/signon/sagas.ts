@@ -522,7 +522,7 @@ function* signUp() {
               )
 
               // Optimistically update localStorage so getLocalAccount returns
-              // complete user data before discovery provider has indexed.
+              // complete user data before the validator node has indexed.
               const updatedUser = {
                 ...account.user,
                 handle,

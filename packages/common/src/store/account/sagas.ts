@@ -375,7 +375,7 @@ function* setLocalStorageAccountAndUser(
   // Prefer cached user data (which may include recent optimistic mutations
   // like profile_type changes) over the server-fetched response. This prevents
   // setLocalStorageAccountAndUser from overwriting changes that haven't yet
-  // propagated to all discovery nodes.
+  // propagated to all validator nodes.
   const queryClient = yield* getContext('queryClient')
   const cachedUser = queryClient.getQueryData<UserMetadata>(
     getUserQueryKey(accountUser.user_id)

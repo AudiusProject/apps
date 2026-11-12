@@ -64,7 +64,6 @@ export const FormScreen = (props: FormScreenProps) => {
         backgroundColor='white'
         borderTop='default'
         gap='m'
-        // style={css({ position: 'absolute', bottom: 0, left: 0, right: 0 })}
       >
         {bottomSection ?? (
           <>
