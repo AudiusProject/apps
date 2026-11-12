@@ -60,10 +60,10 @@ export const useCoinBalance = ({
       includeStaked
     },
     {
-      enabled: isAudio,
       refetchInterval: isPolling ? pollingInterval : undefined,
       refetchOnWindowFocus: !isPolling,
-      ...queryOptions
+      ...queryOptions,
+      enabled: isAudio && queryOptions.enabled !== false
     }
   )
 

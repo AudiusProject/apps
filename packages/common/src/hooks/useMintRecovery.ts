@@ -50,10 +50,10 @@ export const useMintRecovery = (
         return BigInt(0)
       }
     },
-    enabled: options?.enabled !== false && !!mint,
     refetchInterval: 2000, // Poll every 2 seconds
     refetchOnWindowFocus: true,
     ...options,
+    enabled: options?.enabled !== false && !!mint,
     select: (balance: bigint) => {
       // If there's a balance, trigger recovery
       if (balance > BigInt(0)) {
