@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   useCurrentUserId,
@@ -128,46 +128,44 @@ const useWithdrawalTransactionPoller = (
     method: GetUSDCTransactionsMethodEnum.Send
   })
 
+  // Read via refs so the poller only restarts when the awaited transaction
+  // changes. `reset` is a new function every render.
+  const transactionsRef = useRef(transactions)
+  transactionsRef.current = transactions
+  const resetRef = useRef(reset)
+  resetRef.current = reset
+
   useEffect(() => {
     if (!lastCompletedTransaction || !userId) return
 
-    setIsPolling(true)
-    let timedOut = false
-    const timerId = setTimeout(() => {
-      timedOut = true
-      setIsPolling(false)
-    }, 60000)
-
-    const pollInterval = setInterval(async () => {
-      // Check if transaction exists in current data
-      const found = transactions?.some(
+    const isFound = () =>
+      !!transactionsRef.current?.some(
         (t) => t.signature === lastCompletedTransaction
       )
+    if (isFound()) return
 
-      if (found) {
-        clearInterval(pollInterval)
-        clearTimeout(timerId)
-        setIsPolling(false)
-        return
-      }
+    setIsPolling(true)
 
-      // If we've timed out, stop polling
-      if (timedOut) {
-        clearInterval(pollInterval)
-        return
-      }
-
-      // Refetch transactions
-      await reset()
-    }, 1000)
-
-    // Cleanup
-    return () => {
+    const stopPolling = () => {
       clearInterval(pollInterval)
       clearTimeout(timerId)
       setIsPolling(false)
     }
-  }, [lastCompletedTransaction, userId, transactions, reset])
+
+    // Stop polling after 60s even if the transaction never shows up
+    const timerId = setTimeout(stopPolling, 60000)
+
+    const pollInterval = setInterval(() => {
+      if (isFound()) {
+        stopPolling()
+        return
+      }
+      // Refetch transactions
+      resetRef.current()
+    }, 1000)
+
+    return stopPolling
+  }, [lastCompletedTransaction, userId])
 
   return {
     isPolling,

@@ -99,14 +99,20 @@ export const useMuteUser = () => {
       // Generic toast error
       dispatch(toast({ content: messages.muteUserError }))
 
+      if (trackId === undefined) return
       // No way to know what comment count should be here, so we just reset the query data
       queryClient.resetQueries({
-        queryKey: ['trackCommentCount', trackId]
+        queryKey: getTrackCommentCountQueryKey(trackId)
       })
       // Reload data
-      queryClient.resetQueries({
-        queryKey: ['trackCommentList', trackId, currentSort]
-      })
+      if (currentSort !== undefined) {
+        queryClient.resetQueries({
+          queryKey: getTrackCommentListQueryKey({
+            trackId,
+            sortMethod: currentSort
+          })
+        })
+      }
     }
   })
 }

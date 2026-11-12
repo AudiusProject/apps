@@ -29,11 +29,20 @@ export const useMarkNotificationsAsViewed = () => {
       })
     },
     onMutate: () => {
+      const queryKey = getNotificationUnreadCountQueryKey(currentUserId)
+      const previousUnreadCount = queryClient.getQueryData(queryKey)
       // Optimistically set unread count to 0
-      queryClient.setQueryData(
-        getNotificationUnreadCountQueryKey(currentUserId),
-        0
-      )
+      queryClient.setQueryData(queryKey, 0)
+      return { previousUnreadCount }
+    },
+    onError: (_error, _variables, context) => {
+      // Roll back the optimistic update so the unread badge isn't lost
+      if (context?.previousUnreadCount !== undefined) {
+        queryClient.setQueryData(
+          getNotificationUnreadCountQueryKey(currentUserId),
+          context.previousUnreadCount
+        )
+      }
     }
   })
 }

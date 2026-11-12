@@ -22,16 +22,21 @@ export const useEnterContest = (trackId: ID | undefined) => {
     let artwork: { url: string; file: any } | undefined
     const imageUrl = originalTrack?.artwork?.[SquareSizes.SIZE_480_BY_480] ?? ''
     if (imageUrl) {
-      const response = await fetch(imageUrl)
-      const blob = await response.blob()
-      const file = new File([blob], 'image.jpg', { type: blob.type })
-      artwork = {
-        url: imageUrl,
-        file: {
-          // @ts-ignore: KJ - _data is on the file for some reason
-          ...file._data,
-          uri: imageUrl
+      try {
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        const file = new File([blob], 'image.jpg', { type: blob.type })
+        artwork = {
+          url: imageUrl,
+          file: {
+            // @ts-ignore: KJ - _data is on the file for some reason
+            ...file._data,
+            uri: imageUrl
+          }
         }
+      } catch (e) {
+        // Artwork is only a pre-fill, so continue to upload without it
+        console.warn('Failed to pre-fill contest artwork', e)
       }
     }
 
