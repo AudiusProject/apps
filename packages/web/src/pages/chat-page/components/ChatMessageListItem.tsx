@@ -219,9 +219,13 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
           {sender.name}
         </Text>
       ) : null}
+      {/* Full width so a link-only bubble's min(448px, 100%) width resolves
+          against the list, not this row's shrink-to-fit width. */}
       <Flex
         gap='s'
         alignItems='flex-end'
+        justifyContent={isAuthor ? 'flex-end' : 'flex-start'}
+        w='100%'
         css={{ maxWidth: '100%', minWidth: 0 }}
       >
         {showSender ? (
