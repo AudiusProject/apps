@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import CodePush from '@bravemobile/react-native-code-push'
 import { StyleSheet, View } from 'react-native'
-import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated'
+import Animated, { Easing, withTiming } from 'react-native-reanimated'
 
 import {
   Button,
@@ -32,6 +32,10 @@ const FORCE_OTA_BANNER_PREVIEW = false
 const TOAST_HEIGHT = 44
 /** Gap between the toast and the play bar or tab bar below it. */
 const TOAST_GAP = 12
+/** Extra travel so the shadow is off screen too. */
+const TOAST_SHADOW_ALLOWANCE = 24
+const ENTER_DURATION_MS = 280
+const EXIT_DURATION_MS = 180
 
 const messages = {
   pendingBody: 'Update ready',
@@ -259,15 +263,50 @@ export const OtaUpdateBanner = () => {
   )
 
   // Slides rather than fades: the system glass stops rendering under a parent
-  // at zero opacity.
+  // at zero opacity. Travels only from just below the screen edge, with no
+  // spring.
+  const travel = bottomInset + TOAST_GAP + TOAST_HEIGHT + TOAST_SHADOW_ALLOWANCE
+  const entering = () => {
+    'worklet'
+    return {
+      initialValues: { transform: [{ translateY: travel }] },
+      animations: {
+        transform: [
+          {
+            translateY: withTiming(0, {
+              duration: ENTER_DURATION_MS,
+              easing: Easing.out(Easing.cubic)
+            })
+          }
+        ]
+      }
+    }
+  }
+  const exiting = () => {
+    'worklet'
+    return {
+      initialValues: { transform: [{ translateY: 0 }] },
+      animations: {
+        transform: [
+          {
+            translateY: withTiming(travel, {
+              duration: EXIT_DURATION_MS,
+              easing: Easing.in(Easing.cubic)
+            })
+          }
+        ]
+      }
+    }
+  }
+
   return (
     <View
       pointerEvents='box-none'
       style={[styles.root, { bottom: bottomInset + TOAST_GAP }]}
     >
       <Animated.View
-        entering={SlideInDown.springify().damping(18)}
-        exiting={SlideOutDown.duration(200)}
+        entering={entering}
+        exiting={exiting}
         style={styles.shadow}
       >
         {isLiquidGlassAvailable ? (
