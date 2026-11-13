@@ -84,18 +84,14 @@ export const TrendingScreen = () => {
     <Screen url='Trending' header={renderHeader} headerTransparent>
       <Flex flex={1} direction='column' style={{ minHeight: 0 }}>
         <FloatingSubHeader
-          title={titleByCategory[category]}
           compact={
             <TrendingHeader
               title={titleByCategory[category]}
               icon={IconTrending}
               filterModal={TRENDING_FILTER_MODAL}
               showTitleRow={false}
-              size='small'
             >
-              {category === 'tracks' ? (
-                <TrendingFilterButton size='small' />
-              ) : null}
+              {category === 'tracks' ? <TrendingFilterButton /> : null}
             </TrendingHeader>
           }
         >

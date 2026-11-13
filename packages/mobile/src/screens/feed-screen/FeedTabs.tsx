@@ -14,15 +14,12 @@ const tabs: FeedTab[] = [FeedTab.FOR_YOU, FeedTab.LATEST]
 type FeedTabsProps = {
   currentTab: FeedTab
   onSelectTab: (tab: FeedTab) => void
-  /** `small` for the compact copy under the collapsed header pill. */
-  size?: 'small' | 'large'
   children?: ReactNode
 }
 
 export const FeedTabs = ({
   currentTab,
   onSelectTab,
-  size = 'large',
   children
 }: FeedTabsProps) => {
   return (
@@ -31,7 +28,7 @@ export const FeedTabs = ({
         <SelectablePill
           key={tab}
           type='radio'
-          size={size}
+          size='large'
           value={tab}
           label={tabLabels[tab]}
           isSelected={currentTab === tab}

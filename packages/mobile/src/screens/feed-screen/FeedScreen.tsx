@@ -264,14 +264,9 @@ export const FeedScreen = () => {
     <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
         <FloatingSubHeader
-          title={messages.header}
           compact={
-            <FeedTabs
-              currentTab={feedTab}
-              onSelectTab={handleSelectTab}
-              size='small'
-            >
-              {isForYou ? null : <FeedFilterButton size='small' />}
+            <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab}>
+              {isForYou ? null : <FeedFilterButton />}
             </FeedTabs>
           }
         >

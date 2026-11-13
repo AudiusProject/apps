@@ -38,9 +38,8 @@ type MobileRootHeaderProps = {
   /** Hairline under the title row. Off when a sub-header row follows it. */
   showDivider?: boolean
   /**
-   * Set when the screen renders a `FloatingSubHeader`. The screen's floating
-   * rows draw above the navigation header, so the compact title pill moves
-   * into the sub-header to stay on top of them.
+   * Set when the screen renders a `FloatingSubHeader`. Its pinned controls
+   * replace the compact title pill.
    */
   hasSubHeader?: boolean
 }
@@ -87,7 +86,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
  * content]. It scrolls away with the list, and once the title row is gone a
  * small glass pill with the title takes its place under the status bar.
  * Screens with controls (tab pills, filters) render their own in-flow row
- * and compact copy through `FloatingSubHeader`.
+ * through `FloatingSubHeader` and pin a copy of it instead of the title.
  *
  * Reports its measured height through `GlassChromeContext` so the screen
  * underneath can pad its scrollable content to start below it.
