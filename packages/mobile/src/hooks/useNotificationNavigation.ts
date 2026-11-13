@@ -31,7 +31,6 @@ import type {
   TrendingUndergroundNotification,
   TrendingPushFields,
   ShareMilestoneStat,
-  ChallengeRewardNotification,
   TierChangeNotification,
   AddTrackToPlaylistNotification,
   AddTrackToPlaylistPushFields,
@@ -351,11 +350,6 @@ export const useNotificationNavigation = () => {
       },
       // Will handle NotificationType.Announcement and PushNotificationType.Announcement
       [NotificationType.Announcement]: announcementHandler,
-      [NotificationType.ChallengeReward]: (
-        notification: ChallengeRewardNotification
-      ) => {
-        navigation.navigate('RewardsScreen')
-      },
       // Handles both the in-app tile and the push payload (`type:
       // 'WeeklyRotation'`); neither carries an entity, the mix is fetched on
       // demand for the signed-in user.

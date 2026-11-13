@@ -28,7 +28,6 @@ export const coinDetailsMessages = {
     messageBlasts: 'Message Blasts',
     openDiscord: 'Open The Discord',
     refreshDiscordRole: 'Refresh Discord Role',
-    browseRewards: 'Browse Rewards',
     uploadExclusiveTrack: 'Upload Exclusive Track',
     rewardTiers: 'Reward Tiers',
     discordDisabledTooltip: (coinTicker: string = '') =>

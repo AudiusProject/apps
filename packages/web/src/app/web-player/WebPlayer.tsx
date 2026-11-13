@@ -63,7 +63,6 @@ import Navigator from 'components/nav/Navigator'
 import TopLevelPage from 'components/nav/mobile/TopLevelPage'
 import Notice from 'components/notice/Notice'
 import PlayBarProvider from 'components/play-bar/PlayBarProvider'
-import { RewardClaimedToast } from 'components/reward-claimed-toast/RewardClaimedToast'
 import { useActivityPing } from 'hooks/useActivityPing'
 import { useEnvironment } from 'hooks/useEnvironment'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
@@ -203,11 +202,6 @@ const RepostsPage = lazy(() => import('pages/reposts-page/RepostsPage'))
 const RequiresUpdate = lazy(() =>
   import('pages/requires-update/RequiresUpdate').then((m) => ({
     default: m.RequiresUpdate
-  }))
-)
-const RewardsPage = lazy(() =>
-  import('pages/rewards-page/RewardsPage').then((m) => ({
-    default: m.RewardsPage
   }))
 )
 const ExplorePage = lazy(() =>
@@ -1041,8 +1035,14 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route path={PAYMENTS_PAGE} element={<WalletPage />} />
                 <Route path={WALLET_PAGE} element={<WalletPage />} />
                 <Route path={CASH_PAGE} element={<CashPage />} />
-                <Route path={REWARDS_PAGE} element={<RewardsPage />} />
-                <Route path={AIRDROP_PAGE} element={<RewardsPage />} />
+                <Route
+                  path={REWARDS_PAGE}
+                  element={<Navigate to={WALLET_PAGE} replace />}
+                />
+                <Route
+                  path={AIRDROP_PAGE}
+                  element={<Navigate to={WALLET_PAGE} replace />}
+                />
 
                 <Route path={CHAT_PAGE} element={<ChatPage />} />
                 <Route
@@ -1511,8 +1511,14 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route path={PAYMENTS_PAGE} element={<WalletPage />} />
                 <Route path={WALLET_PAGE} element={<WalletPage />} />
                 <Route path={CASH_PAGE} element={<CashPage />} />
-                <Route path={REWARDS_PAGE} element={<RewardsPage />} />
-                <Route path={AIRDROP_PAGE} element={<RewardsPage />} />
+                <Route
+                  path={REWARDS_PAGE}
+                  element={<Navigate to={WALLET_PAGE} replace />}
+                />
+                <Route
+                  path={AIRDROP_PAGE}
+                  element={<Navigate to={WALLET_PAGE} replace />}
+                />
                 <Route path={CHAT_PAGE} element={<ChatPage />} />
                 <Route
                   path={DEACTIVATE_PAGE}
@@ -1706,7 +1712,6 @@ const WebPlayer = (props: WebPlayerProps) => {
         </Suspense>
         <ConnectedMusicConfetti />
 
-        <RewardClaimedToast />
         {!isMobile ? <Visualizer /> : null}
         {!isMobile ? <DevModeMananger /> : null}
       </div>

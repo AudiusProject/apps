@@ -30,7 +30,6 @@ import {
   IconCloudUpload,
   IconDiscord,
   IconExternalLink,
-  IconGift,
   IconInstagram,
   IconLink,
   IconTikTok,
@@ -66,7 +65,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 import { push } from 'utils/navigation'
 
-const { REWARDS_PAGE, UPLOAD_PAGE } = route
+const { UPLOAD_PAGE } = route
 
 const messages = {
   ...coinDetailsMessages.coinInfo,
@@ -665,10 +664,6 @@ export const FanClubInfoSection = ({
     window.open(coin?.website, '_blank')
   }
 
-  const handleBrowseRewards = useCallback(() => {
-    dispatch(push(REWARDS_PAGE))
-  }, [dispatch])
-
   const handleUploadExclusiveTrack = useCallback(() => {
     dispatch(push(UPLOAD_PAGE))
   }, [dispatch])
@@ -891,7 +886,6 @@ export const FanClubInfoSection = ({
   }
 
   const isWAudio = coin.mint === env.WAUDIO_MINT_ADDRESS
-  const CTAIcon = isWAudio ? IconGift : IconExternalLink
 
   const isUserBalanceUnavailable =
     !userTokenBalance || Number(userTokenBalance) <= 0
@@ -1022,7 +1016,7 @@ export const FanClubInfoSection = ({
           ) : null}
         </Flex>
 
-        {isWAudio || coin.website ? (
+        {coin.website ? (
           <Flex
             alignItems='center'
             justifyContent='space-between'
@@ -1032,11 +1026,11 @@ export const FanClubInfoSection = ({
           >
             <Flex alignItems='center' justifyContent='center' gap='s'>
               <PlainButton
-                onClick={isWAudio ? handleBrowseRewards : handleLearnMore}
-                iconLeft={CTAIcon}
+                onClick={handleLearnMore}
+                iconLeft={IconExternalLink}
                 variant='default'
               >
-                {isWAudio ? messages.browseRewards : messages.learnMore}
+                {messages.learnMore}
               </PlainButton>
             </Flex>
           </Flex>

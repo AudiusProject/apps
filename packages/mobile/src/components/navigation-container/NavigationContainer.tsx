@@ -90,9 +90,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         SettingsScreen: {
                           path: 'settings'
                         },
-                        RewardsScreen: {
-                          path: 'rewards'
-                        },
                         wallet: {
                           path: 'wallet'
                         },

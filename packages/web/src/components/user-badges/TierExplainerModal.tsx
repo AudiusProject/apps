@@ -1,9 +1,8 @@
 import { useCallback, ReactElement } from 'react'
 
 import { BadgeTier } from '@audius/common/models'
-import { route, Nullable } from '@audius/common/utils'
+import { Nullable } from '@audius/common/utils'
 import {
-  Button,
   Flex,
   Modal,
   ModalContent,
@@ -18,23 +17,18 @@ import {
 } from '@audius/harmony'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
-import { useDispatch } from 'react-redux'
 
 import { BadgeTierText } from 'components/user-badges/ProfilePageBadge'
 import { useProfileTier } from 'hooks/wallet'
 import { TierLevel, TierNumber } from 'pages/rewards-page/Tiers'
-import { push } from 'utils/navigation'
 
 import styles from './TierExplainerModal.module.css'
-
-const { REWARDS_PAGE } = route
 
 export const messages = {
   title: '$AUDIO VIP Tiers',
   desc1: 'Unlock $AUDIO VIP Tiers by simply holding more $AUDIO.',
   desc2:
     'Advancing to a new tier will earn you a profile badge, visible throughout the app, and unlock various new features, as they are released.',
-  learnMore: 'LEARN MORE',
   currentTier: 'CURRENT TIER'
 }
 
@@ -102,19 +96,12 @@ const Tier = ({ tier, isActive = false, isCompact = false }: TierProps) => {
 }
 
 const TierExplainerModal = NiceModal.create(() => {
-  const dispatch = useDispatch()
   const tier = useProfileTier()
   const modal = useModal()
 
   const handleDismiss = useCallback(() => {
     modal.hide()
   }, [modal])
-
-  const onClickLearnMore = useCallback(() => {
-    handleDismiss()
-    // Audio page removed - redirect to rewards page instead
-    dispatch(push(REWARDS_PAGE))
-  }, [dispatch, handleDismiss])
 
   return (
     <Modal
@@ -135,9 +122,6 @@ const TierExplainerModal = NiceModal.create(() => {
               <br />
               {messages.desc2}
             </ModalContentText>
-            <Button variant='primary' onClick={onClickLearnMore}>
-              {messages.learnMore}
-            </Button>
           </Flex>
           <Flex flex={2}>
             <Tier isCompact tier={tier} />

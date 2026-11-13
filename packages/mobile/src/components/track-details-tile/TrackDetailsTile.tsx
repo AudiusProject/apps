@@ -33,8 +33,7 @@ import { TrackDogEar } from '../track/TrackDogEar'
 const messages = {
   followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: 'PREMIUM TRACK',
-  coinGated: 'FAN CLUB',
-  earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
+  coinGated: 'FAN CLUB'
 }
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -76,13 +75,11 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 type TrackDetailsTileProps = {
   trackId: ID
   showLabel?: boolean
-  earnAmount?: string
 }
 
 export const TrackDetailsTile = ({
   trackId,
-  showLabel = true,
-  earnAmount
+  showLabel = true
 }: TrackDetailsTileProps) => {
   const styles = useStyles()
   const { accentBlue, specialLightGreen } = useThemeColors()
@@ -174,14 +171,6 @@ export const TrackDetailsTile = ({
               badgeSize='xs'
             />
           </Flex>
-          {earnAmount ? (
-            <Flex direction='row' alignItems='center' gap='xs' pt='xs'>
-              <IconCart size='s' color='premium' />
-              <Text fontSize='xs' color='specialLightGreen'>
-                {messages.earn(earnAmount)}
-              </Text>
-            </Flex>
-          ) : null}
         </View>
       </View>
     </View>

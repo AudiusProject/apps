@@ -38,8 +38,6 @@ import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
-import { ClaimAllRewardsTile } from '../rewards-screen/ClaimAllRewardsTile'
-
 const { setVisibility } = modalsActions
 const { getHasAssociatedWallets } = tokenDashboardPageSelectors
 const { fetchAssociatedWallets } = tokenDashboardPageActions
@@ -47,7 +45,7 @@ const { fetchAssociatedWallets } = tokenDashboardPageActions
 const LEARN_MORE_LINK = 'https://blog.audius.co/article/community-meet-audio'
 
 const messages = {
-  title: '$AUDIO & Rewards',
+  title: '$AUDIO',
   audio: '$AUDIO',
   send: 'Send',
   receive: 'Receive',
@@ -55,8 +53,7 @@ const messages = {
   what: 'What is $AUDIO?',
   whatBody1:
     'Audius is owned by people like you, not major corporations. Holding $AUDIO grants you partial ownership of the Audius platform and gives you access to special features as they are released.',
-  learnMore: 'Learn More',
-  totalReadyToClaim: 'Total Ready to Claim'
+  learnMore: 'Learn More'
 }
 
 const useStyles = makeStyles(({ spacing, palette, typography }) => ({
@@ -264,7 +261,6 @@ export const AudioScreen = () => {
           <ScrollView>
             <Flex gap='l' mv='2xl' mh='m'>
               {renderAudioTile()}
-              <ClaimAllRewardsTile />
               <ScreenSecondaryContent>
                 {renderWhatTile()}
               </ScreenSecondaryContent>
