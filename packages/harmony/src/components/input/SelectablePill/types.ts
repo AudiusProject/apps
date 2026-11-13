@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import type { IconComponent } from '../../icon'
 
@@ -15,6 +15,8 @@ type BaseProps = {
   isSelected?: boolean
   disabled?: boolean
   icon?: IconComponent
+  /** Rendered inside the pill after the label, e.g. an unread dot. */
+  endAdornment?: ReactNode
 }
 
 type LabelProps =

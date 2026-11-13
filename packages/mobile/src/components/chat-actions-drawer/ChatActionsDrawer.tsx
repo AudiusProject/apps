@@ -1,7 +1,11 @@
 import { useCallback } from 'react'
 
 import { useIsGroupChat } from '@audius/common/hooks'
-import { chatActions, chatSelectors } from '@audius/common/store'
+import {
+  chatActions,
+  chatSelectors,
+  getEffectiveChatCategory
+} from '@audius/common/store'
 import { ChatCategory } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -38,7 +42,8 @@ export const ChatActionsDrawer = () => {
     getDoesBlockUser(state, userId)
   )
   const chat = useSelector((state: AppState) => getChat(state, chatId))
-  const category = chat && !chat.is_blast ? (chat.category ?? null) : null
+  const category =
+    chat && !chat.is_blast ? getEffectiveChatCategory(chat) : null
   const isGroup = useIsGroupChat(chatId)
 
   const closeDrawer = useCallback(() => {

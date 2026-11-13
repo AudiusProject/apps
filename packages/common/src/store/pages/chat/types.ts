@@ -1,9 +1,9 @@
 import { ChatPermission, type ChatUnreadCountByCategory } from '@audius/sdk'
 
 /**
- * The tab a chat is shown under in the inbox. Chats the user has not
- * categorized yet ("uncategorized") always surface in the Priority tab so
- * that new conversations are never buried without an explicit action.
+ * The tab a chat is shown under in the inbox. Priority holds chats the user
+ * filed there or has replied in; General holds the rest. See
+ * getInboxTabForChat.
  */
 export enum InboxTab {
   PRIORITY = 'priority',

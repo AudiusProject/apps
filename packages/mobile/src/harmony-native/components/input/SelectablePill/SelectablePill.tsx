@@ -27,6 +27,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
   const {
     type,
     icon: Icon,
+    endAdornment,
     size = 'small',
     isSelected: isSelectedProp,
     isControlled,
@@ -223,6 +224,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
             {displayLabel}
           </AnimatedText>
         ) : null}
+        {endAdornment}
       </AnimatedFlex>
     </Pressable>
   )

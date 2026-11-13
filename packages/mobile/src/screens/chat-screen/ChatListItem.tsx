@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef } from 'react'
 
 import { useOtherChatUsers } from '@audius/common/api'
 import { useIsGroupChat, useProxySelector } from '@audius/common/hooks'
-import { chatSelectors } from '@audius/common/store'
+import { chatSelectors, getEffectiveChatCategory } from '@audius/common/store'
 import { formatGroupChatTitle } from '@audius/common/utils'
 import { css } from '@emotion/native'
 import { useTheme } from '@emotion/react'
@@ -54,7 +54,8 @@ export const ChatListItem = ({ chatId }: { chatId: string }) => {
   const lastMessage = useRemoveLeadingWhitespace(
     (!chat?.is_blast && chat?.last_message) || ''
   )
-  const category = chat && !chat.is_blast ? (chat.category ?? null) : null
+  const category =
+    chat && !chat.is_blast ? getEffectiveChatCategory(chat) : null
   const swipeableRef = useRef<SwipeableMethods>(null)
 
   const handlePress = useCallback(() => {

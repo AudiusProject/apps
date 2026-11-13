@@ -18,7 +18,7 @@ export const inboxTabLabels: Record<InboxTab, string> = {
 
 const tabs: InboxTab[] = [InboxTab.PRIORITY, InboxTab.GENERAL]
 
-const DOT_SIZE = 10
+const DOT_SIZE = 8
 
 type InboxTabsProps = {
   currentTab: InboxTab
@@ -26,9 +26,8 @@ type InboxTabsProps = {
 }
 
 /**
- * Priority / General inbox switcher. Each tab shows its own purple dot when
- * that tab has unread messages; uncategorized chats count towards Priority
- * since that is where they are displayed.
+ * Priority / General inbox switcher. Each tab shows its own dot, inside the
+ * pill after the label, when that tab has unread messages.
  */
 export const InboxTabs = ({ currentTab, onSelectTab }: InboxTabsProps) => {
   const { color } = useTheme()
@@ -51,37 +50,37 @@ export const InboxTabs = ({ currentTab, onSelectTab }: InboxTabsProps) => {
       accessibilityRole='tablist'
     >
       {tabs.map((tab) => (
-        <Box key={tab} style={{ position: 'relative' }}>
-          <SelectablePill
-            type='radio'
-            size='large'
-            value={tab}
-            label={inboxTabLabels[tab]}
-            isSelected={currentTab === tab}
-            onChange={(value, isSelected) => {
-              if (!isSelected) return
-              onSelectTab(value as InboxTab)
-            }}
-            disableUnselectAnimation
-          />
-          {hasUnread[tab] ? (
-            <Box
-              testID={`inbox-tab-dot-${tab}`}
-              accessibilityLabel={`${inboxTabLabels[tab]}: unread messages`}
-              style={{
-                position: 'absolute',
-                top: -2,
-                right: -2,
-                width: DOT_SIZE,
-                height: DOT_SIZE,
-                borderRadius: DOT_SIZE / 2,
-                backgroundColor: color.secondary.s300,
-                borderWidth: 1.5,
-                borderColor: color.background.white
-              }}
-            />
-          ) : null}
-        </Box>
+        <SelectablePill
+          key={tab}
+          type='radio'
+          size='large'
+          value={tab}
+          label={inboxTabLabels[tab]}
+          isSelected={currentTab === tab}
+          onChange={(value, isSelected) => {
+            if (!isSelected) return
+            onSelectTab(value as InboxTab)
+          }}
+          disableUnselectAnimation
+          endAdornment={
+            hasUnread[tab] ? (
+              <Box
+                testID={`inbox-tab-dot-${tab}`}
+                accessibilityLabel='unread messages'
+                style={{
+                  width: DOT_SIZE,
+                  height: DOT_SIZE,
+                  borderRadius: DOT_SIZE / 2,
+                  // Selected pills are purple, so the dot flips to white
+                  backgroundColor:
+                    currentTab === tab
+                      ? color.static.white
+                      : color.secondary.secondary
+                }}
+              />
+            ) : null
+          }
+        />
       ))}
     </Flex>
   )
