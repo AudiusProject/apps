@@ -2,10 +2,7 @@ import { Id, type CrossPlatformFile } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
-import {
-  getTrackCollaboratorsForEdit,
-  trackMetadataForUploadToSdk
-} from '~/adapters/track'
+import { trackMetadataForUploadToSdk } from '~/adapters/track'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { UserTrackMetadata } from '~/models'
 import { ID } from '~/models/Identifiers'
@@ -116,10 +113,11 @@ export const useBulkUpdateTracks = () => {
           }
 
           // Send the full track like the edit form does, so the update can't
-          // reset fields this edit doesn't touch.
+          // reset fields this edit doesn't touch. Collaborators are left out:
+          // the indexer only reconciles invites when the list is sent.
           const metadata = addPremiumMetadata(userId, {
             ...track,
-            collaborators: getTrackCollaboratorsForEdit(track),
+            collaborators: undefined,
             ...changes
           } as TrackMetadataForUpload)
           const sdkMetadata = trackMetadataForUploadToSdk(metadata)
