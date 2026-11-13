@@ -652,6 +652,10 @@ export const DesktopSearchBar = () => {
             },
             '& input[type="search"]::-ms-clear': {
               display: 'none'
+            },
+            // iOS Safari zooms the page on focus when input text is under 16px
+            '@media (hover: none) and (pointer: coarse)': {
+              '& input': { fontSize: 'var(--harmony-font-m)' }
             }
           }}
         />

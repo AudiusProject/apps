@@ -293,3 +293,10 @@
     display: none;
   }
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .descriptionInput {
+    font-size: var(--harmony-font-m);
+  }
+}
