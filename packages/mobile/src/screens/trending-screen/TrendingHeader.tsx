@@ -37,8 +37,6 @@ type TrendingHeaderProps = {
   /** When false, only the category pills are shown (title row is in native header) */
   showTitleRow?: boolean
   styles?: StylesProp<{ root: ViewStyle }>
-  /** `small` for the compact copy under the collapsed header pill. */
-  size?: 'small' | 'large'
   /** Extra controls after the category pills. */
   children?: ReactNode
 }
@@ -93,7 +91,6 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
     filterModal,
     showTitleRow = true,
     styles: stylesProp,
-    size = 'large',
     children
   } = props
   const styles = useStyles()
@@ -160,7 +157,7 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
           <SelectablePill
             key={cat}
             type='radio'
-            size={size}
+            size='large'
             value={cat}
             label={categoryLabels[cat]}
             isSelected={category === cat}

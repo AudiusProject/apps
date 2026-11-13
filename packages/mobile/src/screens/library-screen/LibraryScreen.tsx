@@ -60,7 +60,7 @@ const LibraryTabBar = (props: MaterialTopTabBarProps) => {
         <SelectablePill
           key={route.key}
           type='radio'
-          size='small'
+          size='large'
           value={route.name}
           label={route.name}
           isSelected={state.index === index}
@@ -74,11 +74,7 @@ const LibraryTabBar = (props: MaterialTopTabBarProps) => {
   )
 
   return (
-    <FloatingSubHeader
-      title={messages.header}
-      padded={false}
-      compact={compactTabs}
-    >
+    <FloatingSubHeader padded={false} compact={compactTabs}>
       <LibraryCategorySelectionMenu />
       <TopTabBar {...props} />
     </FloatingSubHeader>

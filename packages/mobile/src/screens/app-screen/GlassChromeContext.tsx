@@ -238,6 +238,15 @@ export const useCompactControlsProgress = () => {
 }
 
 /**
+ * 0..1 fade for chrome that takes over once the list has scrolled `end`
+ * past the top.
+ */
+export const useCompactProgressAt = (end: number) => {
+  const scrollY = useGlassScrollY()
+  return useDerivedValue(() => compactFadeProgress(scrollY.value, end))
+}
+
+/**
  * Points the chrome at a list that is already scrolled to `offset`. Call when
  * the list behind the glass is swapped for another that keeps its own scroll
  * position (Feed's pager pages), so the swap isn't read as a scroll.

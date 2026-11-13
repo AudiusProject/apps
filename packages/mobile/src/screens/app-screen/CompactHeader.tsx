@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-import { StyleSheet, Text } from 'react-native'
+import { ScrollView, StyleSheet, Text, useWindowDimensions } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import Animated, {
   runOnJS,
@@ -18,13 +18,13 @@ import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
 
 /** Height of the compact title pill. */
-export const COMPACT_TITLE_HEIGHT = 36
-/** Height of the glass bar holding a screen's compact controls. */
-const COMPACT_CONTROLS_HEIGHT = 36
-/** Gap between the status bar and the title pill. */
+const COMPACT_TITLE_HEIGHT = 36
+/** Height of the glass bar holding a screen's pinned controls: large pills. */
+const COMPACT_CONTROLS_HEIGHT = 44
+/** Gap between the status bar and the pinned chrome. */
 const COMPACT_TOP_GAP = 4
-/** Gap between the title pill and the controls under it. */
-const COMPACT_STACK_GAP = 6
+/** Closest the controls bar gets to the screen edges. */
+const COMPACT_SIDE_GAP = 8
 
 /** Page-colored tint so pill text stays readable over the list. */
 const useCompactTint = () => `${useThemeColors().background.slice(0, 7)}B3`
@@ -77,7 +77,9 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   },
   controlsContent: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'row'
+  },
+  controlsScroll: {
     alignItems: 'center',
     paddingHorizontal: spacing(1.5)
   }
@@ -86,16 +88,15 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
 type CompactTitlePillProps = {
   title: string
   progress: SharedValue<number>
-  /** Shown before the title, e.g. a search icon. */
-  leading?: ReactNode
 }
 
 /**
  * The small glass pill a root screen's header contracts to once its title row
- * has scrolled away. Pinned just under the status bar.
+ * has scrolled away. Pinned just under the status bar. Only for screens with
+ * no controls row; those pin their controls instead.
  */
 export const CompactTitlePill = (props: CompactTitlePillProps) => {
-  const { title, progress, leading } = props
+  const { title, progress } = props
   const styles = useStyles()
   const insets = useSafeAreaInsets()
   const floating = useSharedValue(1)
@@ -118,7 +119,6 @@ export const CompactTitlePill = (props: CompactTitlePillProps) => {
         style={layout.capsule}
       >
         <Animated.View style={[styles.titleContent, contentStyle]}>
-          {leading}
           <Text numberOfLines={1} style={styles.title}>
             {title}
           </Text>
@@ -134,9 +134,9 @@ type CompactControlsProps = {
 }
 
 /**
- * A screen's controls (tab pills, filter) in a small glass bar under the
- * compact title pill. Rendered by the screen so tab state changes don't
- * rebuild the navigation header.
+ * A screen's controls (tab pills, filter) in a glass bar pinned under the
+ * status bar. Rendered by the screen so tab state changes don't rebuild the
+ * navigation header.
  */
 export const CompactControls = (props: CompactControlsProps) => {
   const { children, progress } = props
@@ -144,8 +144,8 @@ export const CompactControls = (props: CompactControlsProps) => {
   const insets = useSafeAreaInsets()
   const floating = useSharedValue(1)
   const tint = useCompactTint()
-  const top =
-    insets.top + COMPACT_TOP_GAP + COMPACT_TITLE_HEIGHT + COMPACT_STACK_GAP
+  const top = insets.top + COMPACT_TOP_GAP
+  const { width } = useWindowDimensions()
   const { isShown, frameStyle, contentStyle } = useCompactFade(progress)
 
   return (
@@ -158,10 +158,18 @@ export const CompactControls = (props: CompactControlsProps) => {
         floatProgress={floating}
         tintColor={tint}
         effect={isShown ? 'regular' : 'none'}
-        style={layout.capsule}
+        style={[layout.capsule, { maxWidth: width - COMPACT_SIDE_GAP * 2 }]}
       >
         <Animated.View style={[styles.controlsContent, contentStyle]}>
-          {children}
+          {/* Scrolls sideways when the pills are wider than the screen. */}
+          <ScrollView
+            horizontal
+            bounces={false}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.controlsScroll}
+          >
+            {children}
+          </ScrollView>
         </Animated.View>
       </GlassCapsule>
     </Animated.View>

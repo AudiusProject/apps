@@ -8,10 +8,9 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { makeStyles } from 'app/styles'
 import { zIndex } from 'app/utils/zIndex'
 
-import { CompactControls, CompactTitlePill } from './CompactHeader'
+import { CompactControls } from './CompactHeader'
 import {
   useCompactControlsProgress,
-  useCompactTitleProgress,
   useHeaderScrollOffset,
   useRootHeaderHeight,
   useSetSubHeaderHeight
@@ -21,17 +20,12 @@ type FloatingSubHeaderProps = {
   /** The in-flow row under the title (e.g. large tab pills). */
   children: ReactNode
   /**
-   * Smaller copy of the controls, shown in a glass bar under the compact
-   * title pill once the in-flow row has scrolled away.
+   * Copy of the controls, pinned in a glass bar under the status bar once
+   * the in-flow row has scrolled away.
    */
   compact?: ReactNode
   /** Pads the row to the screen gutter. Off for full-width rows. */
   padded?: boolean
-  /**
-   * The screen title. The compact title pill renders here, above this row;
-   * see `MobileRootHeader`'s `hasSubHeader`.
-   */
-  title: string
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -47,20 +41,19 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 /**
  * A screen's controls row (feed tabs, trending categories) under the root
  * header. It scrolls away with the header, then its compact copy pins under
- * the compact title pill.
+ * the status bar.
  *
  * Owned by the screen rather than passed into `MobileRootHeader`, whose
  * memoized render prop must not rebuild on tab-state changes (that remounts
  * `AccountPictureHeader` and re-fires the profile-picture fetch).
  */
 export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
-  const { children, compact, padded = true, title } = props
+  const { children, compact, padded = true } = props
   const styles = useStyles()
   const headerHeight = useRootHeaderHeight()
   const setSubHeaderHeight = useSetSubHeaderHeight()
   const scrollOffset = useHeaderScrollOffset()
   const compactProgress = useCompactControlsProgress()
-  const titleProgress = useCompactTitleProgress()
 
   const positionStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -scrollOffset.value }]
@@ -87,7 +80,6 @@ export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
       >
         {children}
       </Animated.View>
-      <CompactTitlePill title={title} progress={titleProgress} />
       {compact ? (
         <CompactControls progress={compactProgress}>{compact}</CompactControls>
       ) : null}
