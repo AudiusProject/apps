@@ -452,7 +452,7 @@ type Share = {
   source: ShareSource
   id: string
   url: string
-  channel?: 'copyLink' | 'shareSheet'
+  channel?: 'copyLink' | 'shareSheet' | 'instagramStory'
 }
 
 export type ShareToTwitter = {

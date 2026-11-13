@@ -44,8 +44,14 @@ import { ActionDrawerWithoutRedux } from '../action-drawer/ActionDrawerWithoutRe
 import { Text } from '../core'
 
 import { ShareToStorySticker } from './ShareToStorySticker'
+import {
+  STORY_CAPTURE_HEIGHT,
+  STORY_CAPTURE_WIDTH,
+  WeeklyRotationStoryCard
+} from './WeeklyRotationStoryCard'
 import { messages } from './messages'
 import { useShareToStory } from './useShareToStory'
+import { useShareWeeklyRotationStory } from './useShareWeeklyRotationStory'
 import { getContentUrl, getStatHeadline, getXShareUrl } from './utils'
 
 const { getShareRequest, getShareSource } = shareModalUISelectors
@@ -83,6 +89,9 @@ export const ShareDrawer = NiceModal.create(() => {
   const styles = useStyles()
   const isManagedAccount = useIsManagedAccount()
   const viewShotRef = useRef<ViewShot | null>(null) as React.RefObject<ViewShot>
+  const weeklyRotationViewShotRef = useRef<ViewShot | null>(
+    null
+  ) as React.RefObject<ViewShot>
   const navigation = useNavigation<AppTabScreenParamList>()
   const sendShareAction = useShareAction()
 
@@ -157,6 +166,12 @@ export const ShareDrawer = NiceModal.create(() => {
     selectedPlatform,
     stickerArtworkSource
   } = useShareToStory({ content, viewShotRef })
+
+  const weeklyRotationStory = useShareWeeklyRotationStory({
+    content,
+    viewShotRef: weeklyRotationViewShotRef,
+    source
+  })
 
   const handleCopyLink = useCallback(() => {
     if (!content) return
@@ -283,6 +298,17 @@ export const ShareDrawer = NiceModal.create(() => {
       icon: <IconInstagram fill={secondary} height={26} width={26} />,
       callback: handleShareToInstagramStory
     }
+    // Weekly Rotation's story is a still image of the mix's top tracks, so it
+    // doesn't need the single streamable track the video story does. The
+    // drawer stays open (and the card mounted) until the capture is done.
+    const shareWeeklyRotationToInstagramAction = {
+      text: messages.instagramStory,
+      icon: <IconInstagram fill={secondary} height={26} width={26} />,
+      callback: async () => {
+        await weeklyRotationStory.handleShareToInstagramStory()
+        onClose()
+      }
+    }
 
     const result: {
       text: string
@@ -297,10 +323,12 @@ export const ShareDrawer = NiceModal.create(() => {
       result.push(shareToInstagramStoriesAction)
       result.push(shareVideoToTiktokAction)
       result.push(shareToSnapchatAction)
-    } else if (
-      content?.type === 'weeklyRotation' ||
-      content?.type === 'milestone'
-    ) {
+    } else if (content?.type === 'weeklyRotation') {
+      result.push(shareToXAction)
+      if (weeklyRotationStory.canShareStory) {
+        result.push(shareWeeklyRotationToInstagramAction)
+      }
+    } else if (content?.type === 'milestone') {
       // Story/video shares need a single track; X only needs the link.
       result.push(shareToXAction)
     }
@@ -320,7 +348,9 @@ export const ShareDrawer = NiceModal.create(() => {
     handleShareToInstagramStory,
     isShareableTrack,
     content?.type,
-    isManagedAccount
+    isManagedAccount,
+    weeklyRotationStory,
+    onClose
   ])
 
   // Trigger share action on mount with new content
@@ -358,6 +388,26 @@ export const ShareDrawer = NiceModal.create(() => {
                 ? getStatHeadline(storyContent.stat)
                 : undefined
             }
+          />
+        </ViewShot>
+      ) : null}
+      {weeklyRotationStory.owner && weeklyRotationStory.canShareStory ? (
+        <ViewShot
+          style={styles.viewShot}
+          ref={weeklyRotationViewShotRef}
+          options={{
+            format: 'png',
+            width: STORY_CAPTURE_WIDTH,
+            height: STORY_CAPTURE_HEIGHT,
+            useRenderInContext: true
+          }}
+        >
+          <WeeklyRotationStoryCard
+            owner={weeklyRotationStory.owner}
+            period={weeklyRotationStory.period}
+            tracks={weeklyRotationStory.storyTracks}
+            gradient={weeklyRotationStory.gradient}
+            onArtworkLoad={weeklyRotationStory.handleArtworkLoad}
           />
         </ViewShot>
       ) : null}
