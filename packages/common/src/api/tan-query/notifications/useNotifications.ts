@@ -114,7 +114,8 @@ export const useNotifications = (options?: QueryOptions) => {
   const notifications = (query.data?.pages.flat() ?? []).filter(
     (notification) =>
       notification.type !== NotificationType.ChallengeReward &&
-      notification.type !== NotificationType.ClaimableReward
+      notification.type !== NotificationType.ClaimableReward &&
+      notification.type !== NotificationType.ListenStreakReminder
   )
 
   const queryResults = query as typeof query & {
