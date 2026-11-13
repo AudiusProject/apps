@@ -98,14 +98,7 @@ export enum StringKeys {
   APP_WIDE_NOTICE_TEXT = 'APP_WIDE_NOTICE_TEXT',
 
   /** Rewards IDs as comma-separated array */
-  TRENDING_REWARD_IDS = 'TRENDING_REWARD_IDS',
   CHALLENGE_REWARD_IDS = 'CHALLENGE_REWARD_IDS',
-
-  /** Embedded tweet for trending rewards UI tracks */
-  REWARDS_TWEET_ID_TRACKS = 'REWARDS_TWEET_ID_TRACKS',
-
-  /** Embedded tweet for underground trending rewards UI  */
-  REWARDS_TWEET_ID_UNDERGROUND = 'REWARDS_TWEET_ID_UNDERGROUND',
 
   /** Trending experiment id */
   TRENDING_EXPERIMENT = 'TRENDING_EXPERIMENT',

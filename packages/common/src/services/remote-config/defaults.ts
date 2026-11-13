@@ -34,12 +34,8 @@ export const remoteConfigStringDefaults: {
   [key in StringKeys]: string | null
 } = {
   [StringKeys.APP_WIDE_NOTICE_TEXT]: null,
-  [StringKeys.TRENDING_REWARD_IDS]:
-    'trending-track,trending-underground,top-api',
   [StringKeys.CHALLENGE_REWARD_IDS]:
     'track-upload,invite-friends,mobile-app,listen-streak,profile-completion,first-playlist',
-  [StringKeys.REWARDS_TWEET_ID_TRACKS]: '1374856377651187713',
-  [StringKeys.REWARDS_TWEET_ID_UNDERGROUND]: '1374856377651187713',
   [StringKeys.TRENDING_EXPERIMENT]: null,
   [StringKeys.ORACLE_ETH_ADDRESS]: null,
   [StringKeys.ORACLE_ENDPOINT]: null,

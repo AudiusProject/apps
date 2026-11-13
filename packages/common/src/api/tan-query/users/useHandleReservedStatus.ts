@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
 import { QueryContextType } from '~/api/tan-query/utils/QueryContext'
-import { FeatureFlags } from '~/services/remote-config/feature-flags'
 import { IntKeys } from '~/services/remote-config/types'
 import { parseHandleReservedStatusFromSocial } from '~/utils/handleReservedStatus'
 import { promiseWithTimeout } from '~/utils/promiseWithTimeout'
@@ -29,32 +28,18 @@ export const fetchHandleReservedStatus = async (
     ) ?? DEFAULT_HANDLE_VERIFICATION_TIMEOUT_MILLIS
 
   if (env.ENVIRONMENT === 'production') {
-    const twitterCheckPromise = remoteConfigInstance.getFeatureEnabled(
-      FeatureFlags.VERIFY_HANDLE_WITH_TWITTER
+    const twitterCheckPromise = promiseWithTimeout(
+      identityService.lookupTwitterHandle(handle),
+      handleCheckTimeout
     )
-      ? promiseWithTimeout(
-          identityService.lookupTwitterHandle(handle),
-          handleCheckTimeout
-        )
-      : null
-
-    const instagramCheckPromise = remoteConfigInstance.getFeatureEnabled(
-      FeatureFlags.VERIFY_HANDLE_WITH_INSTAGRAM
+    const instagramCheckPromise = promiseWithTimeout(
+      audiusBackend.instagramHandle(handle),
+      handleCheckTimeout
     )
-      ? promiseWithTimeout(
-          audiusBackend.instagramHandle(handle),
-          handleCheckTimeout
-        )
-      : null
-
-    const tiktokCheckPromise = remoteConfigInstance.getFeatureEnabled(
-      FeatureFlags.VERIFY_HANDLE_WITH_TIKTOK
+    const tiktokCheckPromise = promiseWithTimeout(
+      audiusBackend.tiktokHandle(handle),
+      handleCheckTimeout
     )
-      ? promiseWithTimeout(
-          audiusBackend.tiktokHandle(handle),
-          handleCheckTimeout
-        )
-      : null
 
     const [twitterUser, instagramUser, tiktokUser] = await Promise.all([
       twitterCheckPromise,

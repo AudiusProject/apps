@@ -1,9 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import { useFanClubFeed, type FanClubFeedItem } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { Name, PlaybackSource, ID, ModalSource } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
@@ -35,9 +33,6 @@ type FanClubFeedSectionProps = {
 export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
-  const { isEnabled: isTextPostsEnabled } = useFeatureFlag(
-    FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
-  )
 
   // Single chronological feed for both tracks and text posts
   const {
@@ -145,7 +140,6 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         <Flex column gap='m'>
           {feedItemsWithLineupIndex.map((item) => {
             if (item.itemType === 'text_post') {
-              if (!isTextPostsEnabled) return null
               return (
                 <TextPostCard
                   key={`post-${item.commentId}`}
