@@ -21,6 +21,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
     size = 'small',
     _isHovered,
     icon: Icon,
+    endAdornment,
     className,
     ...other
   } = props
@@ -113,6 +114,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
           {other.label}
         </Text>
       ) : null}
+      {endAdornment}
     </>
   )
 

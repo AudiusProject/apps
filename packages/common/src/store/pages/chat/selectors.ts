@@ -149,10 +149,10 @@ const makeGetChatsForInboxTab = (tab: InboxTab) =>
     chats.filter((chat) => getInboxTabForChat(chat) === tab)
   )
 
-/** Chats shown in the Priority tab: those marked Priority plus uncategorized. */
+/** Chats shown in the Priority tab: marked Priority, or uncategorized and replied to. */
 export const getPriorityInboxChats = makeGetChatsForInboxTab(InboxTab.PRIORITY)
 
-/** Chats shown in the General tab: only those the user marked General. */
+/** Chats shown in the General tab: marked General, or never replied to. */
 export const getGeneralInboxChats = makeGetChatsForInboxTab(InboxTab.GENERAL)
 
 export const getChatsForInboxTab = (state: CommonState, tab: InboxTab) =>
@@ -171,10 +171,13 @@ export const getHasUnreadMessagesForInboxTab = (
 ) => {
   const counts = getUnreadMessagesCountByCategory(state)
   if (counts) {
+    // Older api versions don't report the unreplied split; their
+    // uncategorized chats all show in Priority.
+    const unreplied = counts.uncategorized_unreplied ?? 0
     const tabCount =
       tab === InboxTab.GENERAL
-        ? counts.general
-        : counts.priority + counts.uncategorized
+        ? counts.general + unreplied
+        : counts.priority + counts.uncategorized - unreplied
     if (tabCount > 0) return true
   }
   return getChatsForInboxTab(state, tab).some(

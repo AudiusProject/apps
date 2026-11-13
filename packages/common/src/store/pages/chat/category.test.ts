@@ -60,7 +60,12 @@ const seed = (chats: UserChat[]) =>
 
 const withServerCounts = (
   state: ReturnType<typeof chatReducer>,
-  counts: { priority: number; general: number; uncategorized: number }
+  counts: {
+    priority: number
+    general: number
+    uncategorized: number
+    uncategorized_unreplied?: number
+  }
 ) =>
   chatReducer(
     state,
@@ -85,7 +90,37 @@ const getUserChatEntity = (
 
 describe('chat categories', () => {
   describe('getInboxTabForChat', () => {
-    it('puts uncategorized and priority chats in Priority, general in General', () => {
+    it('puts uncategorized chats in Priority once the user has replied', () => {
+      expect(getInboxTabForChat(makeChat('a', { has_replied: true }))).toBe(
+        InboxTab.PRIORITY
+      )
+      expect(getInboxTabForChat(makeChat('a', { has_replied: false }))).toBe(
+        InboxTab.GENERAL
+      )
+    })
+
+    it('lets an explicit category override replies', () => {
+      expect(
+        getInboxTabForChat(
+          makeChat('a', { category: ChatCategory.PRIORITY, has_replied: false })
+        )
+      ).toBe(InboxTab.PRIORITY)
+      expect(
+        getInboxTabForChat(
+          makeChat('a', { category: ChatCategory.GENERAL, has_replied: true })
+        )
+      ).toBe(InboxTab.GENERAL)
+    })
+
+    it('keeps sent blasts in Priority', () => {
+      const blast = {
+        chat_id: 'follower_audience',
+        is_blast: true
+      } as unknown as UserChat
+      expect(getInboxTabForChat(blast)).toBe(InboxTab.PRIORITY)
+    })
+
+    it('treats chats from an api without has_replied as Priority', () => {
       expect(getInboxTabForChat(makeChat('a'))).toBe(InboxTab.PRIORITY)
       expect(getInboxTabForChat(makeChat('a', { category: null }))).toBe(
         InboxTab.PRIORITY
@@ -305,13 +340,15 @@ describe('chat categories', () => {
       expect(getUnreadMessagesCountByCategory(asCommonState(next))).toEqual({
         priority: 0,
         general: 0,
-        uncategorized: 0
+        uncategorized: 0,
+        uncategorized_unreplied: 0
       })
       const confirmed = chatReducer(next, actions.markAllChatsAsReadSucceeded())
       expect(confirmed.unreadMessagesCountByCategory).toEqual({
         priority: 0,
         general: 0,
-        uncategorized: 0
+        uncategorized: 0,
+        uncategorized_unreplied: 0
       })
     })
 
@@ -379,6 +416,154 @@ describe('chat categories', () => {
         actions.markChatAsReadSucceeded({ chatId: 'general-1' })
       )
       expect(getHasUnreadMessages(asCommonState(read))).toBe(false)
+    })
+  })
+
+  describe('unreplied chats', () => {
+    const unreadMessage = (chatId: string, id: string) =>
+      ({
+        message_id: id,
+        chat_id: chatId,
+        sender_user_id: '7',
+        created_at: '2026-01-03T00:00:00.000Z',
+        message: 'hi',
+        is_plaintext: false,
+        reactions: []
+      }) as any
+
+    it('lights the General dot for unread chats the user never replied to', () => {
+      const seeded = withServerCounts(
+        seed([
+          makeChat('new-1', { has_replied: false, unread_message_count: 2 })
+        ]),
+        {
+          priority: 0,
+          general: 0,
+          uncategorized: 2,
+          uncategorized_unreplied: 2
+        }
+      )
+      const state = asCommonState(seeded)
+      expect(getHasUnreadGeneralMessages(state)).toBe(true)
+      expect(getHasUnreadPriorityMessages(state)).toBe(false)
+      expect(getGeneralInboxChats(state).map((c) => c.chat_id)).toEqual([
+        'new-1'
+      ])
+    })
+
+    it('counts unreplied uncategorized unreads as Priority on an older api', () => {
+      const seeded = withServerCounts(
+        seed([makeChat('new-1', { unread_message_count: 1 })]),
+        { priority: 0, general: 0, uncategorized: 1 }
+      )
+      const state = asCommonState(seeded)
+      expect(getHasUnreadPriorityMessages(state)).toBe(true)
+      expect(getHasUnreadGeneralMessages(state)).toBe(false)
+    })
+
+    it('bumps both uncategorized buckets when a message arrives', () => {
+      const seeded = withServerCounts(
+        seed([makeChat('new-1', { has_replied: false })]),
+        {
+          priority: 0,
+          general: 0,
+          uncategorized: 0,
+          uncategorized_unreplied: 0
+        }
+      )
+      const next = chatReducer(
+        seeded,
+        actions.addMessage({
+          chatId: 'new-1',
+          isSelfMessage: false,
+          message: unreadMessage('new-1', 'm1')
+        })
+      )
+      expect(getUnreadMessagesCountByCategory(asCommonState(next))).toEqual({
+        priority: 0,
+        general: 0,
+        uncategorized: 1,
+        uncategorized_unreplied: 1
+      })
+      expect(getHasUnreadGeneralMessages(asCommonState(next))).toBe(true)
+    })
+
+    it('moves the chat to Priority when the user replies', () => {
+      const seeded = withServerCounts(
+        seed([
+          makeChat('new-1', { has_replied: false, unread_message_count: 1 })
+        ]),
+        {
+          priority: 0,
+          general: 0,
+          uncategorized: 1,
+          uncategorized_unreplied: 1
+        }
+      )
+      const replied = chatReducer(
+        seeded,
+        actions.addMessage({
+          chatId: 'new-1',
+          isSelfMessage: true,
+          message: { ...unreadMessage('new-1', 'm2'), sender_user_id: '1' }
+        })
+      )
+      expect(getUserChatEntity(replied, 'new-1')?.has_replied).toBe(true)
+      const state = asCommonState(replied)
+      expect(getPriorityInboxChats(state).map((c) => c.chat_id)).toEqual([
+        'new-1'
+      ])
+      expect(getUnreadMessagesCountByCategory(state)).toEqual({
+        priority: 0,
+        general: 0,
+        uncategorized: 0,
+        uncategorized_unreplied: 0
+      })
+    })
+
+    it('does not count a blast copy as a reply', () => {
+      const seeded = seed([makeChat('new-1', { has_replied: false })])
+      const next = chatReducer(
+        seeded,
+        actions.addMessage({
+          chatId: 'new-1',
+          isSelfMessage: true,
+          message: {
+            ...unreadMessage('new-1', 'm3'),
+            sender_user_id: '1',
+            is_plaintext: true
+          }
+        })
+      )
+      expect(getUserChatEntity(next, 'new-1')?.has_replied).toBe(false)
+    })
+
+    it('moves unreads out of both uncategorized buckets when filed', () => {
+      const seeded = withServerCounts(
+        seed([
+          makeChat('new-1', { has_replied: false, unread_message_count: 3 })
+        ]),
+        {
+          priority: 0,
+          general: 0,
+          uncategorized: 3,
+          uncategorized_unreplied: 3
+        }
+      )
+      const moved = chatReducer(
+        seeded,
+        actions.setChatCategory({
+          chatId: 'new-1',
+          category: ChatCategory.PRIORITY
+        })
+      )
+      expect(getUnreadMessagesCountByCategory(asCommonState(moved))).toEqual({
+        priority: 3,
+        general: 0,
+        uncategorized: 0,
+        uncategorized_unreplied: 0
+      })
+      expect(getHasUnreadGeneralMessages(asCommonState(moved))).toBe(false)
     })
   })
 

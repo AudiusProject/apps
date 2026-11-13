@@ -159,6 +159,11 @@ export type UserChat = {
   cleared_history_at: string
   /** Inbox category chosen by the current user. Absent/null = uncategorized. */
   category?: ChatCategory | null
+  /**
+   * Whether the current user has sent a message (not a blast) in this chat.
+   * Absent from older api versions.
+   */
+  has_replied?: boolean
 
   // If blast:
   is_blast: false
@@ -255,6 +260,11 @@ export type ChatUnreadCountByCategory = {
   priority: number
   general: number
   uncategorized: number
+  /**
+   * Subset of `uncategorized` the user never replied to. Absent from older
+   * api versions.
+   */
+  uncategorized_unreplied?: number
 }
 
 export enum ChatBlastAudience {

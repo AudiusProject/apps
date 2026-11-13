@@ -1,10 +1,8 @@
 import { ChangeEvent, useCallback } from 'react'
 
 import { chatSelectors, InboxTab } from '@audius/common/store'
-import { Flex, SelectablePill } from '@audius/harmony'
+import { Flex, SelectablePill, useTheme } from '@audius/harmony'
 import { useSelector } from 'react-redux'
-
-import { NotificationDot } from 'components/notification-dot/NotificationDot'
 
 const { getHasUnreadPriorityMessages, getHasUnreadGeneralMessages } =
   chatSelectors
@@ -23,17 +21,19 @@ export const inboxTabLabels: Record<InboxTab, string> = {
 
 const tabs: InboxTab[] = [InboxTab.PRIORITY, InboxTab.GENERAL]
 
+const DOT_SIZE = 8
+
 type InboxTabsProps = {
   currentTab: InboxTab
   onSelectTab: (tab: InboxTab) => void
 }
 
 /**
- * Priority / General inbox switcher. Each tab shows its own purple dot when
- * that tab has unread messages; uncategorized chats count towards Priority
- * since that is where they are displayed.
+ * Priority / General inbox switcher. Each tab shows its own dot, inside the
+ * pill after the label, when that tab has unread messages.
  */
 export const InboxTabs = ({ currentTab, onSelectTab }: InboxTabsProps) => {
+  const { color } = useTheme()
   const hasUnreadPriority = useSelector(getHasUnreadPriorityMessages)
   const hasUnreadGeneral = useSelector(getHasUnreadGeneralMessages)
   const hasUnread: Record<InboxTab, boolean> = {
@@ -56,25 +56,36 @@ export const InboxTabs = ({ currentTab, onSelectTab }: InboxTabsProps) => {
       onChange={handleChange}
     >
       {tabs.map((tab) => (
-        <Flex key={tab} css={{ position: 'relative' }}>
-          <SelectablePill
-            name='inbox-tab'
-            type='radio'
-            value={tab}
-            label={inboxTabLabels[tab]}
-            isSelected={currentTab === tab}
-            size='large'
-          />
-          {hasUnread[tab] ? (
-            <NotificationDot
-              variant='small'
-              role='img'
-              aria-label={`${inboxTabLabels[tab]}: ${messages.unread}`}
-              data-testid={`inbox-tab-dot-${tab}`}
-              css={{ position: 'absolute', top: -2, right: -2 }}
-            />
-          ) : null}
-        </Flex>
+        <SelectablePill
+          key={tab}
+          name='inbox-tab'
+          type='radio'
+          value={tab}
+          label={inboxTabLabels[tab]}
+          isSelected={currentTab === tab}
+          size='large'
+          endAdornment={
+            hasUnread[tab] ? (
+              <span
+                role='img'
+                aria-label={messages.unread}
+                data-testid={`inbox-tab-dot-${tab}`}
+                css={{
+                  width: DOT_SIZE,
+                  height: DOT_SIZE,
+                  flexShrink: 0,
+                  borderRadius: '50%',
+                  // Selected pills are purple, so the dot flips to white
+                  backgroundColor:
+                    currentTab === tab
+                      ? color.static.white
+                      : color.secondary.secondary,
+                  'label:hover &': { backgroundColor: color.static.white }
+                }}
+              />
+            ) : null
+          }
+        />
       ))}
     </Flex>
   )

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { chatActions } from '@audius/common/store'
+import { chatActions, getEffectiveChatCategory } from '@audius/common/store'
 import { IconMessages, IconStar, type PopupMenuItem } from '@audius/harmony'
 import { ChatCategory, type ChatBlast, type UserChat } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
@@ -14,7 +14,7 @@ const messages = {
 
 /**
  * Popup menu items for moving a chat between the Priority and General inbox
- * tabs. Only the categories the chat is not already in are offered. Blasts
+ * tabs. Only the tab the chat is not already shown in is offered. Blasts
  * (and unknown chats) get no items.
  */
 export const useChatCategoryMenuItems = (
@@ -23,7 +23,8 @@ export const useChatCategoryMenuItems = (
   const dispatch = useDispatch()
   const chatId = chat?.chat_id
   const isBlast = chat?.is_blast ?? false
-  const category = chat && !chat.is_blast ? (chat.category ?? null) : null
+  const category =
+    chat && !chat.is_blast ? getEffectiveChatCategory(chat) : null
 
   return useMemo(() => {
     if (!chatId || isBlast) return []

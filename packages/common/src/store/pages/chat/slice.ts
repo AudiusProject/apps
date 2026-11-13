@@ -26,7 +26,7 @@ import { hasTail } from '~/utils/chatUtils'
 import dayjs from '~/utils/dayjs'
 
 import { ChatWebsocketError } from './types'
-import { getChatCategoryKey } from './utils'
+import { getChatCategoryKeys } from './utils'
 
 export type Chat = UserChat | ChatBlast
 
@@ -116,16 +116,31 @@ const { selectById: getChat } = chatsAdapter.getSelectors(
  */
 const adjustUnreadCountForChatCategory = (
   state: ChatState,
-  chat: { category?: ChatCategory | null },
+  chat: { category?: ChatCategory | null; has_replied?: boolean },
   delta: number
 ) => {
   if (!state.unreadMessagesCountByCategory || delta === 0) return
   const counts = state.optimisticUnreadMessagesCountByCategory ?? {
     ...state.unreadMessagesCountByCategory
   }
-  const key = getChatCategoryKey(chat)
-  counts[key] = Math.max(0, counts[key] + delta)
+  applyUnreadCountDelta(counts, chat, delta)
   state.optimisticUnreadMessagesCountByCategory = counts
+}
+
+/**
+ * Adds `delta` to every bucket `chat` counts towards. Buckets the server did
+ * not report (older api versions) are left absent.
+ */
+const applyUnreadCountDelta = (
+  counts: ChatUnreadCountByCategory,
+  chat: { category?: ChatCategory | null; has_replied?: boolean },
+  delta: number
+) => {
+  for (const key of getChatCategoryKeys(chat)) {
+    const current = counts[key]
+    if (current === undefined) continue
+    counts[key] = Math.max(0, current + delta)
+  }
 }
 
 /** The unread count currently shown for a chat, honoring optimistic reads. */
@@ -526,11 +541,10 @@ const slice = createSlice({
       if (!existingChat || existingChat.is_blast) return
       state.unreadMessagesCount -= existingChat?.unread_message_count ?? 0
       if (state.unreadMessagesCountByCategory) {
-        const key = getChatCategoryKey(existingChat)
-        state.unreadMessagesCountByCategory[key] = Math.max(
-          0,
-          state.unreadMessagesCountByCategory[key] -
-            existingChat.unread_message_count
+        applyUnreadCountDelta(
+          state.unreadMessagesCountByCategory,
+          existingChat,
+          -existingChat.unread_message_count
         )
       }
       chatsAdapter.updateOne(state.chats, {
@@ -571,7 +585,8 @@ const slice = createSlice({
         state.optimisticUnreadMessagesCountByCategory = {
           priority: 0,
           general: 0,
-          uncategorized: 0
+          uncategorized: 0,
+          uncategorized_unreplied: 0
         }
       }
     },
@@ -598,7 +613,8 @@ const slice = createSlice({
         state.unreadMessagesCountByCategory = {
           priority: 0,
           general: 0,
-          uncategorized: 0
+          uncategorized: 0,
+          uncategorized_unreplied: 0
         }
       }
       delete state.optimisticUnreadMessagesCountByCategory
@@ -729,6 +745,14 @@ const slice = createSlice({
           existingChat,
           -existingUnreadCount
         )
+        // Replying moves an uncategorized chat into Priority. Blast copies
+        // (plaintext) are not replies.
+        if (!message.is_plaintext && existingChat.has_replied === false) {
+          chatsAdapter.updateOne(state.chats, {
+            id: chatId,
+            changes: { has_replied: true }
+          })
+        }
       }
     },
     /**
@@ -864,7 +888,11 @@ const slice = createSlice({
       }
       const unreadCount = getDisplayedUnreadCount(state, chatId)
       adjustUnreadCountForChatCategory(state, existingChat, -unreadCount)
-      adjustUnreadCountForChatCategory(state, { category }, unreadCount)
+      adjustUnreadCountForChatCategory(
+        state,
+        { category, has_replied: existingChat.has_replied },
+        unreadCount
+      )
       chatsAdapter.updateOne(state.chats, {
         id: chatId,
         changes: { category }
@@ -901,7 +929,7 @@ const slice = createSlice({
       adjustUnreadCountForChatCategory(state, existingChat, -unreadCount)
       adjustUnreadCountForChatCategory(
         state,
-        { category: previousCategory },
+        { category: previousCategory, has_replied: existingChat.has_replied },
         unreadCount
       )
       chatsAdapter.updateOne(state.chats, {

@@ -48,6 +48,7 @@ const makeChat = (
 
 const chats = [
   makeChat('new-chat'),
+  makeChat('unreplied-chat', { has_replied: false }),
   makeChat('priority-chat', { category: ChatCategory.PRIORITY }),
   makeChat('general-chat', {
     category: ChatCategory.GENERAL,
@@ -108,12 +109,15 @@ describe('Inbox tabs', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('shows only general chats in the General tab', () => {
+  it('shows general and never-replied chats in the General tab', () => {
     renderWithChats(
       <ChatList currentTab={InboxTab.GENERAL} onChatClicked={vi.fn()} />
     )
     expect(
       screen.getByRole('button', { name: /user general-chat/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /user unreplied-chat/i })
     ).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /user new-chat/i })
@@ -154,7 +158,31 @@ describe('Inbox tabs', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('counts uncategorized unreads towards the Priority tab dot', () => {
+  it('counts never-replied unreads towards the General tab dot', () => {
+    renderWithChats(
+      <InboxTabs currentTab={InboxTab.PRIORITY} onSelectTab={vi.fn()} />,
+      {
+        unreadMessagesCountByCategory: {
+          priority: 0,
+          general: 0,
+          uncategorized: 1,
+          uncategorized_unreplied: 1
+        },
+        optimisticChatRead: {
+          'general-chat': {
+            unread_message_count: 0,
+            last_read_at: '2026-01-02T00:00:00.000Z'
+          }
+        }
+      }
+    )
+    expect(screen.getByTestId('inbox-tab-dot-general')).toBeInTheDocument()
+    expect(
+      screen.queryByTestId('inbox-tab-dot-priority')
+    ).not.toBeInTheDocument()
+  })
+
+  it('counts replied uncategorized unreads towards the Priority tab dot', () => {
     renderWithChats(
       <InboxTabs currentTab={InboxTab.PRIORITY} onSelectTab={vi.fn()} />,
       {
@@ -195,7 +223,7 @@ describe('Inbox tabs', () => {
     renderWithChats(
       <InboxTabs currentTab={InboxTab.PRIORITY} onSelectTab={onSelectTab} />
     )
-    fireEvent.click(screen.getByRole('radio', { name: 'General' }))
+    fireEvent.click(screen.getByRole('radio', { name: /^General/ }))
     expect(onSelectTab).toHaveBeenCalledWith(InboxTab.GENERAL)
   })
 })
