@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
-import { UserMetadata } from '@audius/common/models'
+import { useTrackCollaboratorsForEdit } from '@audius/common/api'
+import { ID, UserMetadata } from '@audius/common/models'
 import { Flex, IconUserGroup, Text } from '@audius/harmony'
 
 import { ContextualMenu } from 'components/data-entry/ContextualMenu'
@@ -24,6 +25,8 @@ export const CollaboratorsField = () => {
   const [{ value }, , { setValue }] =
     useTrackField<UserMetadata[]>('collaborators')
   const collaborators = useMemo(() => value ?? [], [value])
+  const [{ value: trackId }] = useTrackField<ID | undefined>('track_id')
+  const { data: collaboratorsForEdit } = useTrackCollaboratorsForEdit(trackId)
 
   const initialValues = useMemo(() => ({ collaborators }), [collaborators])
 
@@ -64,7 +67,11 @@ export const CollaboratorsField = () => {
       initialValues={initialValues}
       onSubmit={onSubmit}
       renderValue={renderValue}
-      menuFields={<CollaboratorsMenuFields />}
+      menuFields={
+        <CollaboratorsMenuFields
+          acceptedUserIds={collaboratorsForEdit?.acceptedUserIds}
+        />
+      }
     />
   )
 }

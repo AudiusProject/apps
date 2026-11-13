@@ -30,6 +30,7 @@ const messages = {
   search: 'Search for an artist',
   add: 'Add Collaborator',
   invitePending: 'Invite Pending',
+  accepted: 'Accepted',
   remove: 'Remove',
   options: (name: string) => `Options for ${name}`
 }
@@ -39,12 +40,17 @@ const MAX_RESULTS = 6
 
 type CollaboratorRowProps = {
   user: UserMetadata
+  isAccepted: boolean
   onRemove: () => void
 }
 
 // A tagged collaborator: the artist, an overflow menu (remove), and the
-// invite-pending status — mirrors the Figma "Add Collaborator" rows.
-const CollaboratorRow = ({ user, onRemove }: CollaboratorRowProps) => (
+// invite status — mirrors the Figma "Add Collaborator" rows.
+const CollaboratorRow = ({
+  user,
+  isAccepted,
+  onRemove
+}: CollaboratorRowProps) => (
   <Flex alignItems='center' justifyContent='space-between' gap='m' w='100%'>
     <ArtistChip
       userId={user.user_id}
@@ -69,7 +75,7 @@ const CollaboratorRow = ({ user, onRemove }: CollaboratorRowProps) => (
         )}
       />
       <Text variant='label' size='s' color='subdued'>
-        {messages.invitePending}
+        {isAccepted ? messages.accepted : messages.invitePending}
       </Text>
     </Flex>
   </Flex>
@@ -134,11 +140,18 @@ const CollaboratorSearch = ({
   )
 }
 
+type CollaboratorsMenuFieldsProps = {
+  acceptedUserIds?: number[]
+}
+
 // Body of the Collaborators ContextualMenu modal.
-export const CollaboratorsMenuFields = () => {
+export const CollaboratorsMenuFields = ({
+  acceptedUserIds
+}: CollaboratorsMenuFieldsProps) => {
   const [{ value }, , { setValue }] = useField<UserMetadata[]>('collaborators')
   const collaborators = useMemo(() => value ?? [], [value])
   const { data: currentUserId } = useCurrentUserId()
+  const accepted = useMemo(() => new Set(acceptedUserIds), [acceptedUserIds])
   const [isSearching, setIsSearching] = useState(collaborators.length === 0)
 
   const excludedUserIds = useMemo(() => {
@@ -175,6 +188,7 @@ export const CollaboratorsMenuFields = () => {
             <CollaboratorRow
               key={collaborator.user_id}
               user={collaborator}
+              isAccepted={accepted.has(collaborator.user_id)}
               onRemove={() => handleRemove(collaborator.user_id)}
             />
           ))}

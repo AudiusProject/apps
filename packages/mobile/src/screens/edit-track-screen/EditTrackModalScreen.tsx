@@ -1,7 +1,11 @@
 import { useCallback } from 'react'
 
 import { getTrackCollaboratorsForEdit } from '@audius/common/adapters'
-import { useTrack, useUpdateTrack } from '@audius/common/api'
+import {
+  useTrack,
+  useTrackCollaboratorsForEdit,
+  useUpdateTrack
+} from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import type { TrackMetadataForUpload } from '@audius/common/store'
 
@@ -27,6 +31,10 @@ export const EditTrackModalScreen = () => {
 
   const { data: track } = useTrack(id)
   const { mutateAsync: updateTrack } = useUpdateTrack()
+  // The cached track can be missing pending invites; saving without them
+  // would delete those invites.
+  const { data: collaboratorsForEdit, isPending: isCollaboratorsPending } =
+    useTrackCollaboratorsForEdit(id)
 
   const trackImage = useTrackImage({
     trackId: track?.track_id,
@@ -46,11 +54,13 @@ export const EditTrackModalScreen = () => {
     [id, navigation, tabNavigation, updateTrack]
   )
 
-  if (!track) return null
+  if (!track || isCollaboratorsPending) return null
 
   const initialValues = {
     ...track,
-    collaborators: getTrackCollaboratorsForEdit(track),
+    collaborators:
+      collaboratorsForEdit?.collaborators ??
+      getTrackCollaboratorsForEdit(track),
     artwork: null,
     trackArtwork:
       trackImage && trackImage.source && isImageUriSource(trackImage.source)

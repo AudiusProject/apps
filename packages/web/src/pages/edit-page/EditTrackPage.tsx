@@ -4,7 +4,12 @@ import {
   fileToSdk,
   getTrackCollaboratorsForEdit
 } from '@audius/common/adapters'
-import { useStems, useTrackByParams, useUpdateTrack } from '@audius/common/api'
+import {
+  useStems,
+  useTrackByParams,
+  useTrackCollaboratorsForEdit,
+  useUpdateTrack
+} from '@audius/common/api'
 import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
 import {
   TrackMetadataForUpload,
@@ -63,6 +68,11 @@ export const EditTrackPage = (props: EditPageProps) => {
   const { data: stemTracks = [], isPending: isStemsPending } = useStems(
     track?.track_id
   )
+
+  // Same for collaborators: the cached track can be missing pending invites,
+  // and saving without them would delete those invites.
+  const { data: collaboratorsForEdit, isPending: isCollaboratorsPending } =
+    useTrackCollaboratorsForEdit(track?.track_id)
 
   const onSubmit = async (formValues: TrackEditFormValues) => {
     const metadata = { ...formValues.trackMetadatas[0] }
@@ -125,7 +135,9 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const trackAsMetadataForUpload: TrackMetadataForUpload = {
     ...(track as TrackMetadata),
-    collaborators: getTrackCollaboratorsForEdit(track),
+    collaborators:
+      collaboratorsForEdit?.collaborators ??
+      getTrackCollaboratorsForEdit(track),
     genre: (track?.genre as Genre) ?? '',
     mood: (track?.mood as Mood) ?? null,
     artwork: {
@@ -155,7 +167,10 @@ export const EditTrackPage = (props: EditPageProps) => {
         />
       }
     >
-      {trackStatus !== 'success' || !coverArtUrl || isStemsPending ? (
+      {trackStatus !== 'success' ||
+      !coverArtUrl ||
+      isStemsPending ||
+      isCollaboratorsPending ? (
         <LoadingSpinnerFullPage />
       ) : (
         <EditFormScrollContext.Provider value={scrollToTop}>

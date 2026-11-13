@@ -53,7 +53,11 @@ function* watchTrackPageMakePublic() {
         yield* call([sdk.tracks, sdk.tracks.updateTrack], {
           userId: Id.parse(userId),
           trackId: Id.parse(trackId),
-          metadata: trackMetadataForUploadToSdk(updatedTrack)
+          // Leave collaborators out so pending invites are untouched.
+          metadata: trackMetadataForUploadToSdk({
+            ...updatedTrack,
+            collaborators: undefined
+          })
         })
         // Reconcile with server-side state.
         const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
