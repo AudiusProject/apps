@@ -1,10 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 
 import { useOtherChatUsers } from '@audius/common/api'
 import { useCanSendMessage, useIsGroupChat } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { chatActions, chatSelectors, InboxTab } from '@audius/common/store'
 import { formatGroupChatTitle } from '@audius/common/utils'
+import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 import { useParams, useLocation, useNavigate } from 'react-router'
@@ -34,6 +41,7 @@ const messages = {
 }
 
 const NARROW_LAYOUT_THRESHOLD_PX = 1080
+const SCROLL_BOTTOM_THRESHOLD = 80
 
 export const ChatPage = () => {
   useManagedAccountNotAllowedRedirect()
@@ -62,6 +70,37 @@ export const ChatPage = () => {
     NARROW_LAYOUT_THRESHOLD_PX
   )
   const messagesRef = useRef<HTMLDivElement>(null)
+  const chatAreaRef = useRef<HTMLDivElement>(null)
+  const [composerEl, setComposerEl] = useState<HTMLDivElement | null>(null)
+
+  // The message list scrolls behind the composer using
+  // --chat-composer-height, so keep it in sync with the composer's real
+  // height (it grows with multi-line input and link previews).
+  useLayoutEffect(() => {
+    const chatArea = chatAreaRef.current
+    if (!chatArea || !composerEl) return
+
+    const update = () => {
+      const height = composerEl.getBoundingClientRect().height
+      const list = messagesRef.current
+      const wasAtBottom =
+        !!list &&
+        list.scrollTop + list.clientHeight >=
+          list.scrollHeight - SCROLL_BOTTOM_THRESHOLD
+      chatArea.style.setProperty('--chat-composer-height', `${height}px`)
+      if (list && wasAtBottom) {
+        list.scrollTop = list.scrollHeight
+      }
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(composerEl)
+    return () => {
+      observer.disconnect()
+      chatArea.style.removeProperty('--chat-composer-height')
+    }
+  }, [composerEl])
 
   const chats = useSelector(getChats)
   const chatsStatus = useSelector(getChatsStatus)
@@ -155,6 +194,7 @@ export const ChatPage = () => {
           </div>
         )}
         <div
+          ref={chatAreaRef}
           className={cn(styles.chatArea, {
             [styles.chatAreaNarrow]: isNarrowLayout
           })}
@@ -175,6 +215,7 @@ export const ChatPage = () => {
               />
               {chat?.is_blast || (canSendMessage && chat) ? (
                 <ChatComposer
+                  ref={setComposerEl}
                   className={styles.composer}
                   chatId={currentChatId}
                   onMessageSent={handleMessageSent}

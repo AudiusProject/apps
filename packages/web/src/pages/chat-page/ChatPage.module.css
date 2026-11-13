@@ -70,8 +70,9 @@
 
   /* Heights consumed by the message list's negative margins / padding so
    * it can scroll behind the frosted header and composer. Matched against
-   * ChatPaneHeader (112px in the wide layout, smaller in narrow) and
-   * ChatComposer (grows with the track/collection preview, base ~88px). */
+   * ChatPaneHeader (112px in the wide layout, smaller in narrow).
+   * --chat-composer-height is a fallback; ChatPage sets the measured
+   * composer height inline. */
   --chat-pane-header-height: 112px;
   --chat-composer-height: 88px;
   --chat-message-overlap-top: var(--chat-header-height, 112px);
