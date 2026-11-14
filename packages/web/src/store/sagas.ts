@@ -23,7 +23,6 @@ import addToCollectionSagas from 'common/store/add-to-collection/sagas'
 import analyticsSagas from 'common/store/analytics/sagas'
 import backendSagas from 'common/store/backend/sagas'
 import collectionsSagas from 'common/store/cache/collections/webSagas'
-import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
@@ -67,7 +66,6 @@ export default function* rootSaga() {
     chatSagas(),
     passwordResetSagas(),
     profileSagas(),
-    rewardsPageSagas(),
     settingsSagas(),
     signOnSaga(),
     socialSagas(),
@@ -138,7 +136,6 @@ export function* testRootSaga() {
     // passwordResetSagas(),
     profileSagas(),
     // reactionSagas(),
-    // rewardsPageSagas(),
     // savedSagas(),
     // searchResultsSagas(),
     // settingsSagas(),

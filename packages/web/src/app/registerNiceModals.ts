@@ -132,20 +132,6 @@ registerLazyModal('ClaimVestedCoinsModal', () =>
   )
 )
 
-registerLazyModal('ClaimAllRewards', () =>
-  import('components/rewards/modals/ClaimAllRewardsModal').then((m) => ({
-    default: m.ClaimAllRewardsModal
-  }))
-)
-
-registerLazyModal('ChallengeRewards', () =>
-  import(
-    'pages/rewards-page/components/modals/ChallengeRewardsModal/ChallengeRewardsModal'
-  ).then((m) => ({
-    default: m.ChallengeRewardsModal
-  }))
-)
-
 registerLazyModal('LockedContent', () =>
   import('components/locked-content-modal/LockedContentModal').then((m) => ({
     default: m.LockedContentModal

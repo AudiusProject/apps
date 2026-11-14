@@ -13,16 +13,12 @@ import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
-import { ChallengeRewardsTile } from './ChallengeRewardsTile'
-import { ClaimAllRewardsTile } from './ClaimAllRewardsTile'
 import { TiersTile } from './TiersTile'
 
 const { fetchAssociatedWallets } = tokenDashboardPageActions
 
 const messages = {
-  title: 'Rewards & Perks',
-  rewards: 'Earn Rewards',
-  rewardsBody1: 'Complete tasks to earn $AUDIO tokens!'
+  title: 'Rewards & Perks'
 }
 
 const useStyles = makeStyles(({ spacing, palette, typography }) => ({
@@ -118,8 +114,6 @@ export const RewardsScreen = () => {
         <ScrollView style={styles.tiles}>
           <Flex gap='xl'>
             {audioFeaturesDegradedText ? renderNoticeTile() : null}
-            <ClaimAllRewardsTile />
-            <ChallengeRewardsTile />
             <TiersTile />
           </Flex>
         </ScrollView>

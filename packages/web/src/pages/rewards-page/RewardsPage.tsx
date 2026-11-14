@@ -18,12 +18,11 @@ import { BASE_URL } from 'utils/route'
 
 import styles from './RewardsPage.module.css'
 import Tiers from './Tiers'
-import { ChallengeRewardsTile } from './components/ChallengeRewards/ChallengeRewardsTile'
 const { REWARDS_PAGE } = route
 
 const messages = {
   title: 'Rewards & Perks',
-  description: 'Earn $AUDIO by completing simple tasks while using Audius'
+  description: 'Explore Audius perks and weekly trending rewards'
 }
 
 const RewardsContent = () => {
@@ -40,7 +39,6 @@ const RewardsContent = () => {
           </span>
         </div>
       ) : null}
-      <ChallengeRewardsTile className={styles.mobile} />
       <Tiers />
     </>
   )
