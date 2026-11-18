@@ -5,7 +5,7 @@
 
     <!-- API (fetch is CORS, so crossorigin) and the Optimizely datafile -->
     <link rel="preconnect" href="%API_URL%" crossorigin />
-    <link rel="preconnect" href="https://experiments.audius.co" />
+    <link rel="preconnect" href="https://experiments.audius.co" crossorigin />
 
     <!-- Avenir: the weights most pages render -->
     <link
@@ -220,12 +220,18 @@
     <!-- end Google Analytics -->
 
     <!-- start Optimizely -->
-    <script
-      async
-      onLoad="window.dispatchEvent(new CustomEvent('OPTIMIZELY_LOADED'))"
-      onError="window.optimizelyDatafile = {}; window.dispatchEvent(new CustomEvent('OPTIMIZELY_LOADED'))"
-      src="https://experiments.audius.co/datafiles/%OPTIMIZELY_KEY%.json/tag.js"
-    ></script>
+    <script>
+      // Fetched as JSON so nothing served from the datafile host is executed
+      window.optimizelyDatafilePromise = fetch(
+        'https://experiments.audius.co/datafiles/%OPTIMIZELY_KEY%.json'
+      )
+        .then(function (res) {
+          return res.ok ? res.json() : {}
+        })
+        .catch(function () {
+          return {}
+        })
+    </script>
     <!-- end Optimizely -->
 
     <!-- GEO: Organization, WebSite, SoftwareApplication schema for AI engines -->

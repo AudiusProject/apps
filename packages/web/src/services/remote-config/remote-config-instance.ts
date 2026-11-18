@@ -11,7 +11,7 @@ const { version: appVersion } = packageInfo
 
 declare global {
   interface Window {
-    optimizelyDatafile: Config['datafile']
+    optimizelyDatafilePromise?: Promise<Config['datafile']>
   }
 }
 
@@ -21,17 +21,8 @@ export const remoteConfigInstance = remoteConfig({
   appVersion,
   platform: isElectron() ? 'desktop' : 'web',
   createOptimizelyClient: async () => {
-    // Wait for optimizely to load if necessary (as it can be an async or defer tag)
-    if (!window.optimizelyDatafile) {
-      let cb
-      await new Promise((resolve) => {
-        cb = resolve
-        window.addEventListener('OPTIMIZELY_LOADED', cb)
-      })
-      if (cb) window.removeEventListener('OPTIMIZELY_LOADED', cb)
-    }
-
-    const datafile = window.optimizelyDatafile
+    // index.html starts the fetch so it runs alongside the entry bundle
+    const datafile = (await window.optimizelyDatafilePromise) ?? {}
     if (isEmpty(datafile)) {
       console.error(new Error('Optimizely failed to load'))
     }
