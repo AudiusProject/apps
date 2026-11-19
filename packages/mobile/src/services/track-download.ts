@@ -302,7 +302,13 @@ const downloadFile = async ({
       abortSignal?.addEventListener('abort', () => {
         fetchPromise.cancel()
       })
-      await fetchPromise
+      const response = await fetchPromise
+      // fetch resolves on HTTP errors, which would otherwise save the error
+      // body to disk and share it as the file.
+      const status = response.info().status
+      if (status < 200 || status >= 300) {
+        throw new Error(`Download failed with status ${status}`)
+      }
 
       await Share.share({
         url: filePath

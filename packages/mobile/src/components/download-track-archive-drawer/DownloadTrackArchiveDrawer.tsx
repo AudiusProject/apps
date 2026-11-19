@@ -27,6 +27,11 @@ const messages = {
   tryAgain: 'Try again.'
 }
 
+// Track titles can contain characters (like "/") that aren't valid in a file
+// name and would break the download path.
+const toSafeFilename = (name: string) =>
+  name.replace(/[\\/:*?"<>|]/g, '_').trim() || 'stems'
+
 const useDownloadFile = () => {
   const { trackDownload } = useAppContext()
   const [fetching, setFetching] = useState<boolean>(false)
@@ -111,7 +116,9 @@ const DownloadTrackArchiveDrawerContent = ({
     resetDownload()
     try {
       const url = await getStemsZipUrl()
-      await downloadFile({ file: { url, filename: `${trackTitle}.zip` } })
+      await downloadFile({
+        file: { url, filename: `${toSafeFilename(trackTitle)}.zip` }
+      })
     } catch (e) {
       console.error('Failed to start stems download', e)
     }
