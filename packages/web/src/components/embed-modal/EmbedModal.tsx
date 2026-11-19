@@ -78,6 +78,15 @@ const constructUrl = (
   }`
 }
 
+// The frame string is rendered as HTML and shown for copying, and the url
+// includes the permalink from the API, so escape it for use in an attribute.
+const escapeHtmlAttribute = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
 const formatIFrame = (url: string, size: Size) => {
   let extras
   switch (size) {
@@ -91,7 +100,7 @@ const formatIFrame = (url: string, size: Size) => {
       extras = 'width="100%" height="24" allowTransparency="true"'
       break
   }
-  return `<iframe src=${url} ${extras} allow="encrypted-media" style="border: none;"></iframe>`
+  return `<iframe src="${escapeHtmlAttribute(url)}" ${extras} allow="encrypted-media" style="border: none;"></iframe>`
 }
 
 const useMetadata = () => {
