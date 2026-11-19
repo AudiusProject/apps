@@ -3,3 +3,8 @@ export enum Size {
   COMPACT = 'Compact',
   TINY = 'Tiny'
 }
+
+export enum PlayerTheme {
+  ARTWORK = 'Artwork',
+  DARK = 'Dark'
+}
