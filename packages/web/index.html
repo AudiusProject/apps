@@ -220,12 +220,28 @@
     <!-- end Google Analytics -->
 
     <!-- start Optimizely -->
-    <script
-      async
-      onLoad="window.dispatchEvent(new CustomEvent('OPTIMIZELY_LOADED'))"
-      onError="window.optimizelyDatafile = {}; window.dispatchEvent(new CustomEvent('OPTIMIZELY_LOADED'))"
-      src="https://experiments.audius.co/datafiles/%OPTIMIZELY_KEY%.json/tag.js"
-    ></script>
+    <!--
+      Fetch the datafile as JSON rather than executing tag.js, so a compromised
+      datafile can only change flag values, never run code on the page.
+      Started here (not in the bundle) so it downloads in parallel with the app.
+    -->
+    <script>
+      fetch('https://experiments.audius.co/datafiles/%OPTIMIZELY_KEY%.json')
+        .then(function (res) {
+          if (!res.ok) throw new Error('Optimizely datafile ' + res.status)
+          return res.json()
+        })
+        .then(function (datafile) {
+          window.optimizelyDatafile = datafile
+        })
+        .catch(function (e) {
+          console.error(e)
+          window.optimizelyDatafile = {}
+        })
+        .then(function () {
+          window.dispatchEvent(new CustomEvent('OPTIMIZELY_LOADED'))
+        })
+    </script>
     <!-- end Optimizely -->
 
     <!-- GEO: Organization, WebSite, SoftwareApplication schema for AI engines -->
