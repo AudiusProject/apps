@@ -21,7 +21,6 @@ import { lazySagas, sagaWithErrorHandler } from '@audius/common/utils'
 import addToCollectionSagas from 'common/store/add-to-collection/sagas'
 import analyticsSagas from 'common/store/analytics/sagas'
 import backendSagas from 'common/store/backend/sagas'
-import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
@@ -103,7 +102,6 @@ export default function* rootSaga() {
     ...collectionPageSagas(),
     ...profileSagas(),
     ...socialSagas(),
-    ...rewardsPageSagas(),
     ...settingsSagas(),
 
     // Cast

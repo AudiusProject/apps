@@ -9,8 +9,6 @@ import { ApiRewardsDrawer } from 'app/components/api-rewards-drawer/ApiRewardsDr
 import { AudioBreakdownDrawer } from 'app/components/audio-breakdown-drawer'
 import { TiersExplainerDrawer } from 'app/components/audio-rewards'
 import { BlockMessagesDrawer } from 'app/components/block-messages-drawer'
-import { ChallengeRewardsDrawer } from 'app/components/challenge-rewards-drawer'
-import { ClaimAllRewardsDrawer } from 'app/components/challenge-rewards-drawer/ClaimAllRewardsDrawer'
 import { ChatActionsDrawer } from 'app/components/chat-actions-drawer'
 import { CoinflowOnrampDrawer } from 'app/components/coinflow-onramp-drawer/CoinflowOnrampDrawer'
 import { CoinflowWithdrawDrawer } from 'app/components/coinflow-withdraw-drawer/CoinflowWithdrawDrawer'
@@ -117,8 +115,6 @@ type LazyComponent = () => ComponentType
 
 const commonDrawersMap: { [Modal in Modals]?: LazyComponent } = {
   TiersExplainer: () => TiersExplainerDrawer,
-  ChallengeRewards: () => ChallengeRewardsDrawer,
-  ClaimAllRewards: () => ClaimAllRewardsDrawer,
   APIRewardsExplainer: () => ApiRewardsDrawer,
   TransferAudioMobileWarning: () => TransferAudioMobileDrawer,
   DeactivateAccountConfirmation: () => DeactivateAccountConfirmationDrawer,
