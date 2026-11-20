@@ -101,7 +101,7 @@ const SUCCESS_EVENT_NAMES_MAP = {
   | typeof EventNames.SHARE_TO_SNAPCHAT_STORY_SUCCESS
 >
 
-const PLATFORM_APP_NAMES: Record<ShareToStoryPlatform, string> = {
+export const PLATFORM_APP_NAMES: Record<ShareToStoryPlatform, string> = {
   instagram: 'Instagram',
   tiktok: 'TikTok',
   snapchat: 'Snapchat'
@@ -115,7 +115,7 @@ const IOS_APP_SCHEMES: Record<ShareToStoryPlatform, string[]> = {
 }
 
 // Android has no package visibility for every target, so only check on iOS
-const isAppInstalled = async (platform: ShareToStoryPlatform) => {
+export const isAppInstalled = async (platform: ShareToStoryPlatform) => {
   if (Platform.OS !== 'ios') return true
   const results = await Promise.all(
     IOS_APP_SCHEMES[platform].map((scheme) =>
@@ -132,7 +132,7 @@ const ERROR_OUTPUT_LENGTH = 800
 // Resolves once the target app has opened: its SDK resolved or this app went
 // to the background. Some SDKs only resolve when the user comes back to
 // Audius (or time out natively), so don't wait for that.
-const waitForHandoff = (launch: Promise<unknown>) =>
+export const waitForHandoff = (launch: Promise<unknown>) =>
   new Promise<void>((resolve, reject) => {
     let settled = false
     const finish = (error?: Error) => {
@@ -159,7 +159,7 @@ const waitForHandoff = (launch: Promise<unknown>) =>
     )
   })
 
-const runWhenActive = (fn: () => void) => {
+export const runWhenActive = (fn: () => void) => {
   if (AppState.currentState === 'active') {
     fn()
     return
