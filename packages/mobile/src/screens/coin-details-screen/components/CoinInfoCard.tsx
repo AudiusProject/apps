@@ -14,7 +14,6 @@ import {
   Flex,
   IconCopy,
   IconExternalLink,
-  IconGift,
   IconInstagram,
   IconLink,
   IconX,
@@ -27,7 +26,6 @@ import { ProfilePicture } from 'app/components/core'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { primitiveToImageSource } from 'app/components/image/primitiveToImageSource'
 import { UserLink } from 'app/components/user-link'
-import { useNavigation } from 'app/hooks/useNavigation'
 import { useToast } from 'app/hooks/useToast'
 import { env } from 'app/services/env'
 
@@ -226,7 +224,6 @@ const SocialLinksSection = ({ coin }: { coin: Coin }) => {
 
 export const CoinInfoCard = ({ mint }: { mint: string }) => {
   const { data: coin, isLoading } = useFanClub(mint)
-  const navigation = useNavigation()
   const { toast } = useToast()
 
   const handleLearnMore = useCallback(() => {
@@ -235,10 +232,6 @@ export const CoinInfoCard = ({ mint }: { mint: string }) => {
       Linking.openURL(coin?.website)
     }
   }, [coin?.website])
-
-  const handleBrowseRewards = useCallback(() => {
-    navigation.navigate('RewardsScreen')
-  }, [navigation])
 
   const handleCopyAddress = useCallback(() => {
     Clipboard.setString(mint)
@@ -250,7 +243,6 @@ export const CoinInfoCard = ({ mint }: { mint: string }) => {
   }
 
   const isWAudio = coin.mint === env.WAUDIO_MINT_ADDRESS
-  const CTAIcon = isWAudio ? IconGift : IconExternalLink
 
   return (
     <Paper
@@ -264,16 +256,16 @@ export const CoinInfoCard = ({ mint }: { mint: string }) => {
       <BannerSection mint={mint} />
       <SocialLinksSection coin={coin} />
       <CoinDescriptionSection coin={coin} />
-      {isWAudio || coin.website ? (
+      {!isWAudio && coin.website ? (
         <>
           <Divider style={{ width: '100%' }} />
           <Flex direction='column' w='100%' ph='xl' pv='l'>
             <PlainButton
               style={{ alignSelf: 'flex-start' }}
-              onPress={isWAudio ? handleBrowseRewards : handleLearnMore}
-              iconLeft={CTAIcon}
+              onPress={handleLearnMore}
+              iconLeft={IconExternalLink}
             >
-              {isWAudio ? messages.browseRewards : messages.learnMore}
+              {messages.learnMore}
             </PlainButton>
           </Flex>
         </>

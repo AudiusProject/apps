@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 import { Id } from '@audius/sdk'
 import {
@@ -10,10 +10,7 @@ import { usePrevious } from 'react-use'
 
 import { notificationFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
-import { useRemoteVar } from '~/hooks'
-import { ChallengeRewardID } from '~/models'
 import { ID } from '~/models/Identifiers'
-import { StringKeys } from '~/services'
 import { NotificationType, Notification } from '~/store/notifications/types'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -24,6 +21,13 @@ import { primeRelatedData } from '../utils/primeRelatedData'
 import { useNotificationUnreadCount } from './useNotificationUnreadCount'
 
 const DEFAULT_LIMIT = 20
+
+// $AUDIO challenge rewards are retired; hide their notifications.
+const RETIRED_NOTIFICATION_TYPES = new Set<NotificationType>([
+  NotificationType.ChallengeReward,
+  NotificationType.ClaimableReward,
+  NotificationType.ListenStreakReminder
+])
 
 type PageParam = {
   timestamp: number
@@ -56,17 +60,6 @@ export const useNotifications = (options?: QueryOptions) => {
   const { data: unreadCount } = useNotificationUnreadCount()
   const prevUnreadCount = usePrevious(unreadCount)
 
-  // Get whitelisted challenge reward IDs from remote config
-  const challengeRewardIdsString = useRemoteVar(StringKeys.CHALLENGE_REWARD_IDS)
-  const whitelistedChallengeIds = useMemo(() => {
-    if (!challengeRewardIdsString) return new Set<ChallengeRewardID>()
-    return new Set(
-      challengeRewardIdsString
-        .split(',')
-        .map((id) => id.trim()) as ChallengeRewardID[]
-    )
-  }, [challengeRewardIdsString])
-
   const query = useInfiniteQuery({
     queryKey: getNotificationsQueryKey({
       currentUserId,
@@ -93,13 +86,9 @@ export const useNotifications = (options?: QueryOptions) => {
         notificationFromSDK
       ) as Notification[]
 
-      // Filter out challenge reward notifications that aren't whitelisted
-      return notifications.filter((notification) => {
-        if (notification.type === NotificationType.ChallengeReward) {
-          return whitelistedChallengeIds.has(notification.challengeId)
-        }
-        return true
-      })
+      return notifications.filter(
+        (notification) => !RETIRED_NOTIFICATION_TYPES.has(notification.type)
+      )
     },
     getNextPageParam: (lastPage: Notification[]) => {
       const lastNotification = lastPage[lastPage.length - 1]

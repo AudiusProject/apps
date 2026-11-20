@@ -36,7 +36,6 @@ import {
   PurchaseableContentType
 } from '@audius/common/store'
 import type { PurchaseContentError } from '@audius/common/store'
-import { AUDIO_MATCHING_REWARDS_MULTIPLIER } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 import { Formik, useField, useFormikContext } from 'formik'
 import { Linking, View, ScrollView, TouchableOpacity } from 'react-native'
@@ -335,15 +334,7 @@ const RenderForm = ({
         <>
           <ScrollView contentContainerStyle={styles.formContentContainer}>
             <View style={styles.formContentSection}>
-              <TrackDetailsTile
-                trackId={contentId}
-                showLabel={false}
-                earnAmount={USDC(
-                  (price * AUDIO_MATCHING_REWARDS_MULTIPLIER) / 100
-                )
-                  .round()
-                  .toShorthand()}
-              />
+              <TrackDetailsTile trackId={contentId} showLabel={false} />
               {isPurchaseSuccessful ? null : (
                 <PayExtraFormSection
                   amountPresets={presetValues}

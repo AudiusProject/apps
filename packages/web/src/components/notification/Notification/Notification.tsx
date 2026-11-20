@@ -11,8 +11,6 @@ import { ApproveManagerNotification } from './ApproveManagerRequestNotification'
 import { ArtistRemixContestEndedNotification } from './ArtistRemixContestEndedNotification'
 import { ArtistRemixContestEndingSoonNotification } from './ArtistRemixContestEndingSoonNotification'
 import { ArtistRemixContestSubmissionsNotification } from './ArtistRemixContestSubmissionsNotification'
-import { ChallengeRewardNotification } from './ChallengeRewardNotification'
-import { ClaimableRewardNotification } from './ClaimableRewardNotification'
 import { CommentMentionNotification } from './CommentMentionNotification'
 import { CommentNotification } from './CommentNotification'
 import { CommentReactionNotification } from './CommentReactionNotification'
@@ -26,7 +24,6 @@ import { FanRemixContestWinnersSelectedNotification } from './FanRemixContestWin
 import { FavoriteNotification } from './FavoriteNotification'
 import { FavoriteOfRepostNotification } from './FavoriteOfRepostNotification'
 import { FollowNotification } from './FollowNotification'
-import { ListenStreakReminderNotification } from './ListenStreakReminderNotification'
 import { MilestoneNotification } from './MilestoneNotification'
 import { RemixContestUpdateNotification } from './RemixContestUpdateNotification'
 import { RemixCosignNotification } from './RemixCosignNotification'
@@ -60,12 +57,6 @@ export const Notification = (props: NotificationProps) => {
     switch (notification.type) {
       case NotificationType.Announcement: {
         return <AnnouncementNotification notification={notification} />
-      }
-      case NotificationType.ChallengeReward: {
-        return <ChallengeRewardNotification notification={notification} />
-      }
-      case NotificationType.ClaimableReward: {
-        return <ClaimableRewardNotification notification={notification} />
       }
       case NotificationType.Favorite: {
         return <FavoriteNotification notification={notification} />
@@ -147,9 +138,6 @@ export const Notification = (props: NotificationProps) => {
       }
       case NotificationType.CommentReaction: {
         return <CommentReactionNotification notification={notification} />
-      }
-      case NotificationType.ListenStreakReminder: {
-        return <ListenStreakReminderNotification notification={notification} />
       }
       case NotificationType.WeeklyRotation: {
         return <WeeklyRotationNotification notification={notification} />

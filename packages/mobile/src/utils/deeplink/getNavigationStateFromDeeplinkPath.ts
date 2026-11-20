@@ -187,13 +187,7 @@ export const getNavigationStateFromDeeplinkPath = ({
     })
   }
 
-  if (path.match(/^\/rewards/)) {
-    return createTrendingStackState({
-      name: 'RewardsScreen'
-    })
-  }
-
-  if (path.match(/^\/wallet(?:\/|\?|$)/)) {
+  if (path.match(/^\/(?:rewards|wallet(?:\/|\?|$))/)) {
     return createTrendingStackState({
       name: 'wallet'
     })

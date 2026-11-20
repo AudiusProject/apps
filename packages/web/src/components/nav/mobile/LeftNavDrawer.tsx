@@ -8,7 +8,6 @@ import {
   IconAudiusLogoHorizontal,
   IconComponent,
   IconFanClub,
-  IconGift,
   IconSettings,
   IconTrophy,
   IconUser,
@@ -31,7 +30,6 @@ const {
   CONTESTS_PAGE,
   FOLLOWERS_USERS_ROUTE,
   FOLLOWING_USERS_ROUTE,
-  REWARDS_PAGE,
   SETTINGS_PAGE,
   WALLET_PAGE,
   profilePage
@@ -42,7 +40,6 @@ const messages = {
   audio: '$AUDIO',
   artistCoins: 'Artist Coins',
   contests: 'Contests',
-  rewards: 'Rewards',
   settings: 'Settings',
   followers: 'Followers',
   following: 'Following'
@@ -238,12 +235,6 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
               icon={IconTrophy}
               label={messages.contests}
               href={CONTESTS_PAGE}
-              onNavigate={handleNavigate}
-            />
-            <NavItem
-              icon={IconGift}
-              label={messages.rewards}
-              href={REWARDS_PAGE}
               onNavigate={handleNavigate}
             />
             <NavItem

@@ -7,7 +7,6 @@ import { ResizeObserver } from '@juggle/resize-observer'
 import useMeasure from 'react-use-measure'
 
 import { DragAutoscroller } from 'components/drag-autoscroller/DragAutoscroller'
-import { ProfileCompletionPanel } from 'components/profile-progress/ProfileCompletionPanel'
 
 import { AccountDetails } from './AccountDetails'
 import { LeftNavCTA } from './LeftNavCTA'
@@ -23,7 +22,6 @@ import {
   LibraryNavItem,
   MessagesNavItem,
   WalletNavItem,
-  RewardsNavItem,
   DashboardNavItem,
   UploadNavItem,
   DevToolsNavItem,
@@ -136,7 +134,6 @@ export const LeftNav = (props: OwnProps) => {
               <MessagesNavItem />
               <WalletNavItem />
               <FanClubsNavItem />
-              <RewardsNavItem />
               <DashboardNavItem />
               <UploadNavItem />
               <DevToolsNavItem />
@@ -159,7 +156,6 @@ export const LeftNav = (props: OwnProps) => {
           gap='s'
           pb={isCollapsed ? 's' : undefined}
         >
-          {!isCollapsed ? <ProfileCompletionPanel /> : null}
           {!isCollapsed ? <LeftNavCTA /> : null}
           <NowPlayingArtworkTile size={isCollapsed ? 56 : undefined} />
           {isCollapsed ? <LeftNavCTA /> : null}

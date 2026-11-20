@@ -17,7 +17,6 @@ import {
   MessagesNavItem,
   WalletNavItem,
   FanClubsNavItem,
-  RewardsNavItem,
   UploadNavItem,
   SettingsNavItem,
   FeatureFlagsNavItem
@@ -54,7 +53,6 @@ const WrappedLeftNavDrawer = () => {
         <MessagesNavItem />
         <WalletNavItem />
         <FanClubsNavItem />
-        <RewardsNavItem />
         <UploadNavItem />
         <SettingsNavItem />
         <FeatureFlagsNavItem />

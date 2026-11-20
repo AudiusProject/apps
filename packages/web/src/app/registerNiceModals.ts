@@ -14,7 +14,7 @@ import { registerNiceModalId } from '@audius/common/services'
 import NiceModal from '@ebay/nice-modal-react'
 
 /**
- * Wallet, Coinflow, purchase and rewards modals are registered lazily to keep
+ * Wallet, Coinflow and purchase modals are registered lazily to keep
  * AppKit, Coinflow and Solana out of the entry chunk. NiceModal only renders visible modals, so nothing
  * loads until one opens. Registration stays here (not in the modal modules) so
  * the lazy import can't re-register and remount an open modal.
@@ -57,7 +57,7 @@ registerLazyModal('CoinflowWithdraw', () =>
   ).then((m) => ({ default: m.CoinflowWithdrawModal }))
 )
 
-// Purchase, wallet and rewards modals
+// Purchase and wallet modals
 registerLazyModal('AddCashModal', () =>
   import('components/add-cash-modal/AddCashModal').then((m) => ({
     default: m.AddCashModal
@@ -130,20 +130,6 @@ registerLazyModal('ClaimVestedCoinsModal', () =>
       default: m.ClaimVestedCoinsModal
     })
   )
-)
-
-registerLazyModal('ClaimAllRewards', () =>
-  import('components/rewards/modals/ClaimAllRewardsModal').then((m) => ({
-    default: m.ClaimAllRewardsModal
-  }))
-)
-
-registerLazyModal('ChallengeRewards', () =>
-  import(
-    'pages/rewards-page/components/modals/ChallengeRewardsModal/ChallengeRewardsModal'
-  ).then((m) => ({
-    default: m.ChallengeRewardsModal
-  }))
 )
 
 registerLazyModal('LockedContent', () =>
@@ -264,10 +250,6 @@ registerLazyModal('ReplaceTrackProgress', () =>
   ).then((m) => ({
     default: m.ReplaceTrackProgressModal
   }))
-)
-registerLazyModal(
-  'APIRewardsExplainer',
-  () => import('components/rewards/modals/TopAPI')
 )
 registerLazyModal('Share', () =>
   import('components/share-modal/ShareModal').then((m) => ({

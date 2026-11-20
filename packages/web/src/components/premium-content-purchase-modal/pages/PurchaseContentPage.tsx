@@ -16,8 +16,6 @@ import {
 import { PurchaseMethod, PurchaseVendor } from '@audius/common/models'
 import { IntKeys, FeatureFlags } from '@audius/common/services'
 import { PurchaseContentStage } from '@audius/common/store'
-import { AUDIO_MATCHING_REWARDS_MULTIPLIER } from '@audius/common/utils'
-import { USDC } from '@audius/fixed-decimal'
 import { Flex, Box } from '@audius/harmony'
 import { useField } from 'formik'
 
@@ -122,9 +120,6 @@ export const PurchaseContentPage = (props: PurchaseContentPageProps) => {
           metadata={metadata}
           owner={metadata.user}
           disabled={isLinkDisabled}
-          earnAmount={USDC((price * AUDIO_MATCHING_REWARDS_MULTIPLIER) / 100)
-            .round()
-            .toShorthand()}
         />
         {isUnlocking || isPurchased ? null : (
           <Box ph='m'>

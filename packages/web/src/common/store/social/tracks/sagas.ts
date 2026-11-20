@@ -40,7 +40,6 @@ import { fullContestPage } from 'utils/route'
 import { waitForRead, waitForWrite } from 'utils/sagaHelpers'
 
 import watchTrackErrors from './errorSagas'
-import { watchRecordListen } from './recordListen'
 const { getNftAccessSignatureMap } = gatedContentSelectors
 const { incrementTrackSaveCount, decrementTrackSaveCount } = accountActions
 const { setVisibility } = modalsActions
@@ -765,7 +764,6 @@ const sagas = () => {
     watchUndoRepostTrack,
     watchSaveTrack,
     watchUnsaveTrack,
-    watchRecordListen,
     watchSetArtistPick,
     watchUnsetArtistPick,
     watchDownloadTrack,

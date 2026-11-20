@@ -1,7 +1,6 @@
 import { useCallback, useContext } from 'react'
 
 import { useAccountStatus, useHasAccount } from '@audius/common/api'
-import { useChallengeCooldownSchedule } from '@audius/common/hooks'
 import { Name, Status } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { connect } from 'react-redux'
@@ -30,9 +29,6 @@ const ConnectedNavBar = ({ goToRoute, goBack }: ConnectedNavBarProps) => {
   const { data: accountStatus } = useAccountStatus()
   const hasAccount = useHasAccount()
   const { setStackReset, setSlideDirection } = useContext(RouterContext)
-  const { claimableAmount: rewardsCount } = useChallengeCooldownSchedule({
-    multiple: true
-  })
 
   const search = (query: string) => {
     navigate({
@@ -61,7 +57,6 @@ const ConnectedNavBar = ({ goToRoute, goBack }: ConnectedNavBarProps) => {
       isSignedIn={hasAccount}
       isLoading={accountStatus === Status.LOADING}
       signUp={signUp}
-      rewardsCount={rewardsCount}
       goToNotificationPage={goToNotificationPage}
       search={search}
       goBack={goBack}

@@ -34,7 +34,6 @@ const { SIGN_UP_PAGE, TRENDING_PAGE } = route
 interface NavBarProps {
   isLoading: boolean
   isSignedIn: boolean
-  rewardsCount: number
   signUp: () => void
   goToNotificationPage: () => void
   search: (term: string) => void
@@ -49,7 +48,6 @@ const messages = {
 const NavBar = ({
   isLoading,
   isSignedIn,
-  rewardsCount,
   search,
   signUp,
   goToNotificationPage,

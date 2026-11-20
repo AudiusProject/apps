@@ -39,7 +39,6 @@ export * from './useAudioRewards'
 export * from './useGetDiscordOAuthLink'
 
 export * from './useAccountSwitcher'
-export * from './useAccountHasClaimableRewards'
 export * from './useAccessAndRemixSettings'
 export * from './useAcceptedTrackCollaborationInvite'
 export * from './purchaseContent'
