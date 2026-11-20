@@ -37,7 +37,6 @@ import {
 } from '~/models/PurchaseContent'
 import { isContentUSDCPurchaseGated, Track } from '~/models/Track'
 import { User } from '~/models/User'
-import { FeatureFlags } from '~/services/remote-config/feature-flags'
 import {
   buyUSDCFlowFailed,
   buyUSDCFlowSucceeded,
@@ -643,12 +642,6 @@ function* doStartPurchaseContentFlow({
     (value: WalletAddresses) => !!value?.currentUser
   )
 
-  const getFeatureEnabled = yield* getContext('getFeatureEnabled')
-  const isNetworkCutEnabled = yield* call(
-    getFeatureEnabled,
-    FeatureFlags.NETWORK_CUT_ENABLED
-  )
-
   const { price, title, artistInfo } = yield* call(getContentInfo, {
     contentId,
     contentType
@@ -726,7 +719,7 @@ function* doStartPurchaseContentFlow({
             trackId: Id.parse(contentId),
             price: price / 100.0,
             extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-            includeNetworkCut: isNetworkCutEnabled
+            includeNetworkCut: true
           })
         } else {
           yield* call([sdk.albums, sdk.albums.purchaseAlbum], {
@@ -734,7 +727,7 @@ function* doStartPurchaseContentFlow({
             albumId: Id.parse(contentId),
             price: price / 100.0,
             extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-            includeNetworkCut: isNetworkCutEnabled
+            includeNetworkCut: true
           })
         }
         break
@@ -769,7 +762,7 @@ function* doStartPurchaseContentFlow({
                 price: price / 100.0,
                 extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
                 guestEmail,
-                includeNetworkCut: isNetworkCutEnabled
+                includeNetworkCut: true
               })
             } else {
               yield* call(purchaseAlbumWithCoinflow, {
@@ -779,7 +772,7 @@ function* doStartPurchaseContentFlow({
                 price: price / 100.0,
                 extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
                 guestEmail,
-                includeNetworkCut: isNetworkCutEnabled
+                includeNetworkCut: true
               })
             }
             break
@@ -792,7 +785,7 @@ function* doStartPurchaseContentFlow({
                 trackId: Id.parse(contentId),
                 price: price / 100.0,
                 extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-                includeNetworkCut: isNetworkCutEnabled
+                includeNetworkCut: true
               })
             } else {
               yield* call([sdk.albums, sdk.albums.purchaseAlbum], {
@@ -800,7 +793,7 @@ function* doStartPurchaseContentFlow({
                 albumId: Id.parse(contentId),
                 price: price / 100.0,
                 extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-                includeNetworkCut: isNetworkCutEnabled
+                includeNetworkCut: true
               })
             }
             break
@@ -941,12 +934,6 @@ function* purchaseWithAnything({
       sdk.services.solanaClient,
       sdk.services.solanaClient.getConnection
     ])
-    const getFeatureEnabled = yield* getContext('getFeatureEnabled')
-    const isNetworkCutEnabled = yield* call(
-      getFeatureEnabled,
-      FeatureFlags.NETWORK_CUT_ENABLED
-    )
-
     // Get the USDC user bank
     const usdcUserBank = yield* call(getOrCreateUSDCUserBank)
     const usdcUserBankTokenAccount = yield* call(pollForTokenAccountInfo, {
@@ -1116,7 +1103,7 @@ function* purchaseWithAnything({
         trackId: Id.parse(contentId),
         price: price / 100.0,
         extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-        includeNetworkCut: isNetworkCutEnabled
+        includeNetworkCut: true
       })
       message.instructions.push(routeInstruction, memoInstruction)
       if (locationMemoInstruction) {
@@ -1134,7 +1121,7 @@ function* purchaseWithAnything({
         albumId: Id.parse(contentId),
         price: price / 100.0,
         extraAmount: extraAmount ? extraAmount / 100.0 : undefined,
-        includeNetworkCut: isNetworkCutEnabled
+        includeNetworkCut: true
       })
       message.instructions.push(routeInstruction, memoInstruction)
       if (locationMemoInstruction) {

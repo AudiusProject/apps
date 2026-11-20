@@ -7,7 +7,6 @@ import {
   useQueryContext,
   useArtistCreatedFanClub
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
 import {
   Chain,
@@ -15,7 +14,6 @@ import {
   LaunchpadFormValues,
   WidthSizes
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { TOKEN_LISTING_MAP, useCoinSuccessModal } from '@audius/common/store'
 import {
   getUserSocialLinks,
@@ -97,13 +95,11 @@ const fetchImageAsFile = async (imageUrl: string): Promise<File | null> => {
 const LaunchpadPageContent = ({
   submitErrorText,
   submitButtonText,
-  isVerified,
-  isLaunchpadVerificationEnabled
+  isVerified
 }: {
   submitErrorText?: string
   submitButtonText?: string
   isVerified: boolean
-  isLaunchpadVerificationEnabled: boolean
 }) => {
   const [phase, setPhase] = useState(Phase.SPLASH)
   const { resetForm, validateForm } = useFormikContext()
@@ -307,7 +303,6 @@ const LaunchpadPageContent = ({
             onContinue={handleSplashContinue}
             isPending={isWalletConnectPending}
             isVerified={isVerified}
-            isLaunchpadVerificationEnabled={isLaunchpadVerificationEnabled}
           />
         )
       case Phase.SETUP:
@@ -338,7 +333,6 @@ const LaunchpadPageContent = ({
             onContinue={handleSplashContinue}
             isPending={isWalletConnectPending}
             isVerified={isVerified}
-            isLaunchpadVerificationEnabled={isLaunchpadVerificationEnabled}
           />
         )
     }
@@ -365,9 +359,6 @@ export const LaunchpadPage = () => {
   const { data: currentUser } = useCurrentAccountUser()
 
   const { data: createdCoin } = useArtistCreatedFanClub(currentUser?.user_id)
-  const { isEnabled: isLaunchpadVerificationEnabled } = useFeatureFlag(
-    FeatureFlags.LAUNCHPAD_VERIFICATION
-  )
   const hasExistingFanClub = !!createdCoin
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -647,7 +638,7 @@ export const LaunchpadPage = () => {
   )
 
   // Redirect if user is not verified or already has a fan club
-  if (hasExistingFanClub && isLaunchpadVerificationEnabled) {
+  if (hasExistingFanClub) {
     track(make({ eventName: Name.LAUNCHPAD_HAS_EXISTING_FAN_CLUB }))
     return <Navigate to={route.CLUBS_EXPLORE_PAGE} replace />
   }
@@ -690,7 +681,6 @@ export const LaunchpadPage = () => {
           }
           submitButtonText={isFirstBuyError ? 'Continue' : undefined}
           isVerified={currentUser?.is_verified ?? false}
-          isLaunchpadVerificationEnabled={isLaunchpadVerificationEnabled}
         />
       </Form>
     </Formik>

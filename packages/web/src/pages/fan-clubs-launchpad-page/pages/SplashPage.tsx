@@ -83,14 +83,12 @@ type SplashPageProps = {
   onContinue: () => void
   isPending: boolean
   isVerified: boolean
-  isLaunchpadVerificationEnabled: boolean
 }
 
 export const SplashPage = ({
   onContinue,
   isPending,
-  isVerified,
-  isLaunchpadVerificationEnabled
+  isVerified
 }: SplashPageProps) => {
   const styles = useStyles()
 
@@ -121,7 +119,7 @@ export const SplashPage = ({
           <Tooltip
             text={messages.verifiedOnlyTooltip}
             placement='top'
-            disabled={!isLaunchpadVerificationEnabled || isVerified}
+            disabled={isVerified}
           >
             <Flex>
               <Button
@@ -129,9 +127,7 @@ export const SplashPage = ({
                 fullWidth
                 iconRight={isPending ? undefined : IconArrowRight}
                 onClick={onContinue}
-                disabled={
-                  isPending || (!isVerified && isLaunchpadVerificationEnabled)
-                }
+                disabled={isPending || !isVerified}
                 color='coinGradient'
               >
                 {isPending ? <LoadingSpinner /> : messages.getStarted}

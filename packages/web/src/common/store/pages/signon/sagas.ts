@@ -16,13 +16,10 @@ import {
   FavoriteSource,
   ID,
   FollowSource,
-  InstagramUser,
-  TikTokUser,
   Status
 } from '@audius/common/models'
 import {
   IntKeys,
-  FeatureFlags,
   MAX_HANDLE_LENGTH,
   getCityAndRegion,
   SignInResponse,
@@ -220,39 +217,28 @@ function* validateHandle(
       ) ?? DEFAULT_HANDLE_VERIFICATION_TIMEOUT_MILLIS
 
     if (ENVIRONMENT === 'production') {
-      const verifyTwitter = remoteConfigInstance.getFeatureEnabled(
-        FeatureFlags.VERIFY_HANDLE_WITH_TWITTER
-      )
-      const verifyInstagram = remoteConfigInstance.getFeatureEnabled(
-        FeatureFlags.VERIFY_HANDLE_WITH_INSTAGRAM
-      )
-      const verifyTikTok = remoteConfigInstance.getFeatureEnabled(
-        FeatureFlags.VERIFY_HANDLE_WITH_TIKTOK
-      )
-
-      const [twitterResult, instagramResult, tiktokResult] = yield* all([
-        race({
-          data: verifyTwitter
-            ? call(
-                [identityService, identityService.lookupTwitterHandle],
-                handle
-              )
-            : null,
+      // Object form keeps each lookup's result type separate.
+      const {
+        twitter: twitterResult,
+        instagram: instagramResult,
+        tiktok: tiktokResult
+      } = yield* all({
+        twitter: race({
+          data: call(
+            [identityService, identityService.lookupTwitterHandle],
+            handle
+          ),
           timeout: delay(handleCheckTimeout)
         }),
-        race({
-          data: verifyInstagram
-            ? call(audiusBackendInstance.instagramHandle, handle)
-            : null,
+        instagram: race({
+          data: call(audiusBackendInstance.instagramHandle, handle),
           timeout: delay(handleCheckTimeout)
         }),
-        race({
-          data: verifyTikTok
-            ? call(audiusBackendInstance.tiktokHandle, handle)
-            : null,
+        tiktok: race({
+          data: call(audiusBackendInstance.tiktokHandle, handle),
           timeout: delay(handleCheckTimeout)
         })
-      ])
+      })
 
       const twitterUserQuery = twitterResult?.timeout
         ? null
@@ -266,8 +252,10 @@ function* validateHandle(
         isOauthVerified,
         // @ts-ignore
         lookedUpTwitterUser: twitterUserQuery?.profile?.[0] ?? null,
-        lookedUpInstagramUser: (instagramUser as InstagramUser) || null,
-        lookedUpTikTokUser: (tikTokUser as TikTokUser) || null
+        // The Instagram and TikTok lookups are currently stubs that resolve
+        // null, so only the Twitter check can reserve a handle today.
+        lookedUpInstagramUser: instagramUser ?? null,
+        lookedUpTikTokUser: tikTokUser ?? null
       })
 
       if (handleCheckStatus !== 'notReserved') {

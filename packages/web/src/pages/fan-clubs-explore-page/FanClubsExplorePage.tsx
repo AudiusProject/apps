@@ -4,9 +4,7 @@ import {
   useCurrentAccountUser,
   useArtistCreatedFanClub
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import { COINS_CREATE_PAGE, clubPage } from '@audius/common/src/utils/route'
 import {
   Box,
@@ -79,9 +77,6 @@ const DesktopFanClubsExplorePage = () => {
   const { data: createdCoin, isPending: isLoadingCreatedCoin } =
     useArtistCreatedFanClub(currentUser?.user_id)
 
-  const { isEnabled: isLaunchpadVerificationEnabled } = useFeatureFlag(
-    FeatureFlags.LAUNCHPAD_VERIFICATION
-  )
   const hasExistingFanClub = !!createdCoin
   const existingClubTicker = createdCoin?.ticker ?? null
   const canViewExistingClub =
@@ -115,9 +110,7 @@ const DesktopFanClubsExplorePage = () => {
     }
   }, [])
 
-  const shouldShowLaunchCta =
-    (!hasExistingFanClub && !isLoadingCreatedCoin) ||
-    !isLaunchpadVerificationEnabled
+  const shouldShowLaunchCta = !hasExistingFanClub && !isLoadingCreatedCoin
 
   const launchCtaReserveY =
     shouldShowLaunchCta && !isLaunchBannerDismissed

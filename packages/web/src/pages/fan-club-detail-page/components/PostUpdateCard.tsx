@@ -5,8 +5,6 @@ import {
   useCurrentUserId,
   usePostTextUpdate
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { parseVideoUrl, getVideoThumbnailUrl } from '@audius/common/utils'
 import {
   Checkbox,
@@ -41,9 +39,6 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: coin } = useFanClub(mint)
   const { mutate: postTextUpdate, isPending } = usePostTextUpdate()
-  const { isEnabled: isTextPostPostingEnabled } = useFeatureFlag(
-    FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
-  )
 
   const isOwner = currentUserId != null && coin?.ownerId === currentUserId
 
@@ -75,7 +70,7 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
     ]
   )
 
-  if (!isOwner || !isTextPostPostingEnabled) return null
+  if (!isOwner) return null
 
   return (
     <Paper

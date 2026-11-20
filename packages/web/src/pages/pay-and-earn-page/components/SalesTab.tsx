@@ -6,9 +6,8 @@ import {
   useSalesCount,
   useCurrentUserId
 } from '@audius/common/api'
-import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
+import { useIsManagedAccount } from '@audius/common/hooks'
 import { USDCPurchaseDetails } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { useUSDCPurchaseDetailsModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Flex, IconMoneyBracket, Text, useTheme } from '@audius/harmony'
@@ -337,9 +336,6 @@ export const SalesTab = ({
   const isMobile = useIsMobile()
   const mainContentRef = useMainContentRef()
   const { color } = useTheme()
-  const { isEnabled: isNetworkCutEnabled } = useFeatureFlag(
-    FeatureFlags.NETWORK_CUT_ENABLED
-  )
 
   const columns = isMobile
     ? (['contentName', 'date', 'value'] as SalesTableColumn[])
@@ -347,20 +343,18 @@ export const SalesTab = ({
 
   return (
     <div className={styles.container}>
-      {isNetworkCutEnabled ? (
-        <Flex gap='s' ph='l' pt='xl' alignItems='center'>
-          <IconMoneyBracket width={16} height={16} fill={color.neutral.n800} />
-          <Text variant='body' size='s' textAlign='left'>
-            {messages.networkSplitExplainer + ' '}
-            <ExternalTextLink
-              to='https://help.audius.co/help/network-fee'
-              variant='visible'
-            >
-              {messages.learnMore}
-            </ExternalTextLink>
-          </Text>
-        </Flex>
-      ) : null}
+      <Flex gap='s' ph='l' pt='xl' alignItems='center'>
+        <IconMoneyBracket width={16} height={16} fill={color.neutral.n800} />
+        <Text variant='body' size='s' textAlign='left'>
+          {messages.networkSplitExplainer + ' '}
+          <ExternalTextLink
+            to='https://help.audius.co/help/network-fee'
+            variant='visible'
+          >
+            {messages.learnMore}
+          </ExternalTextLink>
+        </Text>
+      </Flex>
       {isEmpty ? (
         <NoSales />
       ) : (
