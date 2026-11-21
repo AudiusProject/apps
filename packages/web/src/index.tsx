@@ -1,4 +1,3 @@
-// Handle stale chunk errors after deploys by reloading once
 import 'setimmediate'
 
 import { createRoot } from 'react-dom/client'
@@ -14,7 +13,6 @@ window.addEventListener('vite:preloadError', (event) => {
   const lastReload = sessionStorage.getItem(key)
   const now = Date.now()
 
-  // Only reload if we haven't reloaded in the last 10 seconds
   if (!lastReload || now - Number(lastReload) > 10_000) {
     sessionStorage.setItem(key, String(now))
     window.location.reload()
@@ -24,7 +22,6 @@ window.addEventListener('vite:preloadError', (event) => {
 // @ts-ignore
 window.global ||= window
 
-// Register HMR handler to close the error page when HMR updates fix errors
 registerErrorHmrHandler()
 
 const container = document.getElementById('root')

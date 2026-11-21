@@ -48,13 +48,8 @@ import {
   getHiddenResponsiveColumns
 } from './responsiveColumns'
 
-// - Infinite scroll constants -
-// Fetch the next group of rows when the user scroll within X rows of the bottom
 const FETCH_THRESHOLD = 40
-// Number of rows to fetch in each batch
 const FETCH_BATCH_SIZE = 80
-// Table cells/headers add 12px left + 12px right padding in CSS.
-// Include this chrome in collapse budgeting to avoid clipping before drop.
 const TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH = 24
 
 const getColumnSortLabel = (column: any, headerContent: unknown) => {
@@ -64,7 +59,6 @@ const getColumnSortLabel = (column: any, headerContent: unknown) => {
   return column.id ?? column.accessor ?? 'column'
 }
 
-// Column Sort Functions
 export const numericSorter = (accessor: string) => (rowA: any, rowB: any) => {
   return rowA[accessor] - rowB[accessor]
 }
@@ -89,7 +83,6 @@ export const dateSorter = (accessor: string) => (rowA: any, rowB: any) => {
   return 0
 }
 
-// Used in TracksTable
 const isEmptyRowDefault = (row: any) => {
   return Boolean(!row?.original?.uid || row?.original?.kind === Kind.EMPTY)
 }
@@ -110,7 +103,6 @@ export type TableProps = {
   isPaginated?: boolean
   isReorderable?: boolean
   isTracksTable?: boolean
-  /** Flat, 56px rows styled like Harmony's TrackRow: no card, hover fill, sentence-case header. */
   isDense?: boolean
   isVirtualized?: boolean
   loading?: boolean
@@ -181,7 +173,6 @@ export const Table = ({
   }, [isPaginated, totalRowCount])
   const defaultColumn = useMemo(
     () => ({
-      // Default resizing column props
       minWidth: 64,
       width: 64,
       maxWidth: 200
@@ -189,7 +180,6 @@ export const Table = ({
     []
   )
 
-  // Pagination page
   const [currentPage, setCurrentPage] = useState<number>(0)
   const maxPage = useMemo(() => {
     if (totalRowCount == null) {
@@ -303,11 +293,8 @@ export const Table = ({
   const prevSortValue = useRef<string | null>(null)
   const sortValue = sortBy[0] ? `${sortBy[0].id}${sortBy[0].desc}` : null
 
-  // NOTE: react-table allows for multple sorters, but we are only checking the first here
-  // - This can be updated if we need multiple sorters in the future
   const handleSortChange = useCallback(() => {
     if (isVirtualized && !useLocalSort) {
-      // Virtualized Table -> Pass back the selected column and direction for backend sorting
       if (sortBy.length === 0) return onSort?.('', '')
 
       const sortColumn = columns.find((c) => c.id === sortBy[0].id)
@@ -316,16 +303,13 @@ export const Table = ({
 
       onSort?.(column, order)
     } else {
-      // Non-virtualized table -> Pass back the sorter from the selected column for manual frontend sorting
       let sorter = null
       let sortColumn
       let order = 'ascend'
 
       if (sortBy.length === 0) {
-        // Use defaultSorter if sortBy array is empty
         sorter = defaultSorter
       } else {
-        // Use the sorter from the column
         sortColumn = columns.find((c) => c.id === sortBy[0].id)
         sorter = sortColumn?.sorter
         order = sortBy[0]?.desc ? 'descend' : 'ascend'
@@ -433,7 +417,6 @@ export const Table = ({
       const headers = headerGroup.headers.filter(
         (header) => isColumnVisible(header.id) && !isEndColumn(header.id)
       )
-      // Should only be one or the other
       const endHeaders = headerGroup.headers.filter(
         (header) => isColumnVisible(header.id) && isEndColumn(header.id)
       )
@@ -497,7 +480,6 @@ export const Table = ({
         (cell: Cell) =>
           isColumnVisible(cell.column.id) && !isEndColumn(cell.column.id)
       )
-      // Should only be one or the other
       const endCells = row.cells.filter(
         (cell: Cell) =>
           isColumnVisible(cell.column.id) && isEndColumn(cell.column.id)
@@ -655,7 +637,6 @@ export const Table = ({
       if (isReorderable) {
         return renderReorderableRow(row, key, rowProps)
       }
-      // Cannot drag stream gated tracks
       if (isTracksTable && !isStreamGated) {
         return renderDraggableRow(row, key, rowProps)
       }
@@ -685,7 +666,6 @@ export const Table = ({
       if (isReorderable) {
         return renderReorderableRow(row, row.id, rowProps)
       }
-      // Cannot drag stream gated tracks
       if (isTracksTable && !isStreamGated) {
         return renderDraggableRow(row, row.id, rowProps)
       }
@@ -704,11 +684,6 @@ export const Table = ({
   ])
 
   const loadMoreRows = useCallback(
-    // Await the fetch so InfiniteLoader's in-flight tracking actually
-    // works — without the await the returned promise resolves immediately
-    // and InfiniteLoader will keep firing loadMoreRows in a tight loop
-    // (forceUpdate → still-unloaded-rows → loadMoreRows → repeat) which
-    // cascades through every page of a cursor-based query.
     async ({ startIndex }: { startIndex: number }) => {
       const offset = startIndex
       const limit = fetchBatchSize
@@ -722,7 +697,6 @@ export const Table = ({
     [rows, isEmptyRow]
   )
 
-  // Pagination Functions
   const goToPage = useCallback(
     (page: number) => {
       if (page !== currentPage) setCurrentPage(page)
@@ -857,9 +831,6 @@ export const Table = ({
     isDense
   ])
 
-  // Force the window scroller to update its position
-  // after the DOM has laid out. Also when row count changes (e.g. add/remove track)
-  // so scroll position is preserved.
   const wsRef = useRef<WindowScroller>(null)
   useLayoutEffect(() => {
     wsRef.current?.updatePosition()

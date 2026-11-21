@@ -38,11 +38,6 @@ export const getPercentageComplete = (
   return (stepsCompleted / completionStages.length) * 100
 }
 
-/**
- * ProfileCompletionHeroCard is the hero card that shows the profile completion percentage,
- * the progress meter, and the list of completed stages. It handles its own state management
- * and animations.
- */
 export const ProfileCompletionHeroCard = () => {
   const dispatch = useDispatch()
 

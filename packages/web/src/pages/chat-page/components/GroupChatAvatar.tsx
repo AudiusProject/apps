@@ -5,7 +5,6 @@ import { ProfilePicture } from 'components/notification/Notification/components/
 
 import styles from './GroupChatAvatar.module.css'
 
-/** Two overlapping profile pictures for a group chat. */
 export const GroupChatAvatar = ({ users }: { users: User[] }) => {
   const [first, second] = users
   return (

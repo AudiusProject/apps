@@ -48,13 +48,6 @@ const DISABLE_MODAL_CLOSE_PAGES = new Set([
   WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS
 ])
 
-/** Tracks form errors of interest, only sending events the first time
- * each error occurs on a changed value. For example:
- * 1. User enters invalid address: event fired
- * 2. User changes address and still invalid: no event
- * 3. User changes address and it's now valid: no event
- * 4. User changes address and it's invalid again: event fired
- */
 const TrackFormErrors = ({ currentBalance }: { currentBalance: number }) => {
   const {
     errors: { [ADDRESS]: addressError },

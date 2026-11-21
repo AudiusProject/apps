@@ -1,5 +1,3 @@
-// Explore page SSR - meta tags only
-
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
@@ -18,7 +16,6 @@ type ExplorePageContext = PageContextServer & {
 export default function render(pageContext: ExplorePageContext) {
   const { routeParams, urlPathname } = pageContext
 
-  // Handle /trending/playlists as a special case
   let type = routeParams.type
   if (urlPathname === '/trending/playlists') {
     type = 'trending-playlists'

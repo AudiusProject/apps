@@ -100,14 +100,12 @@ export const QueuePopover = ({
     top: number
     left: number
   } | null>(null)
-  // Keep a render after isVisible flips off so we can play the close animation.
   const [shouldRender, setShouldRender] = useState(isVisible)
 
   useEffect(() => {
     if (isVisible) setShouldRender(true)
   }, [isVisible])
 
-  // Compute the popover's screen position based on the anchor.
   useLayoutEffect(() => {
     if (!isVisible) return
     const el = anchorRef.current
@@ -117,10 +115,8 @@ export const QueuePopover = ({
       POPOVER_HEIGHT,
       Math.floor(window.innerHeight * 0.7)
     )
-    // Anchor: top-right of trigger. Popover: bottom-right.
     let top = rect.top - desiredHeight - POPOVER_GAP
     let left = rect.right - POPOVER_WIDTH
-    // Clamp to viewport.
     if (top < 8) top = 8
     if (left < 8) left = 8
     if (left + POPOVER_WIDTH > window.innerWidth - 8) {
@@ -129,7 +125,6 @@ export const QueuePopover = ({
     setPosition({ top, left })
   }, [isVisible, anchorRef])
 
-  // Click-outside handler.
   useEffect(() => {
     if (!isVisible) return
     const onDocPointerDown = (e: PointerEvent) => {
@@ -142,7 +137,6 @@ export const QueuePopover = ({
     return () => document.removeEventListener('pointerdown', onDocPointerDown)
   }, [isVisible, onClose, anchorRef])
 
-  // Escape closes.
   useEffect(() => {
     if (!isVisible) return
     const onKey = (e: KeyboardEvent) => {
@@ -178,8 +172,6 @@ export const QueuePopover = ({
         zIndex: 20000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 140ms ease-out',
-        // No transform — keeps containing-block semantics for nested
-        // position:fixed children (e.g. the dragged queue row).
         pointerEvents: 'auto'
       }}
     >

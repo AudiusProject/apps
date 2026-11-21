@@ -50,7 +50,6 @@ export const processFiles = (
       handleInvalid(file.name, 'size')
       return null
     }
-    // Check file extension (heuristic for failure)
     if (
       !ALLOWED_AUDIO_FILE_EXTENSIONS.some((ext) =>
         file.name.trim().toLowerCase().endsWith(ext)
@@ -59,13 +58,11 @@ export const processFiles = (
       handleInvalid(file.name, 'type')
       return null
     }
-    // If the mime type is somehow undefined or it doesn't begin with audio/ reject.
-    // Backend will try to match on mime again and if it's not an audio/ match, it'll error
     if (file.type && !file.type.match(ALLOWED_AUDIO_FILE_MIME)) {
       handleInvalid(file.type, 'type')
       return null
     }
-    const title = file.name.replace(/\.[^/.]+$/, '') // strip file extension
+    const title = file.name.replace(/\.[^/.]+$/, '')
     let artwork = { file: null as File | null, url: '' }
     try {
       const tags = await readMediaTags(file)
@@ -78,7 +75,6 @@ export const processFiles = (
         artwork = await createArtwork([artworkFile])
       }
     } catch (error) {
-      // Unable to read tags, but continue on anyways
       console.warn(
         `Unable to parse tags from uploaded track: ${title}\n NOTE: if a picture was attached to the track, it will not be added`,
         error

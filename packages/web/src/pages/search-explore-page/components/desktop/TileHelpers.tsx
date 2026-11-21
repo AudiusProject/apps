@@ -13,7 +13,6 @@ import { useIsMobile } from 'hooks/useIsMobile'
 
 import { DESKTOP_RESPONSIVE_TILE_WIDTH, MOBILE_TILE_WIDTH } from './constants'
 
-// Wrapper component to make tiles playable
 export const PlayableTile = ({
   id,
   index,
@@ -34,7 +33,6 @@ export const PlayableTile = ({
     entries
   })
 
-  // Create lineup-style togglePlay function that TrackTile expects
   const handleTogglePlay = useCallback(
     (trackId: ID) => {
       if (trackId === id) {

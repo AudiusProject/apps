@@ -49,8 +49,6 @@ export const NotificationsButton = ({ size }: NotificationsButtonProps) => {
   })
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useNotificationModal()
-  // Mount the panel on first hover or open. Mounting starts the
-  // notifications fetch, so hovering warms both the code and the data.
   const [shouldMountPanel, setShouldMountPanel] = useState(false)
   if (isOpen && !shouldMountPanel) setShouldMountPanel(true)
   const handleMouseEnter = useCallback(() => setShouldMountPanel(true), [])

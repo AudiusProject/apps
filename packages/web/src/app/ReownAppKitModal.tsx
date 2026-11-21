@@ -29,7 +29,7 @@ export const appkitModal = createAppKit({
   networks,
   projectId,
   themeVariables: {
-    '--w3m-z-index': zIndex.REOWN_APPKIT_MODAL // above ConnectWalletModal
+    '--w3m-z-index': zIndex.REOWN_APPKIT_MODAL
   },
   features: {
     send: false,
@@ -42,7 +42,4 @@ export const appkitModal = createAppKit({
 
 registerLoadedAppKit({ appkitModal, wagmiAdapter })
 
-// Restore a persisted wallet connection. There is no app-wide WagmiProvider
-// (whose Hydrate used to do this), and reconnect is a no-op if one is already
-// in progress.
 reconnect(wagmiAdapter.wagmiConfig)

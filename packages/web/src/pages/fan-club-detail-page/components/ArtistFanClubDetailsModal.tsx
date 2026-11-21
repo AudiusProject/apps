@@ -39,17 +39,8 @@ import { LAUNCHPAD_COIN_DESCRIPTION } from '../../fan-clubs-launchpad-page/const
 const { fanClubDetails, overflowMenu } = coinDetailsMessages
 
 type ArtistFanClubDetailsModalProps = {
-  /**
-   * Whether the modal is open
-   */
   isOpen: boolean
-  /**
-   * Callback to close the modal
-   */
   onClose: () => void
-  /**
-   * The mint address of the fan club
-   */
   mint: string
 }
 

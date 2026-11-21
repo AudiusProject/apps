@@ -213,7 +213,6 @@ const ProfileHeader = ({
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // Fan club detection
   const { data: fanClub, isPending: isFanClubLoading } =
     useArtistCreatedFanClub(userId)
 
@@ -236,8 +235,6 @@ const ProfileHeader = ({
     if (win) win.focus()
   }
 
-  // If we're not loading, we know that
-  // nullable fields such as userId are valid.
   if (loading) {
     return <LoadingProfileHeader />
   }

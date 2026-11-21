@@ -9,27 +9,6 @@ type PreloadableLazyComponent<T extends ComponentType<any>> =
     preload: () => Promise<{ default: T }>
   }
 
-/**
- * Wraps a component with a lazy import and attaches a method `preload` which will
- * trigger preloading.
- * Example:
- * ```
- *  // Loads on command
- *  const MyComponent = lazyWithPreload(
- *    () => import("./MyComponent")
- *  )
- *  MyComponent.preload()
- *  return <MyComponent>
- *
- *  // Waits to load
- *  const MyComponent = lazyWithPreload(
- *    () => import("./MyComponent"),
- *    100
- *  )
- *  // 100ms later the component's js is loaded regardless of when it's rendered
- *  return <MyComponent>
- * ```
- */
 export default function lazyWithPreload<T extends ComponentType<any>>(
   factory: PreloadFactory<T>,
   delay?: number

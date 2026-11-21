@@ -42,13 +42,6 @@ export const useGoToEntity = (
       event.stopPropagation()
       event.preventDefault()
       const trackLink = getEntityLink(entity)
-      // Comment notifications on a remix-contest event resolve their
-      // entity to the underlying track (see useNotificationEntity), so
-      // `getEntityLink` returns the track permalink. Rewrite the path to
-      // `/<handle>/contest/<slug>` so the click lands on the contest
-      // page instead of the parent track page. The Track-permalink
-      // shape is `/handle/track-slug`; we splice `/contest` after the
-      // first segment.
       const link =
         entityType === Entity.Event
           ? trackLink.replace(/^\/([^/]+)\/(.+)$/, '/$1/contest/$2')

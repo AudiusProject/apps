@@ -15,13 +15,13 @@ export type DragnDropState = {
   dragging: boolean
   isOwner?: boolean
   kind?: DragDropKind
-  id?: ID | string // Entity id or folder id
+  id?: ID | string
   index?: number
 }
 
 type DragAction = PayloadAction<{
   kind: DragDropKind
-  id: ID | string // Entity id or folder id
+  id: ID | string
   index?: number
   isOwner?: boolean
 }>

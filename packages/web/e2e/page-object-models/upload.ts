@@ -22,16 +22,15 @@ class BaseTrackEditPage {
     this.genreBox = page.getByRole('combobox', { name: /pick a genre/i })
     this.genreList = page
       .getByLabel(/pick a genre/i)
-      .locator('.rc-virtual-list') // ant-d uses a virtualized list
+      .locator('.rc-virtual-list')
     this.moodBox = page.getByRole('combobox', { name: /pick a mood/i })
-    this.moodList = page.getByLabel(/pick a mood/i).locator('.rc-virtual-list') // ant-d uses a virtualized list
+    this.moodList = page.getByLabel(/pick a mood/i).locator('.rc-virtual-list')
     this.tagsInput = page.getByRole('textbox', { name: /tags/i })
     this.descriptionInput = page.getByRole('textbox', { name: /description/i })
     this.completeButton = page.getByRole('button', { name: /complete upload/i })
   }
 
   async setArtwork(file: string) {
-    // Remove existing artwork first if applicable
     await expect(this.artworkButton).toBeVisible()
     if (await this.artworkButton.filter({ hasText: 'remove' }).isVisible()) {
       await this.artworkButton.click()
@@ -158,7 +157,6 @@ export class EditPlaylistPage extends BaseTrackEditPage {
     }
   ) {
     const trackItem = this.trackList.getByRole('listitem').nth(index)
-    // TODO: This feature is being reworked, this no longer exists
     const checkbox = trackItem.getByRole('checkbox', {
       name: /override details for this track/i
     })
@@ -185,7 +183,7 @@ export class EditPlaylistPage extends BaseTrackEditPage {
     const genreList = genreBox
       .page()
       .getByLabel(/pick a genre/i)
-      .locator('.rc-virtual-list') // ant-d uses a virtualized list
+      .locator('.rc-virtual-list')
     await genreBox.fill(genre)
     await genreList.getByRole('option', { name: genre }).click()
   }
@@ -196,7 +194,7 @@ export class EditPlaylistPage extends BaseTrackEditPage {
     const moodList = moodBox
       .page()
       .getByLabel(/pick a mood/i)
-      .locator('.rc-virtual-list') // ant-d uses a virtualized list
+      .locator('.rc-virtual-list')
     await moodBox.fill(mood)
     await moodList.getByRole('option', { name: mood }).click()
   }
@@ -329,10 +327,8 @@ export class UploadFinishPage {
   }
 
   async assertCompletes() {
-    // Assert uploading
     await expect(this.uploadingHeading).toBeVisible()
 
-    // Assert progress
     await this.assertProgress(1)
     await this.assertProgress(10)
     await this.assertProgress(20)
@@ -345,10 +341,8 @@ export class UploadFinishPage {
     await this.assertProgress(90)
     await this.assertProgress(99)
 
-    // Assert finalizing
     await expect(this.finalizing).toBeVisible({ timeout: 60 * 1000 })
 
-    // Assert success
     await expect(this.successHeading).toBeVisible({ timeout: 60 * 1000 })
   }
 

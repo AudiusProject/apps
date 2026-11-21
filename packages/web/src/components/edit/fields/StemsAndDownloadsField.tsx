@@ -79,11 +79,6 @@ export const StemsAndDownloadsField = (props: StemsAndDownloadsFieldProps) => {
   const [{ value: isOwnedByUser }, , { setValue: setIsOwnedByUser }] =
     useTrackField<boolean>(IS_OWNED_BY_USER)
 
-  /**
-   * Download conditions from inside the modal.
-   * Upon submit, these values along with the selected access option will
-   * determine the final download conditions that get saved to the track.
-   */
   const { data: accountUserId } = useCurrentUserId()
   const tempDownloadConditions = useMemo(
     () => ({
@@ -161,8 +156,6 @@ export const StemsAndDownloadsField = (props: StemsAndDownloadsFieldProps) => {
         })
       }
 
-      // If download does not inherit from stream conditions,
-      // extract the correct download conditions based on the selected availability type.
       if (!streamConditions) {
         setIsDownloadGated(false)
         setDownloadConditions(null)
@@ -244,7 +237,6 @@ export const StemsAndDownloadsField = (props: StemsAndDownloadsFieldProps) => {
       typeof value === 'string' ? value : value.label
     const groupedValues = groupBy(values, getLabel)
 
-    // Convert grouped values into array with counts
     const displayValues = Object.entries(groupedValues).map(
       ([label, items]) => {
         const originalValue = items[0]
@@ -257,7 +249,6 @@ export const StemsAndDownloadsField = (props: StemsAndDownloadsFieldProps) => {
           }
         }
 
-        // Check if this value is a stem category by checking if it exists in the stems array
         const isStemCategory = stemsCategories.includes(label)
         return isStemCategory ? `${label} (${count})` : label
       }

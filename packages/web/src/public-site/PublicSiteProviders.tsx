@@ -14,10 +14,6 @@ type PublicSiteProvidersProps = {
   children: ReactNode
 }
 
-/**
- * Provides QueryClient and QueryContext (via AudiusQueryProvider) so that
- * landing page sections can use useExploreContent, useFeaturedProfiles, etc.
- */
 export const PublicSiteProviders = (props: PublicSiteProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>

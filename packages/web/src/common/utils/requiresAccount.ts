@@ -11,14 +11,8 @@ import { push as pushRoute } from 'utils/navigation'
 
 const { SIGN_UP_PAGE } = route
 
-/**
- * Checks if the user is signed in with an account.
- * If they are signed in, `fn` is invoked, otherwise, the
- * user is directed to the sign-up page.
- */
 export function requiresAccount<TArgs extends any[], TReturn>(
   fn: (...args: TArgs) => TReturn,
-  // optional route to go to on closing the sign up page/modal
   route?: string
 ) {
   return function* (...args: TArgs) {

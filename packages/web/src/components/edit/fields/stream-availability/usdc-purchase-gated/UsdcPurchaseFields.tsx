@@ -39,7 +39,6 @@ const messages = {
       label: 'Cost to Unlock',
       placeholder: '1.00'
     },
-    // Album purchase flow
     albumPrice: {
       title: 'Set Album Price',
       description: 'The price to unlock the entire album (min $1)',
@@ -175,15 +174,11 @@ const PriceField = (props: PriceFieldProps) => {
   const [humanizedValue, setHumanizedValue] = useState<string | null>(
     value
       ? decimalIntegerToHumanReadable(value)
-      : // Use prefilled value if set
-        prefillValue !== undefined
+      : prefillValue !== undefined
         ? decimalIntegerToHumanReadable(prefillValue)
         : null
   )
 
-  // This logic is a bit of a hack to set an initial value once in the Formik field (when a prefilled value is desired)
-  // This could have lived elsewhere (i.e. initialValues or onChange higher up),
-  // but it made sense to colocate here since we also had to set up workaround logic to work with the "setHumanizedValue" state
   const [hasSetInitialValue, setHasSetInitialValue] = useState(false)
   useEffect(() => {
     if (
@@ -213,8 +208,6 @@ const PriceField = (props: PriceFieldProps) => {
   const handlePriceBlur: FocusEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       if (humanizedValue === null && !e.target.value) {
-        // Do nothing if there is no value set and the user just loses focus
-
         return
       }
       setHumanizedValue(padDecimalValue(e.target.value))

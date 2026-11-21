@@ -26,8 +26,6 @@ const FROM_POSITION = -20
 const ENTER_POSITION = 20
 const TOAST_SPACING = 40
 
-// Interpolates the index of a toast in the list of visible
-// toasts to a valid Y index into [FROM_POSITION, index * toast spacing + ENTER_POSITION]
 const interp = (i: number) => (y: number) =>
   y === FROM_POSITION
     ? `translate3d(-50%,${y}px,0)`

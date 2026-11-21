@@ -27,7 +27,6 @@ type ActionSheetModalProps = {
   zIndex?: number
 }
 
-// `ActionDrawer` is a drawer that presents a list of clickable rows with text
 const ActionDrawer = ({
   id,
   didSelectRow,

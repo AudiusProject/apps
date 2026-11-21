@@ -73,14 +73,12 @@ export const AdvancedWalletDetails = () => {
 
   useEffect(() => {
     const fetchKeypair = async () => {
-      // Fetch Solana wallet details
       const solanaKeypair = await solanaWalletService.getKeypair()
       if (solanaKeypair) {
         setSolanaPublicKey(solanaKeypair.publicKey.toString())
         setSolanaEncodedPrivateKey(pkg.encode(solanaKeypair.secretKey))
       }
 
-      // Fetch Ethereum wallet details
       const hedgehogWallet = authService.getWallet()
       if (hedgehogWallet) {
         setEthAddress(hedgehogWallet.getAddressString())

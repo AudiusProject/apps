@@ -7,9 +7,6 @@ import { isElectron } from 'utils/clientUtil'
 
 import { env } from '../env'
 
-/**
- * audiusBackend initialized for a web environment
- */
 export const audiusBackendInstance = audiusBackend({
   claimDistributionContractAddress:
     env.CLAIM_DISTRIBUTION_CONTRACT_ADDRESS ?? undefined,

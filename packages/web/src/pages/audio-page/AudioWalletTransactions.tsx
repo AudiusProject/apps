@@ -88,7 +88,6 @@ export const AudioWalletTransactions = () => {
     { refetchOnMount: 'always' }
   )
 
-  // Defaults: sort method = date, sort direction = desc
   const onSort = useCallback(
     (sortMethodInner: string, sortDirectionInner: string) => {
       const sortMethodRes =

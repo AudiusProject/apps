@@ -9,11 +9,6 @@ const SSR = true
 const DEBUG = false
 const BROWSER_CACHE_TTL_SECONDS = 60 * 60 * 24
 
-/**
- * Valid Cache-Control values for static files. Hashed Vite assets under /assets
- * should be cached long-term; previously a numeric value was set, which is not
- * a valid header and led to "no cache" in Lighthouse / PSI.
- */
 function cacheControlForPathname(pathname) {
   if (pathname.startsWith('/assets/') || pathname.startsWith('/scripts/')) {
     return 'public, max-age=31536000, immutable'
@@ -114,7 +109,6 @@ async function getMetadata(pathname, apiEndpoint) {
     }
     const json = await res.json()
     const data = json.data
-    // User-by-handle returns a single object; tracks/playlists return arrays
     if (route.name === 'user') {
       if (data == null || Array.isArray(data) || typeof data !== 'object') {
         return { metadata: null, name: null }
@@ -162,7 +156,6 @@ class SEOHandlerHead {
     )
 
     if (!metadata || !name || !metadata.data) {
-      // We didn't parse this to anything we have custom tags for, so just return the default tags
       const baseUrl = `https://${self.host}`
       const schemaLd = JSON.stringify({
         '@context': 'https://schema.org',
@@ -226,7 +219,7 @@ class SEOHandlerHead {
             name: "I'm a record label. What can I do on Audius?",
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Record labels on Audius actively showcase their roster\'s music, discover artists, and create a community around their brand. They host remix contests, stay connected to emerging scenes, and build the momentum needed to support their releases everywhere else. Like artists, successful labels consistently engage, activate, and connect with their audience.'
+              text: "Record labels on Audius actively showcase their roster's music, discover artists, and create a community around their brand. They host remix contests, stay connected to emerging scenes, and build the momentum needed to support their releases everywhere else. Like artists, successful labels consistently engage, activate, and connect with their audience."
             }
           },
           {
@@ -258,7 +251,7 @@ class SEOHandlerHead {
             name: 'I just love music. What can I do on Audius?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Music lovers on Audius keep the culture alive. They play a vital role in directly engaging, amplifying, and creating opportunities for artists to grow in their scene. While some just love the music, many professionally run collectives, promote events, and use the platform to expand what they\'re already building.'
+              text: "Music lovers on Audius keep the culture alive. They play a vital role in directly engaging, amplifying, and creating opportunities for artists to grow in their scene. While some just love the music, many professionally run collectives, promote events, and use the platform to expand what they're already building."
             }
           },
           {
@@ -266,7 +259,7 @@ class SEOHandlerHead {
             name: 'How do I sign up for Audius?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Visit audius.co/signup, enter your email address, create a password, choose a unique handle (which cannot be changed later), set your display name, optionally select favorite genres and follow artists to personalize your feed. You\'ll land directly in Audius ready to explore music and build your profile.'
+              text: "Visit audius.co/signup, enter your email address, create a password, choose a unique handle (which cannot be changed later), set your display name, optionally select favorite genres and follow artists to personalize your feed. You'll land directly in Audius ready to explore music and build your profile."
             }
           }
         ]
@@ -361,7 +354,6 @@ class SEOHandlerHead {
 }
 
 async function getOEmbedResponse(url, apiEndpoint) {
-  // Parse the URL query parameter to get the resource URL pathname
   const params = new URLSearchParams(url.search)
   const oembedUrl = params.get('url')
   if (!oembedUrl) {
@@ -369,19 +361,15 @@ async function getOEmbedResponse(url, apiEndpoint) {
   }
   const pathname = new URL(oembedUrl).pathname
 
-  // Get the metadata from the pathname
   const { metadata, name: entityType } = await getMetadata(
     pathname,
     apiEndpoint
   )
 
-  // Ensure https
   const host = 'https://' + url.host
 
-  // Playlist endoint is returning an array of playlists, so we need to handle that
   const data = Array.isArray(metadata.data) ? metadata.data[0] : metadata.data
 
-  // Construct an embed player for tracks, playlists, and albums
   if (entityType !== 'user') {
     const title = `${data.title || data.playlist_name} by ${data.user.name} • Audius`
     const embed = `<iframe src="${host}/embed/${entityType}/${data.id}?flavor=card" width="100%" height="480" allow="encrypted-media" style="border: none;"></iframe>`
@@ -412,7 +400,6 @@ async function getOEmbedResponse(url, apiEndpoint) {
     )
   }
 
-  // For user, return a simple link with thumbnail
   const userDisplayName =
     (data.name && String(data.name).trim()) || data.handle || 'Artist'
   const title = `${userDisplayName} • Audius`
@@ -483,7 +470,6 @@ async function handleEvent(request, env, ctx) {
 
   try {
     if (DEBUG) {
-      // customize caching
       options.cacheControl = {
         bypassCache: true
       }
@@ -493,11 +479,8 @@ async function handleEvent(request, env, ctx) {
       pathname === '/.well-known/apple-app-site-association' ||
       pathname === '/apple-app-site-association'
     if (isAppleAppSiteAssociation) {
-      // Cloudflare's asset handler treats extensionless paths as directories and
-      // attempts to fetch `index.html`. Use a custom mapper that bypasses this.
       const aasaOptions = {
         mapRequestToAsset: (req) => {
-          // Return request with exact path, preventing index.html lookup
           const url = new URL(req.url)
           url.pathname = '/.well-known/apple-app-site-association'
           return new Request(url.toString(), req)
@@ -506,21 +489,16 @@ async function handleEvent(request, env, ctx) {
       const asset = await getAsset(request, env, ctx, aasaOptions)
       const response = new Response(asset.body, asset)
       response.headers.set('Content-Type', 'application/json')
-      response.headers.set(
-        'cache-control',
-        cacheControlForPathname(pathname)
-      )
+      response.headers.set('cache-control', cacheControlForPathname(pathname))
       response.headers.set('Access-Control-Allow-Origin', '*')
       return response
     }
 
-    // For now, only SSR for crawlers
     if (SSR && isCrawler(userAgent)) {
       const ssrResponse = await env.SSR.fetch(request.clone())
       return ssrResponse
     } else {
       if (!isAssetUrl(request.url)) {
-        // Map all non-asset requests to the root path
         options.mapRequestToAsset = (request) => {
           const url = new URL(request.url)
           url.pathname = `/`
@@ -538,16 +516,11 @@ async function handleEvent(request, env, ctx) {
       } else {
         const asset = await getAsset(request, env, ctx, options)
 
-        // Adjust browser cache on assets that don't change frequently and/or
-        // are given unique hashes when they do.
         const response = new Response(asset.body, asset)
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
         response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.set(
-          'cache-control',
-          cacheControlForPathname(pathname)
-        )
+        response.headers.set('cache-control', cacheControlForPathname(pathname))
 
         return response
       }

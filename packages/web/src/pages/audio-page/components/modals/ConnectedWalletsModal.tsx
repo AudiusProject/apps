@@ -126,7 +126,6 @@ export const ConnectedWalletsModal = NiceModal.create(() => {
   const isConnectDisabled =
     hasReachedLimit || isMutationPending || isConnectingWallets
 
-  // Not supported on mobile web
   const isMobile = useIsMobile()
   if (isMobile) {
     return (

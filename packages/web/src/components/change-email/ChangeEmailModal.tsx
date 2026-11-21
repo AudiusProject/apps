@@ -63,7 +63,6 @@ const ResendCodeLink = () => {
 
   const handleClick = useCallback(async () => {
     setIsSending(true)
-    // Try to confirm without OTP to force OTP refresh
     try {
       await identityService.changeEmail({
         email
@@ -88,7 +87,6 @@ const ResendCodeLink = () => {
 const CurrentEmail = () => {
   const [{ value: oldEmail }, , { setValue: setOldEmail }] =
     useField('oldEmail')
-  // Load the email for the user
   const emailRequest = useAsync(async () => {
     return await identityService.getUserEmail()
   })

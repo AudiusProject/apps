@@ -118,8 +118,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
 
   const usdcPurchaseConfig = useUSDCPurchaseConfig()
 
-  // For edit flows we need to track initial stream conditions from the parent form (not from inside contextual menu)
-  // So we take this from the parent form and pass it down to the menu fields
   const { initialValues: parentFormInitialValues } = useFormikContext<
     EditCollectionValues | CollectionValues | TrackEditFormValues
   >()
@@ -130,7 +128,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
         ? parentFormInitialValues.trackMetadatas[index].stream_conditions
         : undefined
 
-  // Fields from the outer form
   const [{ value: isUnlisted }, , { setValue: setIsUnlistedValue }] =
     useTrackField<boolean>(isHiddenFieldName)
   const [{ value: isScheduledRelease }, ,] =
@@ -182,11 +179,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
 
   const isRemix = !isEmpty(remixOfValue?.tracks)
 
-  /**
-   * Stream conditions from inside the modal.
-   * Upon submit, these values along with the selected access option will
-   * determine the final stream conditions that get saved to the track.
-   */
   const { data: accountUserId } = useCurrentUserId()
   const tempStreamConditions = useMemo(
     () => ({
@@ -270,10 +262,8 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       setStreamConditionsValue(null)
       setPreviewValue(undefined)
 
-      // For gated options, extract the correct stream conditions based on the selected availability type
       switch (availabilityType) {
         case StreamTrackAvailabilityType.USDC_PURCHASE: {
-          // type cast because the object is fully formed in saga (validated + added splits)
           const albumTrackPriceValue = (
             streamConditions as USDCPurchaseConditions
           ).usdc_purchase.albumTrackPrice
@@ -346,7 +336,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
           break
         }
         case StreamTrackAvailabilityType.PUBLIC: {
-          // TODO - KJ: See if we need to clear the download conditions when going back to public from token gated
           setIsUnlistedValue(false)
           if (lastGateKeeper.access === 'accessAndSale') {
             setIsDownloadGated(false)

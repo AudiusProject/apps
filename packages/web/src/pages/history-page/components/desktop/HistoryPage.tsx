@@ -60,7 +60,6 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
   const mainContentRef = useMainContentRef()
   const navigate = useNavigate()
 
-  // Filter state
   const [filterText, setFilterText] = useState('')
   const onFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setFilterText(e.target.value)

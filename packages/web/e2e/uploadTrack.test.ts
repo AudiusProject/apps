@@ -37,10 +37,8 @@ test('should upload a track', async ({ page }) => {
   const uploadingPage = new UploadFinishPage(page, 'Track')
   await uploadingPage.assertCompletes()
 
-  // Vist track page
   await page.getByRole('link', { name: /visit track page/i }).click()
 
-  // Assert title
   const trackHeading = page.getByRole('heading', {
     name: trackTitle,
     level: 1
@@ -48,8 +46,6 @@ test('should upload a track', async ({ page }) => {
   await expect(trackHeading).toBeVisible()
 })
 
-// TODO: re-enable if we decide it's critical path
-// https://linear.app/audius/issue/INF-703/re-enable-uploadtracktestts-advanced-test-cases
 test('should upload a remix hidden track', async ({ page }) => {
   const { title, permalink } = getTrack()
   const trackTitle = `Test track ${Date.now()}`
@@ -89,7 +85,6 @@ test('should upload a remix hidden track', async ({ page }) => {
   await editPage.openPriceAndAudienceSettings()
   const priceAndAudienceModal = new TrackPriceAndAudienceModal(page)
   expect(priceAndAudienceModal.remixAlert).toBeVisible()
-  // Only public is allowed for remixes
   await expect(
     priceAndAudienceModal.locator.getByRole('radio', { disabled: false })
   ).toHaveCount(1)
@@ -114,42 +109,34 @@ test('should upload a remix hidden track', async ({ page }) => {
   const uploadingPage = new UploadFinishPage(page, 'Track')
   await uploadingPage.assertCompletes()
 
-  // Vist track page
   await page.getByRole('link', { name: /visit track page/i }).click()
 
-  // Assert title
   const trackHeading = page.getByRole('heading', {
     name: trackTitle,
     level: 1
   })
   await expect(trackHeading).toBeVisible()
 
-  // Assert hidden
   const makePublicButton = page.getByRole('button', { name: /make public/i })
   await expect(makePublicButton.first()).toBeVisible()
 
-  // Assert tagged
   const tag1 = page.getByRole('link', { name: tags[0] })
   await expect(tag1).toBeVisible()
   const tag2 = page.getByRole('link', { name: tags[1] })
   await expect(tag1).toBeVisible()
   await expect(tag2).toBeVisible()
 
-  // Assert description
   const description = page.getByRole('heading', {
     name: trackDescription,
     level: 3
   })
   await expect(description).toBeVisible()
 
-  // Assert genre and mood
   await expect(page.getByRole('link', { name: genre })).toBeVisible()
   await expect(page.getByRole('link', { name: mood })).toBeVisible()
 
-  // Assert shareable
   await expect(page.getByRole('button', { name: /share/i })).toBeVisible()
 
-  // Assert remix
   await expect(page.getByText('ORIGINAL TRACK')).toBeVisible()
   await expect(page.getByRole('link', { name: remixName })).toBeVisible()
 
@@ -191,29 +178,24 @@ test('should upload a premium track', async ({ page, browser }) => {
   const uploadingPage = new UploadFinishPage(page, 'Track')
   await uploadingPage.assertCompletes()
 
-  // Vist track page
   await page.getByRole('link', { name: /visit track page/i }).click()
 
-  // Assert title
   const trackHeading = page.getByRole('heading', {
     name: trackTitle,
     level: 1
   })
   await expect(trackHeading).toBeVisible()
 
-  // Assert premium
   const premium = page.getByRole('heading', {
     name: /premium track/i,
     level: 5
   })
   await expect(premium.first()).toBeVisible()
 
-  // Assert price
   await expect(page.getByText('$' + price)).toBeVisible()
 
   const trackUrl = page.url()
 
-  // Open the tracks in a new browser to ensure the premium track page looks as expected to non-owners
   const newPage = await openCleanBrowser({ browser })
   const buyButton = newPage.getByRole('button', { name: /buy/i })
   newPage.goto(trackUrl)
@@ -251,17 +233,14 @@ test('should upload a track with free stems', async ({ page }) => {
   const uploadingPage = new UploadFinishPage(page, 'Track')
   await uploadingPage.assertCompletes()
 
-  // Vist track page
   await page.getByRole('link', { name: /visit track page/i }).click()
 
-  // Assert title
   const trackHeading = page.getByRole('heading', {
     name: trackTitle,
     level: 1
   })
   await expect(trackHeading).toBeVisible()
 
-  // Assert Stems & Downloads
   await page.getByRole('button', { name: /stems & downloads/i }).click()
   const fullTrackRow = page.getByRole('row').filter({ hasText: /full track/i })
   const instrumentalRow = page

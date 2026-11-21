@@ -28,11 +28,6 @@ const defaultHiddenFields = {
   // REMIXES handled by a separate field
 }
 
-/**
- * Seeds the edit form for one track. EditTrackForm uses enableReinitialize and
- * formState.tracks is updated on every submit, so this must only read from
- * track.metadata (any initialMetadata seed is applied when the track is added).
- */
 export const getTrackEditInitialMetadata = (
   metadata: TrackMetadataForUpload
 ): SingleTrackEditValues =>

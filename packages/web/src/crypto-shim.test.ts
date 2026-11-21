@@ -15,7 +15,6 @@ describe('crypto-shim', () => {
   it('fills sizes above the getRandomValues limit', () => {
     const buf = randomBytes(65536 * 2 + 10)!
     expect(buf).toHaveLength(65536 * 2 + 10)
-    // The tail chunk is filled too
     expect(buf.subarray(65536 * 2).some((b) => b !== 0)).toBe(true)
   })
 

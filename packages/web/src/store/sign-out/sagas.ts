@@ -19,19 +19,14 @@ function* watchSignOut() {
   yield takeLatest(
     signOutAction.type,
     function* (action: ReturnType<typeof signOutAction>) {
-      // If AppKit never loaded there is no wallet connection to disconnect.
       const wagmiConfig = getLoadedAppKit()?.wagmiAdapter.wagmiConfig
       if (wagmiConfig && wagmiConfig.state.status === 'connected') {
-        // Already loaded along with AppKit
         const { disconnect } = yield call(() => import('@wagmi/core'))
         yield call(disconnect, wagmiConfig)
       }
       yield put(resetAccount())
-      // NOTE: Weird workaround here - queryClient.clear() is necessary to delete all of the cache
-      // HOWEVER, this does NOT trigger a rerender on any active queries.
-      // So we need to call resetQueries() to trigger a rerender and then clear the cache.
       queryClient.resetQueries()
-      queryClient.clear() // ORDER MATTERS HERE - clear() must be called after resetQueries()
+      queryClient.clear()
       yield put(unsubscribeBrowserPushNotifications())
       signOut(localStorage, authService)
       if (!action?.payload?.fromOAuth) {

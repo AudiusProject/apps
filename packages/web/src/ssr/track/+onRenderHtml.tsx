@@ -52,22 +52,15 @@ export default function render(pageContext: TrackPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
-  // Non-streamable tracks render as a 404 with no track metadata. `=== false`
-  // because older responses omit the field.
   const isUnavailable = track?.is_streamable === false
 
-  // Check if this request can show an embed player (Twitter/Discord bots)
-  // Don't show embed for comment pages
   const shouldEmbed =
     canEmbed(userAgent) && !is_stream_gated && !commentData && !isUnavailable
 
-  // Create a fresh cache instance for this SSR request
-  // This ensures the theme context is properly connected
   const cache = createCache({ key: 'harmony', prepend: true })
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  // Build meta tags - use comment-specific if we have comment data
   let seoMetadata
   if (isUnavailable) {
     seoMetadata = getNotFoundContext()
@@ -100,13 +93,10 @@ export default function render(pageContext: TrackPageContext) {
     })
   }
 
-  // Generate embed and app URLs
   const embedUrl = getEmbedUrl('track', id)
   const appUrl = getAppUrl(urlPathname)
   const webUrl = getWebUrl(urlPathname)
 
-  // Discord uses a weird aspect ratio for OG unfurls, so serve artwork
-  // directly instead of the custom OG image
   const discordBot = isDiscord(userAgent)
   const discordImageOverride =
     discordBot && !isUnavailable

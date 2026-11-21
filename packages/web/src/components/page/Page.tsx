@@ -13,7 +13,6 @@ import styles from './Page.module.css'
 
 const HEADER_MARGIN_PX = 32
 
-// Responsible for positioning the header
 type HeaderContainerProps = Pick<
   PageProps,
   | 'header'
@@ -81,15 +80,9 @@ type PageProps = {
   disableHeaderFrosted?: boolean
   frostedHeaderContainer?: boolean
 
-  // There are some pages which don't have a fixed header but still display
-  // a search bar that scrolls with the page.
   scrollableSearch?: boolean
   children?: ReactNode
   showSearch?: boolean
-  /**
-   * Optional title for meta tags/OG tags. If provided, this will be used
-   * for browser tab and social sharing instead of the `title` prop.
-   */
   ogTitle?: string
 } & MetaTagsProps
 

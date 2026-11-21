@@ -1,11 +1,3 @@
-/**
- * This worker handles SSR
- *
- * It's separate from the main worker because the app bundle is heavy
- * and causes slow cold starts. This way we can conditionally do SSR
- * and avoid cold starts in the general case.
- */
-
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler'
 // eslint-disable-next-line import/no-unresolved
 import manifestJSON from '__STATIC_CONTENT_MANIFEST'
@@ -38,7 +30,6 @@ export default {
 
 async function handleRequest(request, env, ctx) {
   if (!isAssetUrl(request.url)) {
-    // Convert request headers to a plain object for Vike
     const headers = {}
     request.headers.forEach((value, key) => {
       headers[key.toLowerCase()] = value
@@ -56,8 +47,6 @@ async function handleRequest(request, env, ctx) {
       throw new Error(pageContext.errorWhileRendering)
     } else {
       const { statusCode: status, headers } = httpResponse
-      // httpResponse.body can be a string or ReadableStream
-      // Use getBody() if available, otherwise use body directly
       const body =
         typeof httpResponse.getBody === 'function'
           ? await httpResponse.getBody()

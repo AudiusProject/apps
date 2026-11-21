@@ -49,7 +49,6 @@ import signOutSagas from 'store/sign-out/sagas'
 
 export default function* rootSaga() {
   const sagas = ([] as (() => Generator<any, void, any>)[]).concat(
-    // Config
     analyticsSagas(),
     webAnalyticsSagas(),
     backendSagas(),
@@ -58,11 +57,9 @@ export default function* rootSaga() {
     reachabilitySagas(),
     routingSagas(),
 
-    // Account
     accountSagas(),
     signOutSagas(),
 
-    // Pages
     collectionSagas(),
     chatSagas(),
     passwordResetSagas(),
@@ -76,17 +73,13 @@ export default function* rootSaga() {
     modalsSagas(),
     niceModalBridgeSagas(),
 
-    // Cache
     collectionsSagas(),
     savedCollectionsSagas(),
 
-    // Playback
     playbackEngineSagas(),
 
-    // Cast
     castSagas(),
 
-    // Application
     addToCollectionSagas(),
     chatWebSagas(),
     deactivateAccountSagas(),
@@ -103,16 +96,13 @@ export default function* rootSaga() {
     userListModalSagas(),
     commonReachabilitySagas(),
 
-    // Gated content
     gatedContentSagas(),
     buyUSDCSagas(),
     purchaseContentSagas(),
     withdrawUSDCSagas(),
 
-    // Error
     errorSagas(),
 
-    // Version refresh
     reloadSagas()
   )
   yield* all(sagas.map((saga) => spawn(sagaWithErrorHandler, saga)))
@@ -120,75 +110,17 @@ export default function* rootSaga() {
 
 export function* testRootSaga() {
   const sagas = ([] as (() => Generator<any, void, any>)[]).concat(
-    // Config
     backendSagas(),
     confirmerSagas(),
     routingSagas(),
 
-    // Account
-    // accountSagas(),
-    // playlistUpdatesSagas(),
-    // recoveryEmailSagas(),
-    // signOutSagas(),
-
-    // Pages
-    // collectionSagas(),
-    // chatSagas(),
-    // historySagas(),
-    // passwordResetSagas(),
     profileSagas(),
-    // reactionSagas(),
-    // rewardsPageSagas(),
-    // savedSagas(),
-    // searchResultsSagas(),
-    // settingsSagas(),
-    // signOnSaga(),
-    // socialSagas(),
-    // trackPageSagas(),
-    // trendingPageSagas(),
-    // trendingUndergroundSagas(),
-    // uploadSagas(),
-    // premiumTracksSagas(),
 
     modalsSagas(),
 
-    // Cache
     collectionsSagas(),
     savedCollectionsSagas(),
 
-    // Application
-    // addToCollectionSagas(),
-    // buyAudioSagas(),
-    // chatWebSagas(),
-    // deactivateAccountSagas(),
-    // deletedSagas(),
-    // deletePlaylistConfirmationModalSagas(),
-    // duplicateAddConfirmationModalSagas(),
-    // firstUploadModalSagas(),
-    // remixesSagas(),
-    // scrollLockSagas(),
-    // shareModalSagas(),
-    // stripeModalSagas(),
-    // overflowMenuSagas(),
-    // toastSagas(),
-
-    // stemUploadSagas(),
-    // userListModalSagas(),
-    // commonReachabilitySagas(),
-
-    // Remote config
-    // remoteConfigSagas(),
-
-    // Tipping
-    // tippingSagas(),
-
-    // Gated content
-    // gatedContentSagas(),
-    // buyUSDCSagas(),
-    // purchaseContentSagas(),
-    // withdrawUSDCSagas(),
-
-    // Error
     errorSagas()
 
     // Version refresh

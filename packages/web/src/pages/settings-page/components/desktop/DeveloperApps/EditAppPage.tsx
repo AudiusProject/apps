@@ -81,7 +81,6 @@ const ImageField = ({ name }: { name: string }) => {
   )
 }
 
-/** Active bearer tokens: from params.bearerToken (post-creation) or params.api_access_keys */
 const getBearerTokens = (params: EditAppPageProps['params']) => {
   if (!params) return []
   const { bearerToken, api_access_keys } = params
@@ -106,7 +105,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
   const deactivateAccessKey = useDeactivateDeveloperAppAccessKey()
   const createAccessKey = useCreateDeveloperAppAccessKey()
 
-  // Sync bearer tokens when params change (e.g. navigating to different app)
   useEffect(() => {
     setBearerTokens(getBearerTokens(params))
   }, [params])
@@ -119,11 +117,9 @@ export const EditAppPage = (props: EditAppPageProps) => {
 
   const handleSubmit = useCallback(
     (values: DeveloperAppValues) => {
-      // Trim redirect URIs and remove empty ones
       const redirectUris = (values.redirectUris ?? [])
         .map((u) => u?.trim())
         .filter(removeNullable)
-      // Trim image URL and set to undefined if empty string
       const imageUrl = values.imageUrl?.trim() || undefined
       mutate({ ...values, redirectUris, imageUrl })
     },

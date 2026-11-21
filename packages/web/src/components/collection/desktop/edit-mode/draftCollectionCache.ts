@@ -11,12 +11,6 @@ type DraftCollection = {
   }
 }
 
-/**
- * Appends a track to a locally-drafted collection in the query cache. Used by
- * the inline create flow so "add" affordances mutate the draft instead of
- * writing to the backend. Mutates both `trackIds` and `playlist_contents` so
- * the lineup and dependent queries stay consistent.
- */
 export const addTrackToDraftCollection = (
   queryClient: QueryClient,
   collectionId: ID,

@@ -33,7 +33,6 @@ export const TooltipInfoIcon = ({
       text={messages.text}
       placement={placement}
       getPopupContainer={() => {
-        // First try to find a modal content container to render within
         const modalContent =
           document.querySelector('[role="dialog"] [data-modal-content]') ||
           document.querySelector('[role="dialog"] .modal-content') ||
@@ -41,7 +40,6 @@ export const TooltipInfoIcon = ({
         if (modalContent) {
           return modalContent as HTMLElement
         }
-        // Fall back to page or body
         return document.getElementById('page') ?? document.body
       }}
       shouldWrapContent={false}

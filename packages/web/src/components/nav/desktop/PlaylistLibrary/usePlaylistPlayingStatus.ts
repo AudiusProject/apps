@@ -7,9 +7,6 @@ import { useSelector } from 'react-redux'
 
 const { getTrackId, getPlaying, getCollectionId } = playbackSelectors
 
-/**
- * Used to determine if a track from a specific playlist is currently playing.
- */
 export const usePlaylistPlayingStatus = (id: PlaylistLibraryID) => {
   const currentTrackId = useSelector(getTrackId)
   const isPlaying = useSelector(getPlaying)
@@ -19,7 +16,6 @@ export const usePlaylistPlayingStatus = (id: PlaylistLibraryID) => {
     typeof id === 'string' ? null : id,
     {
       select: (collection) => new Set(collection?.trackIds),
-      // ensure read only so we dont fetch all collections in left-nav
       enabled: false
     }
   )

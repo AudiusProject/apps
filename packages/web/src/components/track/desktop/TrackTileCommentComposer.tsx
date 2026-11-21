@@ -19,8 +19,6 @@ const messages = {
   commentAt: (time: string) => `Comment at ${time}`
 }
 
-// The waveform reads comments sorted by timestamp, so the optimistic comment
-// goes into that list and its avatar shows up right away.
 const SORT_BY_TIMESTAMP = 'timestamp'
 const POLL_MS = 500
 
@@ -45,10 +43,6 @@ type TrackTileCommentComposerProps = {
   isPlaying: boolean
 }
 
-/**
- * Comment box under the waveform of the track that is playing. The comment is
- * stamped with the playback position at the moment it is sent.
- */
 export const TrackTileCommentComposer = ({
   trackId,
   isPlaying
@@ -84,7 +78,6 @@ export const TrackTileCommentComposer = ({
     [currentUserId, postComment, trackId]
   )
 
-  // The tile navigates on click; typing here should not.
   const stopPropagation = useCallback(
     (e: MouseEvent) => e.stopPropagation(),
     []

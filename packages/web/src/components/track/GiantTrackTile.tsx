@@ -75,7 +75,6 @@ import { TrackMetadataList } from './TrackMetadataList'
 import { TrackStats } from './TrackStats'
 import { TrackTileWaveform } from './desktop/TrackTileWaveform'
 
-// Toast timeouts in ms
 const REPOST_TIMEOUT = 1000
 const SAVED_TIMEOUT = 1000
 const MAX_DESCRIPTION_LINES = 8
@@ -214,11 +213,9 @@ export const GiantTrackTile = ({
   const [searchParams, setSearchParams] = useSearchParams()
   const handleOpenComment = useCallback(
     (commentId: ID) => {
-      // The comment section shows the comment in the URL at the top.
       const next = new URLSearchParams(searchParams)
       next.set('commentId', Id.parse(commentId))
       setSearchParams(next, { replace: true })
-      // Replacing history resets the scroll, so scroll once that has run.
       window.setTimeout(scrollToCommentSection, 0)
     },
     [searchParams, setSearchParams, scrollToCommentSection]
@@ -228,11 +225,8 @@ export const GiantTrackTile = ({
   })
   const { data: stems = [] } = useStems(trackId)
   const shouldShowDownloadSection = !!track?.is_downloadable || stems.length > 0
-  // Preview button is shown for USDC-gated tracks if user does not have access
-  // or is the owner
   const showPreview =
     isUSDCPurchaseGated && (isOwner || !hasStreamAccess) && track?.preview_cid
-  // Play button is conditionally hidden for USDC-gated tracks when the user does not have access
   const showPlay = isUSDCPurchaseGated ? hasStreamAccess : true
   const showWaveform =
     isWaveformEnabled &&
@@ -248,7 +242,6 @@ export const GiantTrackTile = ({
 
   const handleToggleDescription = useCallback(() => {
     toggleDescriptionExpanded()
-    // If we're collapsing, scroll the button into view
     if (isDescriptionExpanded && toggleButtonRef.current) {
       toggleButtonRef.current.scrollIntoView({
         behavior: 'smooth',
@@ -257,17 +250,14 @@ export const GiantTrackTile = ({
     }
   }, [isDescriptionExpanded, toggleDescriptionExpanded])
 
-  // This ref holds the description height for expansion
   const [descriptionRef, descriptionBounds] = useMeasure({
     polyfill: ResizeObserver
   })
 
-  // This ref holds the full content height for expansion
   const [fullContentRef, fullContentBounds] = useMeasure({
     polyfill: ResizeObserver
   })
 
-  // Calculate if toggle should be shown based on content height
   useEffect(() => {
     if (description && descriptionBounds.height && fullContentBounds.height) {
       const lineHeight = DEFAULT_LINE_HEIGHT

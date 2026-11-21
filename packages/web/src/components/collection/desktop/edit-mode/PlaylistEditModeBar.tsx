@@ -22,10 +22,6 @@ const messages = {
 
 const AnchoredBar = ({ children }: { children: ReactNode }) => {
   const { color } = useTheme()
-  // Portal out of the main content wrapper — its `transform` creates a
-  // containing block that breaks position:fixed relative to the viewport.
-  // Anchor to the app shell so the bar sits above the play bar and inherits
-  // the --nav-width / --play-bar-height vars.
   const mainContentRef = useMainContentRef()
   const Portal = usePortal({
     container: mainContentRef.current?.parentElement ?? undefined

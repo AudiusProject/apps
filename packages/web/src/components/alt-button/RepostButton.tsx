@@ -23,7 +23,7 @@ type RepostButtonProps = {
   isDisabled?: boolean
   isUnlisted?: boolean
   stopPropagation?: boolean
-  iconMode?: boolean // should it behave as a static icon?
+  iconMode?: boolean
   altVariant?: boolean
   'aria-label'?: string
 }

@@ -16,28 +16,18 @@ type TrendingGenreFiltersProps = {
   didSelectMore: () => void
 }
 
-/**
- * TrendingGenreFilters maintains a row of toggleable buttons for filtering the trending lineups by genre.
- */
 export const TrendingGenreFilters = (props: TrendingGenreFiltersProps) => {
   const { currentGenre, didSelectGenre, didSelectMore } = props
-  // type guard for whether this is a genre specified by the user via the modal
   const isSelectedFromModal = (genre: string | null): genre is string => {
     return genre !== null && initialGenres.indexOf(genre) === -1
   }
 
-  // Need to store our the last user specified genre (e.g. one picked thru the modal)
-  // so that we can keep it rendered even if the user subsequently selects
-  // one of the preselected genres.
   const [lastModalSelectedGenre, setLastModalSelectedGenre] = useState<
     string | null
   >(null)
 
-  // Avoid mutating initialGenres
   const genres = [...initialGenres]
 
-  // Set the last seen modal selected genre, and make sure we render it
-  // even if it's not selected.
   if (
     isSelectedFromModal(currentGenre) &&
     currentGenre !== lastModalSelectedGenre

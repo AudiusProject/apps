@@ -23,12 +23,6 @@ type EditAwareTracksTableProps = ComponentProps<typeof TracksTable> & {
   collectionId: ID
 }
 
-/**
- * Wraps the standard TracksTable for the playlist detail page so that, while
- * the page is in edit mode, clicking a row toggles selection (shift to extend
- * the range) instead of activating playback. Outside of edit mode the
- * behavior is identical to the underlying TracksTable.
- */
 export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
   const { collectionId, onClickRow, data, ...rest } = props
   const editMode = usePlaylistEditMode()
@@ -36,8 +30,6 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
   const isEditingThis =
     editMode.isEditMode && editMode.collectionId === collectionId
 
-  // While editing, tracks staged for removal disappear from the table
-  // immediately; they are only persisted (or restored) when Apply/Discard runs.
   const visibleData = useMemo(() => {
     if (!isEditingThis || editMode.removedTrackIds.size === 0) return data
     return data.filter(
@@ -63,7 +55,6 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
 
   const handleHeaderCheckboxClick = useCallback(
     (e: MouseEvent<HTMLInputElement>) => {
-      // Stop the click from bubbling to the column header's sort handler.
       e.stopPropagation()
       if (allSelected) {
         selection.clear()
@@ -106,8 +97,6 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
           aria-label={checked ? 'Deselect track' : 'Select track'}
           checked={checked}
           onClick={(e) => {
-            // Avoid double-toggling: the row's onClick handler would also
-            // call selection.toggle if the click bubbled up.
             e.stopPropagation()
             selection.toggle(id, index)
           }}
@@ -118,8 +107,6 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
     [selection]
   )
 
-  // Capture shift modifier state from keyboard so we can extend the selection
-  // even though TracksTable's onClickRow does not pass the MouseEvent.
   const shiftRef = useRef(false)
   useEffect(() => {
     if (!isEditingThis) {
@@ -132,8 +119,6 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
     const up = (e: KeyboardEvent) => {
       if (e.key === 'Shift') shiftRef.current = false
     }
-    // Without this, Cmd/Alt-Tabbing away while holding Shift leaves shiftRef
-    // stuck true because the keyup fires in the other window.
     const reset = () => {
       shiftRef.current = false
     }

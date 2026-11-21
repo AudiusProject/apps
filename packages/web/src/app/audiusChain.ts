@@ -2,10 +2,6 @@ import { type Chain } from 'viem'
 
 import { env } from 'services/env'
 
-/**
- * Audius ACDC chain (now ports to Core). Kept free of @reown imports so
- * importing it doesn't pull AppKit into the chunk.
- */
 export const audiusChain = {
   id: env.AUDIUS_NETWORK_CHAIN_ID,
   name: 'Audius',

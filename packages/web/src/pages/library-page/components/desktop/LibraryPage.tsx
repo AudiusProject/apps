@@ -154,8 +154,6 @@ const LibraryPage = () => {
   const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
     Boolean(entry.track_id)
   )
-  // Show skeletons while the initial library-tracks query is loading and we
-  // don't yet have any resolved rows to show.
   const showTrackTableSkeletons =
     status === Status.LOADING && !hasResolvedTrackRows
   const tracksLoading = showTrackTableSkeletons && isEmpty
@@ -180,7 +178,6 @@ const LibraryPage = () => {
 
   const queuedAndPlaying = playing && isQueued
 
-  // Setup play button
   const playButtonActive =
     currentTab === LibraryPageTabs.TRACKS && !tracksLoading
   const playAllButton = (

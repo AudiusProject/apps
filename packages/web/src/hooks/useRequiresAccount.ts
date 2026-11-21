@@ -30,10 +30,6 @@ const canAccess = (
   return isAccountComplete
 }
 
-/**
- * Like useCallback but designed to be used to redirect unauthenticated users
- * to sign in/up in the case they are not logged in.
- */
 export const useRequiresAccountCallback = <T extends (...args: any) => any>(
   callback: T,
   deps: any[],
@@ -51,7 +47,6 @@ export const useRequiresAccountCallback = <T extends (...args: any) => any>(
 
   return useCallback(
     (...args: Parameters<T>) => {
-      // Wait for account status to be loaded before proceeding
       if (accountStatus === Status.LOADING || accountStatus === Status.IDLE) {
         if (args[0]?.preventDefault) {
           args[0].preventDefault()
@@ -65,12 +60,10 @@ export const useRequiresAccountCallback = <T extends (...args: any) => any>(
         isAccountComplete
       )
       if (!canAccessRoute) {
-        // Prevent the default event from occurring
         if (args[0]?.preventDefault) {
           args[0].preventDefault()
         }
 
-        // Set up return route before opening sign on
         dispatch(updateRouteOnExit(returnRoute))
         dispatch(updateRouteOnCompletion(returnRoute))
         dispatch(openSignOn(/** signIn */ false))
@@ -103,10 +96,6 @@ export const useRequiresAccountCallback = <T extends (...args: any) => any>(
   )
 }
 
-/**
- * Like useRequiresAccountCallback but designed to be used for click handlers so that
- * clicks are not propagated.
- */
 export const useRequiresAccountOnClick = <
   T extends (e: ReactMouseEvent<Element, MouseEvent>) => any
 >(
@@ -129,17 +118,6 @@ export const useRequiresAccountOnClick = <
   )
 }
 
-/**
- * Creates a callback to verify user authentication.
- *
- * When invoked, this callback checks if the user is signed in.
- * If not, it redirects to the sign-in page and displays a banner
- * informing the user that an account is required for the action.
- *
- * @param returnRouteOverride - Optional route to navigate to after successful sign-up
- * @param restriction - Optional restriction type ('none' | 'guest' | 'account')
- * @returns A function that, when called, performs the authentication check and redirection
- */
 export const useRequiresAccountFn = (
   returnRouteOverride?: string,
   restriction: RestrictionType = 'account'
@@ -154,16 +132,6 @@ export const useRequiresAccountFn = (
   return { requiresAccount }
 }
 
-/**
- * Hook that checks if a user is signed in. If not, it redirects to the sign-up page
- * and displays a banner informing the user that an account is required.
- *
- * This hook automatically triggers the authentication check on mount and
- * whenever its dependencies change.
- *
- * @param returnRouteOverride - Optional route to navigate to after successful sign-up
- * @param restriction - Optional restriction type ('none' | 'guest' | 'account')
- */
 export const useRequiresAccount = (
   returnRouteOverride?: string,
   restriction: RestrictionType = 'account'

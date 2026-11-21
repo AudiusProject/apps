@@ -6,13 +6,6 @@ import type { TrackMetadataForUpload } from '@audius/common/store'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 
-/**
- * Returns a "submit a remix to this contest" callback that deep-links into
- * the upload flow with artwork + genre + remix_of pre-filled. Web wrapper
- * around the shared common hook — handles the Web `File` blob fetch and the
- * navigation + auth gate, while the metadata shape itself comes from
- * `@audius/common/hooks`.
- */
 export const useEnterContest = (trackId: ID | undefined) => {
   const navigate = useNavigateToPage()
   const { originalTrack, buildInitialMetadata } = useEnterContestShared(trackId)

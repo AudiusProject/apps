@@ -37,10 +37,6 @@ type WinnersSubFilter = 'tracks' | 'underground'
 
 const WEEK_FORMAT = 'YYYY-MM-DD'
 
-/**
- * Most recent Friday that has passed (winners selected at 12PM PT on Fridays).
- * Used to cap "next" navigation so we never show upcoming weeks.
- */
 const getLastCompletedFriday = () => {
   const now = dayjs().utc()
   let lastFriday = now.day(5)
@@ -107,8 +103,6 @@ export const WinnersView = ({
     onWeekChange(next)
   }, [week, onWeekChange])
 
-  // Only allow "next" when the next week is on or before last completed Friday.
-  // Use YYYY-MM-DD string comparison to avoid timezone/granularity edge cases.
   const lastFridayStr = getLastCompletedFriday().format(WEEK_FORMAT)
   const nextWeekStr = week
     ? dayjs(week + 'T12:00:00Z')

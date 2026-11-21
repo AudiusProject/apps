@@ -9,9 +9,6 @@ type Transform = {
   getValue: () => unknown
 }
 
-// Calculates how drastically cursor-position changes over length will
-// create skew
-// See https://www.wolframalpha.com/input/?i=plot%5By+%3D+2.5+*+0.996+%5E+x%2C+y+%3D+5+*+0.990+%5E+x%5D+from+-1+to+800
 const calculateSensitivity = (length: number) => 10 * Math.pow(0.994, length)
 
 type UseCardWeightConfig = {
@@ -19,11 +16,6 @@ type UseCardWeightConfig = {
   isDisabled?: boolean
 }
 
-/**
- * `useCardWeight` will listen to the window scroll and output a translate value to be applied to an element.
- * @param sensitivity optional value to multiply the x-translation by to determine how to weight the
- *  perspective changes
- */
 const useCardWeight = ({
   sensitivity,
   isDisabled

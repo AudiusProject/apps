@@ -117,19 +117,15 @@ export const UploadPage = (props: UploadPageProps) => {
     handleUploadError
   )
 
-  // For navigating back to a remix contest page
   const { data: originalTrack } = useTrack(
     initialMetadata?.remix_of?.tracks[0].parent_track_id
   )
   const navigate = useNavigateToPage()
 
-  // Start the user on the finish page if they have a form state
   const [phase, setPhase] = useState(
     formStateFromStore ? Phase.FINISH : Phase.SELECT
   )
 
-  // Clean up the store on unmount only if the upload succeeded or failed
-  // Allow users to resume in progress uploads otherwise.
   useEffect(() => {
     return () => {
       if (uploadSuccess || uploadError) {
@@ -138,7 +134,6 @@ export const UploadPage = (props: UploadPageProps) => {
     }
   }, [uploadSuccess, uploadError, dispatch])
 
-  // Offer to resume a saved draft when starting fresh.
   const { data: currentUserId } = useCurrentUserId()
   const [draft, setDraft] = useState<UploadDraft | null>(null)
   useEffect(() => {
@@ -168,8 +163,6 @@ export const UploadPage = (props: UploadPageProps) => {
     if (currentUserId) clearUploadDraft(currentUserId)
   }, [currentUserId])
 
-  // Once publishing starts the draft has done its job. This runs after the
-  // edit form unmounts, so its final autosave is queued before the clear.
   useEffect(() => {
     if (phase === Phase.FINISH && currentUserId) {
       clearUploadDraft(currentUserId)

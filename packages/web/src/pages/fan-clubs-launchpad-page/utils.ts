@@ -61,7 +61,6 @@ export const useLaunchpadAnalytics = (params?: {
     }
   }, [formValues, errors, externalWalletAddress])
 
-  // Splash page events
   const trackSplashGetStarted = useCallback(() => {
     track(
       make({
@@ -78,7 +77,6 @@ export const useLaunchpadAnalytics = (params?: {
     )
   }, [track])
 
-  // Wallet connection events
   const trackWalletConnectSuccess = useCallback(
     (walletAddress: string, walletBalance: number) => {
       track(
@@ -117,7 +115,6 @@ export const useLaunchpadAnalytics = (params?: {
     [track]
   )
 
-  // Form progression events
   const trackFormInputChange = useCallback(
     (input: keyof LaunchpadFormValues, newValue: string) => {
       track(
@@ -182,7 +179,6 @@ export const useLaunchpadAnalytics = (params?: {
     )
   }, [formValuesForAnalytics, track])
 
-  // Coin creation events
   const trackCoinCreationStarted = useCallback(
     (walletAddress: string, formValues: LaunchpadFormValues) => {
       const sanitizedValues = sanitizeFormValues(formValues)
@@ -276,23 +272,18 @@ export const useLaunchpadAnalytics = (params?: {
   )
 
   return {
-    // Splash page
     trackSplashGetStarted,
     trackSplashLearnMoreClicked,
-    // Wallet connection events
     trackWalletConnectSuccess,
     trackWalletConnectError,
     trackWalletInsufficientBalance,
-    // Page progression events
     trackSetupContinue,
     trackFormInputChange,
     trackFormBack,
     trackReviewContinue,
-    // Coin creation flow
     trackCoinCreationStarted,
     trackCoinCreationSuccess,
     trackCoinCreationFailure,
-    // First buy flow
     trackFirstBuyRetry,
     trackFirstBuyMaxButton,
     trackBuyModalOpen,

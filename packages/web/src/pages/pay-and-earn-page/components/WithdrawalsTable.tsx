@@ -54,7 +54,6 @@ const defaultColumns: WithdrawalsTableColumn[] = [
   'spacerRight'
 ]
 
-// Cell Render Functions
 const renderDestinationCell = (cellInfo: TransactionCell) => {
   const { transactionType } = cellInfo.row.original
   let destination = ''
@@ -88,7 +87,6 @@ const renderAmountCell = (cellInfo: TransactionCell) => {
   })
 }
 
-// Columns
 const tableColumnMap = {
   destination: {
     id: 'destination',
@@ -133,7 +131,6 @@ const tableColumnMap = {
   }
 }
 
-/** Renders a table of `USDCTransactionDetails` records */
 export const WithdrawalsTable = ({
   columns = defaultColumns,
   data,

@@ -57,7 +57,6 @@ const messages = {
   cooldownDescription:
     'Note: There is a 7 day waiting period from completion until you can claim your reward.',
 
-  // Profile checks
   profileCheckNameAndHandle: 'Name & Handle',
   profileCheckProfilePicture: 'Profile Picture',
   profileCheckCoverPhoto: 'Cover Photo',

@@ -41,7 +41,6 @@ import {
 
 import { FanClubDetailPage } from './FanClubDetailPage'
 
-// Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
 vi.mock('app/ReownAppKitModal', () => ({
   appkitModal: {
     getAccount: vi.fn().mockReturnValue(undefined),
@@ -83,25 +82,21 @@ export function renderFanClubDetailPage(
 const assertFanClubInsightsSection = async () => {
   await screen.findByRole('heading', { name: /insights/i })
 
-  // Price: $0.0₅905 (formatted with subscript notation)
   const priceRow = screen.getByTestId('metric-row-Price')
   expect(priceRow).toBeInTheDocument()
   expect(within(priceRow).getByText('$0.0₅905')).toBeInTheDocument()
   expect(within(priceRow).getByText(/^price$/i)).toBeInTheDocument()
 
-  // Market Cap: ~$9.0K
   const marketCapRow = screen.getByTestId('metric-row-Market Cap')
   expect(marketCapRow).toBeInTheDocument()
   expect(within(marketCapRow).getByText(/\$9\.0K/i)).toBeInTheDocument()
   expect(within(marketCapRow).getByText(/^market cap$/i)).toBeInTheDocument()
 
-  // Unique Holders: 11
   const holdersRow = screen.getByTestId('metric-row-Unique Holders')
   expect(holdersRow).toBeInTheDocument()
   expect(within(holdersRow).getByText('11')).toBeInTheDocument()
   expect(within(holdersRow).getByText(/^unique holders$/i)).toBeInTheDocument()
 
-  // Graduation Progress: 1% (curveProgress: 0.012981... = ~1.3%)
   const graduationRow = screen.getByTestId('metric-row-Graduation Progress')
   expect(graduationRow).toBeInTheDocument()
   expect(within(graduationRow).getByText(/1%/)).toBeInTheDocument()
@@ -109,7 +104,6 @@ const assertFanClubInsightsSection = async () => {
     within(graduationRow).getByText(/graduation progress/i)
   ).toBeInTheDocument()
 
-  // Check graduation progress bar is in the same row
   const progressBar = within(graduationRow).getByRole('progressbar')
   expect(progressBar).toBeInTheDocument()
   expect(progressBar).toHaveAttribute('aria-valuenow', '1')
@@ -125,37 +119,30 @@ const assertFanClubInsightsSection = async () => {
 }
 
 const assertFanClubLeaderboardSection = () => {
-  // Check for Members Leaderboard heading
   const leaderboardHeading = screen.getByRole('heading', {
     name: /members leaderboard/i
   })
   expect(leaderboardHeading).toBeInTheDocument()
 
-  // Check for members count in parentheses (10 random users generated)
   const membersCountText = screen.getByText(/\(10\)/)
   expect(membersCountText).toBeInTheDocument()
 
-  // Check for the button to open leaderboard modal
   const openLeaderboardButton = screen.getByRole('button', {
     name: /open the leaderboard modal/i
   })
   expect(openLeaderboardButton).toBeInTheDocument()
 
-  // The leaderboard section should be within a container
   const leaderboardSection = leaderboardHeading.closest('div')?.parentElement
   expect(leaderboardSection).toBeInTheDocument()
 
-  // Check that the button is in the same container (either disabled during loading or enabled)
   const leaderboardContainer =
     openLeaderboardButton.closest('div[role="button"]')
   expect(leaderboardContainer).toBeInTheDocument()
 }
 
 const assertHeader = async () => {
-  // Wait for the page to load by finding the Insights heading (unique to this page)
   await screen.findByRole('heading', { name: /insights/i })
 
-  // Check that the coin name is rendered in the header (h1)
   const headings = screen.getAllByRole('heading', {
     name: mockFanClub.name
   })
@@ -177,8 +164,6 @@ const assertFanClubBalanceSection = async ({
     balance: string,
     isBuiltIn: boolean = false
   ) => {
-    // Check for Linked Wallet with truncated address and balance in the same row
-    // Find the wallet address element (in parentheses)
     const walletAddress = screen.getByText(
       isBuiltIn
         ? address
@@ -186,12 +171,10 @@ const assertFanClubBalanceSection = async ({
     )
     expect(walletAddress).toBeInTheDocument()
 
-    // Get the parent row container - need to go up 2 levels to get the row that contains both address and balance
     const walletInfoDiv = walletAddress.parentElement
     const walletRow = walletInfoDiv?.parentElement
     expect(walletRow).toBeInTheDocument()
 
-    // Verify the balance (28,062) appears in the same row
     expect(walletRow).toHaveTextContent(balance)
   }
   if (!hasBalance) {
@@ -229,7 +212,6 @@ const assertFanClubBalanceSection = async ({
       ).not.toBeInTheDocument()
     }
   } else {
-    // Scope to balance card: fan feed composer also exposes a "Send" control (post).
     const balanceSection = await screen.findByTestId('fan-club-balance-section')
     expect(
       within(balanceSection).getByRole('button', { name: /buy\/sell/i })
@@ -241,13 +223,10 @@ const assertFanClubBalanceSection = async ({
       within(balanceSection).getByRole('button', { name: /receive/i })
     ).toBeInTheDocument()
 
-    // Check for overall balance number (without dollar sign)
     expect(screen.getByText(/89,493,965\.32/)).toBeInTheDocument()
 
-    // Check for USD balance value
     expect(screen.getByText(/\$809\.57/)).toBeInTheDocument()
 
-    // Check for individual balance breakdown
     expect(screen.getByText(/balance breakdown/i)).toBeInTheDocument()
     assertBalanceBreakdownRow('TESTACCOUNTWALLETADDRESS', '28,062')
     assertBalanceBreakdownRow('Built-In Wallet', '34,063', true)
@@ -256,7 +235,6 @@ const assertFanClubBalanceSection = async ({
 }
 
 const assertFanClubHeroSection = async () => {
-  // Discovery-style hero: "Fan Club" label + profile link + cover strip
   const fanClubLabel = await screen.findByText(/^fan club$/i)
   expect(fanClubLabel).toBeInTheDocument()
 
@@ -286,12 +264,10 @@ const assertFanClubInfoSection = async ({
 
   await assertFanClubHeroSection()
 
-  // Check for coin description
   if (mockFanClub.description) {
     expect(within(hero).getByText(mockFanClub.description)).toBeInTheDocument()
   }
 
-  // Check for social links (link_2, link_3, link_4)
   const allLinks = within(hero).getAllByRole('link', {
     hidden: true
   })
@@ -320,7 +296,6 @@ const assertFanClubInfoSection = async ({
     expect(instagramLink).toHaveAttribute('href', mockFanClub.link_4)
   }
 
-  // Check for website "Learn More" button
   if (mockFanClub.website) {
     const learnMoreButton = within(hero).getByRole('button', {
       name: /learn more/i
@@ -388,7 +363,6 @@ const assertFanClubInfoSection = async ({
 
 describe('FanClubDetailPage', () => {
   beforeEach(() => {
-    // Mock any DOM methods if needed
     vi.clearAllMocks()
   })
 

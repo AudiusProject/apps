@@ -1,6 +1,5 @@
 import { Track } from '@audius/common/models'
 
-// return the original string if it exists, or ''
 export const emptyStringGuard = (str: string | null | undefined) => str ?? ''
 
 export const defaultFieldVisibility = {

@@ -32,20 +32,15 @@ import { DragnDropState } from './dragndrop/slice'
 const averageColor = averageColorReducer
 
 export type AppState = CommonState & {
-  // These belong in CommonState but are here until we move them to the @audius/common package:
   backend: BackendState
 
   signOn: SignOnPageState
 
-  // Config
   reachability: ReachabilityState
-  // Account
   passwordReset: PasswordResetState
 
-  // UI
   dragndrop: DragnDropState
 
-  // Global
   application: {
     ui: {
       appCTAModal: ReturnType<typeof AppCTAModalReducer>
@@ -72,13 +67,10 @@ export type AppState = CommonState & {
     }
   }
 
-  // Pages
   history: HistoryPageState
   collection: CollectionsPageState
 
-  // Remote Config + Flags
   remoteConfig: ReturnType<typeof RemoteConfigReducer>
 
-  // Error Page
   error: ErrorState
 }

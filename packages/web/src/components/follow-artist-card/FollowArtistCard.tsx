@@ -33,7 +33,6 @@ import { SelectArtistsPreviewContext } from './selectArtistsPreviewContext'
 type FollowArtistTileProps = {
   user: UserMetadata
   mobileWidth?: string
-  /** When true, uses a smaller card size for dense grids (e.g. 4-column sign-up) */
   compact?: boolean
 } & HTMLProps<HTMLInputElement>
 

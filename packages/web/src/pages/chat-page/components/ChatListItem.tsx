@@ -52,8 +52,6 @@ export const ChatListItem = memo(function ChatListItem(
         </div>
       </>
     ) : null
-  // The row stays a single native button; the options trigger is a sibling
-  // (not a nested button) so the row keeps its accessible name and click.
   return (
     <div className={styles.container}>
       <button

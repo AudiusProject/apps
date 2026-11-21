@@ -21,7 +21,6 @@ export const remoteConfigInstance = remoteConfig({
   appVersion,
   platform: isElectron() ? 'desktop' : 'web',
   createOptimizelyClient: async () => {
-    // Wait for optimizely to load if necessary (as it can be an async or defer tag)
     if (!window.optimizelyDatafile) {
       let cb
       await new Promise((resolve) => {
@@ -36,7 +35,6 @@ export const remoteConfigInstance = remoteConfig({
       console.error(new Error('Optimizely failed to load'))
     }
 
-    // Loaded lazily so the SDK stays out of the entry chunk
     const { default: optimizely } = await import('@optimizely/optimizely-sdk')
     optimizely.setLogLevel('warn')
     return optimizely.createInstance({
@@ -59,7 +57,6 @@ export const remoteConfigInstance = remoteConfig({
       FEATURE_FLAG_LOCAL_STORAGE_SESSION_KEY,
       id.toString()
     ),
-  // Log level is set in createOptimizelyClient once the SDK has loaded
   setLogLevel: () => {},
   environment: env.ENVIRONMENT
 })

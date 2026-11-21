@@ -13,8 +13,6 @@ const restrictedRoutes = orderedRoutes
   .map((h) => h.toLowerCase())
 
 export const restrictedHandles = new Set([
-  // ===== Restricted Genres, Moods, and keywords come from common =====
   ...commonRestrictedHandles,
-  // ===== Current Routes =====
   ...restrictedRoutes
 ])

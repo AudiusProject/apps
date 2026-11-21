@@ -1,8 +1,5 @@
 import type { Storage } from 'redux-persist'
 
-// redux-persist used to write through localforage (IndexedDB). Keys that
-// have not been read from localStorage yet are copied over once, and
-// localforage is only loaded for that copy.
 const MIGRATED_PREFIX = 'persist-migrated-from-localforage:'
 
 const getLocalStorage = () => {
@@ -13,8 +10,6 @@ const getLocalStorage = () => {
   }
 }
 
-// localforage's default IndexedDB database. A browser without it (every new
-// visitor) has nothing to migrate, so skip loading localforage at all.
 const LOCALFORAGE_DB_NAME = 'localforage'
 
 const mayHaveLocalforageData = async () => {

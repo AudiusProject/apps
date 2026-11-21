@@ -53,8 +53,6 @@ export const RemoveManagerConfirmationContent = ({
   useEffect(() => {
     if (isSuccess) {
       onSuccess()
-      // If we are currently switched into this user and removing ourselves
-      // as manager, switch back to primary account
       if (currentUserId === userId && managerIsCurrentWeb3User)
         switchToWeb3User()
     }
@@ -67,7 +65,6 @@ export const RemoveManagerConfirmationContent = ({
     onSuccess
   ])
 
-  // error handling
   useEffect(() => {
     if (isError) {
       toast(sharedMessages.somethingWentWrong)

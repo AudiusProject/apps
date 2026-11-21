@@ -5,7 +5,6 @@ import { Root } from '../Root'
 
 import { SsrContextProvider, SsrContextType } from './SsrContext'
 
-// Create cache for client-side rendering
 const cache = createCache({ key: 'harmony', prepend: true })
 
 type RootWithProvidersProps = SsrContextType

@@ -30,16 +30,12 @@ export const TrendingGenresSection = () => {
     [navigate]
   )
 
-  // Only the ranked (popular) genres carry a count; the merged static genres
-  // do not. Show the top ranked genres in popularity order.
   const topGenres = (genreSuggestions ?? [])
     .filter((genre) => genre.count !== undefined)
     .slice(0, MAX_GENRES)
 
   const showSkeleton = !inView || isPending
 
-  // Hide the section gracefully when there are no popular genres (empty
-  // response or a failed request that fell back to the static list).
   if (!showSkeleton && topGenres.length === 0) {
     return null
   }

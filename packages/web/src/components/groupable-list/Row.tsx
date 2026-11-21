@@ -7,23 +7,15 @@ import { Link, LinkProps } from 'react-router'
 import styles from './Row.module.css'
 
 type RowProps = {
-  // Leading image, emoji, icon, etc.
   prefix?: ReactNode
-  // Title area of a Row component, may be left unset
   title?: string
-  // Body area of a Row component, may be left unset
   body?: string
   children?: ReactNode
-  // Whether or not to pad the children and body
   includeSpacing?: boolean
-  // Adds an arrow to the row component if `onClick` is provided
   onClick?: () => void
   href?: string
 } & Omit<Partial<LinkProps>, 'prefix'>
 
-/**
- * A row component to be used within a <Grouping />
- */
 const Row = ({
   prefix,
   title,

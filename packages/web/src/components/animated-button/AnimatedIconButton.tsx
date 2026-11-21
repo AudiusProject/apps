@@ -11,7 +11,6 @@ export enum AnimatedIconType {
   REPOST_LIGHT = 'REPOST_LIGHT'
 }
 
-/** Base asset path per icon - theme applied at runtime via useLottieThemeColors */
 const animationMap: Record<AnimatedIconType, string> = {
   [AnimatedIconType.FAVORITE]: 'iconFavoriteLight',
   [AnimatedIconType.REPOST]: 'iconRepostLight',
@@ -30,7 +29,6 @@ type AnimatedIconButtonProps = {
   activeClassName?: string
   disabledClassName?: string
   icon: AnimatedIconType
-  /** @deprecated Theme applied at runtime - no longer used */
   darkMode?: boolean
   isMatrix?: boolean
   'aria-label'?: string

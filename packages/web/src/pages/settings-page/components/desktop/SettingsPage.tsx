@@ -190,7 +190,6 @@ export const SettingsPage = () => {
   const [, setIsInboxSettingsModalVisible] = useModalState('InboxSettings')
   const [, setIsCommentSettingsModalVisible] = useModalState('CommentSettings')
 
-  // Check for verification query param and show appropriate modal
   const verificationStatus = searchParams.get('verification')
   const [isVerificationSuccessModalOpen, setIsVerificationSuccessModalOpen] =
     useState(false)

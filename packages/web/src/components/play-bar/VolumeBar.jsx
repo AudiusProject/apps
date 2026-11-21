@@ -59,13 +59,12 @@ const VolumeBar = ({
       volumeChange(Math.max(volumeLevel - 10, 0))
     }
     setupHotkeys({
-      38 /* up */: { cb: volumeUp, or: [ModifierKeys.CTRL, ModifierKeys.CMD] },
-      40 /* down */: {
+      38: { cb: volumeUp, or: [ModifierKeys.CTRL, ModifierKeys.CMD] },
+      40: {
         cb: volumeDown,
         or: [ModifierKeys.CTRL, ModifierKeys.CMD]
       }
     })
-    // Ensure rounded edges at the default volume (100%).
     volumeChange(volumeLevel)
   }, [volumeChange, volumeLevel])
 

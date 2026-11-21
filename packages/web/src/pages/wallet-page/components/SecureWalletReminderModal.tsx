@@ -18,7 +18,7 @@ import { localStorage } from 'services/local-storage'
 const FAQ_URL =
   'https://help.audius.co/product/crypto-wallet-faq-for-audius-users'
 const DISMISS_STORAGE_KEY = 'secureWalletReminderDismissedAt'
-const DISMISS_DURATION_MS = 14 * 24 * 60 * 60 * 1000 // 2 weeks
+const DISMISS_DURATION_MS = 14 * 24 * 60 * 60 * 1000
 const BALANCE_THRESHOLD = AUDIO(1000).value
 
 const messages = {

@@ -52,7 +52,6 @@ const defaultColumns: SalesTableColumn[] = [
   'spacerRight'
 ]
 
-// Cell Render Functions
 const renderContentNameCell = (cellInfo: PurchaseCell) => {
   const { contentId, contentType } = cellInfo.row.original
   return <TrackNameWithArtwork id={contentId} contentType={contentType} />
@@ -79,7 +78,6 @@ const renderValueCell = (cellInfo: PurchaseCell) => {
   return total
 }
 
-// Columns
 const tableColumnMap = {
   contentName: {
     id: 'contentName',
@@ -133,7 +131,6 @@ const tableColumnMap = {
   }
 }
 
-/** Renders a table of `USDCPurchaseDetails` records, with details intended for the Seller */
 export const SalesTable = ({
   columns = defaultColumns,
   data,

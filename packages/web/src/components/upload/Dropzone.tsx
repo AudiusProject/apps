@@ -31,19 +31,11 @@ type DropzoneProps = {
   subtitleTextClassName?: string
   iconClassName?: string
   type?: 'track' | 'image' | 'stem'
-  // Extra text content to be displayed inside the dropzone.
   textAboveIcon?: string
   subtextAboveIcon?: string
   subtitle?: string
   allowMultiple?: boolean
-  /**
-   * Callback fired when the user drops files onto the dropzone
-   */
   onDropAccepted: (files: File[]) => void
-  /**
-   * Callback fired when the dropped file is rejected, usually
-   * from a disallowed file type
-   */
   onDropRejected?: (files: File[]) => void
   disabled?: boolean
   disableClick?: boolean

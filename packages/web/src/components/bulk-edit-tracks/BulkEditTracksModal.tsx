@@ -275,7 +275,6 @@ const ResultView = ({ result, tracks }: ResultViewProps) => {
 type BulkEditTracksModalProps = {
   isOpen: boolean
   onClose: () => void
-  /** Called once any track was updated, so the caller can clear selection. */
   onUpdated: () => void
   tracks: TrackSummary[]
 }
@@ -289,7 +288,6 @@ export const BulkEditTracksModal = (props: BulkEditTracksModalProps) => {
     completed: number
     total: number
   } | null>(null)
-  // Keeps the edited tracks for the result view after selection clears.
   const [result, setResult] = useState<{
     result: BulkUpdateTracksResult
     tracks: TrackSummary[]

@@ -10,13 +10,6 @@ import {
   publishHiddenChildTracks
 } from './commonSagas'
 
-/**
- * The web vitest setup stubs out redux-saga, and redux-saga-test-plan fails to
- * load under vitest's ESM interop, so neither can run a saga here. These sagas
- * are plain generators of plain effect objects though, so we drive them
- * directly: resolve GET_CONTEXT from `context`, record PUT, and resolve the
- * confirmation RACE with `raceOutcome`.
- */
 type DriveOptions = {
   context?: Record<string, unknown>
   raceOutcome?: 'confirmed' | 'keepPrivate'
@@ -119,7 +112,6 @@ describe('confirmPublishHiddenTracks', () => {
   })
 
   it('keeps the previous publish-everything behavior on native mobile', () => {
-    // Mobile renders no drawer for the prompt yet, so it must not block.
     const { puts, returned } = drive(
       confirmPublishHiddenTracks(1, false),
       mobile
@@ -152,8 +144,6 @@ describe('publishHiddenChildTracks', () => {
   })
 
   it('keeps scheduled tracks hidden when a kept-private track sits alongside', () => {
-    // The collection is a scheduled release, but not every track is scheduled,
-    // so this is not an early release and the scheduled track stays hidden.
     const { puts } = drive(
       publishHiddenChildTracks(
         scheduledPlaylist,

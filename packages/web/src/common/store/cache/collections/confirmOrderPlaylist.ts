@@ -35,12 +35,9 @@ export function* confirmOrderPlaylist(
       function* (_confirmedPlaylistId: ID) {
         const done = yield* isPlaylistConfirmerDone(playlistId)
         if (!done) return
-        // Don't refetch - the backend may not have propagated yet, and a refetch
-        // would overwrite our optimistic cache with stale data.
         yield* call(updateCollectionData, [playlist])
       },
       function* ({ error, timeout }) {
-        // Fail Call
         yield* put(
           collectionActions.orderPlaylistFailed(
             error,

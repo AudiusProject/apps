@@ -3,11 +3,6 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-/**
- * Observes an element's inline size and returns whether it is below
- * `thresholdPx`. State only updates when the threshold is crossed, so
- * consumers do not re-render on every resize frame.
- */
 export const useIsContainerNarrow = (
   ref: { readonly current: HTMLElement | null },
   thresholdPx: number

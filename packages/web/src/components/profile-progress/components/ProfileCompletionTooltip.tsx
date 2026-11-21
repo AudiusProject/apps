@@ -62,10 +62,6 @@ type ProfileCompletionTooltipProps = {
   shouldDismissOnClick?: boolean
 }
 
-/**
- * ProfileCompletionTooltip is a hovering tooltip that presents the
- * percentage of profile completion and the list of completion stages.
- */
 export const ProfileCompletionTooltip = ({
   completionStages,
   children,

@@ -134,7 +134,6 @@ export const Nav2026 = (props: Nav2026Props) => {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [isDropdownOpen, startCloseDropdown])
 
-  /* When dropdown unmounts while "closing", ensure we reset so it can re-open (e.g. if animationend never fired) */
   useEffect(() => {
     if (!isDropdownClosing) return
     const id = window.setTimeout(finishCloseDropdown, 300)

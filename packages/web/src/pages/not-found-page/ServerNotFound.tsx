@@ -10,10 +10,6 @@ const messages = {
   buttonText: 'Take Me Back To The Music'
 }
 
-/**
- * SSR version of NotFoundPage. Uses deep harmony imports and skips the Lottie
- * animation and background to keep the worker bundle small.
- */
 export const ServerNotFound = () => {
   return (
     <Flex

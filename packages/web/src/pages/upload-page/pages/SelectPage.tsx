@@ -21,9 +21,6 @@ import styles from './SelectPage.module.css'
 
 type ErrorType = { reason: 'corrupted' | 'size' | 'type' } | null
 
-// Files that already had initialMetadata applied. Module-level so the seed is
-// applied once per file even if the user goes back to this page, and never
-// overwrites later edits.
 const seededFiles = new WeakSet<object>()
 
 export const applyInitialMetadata = <T extends TrackForUpload>(

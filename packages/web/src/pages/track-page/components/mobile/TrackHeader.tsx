@@ -198,10 +198,7 @@ const TrackHeader = ({
 
   const showSocials = !isUnlisted && hasStreamAccess
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
-  // Preview button is shown for USDC-gated tracks if user does not have access
-  // or is the owner
   const showPreview = isUSDCPurchaseGated && (isOwner || !hasStreamAccess)
-  // Play button is conditionally hidden for USDC-gated tracks when the user does not have access
   const showPlay = isUSDCPurchaseGated ? hasStreamAccess : true
   const showListenCount = isOwner || (!isStreamGated && !isUnlisted)
   const albumInfo = album_backlink

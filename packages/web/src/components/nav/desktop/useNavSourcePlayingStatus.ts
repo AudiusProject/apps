@@ -15,12 +15,6 @@ const {
   getCurrentSource: getSource
 } = playbackSelectors
 
-/**
- * Hook to determine if the currently playing track is from a specific navigation source
- * (trending, feed, library, explore, etc)
- *
- * @returns {string | null} - returns the route of the currently playing track
- */
 export const useNavSourcePlayingStatus = () => {
   const currentTrackId = useSelector(getTrackId)
   const isPlaying = useSelector(getPlaying)

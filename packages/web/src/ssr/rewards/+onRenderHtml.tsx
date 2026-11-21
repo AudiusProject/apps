@@ -1,5 +1,3 @@
-// Rewards page SSR - meta tags only
-
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'

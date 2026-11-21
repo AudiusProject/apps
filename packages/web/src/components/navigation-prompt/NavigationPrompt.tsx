@@ -18,11 +18,6 @@ import styles from './NavigationPrompt.module.css'
 interface Props {
   when?: boolean | undefined
   shouldBlockNavigation?: (location: Location) => boolean
-  /**
-   * Also block in-app navigation (link clicks, navigate()), not just
-   * back/forward. Only safe where the form never navigates away itself
-   * after a save, e.g. the upload flow.
-   */
   blockInAppNavigation?: boolean
   messages: {
     title: string
@@ -32,10 +27,6 @@ interface Props {
   }
 }
 
-/**
- * Asks before leaving a page with unsaved changes: tab close/refresh,
- * back/forward, and in-app navigation when `blockInAppNavigation` is set.
- */
 export const NavigationPrompt = (props: Props) => {
   const { when, shouldBlockNavigation, blockInAppNavigation, messages } = props
 
@@ -63,7 +54,6 @@ export const NavigationPrompt = (props: Props) => {
     }
   }, [when])
 
-  // Release a pending navigation if the form stops needing protection.
   useEffect(() => {
     if (blocker.state === 'blocked' && !when) {
       blocker.proceed()

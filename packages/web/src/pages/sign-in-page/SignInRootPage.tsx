@@ -14,7 +14,6 @@ import { SignInPage } from './SignInPage'
 const { SIGN_IN_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 
 export const SignInRootPage = () => {
-  // Redirect users from confirm-email page on first mount
   const isFirstMount = useFirstMountState()
   const { data: currentAccountEmail } = useCurrentAccount({
     select: (account) => account?.guestEmail

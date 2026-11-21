@@ -49,7 +49,7 @@ type FanClubLeaderboardCardProps = {
 export const FanClubLeaderboardCard = ({
   mint
 }: FanClubLeaderboardCardProps) => {
-  const { isMedium: isSmallScreen } = useMedia() // <1024px
+  const { isMedium: isSmallScreen } = useMedia()
   const numUsersShowing = isSmallScreen ? 6 : 8
   const { data: leaderboardUsers, isPending: isLeaderboardPending } =
     useFanClubMembers({ mint })

@@ -7,9 +7,6 @@ import styles from './SeoLink.module.css'
 
 type SeoLinkProps = Omit<LinkProps, 'to'> & { to: string }
 
-/**
- * Link that renders an anchor tag, but is not clickable itself. Used for seo purposes
- */
 export const SeoLink = forwardRef<HTMLAnchorElement, SeoLinkProps>(
   function SeoLink(props, ref) {
     const { to, onClick, className, ...other } = props

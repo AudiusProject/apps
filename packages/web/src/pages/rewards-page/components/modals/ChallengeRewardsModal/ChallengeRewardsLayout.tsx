@@ -15,15 +15,10 @@ export type ChallengeRewardsLayoutProps = {
   actions?: ReactNode
   additionalContent?: ReactNode
   errorContent?: ReactNode
-  /** Amount to show in the default reward component if no custom reward is provided */
   amount?: number
-  /** Subtext to show in the default reward component if no custom reward is provided */
   rewardSubtext?: string
-  /** Progress status label to show in the default progress component if no custom progress is provided */
   progressStatusLabel?: ReactNode
-  /** Progress bar value if no custom progress is provided */
   progressValue?: number
-  /** Progress bar max value if no custom progress is provided */
   progressMax?: number
 }
 

@@ -24,7 +24,6 @@ export type SummaryTableItem = {
 }
 
 export type SummaryTableProps = {
-  /** Enables an expand/collapse interaction. Only the title shows when collapsed. */
   collapsible?: boolean
   items: SummaryTableItem[]
   extraItems?: SummaryTableItem[]

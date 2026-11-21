@@ -32,7 +32,6 @@ export const UserIdParser = ({ onParsedIdChange }: UserIdParserProps) => {
   const [parsedId, setParsedId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Reverse parser state
   const [reverseInputValue, setReverseInputValue] = useState('')
   const [encodedId, setEncodedId] = useState<string | null>(null)
   const [reverseError, setReverseError] = useState<string | null>(null)
@@ -45,13 +44,11 @@ export const UserIdParser = ({ onParsedIdChange }: UserIdParserProps) => {
 
   const handleInputChange = (value: string) => {
     setInputValue(value)
-    // Clear any previous errors when typing
     if (error) setError(null)
   }
 
   const handleReverseInputChange = (value: string) => {
     setReverseInputValue(value)
-    // Clear any previous errors when typing
     if (reverseError) setReverseError(null)
   }
 
@@ -67,7 +64,6 @@ export const UserIdParser = ({ onParsedIdChange }: UserIdParserProps) => {
       setParsedId(id)
       setError(null)
 
-      // Auto-populate the reverse input with the parsed numeric ID
       setReverseInputValue(id.toString())
       setEncodedId(inputValue.trim())
       setReverseError(null)
@@ -99,7 +95,6 @@ export const UserIdParser = ({ onParsedIdChange }: UserIdParserProps) => {
         return
       }
 
-      // Set the parsed ID for user loading and auto-populate the forward input
       setParsedId(numericId)
       setReverseError(null)
       setInputValue(hashId)

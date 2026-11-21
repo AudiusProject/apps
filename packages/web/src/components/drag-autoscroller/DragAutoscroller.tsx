@@ -21,9 +21,6 @@ type DragAutoscrollerProps = {
   ) => void
 }
 
-/** Helper component to be used inside a Stems Scrollbar component to allow
- * the container to auto-scroll when items are being dragged.
- */
 export const DragAutoscroller = ({
   children,
   containerBoundaries,
@@ -95,13 +92,7 @@ export const DragAutoscroller = ({
   }
 
   return (
-    <div
-      // This gets called repeatedly during drag if dragged item comes from outside the container
-      onDragEnter={handleDrag}
-      // This gets called repeatedly during drag if dragged item is inside the container
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
-    >
+    <div onDragEnter={handleDrag} onDrag={handleDrag} onDragEnd={handleDragEnd}>
       {children}
     </div>
   )

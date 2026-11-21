@@ -73,7 +73,6 @@ export const USDCManualTransfer = ({
   const { env } = useQueryContext()
   const { rootWalletAddress: usdcUserBank, loading: userBankLoading } =
     useRootWalletAddress()
-  // Poll for USDC recovery if there's balance in root wallet
   useMintRecovery(env.USDC_MINT_ADDRESS)
   const { toast } = useContext(ToastContext)
   const isMobile = useIsMobile()

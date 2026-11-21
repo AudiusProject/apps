@@ -46,14 +46,13 @@ export const ReceiveTokensModal = NiceModal.create(() => {
     mint ?? '',
     'en-US',
     isOpen,
-    3000 // Poll every 3 seconds when modal is open
+    3000
   )
   const { userBankAddress, loading: userBankLoading } = useUserbank(mint)
   const { rootWalletAddress, loading: rootWalletLoading } =
     useRootWalletAddress()
   const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
-  // Use root wallet address for USDC, user bank for others
   const isUsdc = mint === env.USDC_MINT_ADDRESS
   const shouldUseRootWallet = isUsdc
   const displayAddress = shouldUseRootWallet

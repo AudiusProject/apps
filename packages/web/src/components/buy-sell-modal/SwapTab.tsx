@@ -74,7 +74,6 @@ export const SwapTab = ({
   onChangeSwapDirection,
   initialTicker
 }: SwapTabProps) => {
-  // If initialTicker is provided, try to find the token and use it as the output token
   const resolvedOutputToken = useMemo(() => {
     if (initialTicker && availableOutputTokens) {
       const tokenByTicker = availableOutputTokens.find(
@@ -108,7 +107,6 @@ export const SwapTab = ({
     onInputValueChange
   })
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   const hasDisplayRateEverBeenFetched = useRef(false)
 
@@ -120,13 +118,10 @@ export const SwapTab = ({
     hasDisplayRateEverBeenFetched.current = true
   }
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     isBalanceLoading ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)
 
-  // Determine isDefault values for input and output sections
   const inputSectionIsDefault =
     inputIsDefault !== undefined ? inputIsDefault : isDefault
   const outputSectionIsDefault =

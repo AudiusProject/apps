@@ -32,15 +32,9 @@ type FanClubHoverCardProps = Pick<
   | 'transformOrigin'
   | 'triggeredBy'
 > & {
-  /**
-   * The user ID to fetch coin data and balance information for
-   */
   userId: ID
 }
 
-/**
- * A complete HoverCard for fan club badges that includes both header and body
- */
 export const FanClubHoverCard = ({
   children,
   userId,
@@ -53,10 +47,8 @@ export const FanClubHoverCard = ({
   const navigate = useNavigateToPage()
   const { spacing } = useTheme()
 
-  // Track hover state to conditionally fetch token balance
   const [isHovered, setIsHovered] = useState(false)
 
-  // Get user data to access fan_club_badge
   const { data: user } = useUser(userId, {
     select: (user) => ({
       fanClubBadge: user?.fan_club_badge
@@ -65,12 +57,10 @@ export const FanClubHoverCard = ({
 
   const { fanClubBadge } = user ?? {}
 
-  // Fetch full coin data to get name and ownerId
   const { data: coinData } = useFanClub(fanClubBadge?.mint, {
     enabled: isHovered && !!fanClubBadge?.mint
   })
 
-  // Only fetch token balance when hovered and we have the mint address
   const { data: tokenBalance, isPending: isTokenBalancePending } =
     useCoinBalance({
       mint: fanClubBadge?.mint ?? '',
@@ -78,7 +68,6 @@ export const FanClubHoverCard = ({
       enabled: isHovered && !!fanClubBadge?.mint
     })
 
-  // Determine if the user whose badge we're showing is the creator of this coin
   const isCreator = userId === coinData?.ownerId
 
   const handleClick = useCallback(() => {
@@ -89,7 +78,6 @@ export const FanClubHoverCard = ({
     }
   }, [onClick, onClose, navigate, fanClubBadge?.ticker])
 
-  // Don't render if we don't have the basic coin info
   if (!fanClubBadge?.ticker || !fanClubBadge?.logo_uri) {
     return null
   }

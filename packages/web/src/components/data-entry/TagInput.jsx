@@ -14,7 +14,6 @@ const isAlphaNumeric = (string) => {
 const isAlphaNumericKeyCode = (e) => {
   const char = String.fromCharCode(e.keyCode)
   if (e.shiftKey) {
-    // Allow hashtags because we clean them up later.
     if (char === '3') {
       return true
     }
@@ -66,7 +65,6 @@ const TagInput = ({
   }
 
   const formatTag = (tag) => {
-    // Remove non-alpha numeric and hash tags.
     return trimToAlphaNumeric(tag)
   }
 
@@ -105,23 +103,17 @@ const TagInput = ({
 
   const onNewTagInputKeyPress = (e) => {
     const newTag = newTagInputRef.current.value.toLowerCase()
-    if (
-      e.keyCode === 13 /* enter */ ||
-      e.keyCode === 9 /* tab */ ||
-      e.keyCode === 188 /* comma */
-    ) {
+    if (e.keyCode === 13 || e.keyCode === 9 || e.keyCode === 188) {
       e.preventDefault()
       addTag(newTag)
-    } else if (e.keyCode === 8 /* backspace */ && newTag.length === 0) {
+    } else if (e.keyCode === 8 && newTag.length === 0) {
       const lastTag = [...tags.keys()].pop()
       deleteTag(lastTag)
     }
 
     if (
-      // Don't allow typing past max characters.
       (newTag.length > maxCharacters - 1 && e.keyCode !== 8) ||
-      // Allow only backspace and alpha-numeric
-      (e.keyCode !== 8 /* backspace */ && !isAlphaNumericKeyCode(e))
+      (e.keyCode !== 8 && !isAlphaNumericKeyCode(e))
     ) {
       e.preventDefault()
       return false

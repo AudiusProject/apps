@@ -72,21 +72,6 @@ const columns: TracksTableColumn[] = [
   'overflowActions'
 ]
 
-/**
- * The full Weekly Rotation mix.
- *
- * Structured like a collection page (artwork, title, play-all, track list) but
- * it isn't backed by a collection entity, so it's assembled from the same
- * pieces the History page uses rather than reusing the collection page.
- * Artwork is the bundled asset for the same reason: there's no playlist_id to
- * hang cover art on.
- *
- * `/explore/weekly-rotation` shows the signed-in user's mix;
- * `/explore/weekly-rotation/:handle` shows that user's mix (public, works
- * signed out).
- *
- * The endpoint returns a fixed 30, so there is no pagination.
- */
 export const WeeklyRotationPage = () => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
@@ -95,12 +80,9 @@ export const WeeklyRotationPage = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { handle } = useParams<{ handle?: string }>()
 
-  // The route stays registered while the flag is off so shared links redirect
-  // instead of 404ing.
   const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
-  // The mix belongs to the handle's user if present, otherwise the viewer.
   const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
   const targetUserId = handle ? handleUser?.user_id : currentUserId
   const isOwnMix =
@@ -123,8 +105,6 @@ export const WeeklyRotationPage = () => {
     [isMobile, isOwnMix, targetUserId]
   )
 
-  // Fired once the mix resolves rather than on mount, so trackCount and status
-  // are real.
   const hasTrackedView = useRef(false)
   useEffect(() => {
     if (hasTrackedView.current || (!isSuccess && !isError)) return
@@ -151,7 +131,6 @@ export const WeeklyRotationPage = () => {
   )
   const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
 
-  // The header button only reflects and controls playback of this mix.
   const isQueued =
     currentPlaybackSource === playbackSource &&
     currentPlaybackTrackId != null &&
@@ -167,8 +146,6 @@ export const WeeklyRotationPage = () => {
     [trackIds, playbackSource]
   )
 
-  // Toggle when the mix is what's loaded, otherwise start the queue from the
-  // top.
   const handlePlay = useCallback(() => {
     if (playbackQueue.length === 0) return
     const firstId = playbackQueue[0].trackId as ID
@@ -227,8 +204,6 @@ export const WeeklyRotationPage = () => {
 
   const isEmpty = !isLoading && trackIds.length === 0
 
-  // Nothing until remote config resolves, so an enabled user doesn't get
-  // bounced to Explore on the first frame.
   if (!isFlagLoaded) return null
   if (!isWeeklyRotationEnabled) return <Navigate to={EXPLORE_PAGE} replace />
 
@@ -236,8 +211,6 @@ export const WeeklyRotationPage = () => {
     ? exploreMessages.weeklyRotation
     : exploreMessages.weeklyRotationFor(handleUser?.name ?? handle ?? '')
 
-  // Only the handle route gets an OG card and canonical URL; the bare route is
-  // per-viewer.
   const metaTags = handle
     ? {
         title,

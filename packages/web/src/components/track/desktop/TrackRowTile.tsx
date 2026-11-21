@@ -50,7 +50,6 @@ const {
   getBuffering
 } = playbackSelectors
 
-/** Same contract as the desktop `TrackTile`, so lineups can swap the two. */
 export type TrackRowTileProps = {
   id: ID
   index: number
@@ -63,15 +62,9 @@ export type TrackRowTileProps = {
   isFeed?: boolean
   onClick?: (trackId: ID) => void
   containerClassName?: string
-  /** Mark the owner's pinned track with an "Artist Pick" line. */
   showArtistPick?: boolean
 }
 
-/**
- * Connected, single-line track row for desktop lineups. Reads the track from
- * the tanquery cache and drives playback and favorites the same way the
- * desktop tile does, but renders Harmony's dense `TrackRow`.
- */
 export const TrackRowTile = ({
   id,
   index,
@@ -239,8 +232,6 @@ export const TrackRowTile = ({
   )
 
   const isLocked = !!streamConditions && !hasStreamAccess && !isOwner
-  // Like the tile's stats: a price pill in place of plays when locked, and the
-  // access label ("Premium", "Hidden"...) next to plays otherwise.
   const status = isLocked ? (
     <GatedConditionsPill
       streamConditions={streamConditions}
@@ -255,7 +246,6 @@ export const TrackRowTile = ({
     <TrackAccessTypeLabel trackId={trackId} />
   ) : undefined
 
-  // Podcasts and audiobooks show progress the way the tile does.
   const isLongForm = isLongFormContent({ genre })
   const durationLabel = !duration
     ? undefined

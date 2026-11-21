@@ -1,4 +1,3 @@
-// From: https://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
 export const webglSupported = () => {
   try {
     const canvas = document.createElement('canvas')

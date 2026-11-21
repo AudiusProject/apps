@@ -6,8 +6,6 @@ import { MarkdownViewer } from 'components/markdown-viewer'
 import styles from './AnnouncementModal.module.css'
 import { IconAnnouncement } from './Notification/components/icons'
 
-/** The NotificationModal is a modal that renders the
- * full notification with markdown */
 export const AnnouncementModal = () => {
   const { isOpen, data, onClose } = useAnnouncementModal()
   const { announcementNotification } = data

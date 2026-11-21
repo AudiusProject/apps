@@ -91,8 +91,6 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
         : [])
     ]
 
-    // Title row (32px) + tabs row (32px) + padding/gap fill the 112px
-    // --chat-header-height exactly, so the list offsets are unchanged.
     const headerContent = (
       <Flex column p='l' gap='m' w='100%' css={{ minWidth: 0 }}>
         <Flex alignItems='center' gap='m' w='100%'>

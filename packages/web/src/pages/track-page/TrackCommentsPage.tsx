@@ -27,7 +27,6 @@ export const TrackCommentsPage = () => {
 
   const { setLeft, setCenter, setRight } = useContext(NavContext)
 
-  // Use the same highlighting logic as desktop
   const highlightedComment = useHighlightedComment()
   const highlightedCommentId =
     highlightedComment?.entityId === partialTrack?.track_id

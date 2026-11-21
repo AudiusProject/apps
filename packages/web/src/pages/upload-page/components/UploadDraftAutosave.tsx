@@ -12,10 +12,6 @@ type UploadDraftAutosaveProps = {
   uploadType: UploadType
 }
 
-/**
- * Saves the upload form to this device's draft as the user edits it. A
- * pending save is flushed on unmount so leaving right after an edit keeps it.
- */
 export const UploadDraftAutosave = ({
   uploadType
 }: UploadDraftAutosaveProps) => {

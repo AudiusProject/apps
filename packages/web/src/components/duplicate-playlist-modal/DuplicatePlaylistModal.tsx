@@ -141,8 +141,6 @@ export const DuplicatePlaylistModal = () => {
     setCustomArtwork(null)
   }, [])
 
-  // Seed custom fields when source loads so toggling a switch shows the
-  // current source value as a starting point.
   useEffect(() => {
     if (sourceCollection) {
       if (!customTitle) {

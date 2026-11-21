@@ -44,7 +44,6 @@ export const FileReplaceContainer = ({
       </PlainButton>
       <Flex gap='s'>
         <ReactDropzone
-          // empty style makes this hug the button
           style={{}}
           multiple={false}
           accept='audio/*'

@@ -1,7 +1,6 @@
 import { CoinInfo, CoinPair } from '@audius/common/store'
 import { TooltipPlacement } from '@audius/harmony'
 
-// Transaction data structure
 export type TransactionData = {
   inputAmount: number
   outputAmount: number
@@ -13,7 +12,6 @@ export type TransactionData = {
   isExchangeRateLoading?: boolean
 }
 
-// UI configuration options
 export type UIConfiguration = {
   isDefault?: boolean
   error?: boolean
@@ -21,14 +19,12 @@ export type UIConfiguration = {
   tooltipPlacement?: TooltipPlacement
 }
 
-// Token pricing configuration
 export type TokenPricing = {
   tokenPrice?: string | null
   isTokenPriceLoading?: boolean
   tokenPriceDecimalPlaces?: number
 }
 
-// Input handling configuration
 export type InputConfiguration = {
   initialInputValue?: string
   onInputValueChange?: (value: string) => void
@@ -36,7 +32,6 @@ export type InputConfiguration = {
   max?: number
 }
 
-// Token selection configuration
 export type TokenSelection = {
   availableInputTokens?: CoinInfo[]
   availableOutputTokens?: CoinInfo[]
@@ -44,13 +39,11 @@ export type TokenSelection = {
   onOutputTokenChange?: (symbol: string) => void
 }
 
-// Callback functions
 export type SwapCallbacks = {
   onTransactionDataChange?: (data: TransactionData) => void
   onChangeSwapDirection?: () => void
 }
 
-// Main SwapTab props interface composed of smaller interfaces
 export type SwapTabProps = {
   tokens: CoinPair
   configuration: UIConfiguration
@@ -60,7 +53,6 @@ export type SwapTabProps = {
   callbacks: SwapCallbacks
 }
 
-// Base props shared across all tab components
 export type BaseTabProps = {
   tokenPair: CoinPair
   onTransactionDataChange?: (data: TransactionData) => void
@@ -88,5 +80,4 @@ export type ConvertTabProps = BaseTabProps & {
   onChangeSwapDirection?: () => void
 }
 
-// Modal screen types
 export type Screen = 'input' | 'confirm' | 'success'

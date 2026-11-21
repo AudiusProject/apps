@@ -4,10 +4,6 @@ import indexHtml from '../../index.html?raw'
 
 const pattern = /%(\S+?)%/g
 
-/**
- * Transform index.html so that it can be used for SSR
- * @returns
- */
 export const getIndexHtml = () => {
   return (
     indexHtml

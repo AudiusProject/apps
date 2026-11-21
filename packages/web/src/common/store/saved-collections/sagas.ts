@@ -24,10 +24,6 @@ function* fetchCollectionsAsync({ ids, type }: FetchCollectionsConfig) {
   )
 }
 
-/** Will create and wait on parallel effects to fetch full details for all saved albums and
- * playlists. Note: Only use this if you really need full details (such as track
- * lists) for all collections, as it may potentially fetch a lot of data.
- */
 export function* fetchAllAccountCollections() {
   yield waitForRead()
 

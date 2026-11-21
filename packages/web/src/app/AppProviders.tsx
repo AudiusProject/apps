@@ -35,14 +35,8 @@ import {
 import './registerNiceModals'
 import { createRoutes } from './routes'
 
-// Wire the platform-agnostic bridge so common (sagas/services) can drive
-// nice-modal-react without depending on the package directly.
 setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
 
-/**
- * Load AppKit at startup only to restore a persisted wallet connection. wagmi
- * and AppKit otherwise load with the features that use them.
- */
 const useRestoreWalletConnection = () => {
   useEffect(() => {
     if (!getLoadedAppKit() && hasPersistedWalletConnection()) {
@@ -84,7 +78,6 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     }
 
     const { store, persistor } = configureStore({ isMobile, initialStoreState })
-    // Mount store to window for easy access
     if (typeof window !== 'undefined' && !window.store) {
       window.store = store
     }
@@ -93,7 +86,6 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
 
   const basename = env.BASENAME || undefined
 
-  // Create router with data router API for code-splitting and performance
   const router = useMemo(() => {
     const routes = createRoutes()
     const createRouter = env.USE_HASH_ROUTING

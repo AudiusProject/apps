@@ -47,9 +47,6 @@ const useCallbacks = () => {
   return { isOpen, downloadDesktopApp, onClose }
 }
 
-/**
- * Modal that presents a CTA to download the Audius apps.
- */
 const AppCTAModal = () => {
   const { isOpen, downloadDesktopApp, onClose } = useCallbacks()
 

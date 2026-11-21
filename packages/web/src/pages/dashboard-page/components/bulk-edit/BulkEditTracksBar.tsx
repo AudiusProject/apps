@@ -14,7 +14,6 @@ const messages = {
 }
 
 type BulkEditTracksBarProps = {
-  /** Tracks currently shown in the table. */
   tracks: { track_id: ID; title: string }[]
 }
 
@@ -22,7 +21,6 @@ export const BulkEditTracksBar = ({ tracks }: BulkEditTracksBarProps) => {
   const selection = useTrackSelection()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Rows hidden by a filter or search don't count as selected.
   const selectedTracks = useMemo(
     () => tracks.filter((track) => selection.isSelected(track.track_id)),
     [tracks, selection]

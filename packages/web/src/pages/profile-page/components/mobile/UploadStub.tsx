@@ -13,7 +13,6 @@ type UploadStubProps = {
     selectedFiles: any,
     source: 'original' | 'unsplash' | 'url'
   ) => void
-  // Manually override the processing state
   isProcessing?: boolean
   isHidden?: boolean
 }

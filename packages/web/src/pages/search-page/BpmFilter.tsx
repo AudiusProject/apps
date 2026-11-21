@@ -101,7 +101,6 @@ const BpmRangeView = ({ value, handleChange, setIsOpen }: ViewProps) => {
   const [minError, setMinError] = useState<string | null>(null)
   const [maxError, setMaxError] = useState<string | null>(null)
   const [hasChanged, setHasChanged] = useState(false)
-  // NOTE: Memo to avoid the constantly changing function instance from triggering the effect
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onChange = useMemo(() => handleChange, [])
 
@@ -122,7 +121,6 @@ const BpmRangeView = ({ value, handleChange, setIsOpen }: ViewProps) => {
   useEffect(() => {
     if (!hasChanged) return
 
-    // Validation
     const minVal = Number(minBpm)
     const maxVal = Number(maxBpm)
     let hasError = false
@@ -160,7 +158,6 @@ const BpmRangeView = ({ value, handleChange, setIsOpen }: ViewProps) => {
 
     if (hasError) return
 
-    // Value Update
     let value = ''
 
     if (minBpm || maxBpm) {
@@ -192,7 +189,6 @@ const BpmRangeView = ({ value, handleChange, setIsOpen }: ViewProps) => {
         gap='xs'
         w={240}
         alignItems='flex-start'
-        // NOTE: Adds a little flexibility so the user doesn't close the popup by accident
         onClick={(e) => e.stopPropagation()}
       >
         <TextInput
@@ -237,7 +233,7 @@ const BpmTargetView = ({ value, handleChange }: ViewProps) => {
   const initialTargetValue =
     minMaxValue && isValidDiff
       ? String(Number(minMaxValue[0]) + minMaxDiff / 2)
-      : minMaxValue // If range is not valid for target view
+      : minMaxValue
         ? ''
         : value
 
@@ -248,7 +244,6 @@ const BpmTargetView = ({ value, handleChange }: ViewProps) => {
   )
   const [hasChanged, setHasChanged] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // NOTE: Memo to avoid the constantly changing function instance from triggering the effect
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onChange = useMemo(() => handleChange, [])
 
@@ -262,7 +257,6 @@ const BpmTargetView = ({ value, handleChange }: ViewProps) => {
   useEffect(() => {
     if (!hasChanged) return
 
-    // Validation
     const val = Number(bpmTarget)
     let hasError = false
 
@@ -282,7 +276,6 @@ const BpmTargetView = ({ value, handleChange }: ViewProps) => {
 
     if (hasError) return
 
-    // Value Update
     let value = ''
 
     if (bpmTarget) {
@@ -375,7 +368,6 @@ export const BpmFilter = () => {
             direction='column'
             w='100%'
             ph='s'
-            // NOTE: Adds a little flexibility so the user doesn't close the popup by accident
             onClick={(e) => e.stopPropagation()}
           >
             <SegmentedControl

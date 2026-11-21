@@ -2,7 +2,6 @@ import { SquareSizes, WidthSizes } from '@audius/common/models'
 import { Id, developmentConfig } from '@audius/sdk'
 const { apiEndpoint } = developmentConfig.network
 
-// These are reserved for "artistUser" (1) and "nonArtistUser" (2)
 const usedIds = [1, 2]
 
 export const artistUser = {

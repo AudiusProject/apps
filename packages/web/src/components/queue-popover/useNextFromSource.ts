@@ -12,11 +12,6 @@ type InfiniteData<T> = { pages: T[]; pageParams: unknown[] }
 
 const MAX_NEXT_FROM = 10
 
-/**
- * Reads the source lineup (the lineup that produced the current playback
- * via `playFrom`) from the tan-query cache and returns the next tracks
- * that are NOT already in the playback queue.
- */
 export const useNextFromSource = () => {
   const queryClient = useQueryClient()
   const querySource = useSelector(getQuerySource)
@@ -40,7 +35,6 @@ export const useNextFromSource = () => {
     for (const page of data.pages) {
       for (const item of page) {
         if (!item) continue
-        // Lineup pages mix tracks and collections — only take tracks.
         if (item.type && item.type !== 'track') continue
         const id = typeof item.id === 'number' ? item.id : Number(item.id)
         if (!Number.isFinite(id)) continue

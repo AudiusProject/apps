@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { Name, AllTrackingEvents, IdentifyTraits } from '@audius/common/models'
 import { useDispatch as useDispatchRedux } from 'react-redux'
 
-/** UI EVENTS */
 export const IDENTIFY = 'ANALYTICS/IDENTIFY'
 export const TRACK = 'ANALYTICS/TRACK'
 

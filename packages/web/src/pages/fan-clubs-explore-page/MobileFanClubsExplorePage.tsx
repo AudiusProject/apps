@@ -151,7 +151,6 @@ export const MobileFanClubsExplorePage: React.FC = () => {
     (coin) => coin.mint !== env.WAUDIO_MINT_ADDRESS
   )
 
-  // Debounce search value to avoid excessive API calls
   useDebounce(() => setDebouncedSearchValue(searchValue), 300, [searchValue])
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -228,7 +227,7 @@ export const MobileFanClubsExplorePage: React.FC = () => {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  color: 'transparent' // fallback for browsers that don't support background-clip
+                  color: 'transparent'
                 }}
               >
                 {walletMessages.fanClubs.title}

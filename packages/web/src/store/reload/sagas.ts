@@ -11,7 +11,7 @@ const { getPlaying } = playbackSelectors
 const { getIsUploading } = uploadSelectors
 
 const checkGitSHA = createAction('RELOAD/CHECK_GIT_SHA')
-const SHA_CHECK_MS = 60 * 60 * 1000 // Once every hour
+const SHA_CHECK_MS = 60 * 60 * 1000
 let localSha: string | null = null
 
 function* fetchCurrentGitSha() {

@@ -37,8 +37,6 @@ const contestHostingLink =
   'https://help.audius.co/artists/hosting-a-remix-contest'
 
 export const HostRemixContestModal = NiceModal.create(() => {
-  // Visibility owned by NiceModal; payload (`trackId`) still flows through
-  // the legacy createModal hook.
   const modal = useModal()
   const onClose = useCallback(() => {
     modal.hide()
@@ -65,7 +63,6 @@ export const HostRemixContestModal = NiceModal.create(() => {
 
   const remixContestData = remixContest?.eventData
 
-  // Form state
   const [contestDescription, setContestDescription] = useState(
     remixContestData ? remixContestData.description : ''
   )
@@ -135,9 +132,6 @@ export const HostRemixContestModal = NiceModal.create(() => {
     if (hasError || !trackId || !userId) return
 
     const endDate = parsedDate.toISOString()
-    // event_data is replaced wholesale by the indexer on update, so carry
-    // over the fields this form doesn't edit (title, coverPhotoUrl,
-    // sourceTrackIds, etc.) instead of dropping them.
     const eventData = {
       ...remixContest?.eventData,
       description: contestDescription,

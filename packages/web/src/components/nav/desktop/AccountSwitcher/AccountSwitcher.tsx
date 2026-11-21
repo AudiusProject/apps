@@ -65,7 +65,6 @@ export const AccountSwitcher = ({
     currentWeb3User && currentUserId && isManagedAccountsPending
   )
 
-  // Notify parent of visibility changes
   useEffect(() => {
     onVisibilityChange?.(isVisible)
     return () => {
@@ -73,8 +72,6 @@ export const AccountSwitcher = ({
     }
   }, [isVisible, onVisibilityChange])
 
-  // Reset to the web3User if we detect that the current user is no longer in
-  // the managed accounts list
   useEffect(() => {
     if (
       !currentUserId ||
@@ -84,7 +81,6 @@ export const AccountSwitcher = ({
     ) {
       return
     }
-    // Check this only once per mount
     setCheckedAccess(true)
     if (
       currentUserId !== currentWeb3User.user_id &&

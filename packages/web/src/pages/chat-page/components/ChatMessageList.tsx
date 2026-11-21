@@ -80,7 +80,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
     const chat = useSelector((state) => getChat(state, chatId ?? ''))
     const isGroup = !!chat && !chat.is_blast && !!chat.is_group
     const blockees = useSelector(getBlockees)
-    // Groups can include people you blocked; hide their messages
     const visibleMessages = useMemo(
       () =>
         isGroup && blockees.length > 0
@@ -102,20 +101,15 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       polyfill: ResizeObserver
     })
 
-    // On first load, mark chat as read
     useEffect(() => {
       if (chatId) {
         dispatch(markChatAsRead({ chatId }))
       }
     }, [chatId, dispatch])
 
-    // A ref so that the unread separator doesn't disappear immediately when the chat is marked as read
-    // Using a ref instead of state here to prevent unwanted flickers.
-    // The chat/chatId selectors will trigger the rerenders necessary.
     const chatFrozenRef = useRef(chat)
     useLayoutEffect(() => {
       if (chat && chatId !== chatFrozenRef.current?.chat_id) {
-        // Update the unread indicator when chatId changes
         chatFrozenRef.current = chat
       }
     }, [chat, chatId])
@@ -126,11 +120,9 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       (e: UIEvent<HTMLDivElement>) => {
         if (!chatId) return
 
-        // Handle case where scrolled to bottom
         const nearBottom = isScrolledNearBottom(e.target as HTMLDivElement)
         wasNearBottomRef.current = nearBottom
         if (nearBottom) {
-          // Mark chat as read when the user reaches the bottom (saga handles no-op if already read)
           dispatch(markChatAsRead({ chatId }))
           dispatch(setActiveChat({ chatId }))
         } else {
@@ -147,7 +139,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
             ) &&
             isScrolledNearTop(e.target as HTMLDivElement)
           ) {
-            // Fetch more messages when user reaches the top
             dispatch(fetchMoreMessages({ chatId }))
           }
         }
@@ -155,10 +146,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       [dispatch, chatId, chat?.messagesStatus, chat?.messagesSummary]
     )
 
-    // Memoize the creation of throttled scroll handler, to avoid
-    // creating a new throttled function each time and because useCallback
-    // doesn't like receiving a non-inlined fn
-    // https://dmitripavlutin.com/react-throttle-debounce/
     const throttledScrollHandler = useMemo(
       () =>
         throttle(scrollHandler, THROTTLE_DURATION_MS, {
@@ -168,9 +155,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       [scrollHandler]
     )
 
-    // Cancel any throttled scrolls when the handler changes or on unmount.
-    // (Without the dep array, the cleanup ran on every render and cancelled
-    // in-flight throttled invocations spuriously.)
     useEffect(
       () => () => {
         throttledScrollHandler.cancel()
@@ -178,10 +162,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       [throttledScrollHandler]
     )
 
-    // Snap to the bottom whenever the inner message-list content resizes and
-    // the user was near the bottom — covers avatar loads, unfurls, image
-    // expansions, etc. that don't change the message-array reference and so
-    // wouldn't otherwise trip StickyScrollList's stickToBottom logic.
     useLayoutEffect(() => {
       if (!ref.current) return
       if (wasNearBottomRef.current) {
@@ -189,15 +169,12 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       }
     }, [messageListHeight])
 
-    // Respond to async unfurl expansions explicitly signaled by list items
     useEffect(() => {
       const el = ref.current
       if (!el) return
 
       const handleExpanded = (e: Event) => {
-        // If user was near bottom before expansion, schedule a microtask scroll
         if (!wasNearBottomRef.current) return
-        // Wait for the layout to settle this tick
         queueMicrotask(() => {
           el.scrollTo({ top: el.scrollHeight })
         })
@@ -213,8 +190,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
 
     const scrollIntoViewOnMount = useCallback((el: HTMLDivElement) => {
       if (el) {
-        // On initial render, can't scroll yet, as the component isn't fully rendered.
-        // Instead, queue a scroll by triggering a rerender via a state change.
         setUnreadIndicatorEl(el)
       }
     }, [])
@@ -230,7 +205,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
           )
         }
 
-        // One more state change, this keeps chats unread until the user scrolls to the bottom on their own
         setLastScrolledChatId(chatId)
       }
     }, [unreadIndicatorEl, chatId, setLastScrolledChatId])
@@ -242,20 +216,14 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
           chat?.messagesStatus === 'PENDING' ||
           chat?.messagesStatus === undefined)
       ) {
-        // Initial fetch
         dispatch(fetchMoreMessages({ chatId }))
         dispatch(setActiveChat({ chatId }))
       }
-      // Unset active chat when component unmounts
       return () => {
         dispatch(setActiveChat({ chatId: null }))
       }
     }, [dispatch, chatId, chat?.messagesStatus])
 
-    // Fix for if the initial load doesn't have enough messages to cause scrolling.
-    // Guarded so that re-renders triggered by the messages array don't dispatch
-    // duplicate fetchMoreMessages for the same (chatId, prev_count) pair while
-    // the saga is still in flight.
     const autoFetchMoreGuardRef = useRef<{
       chatId: string
       prevCount: number

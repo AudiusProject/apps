@@ -2,7 +2,6 @@ import path from 'node:path'
 
 import { defineConfig } from 'vitest/config'
 
-// SSR tests don't need the browser app's providers, canvas mocks, or SDK setup.
 export default defineConfig({
   esbuild: { jsx: 'automatic' },
   resolve: {

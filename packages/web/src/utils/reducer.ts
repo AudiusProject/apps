@@ -4,17 +4,8 @@ import { Action } from 'redux'
 import { UseSelectorHook } from 'common/hooks/useSelector'
 import { AppState } from 'store/types'
 
-/**
- * Typed version of Redux useSelector
- */
 export const useSelector: UseSelectorHook<AppState> = untypedUseSelector
 
-/**
- * Handy util for generating a reducer function from an actionmap.
- *
- * @template A the Action type this reducer listens for
- * @template S the state type this reducer operates on
- */
 export const makeReducer = <A extends Action, S>(
   actionsMap: { [action: string]: (state: S, action: A) => S },
   initialState: S
@@ -26,5 +17,4 @@ export const makeReducer = <A extends Action, S>(
   }
 }
 
-// TODO: Improve this typing from action: any
 export type ActionsMap<S> = { [index: string]: (state: S, action: any) => S }

@@ -17,9 +17,6 @@ const messages = {
 
 type AudiusValueProps = { icon: IconComponent; text: string; dynamic?: boolean }
 
-/**
- * Each individual audius value text + icon row
- */
 const AudiusValue = (props: AudiusValueProps) => {
   const { icon: Icon, text } = props
   const isMedium = useMediaQuery(
@@ -49,10 +46,6 @@ const AudiusValue = (props: AudiusValueProps) => {
     </Flex>
   )
 }
-
-/**
- * Renders all the audius values
- */
 
 type AudiusValuesProps = {
   className?: string

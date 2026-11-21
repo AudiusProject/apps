@@ -41,9 +41,6 @@ const messages = {
   metaDescription: 'Create an account on Audius'
 }
 
-/**
- * <Route> wrapper that handles redirecting through the sign up page flow
- */
 function SignUpRoute({
   children,
   path
@@ -54,8 +51,6 @@ function SignUpRoute({
   const location = useLocation()
   const determineAllowedRoute = useDetermineAllowedRoute()
 
-  // Check if the route is allowed, if not we redirect accordingly
-  // useDetermineAllowedRoute expects the full pathname, not a trimmed one
   const { isAllowedRoute, correctedRoute } = determineAllowedRoute(
     location.pathname
   )
@@ -88,7 +83,6 @@ export const SignUpPage = () => {
         <Route
           path='create-email'
           element={
-            // <SignUpRoute path={SIGN_UP_EMAIL_PAGE}>
             <CreateEmailPage />
             // </SignUpRoute>
           }

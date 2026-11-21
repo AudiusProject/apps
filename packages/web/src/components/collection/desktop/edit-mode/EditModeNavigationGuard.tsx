@@ -14,13 +14,8 @@ const messages = {
   cancel: 'Stay'
 }
 
-/**
- * Warns the user before navigating away (in-app route change or tab
- * close/refresh) while there are unsaved edits in playlist edit/create mode.
- */
 export const EditModeNavigationGuard = () => {
   const { isEditMode, hasChanges, status } = usePlaylistEditMode()
-  // Don't block our own redirect once a save/create is underway.
   const shouldBlock = isEditMode && hasChanges && status !== 'saving'
 
   const blocker = useBlocker(
@@ -28,7 +23,6 @@ export const EditModeNavigationGuard = () => {
       shouldBlock && currentLocation.pathname !== nextLocation.pathname
   )
 
-  // Browser-level navigation (close tab, refresh, external link).
   useEffect(() => {
     if (!shouldBlock) return
     const handler = (e: BeforeUnloadEvent) => {
@@ -39,7 +33,6 @@ export const EditModeNavigationGuard = () => {
     return () => window.removeEventListener('beforeunload', handler)
   }, [shouldBlock])
 
-  // If the changes are saved/discarded while a navigation is blocked, release.
   useEffect(() => {
     if (blocker.state === 'blocked' && !shouldBlock) {
       blocker.proceed()

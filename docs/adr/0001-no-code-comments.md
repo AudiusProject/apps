@@ -12,7 +12,7 @@ The apps repo had about 11,400 hand-written comment blocks (about 24,000 lines, 
 - Code does not carry comments. Names, types and small functions say _what_.
 - A non-obvious _why_ (platform quirks, ordering constraints, money/security reasoning, deliberate fallbacks) goes in an ADR under `docs/adr/`.
 - Unfinished work goes in a GitHub issue, not a TODO.
-- Exempt: tool directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, bundler magic comments), generated code, license headers, and `/** */` JSDoc in the public-API packages `sdk`, `harmony`, `fixed-decimal` and `spl`, where it is shipped documentation.
+- Exempt: tool directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, bundler magic comments), generated code, vendored files under `public/` and `*.min.js`, tutorial comments in `examples/` directories, license headers, and `/** */` JSDoc in the public-API packages `sdk`, `harmony`, `fixed-decimal` and `spl`, where it is shipped documentation.
 
 ## Enforcement
 

@@ -8,7 +8,6 @@ type UseHeaderProps = {
   className?: string
 }
 
-/** Sets up a mobile header with title and style */
 export const useMobileHeader = ({ title, className }: UseHeaderProps = {}) => {
   const { setHeader } = useContext(HeaderContext)
   useEffect(() => {

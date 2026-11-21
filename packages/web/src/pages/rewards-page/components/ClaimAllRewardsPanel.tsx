@@ -40,7 +40,6 @@ export const ClaimAllRewardsPanel = () => {
     getOptimisticUserChallenges(state, currentAccount, currentUser)
   )
 
-  // Calculate total claimed amount
   const totalClaimed = useMemo(() => {
     return Object.values(optimisticUserChallenges).reduce(
       (sum, challenge) => sum + (challenge?.disbursed_amount ?? 0),
@@ -48,7 +47,6 @@ export const ClaimAllRewardsPanel = () => {
     )
   }, [optimisticUserChallenges])
 
-  // Pending amount is the cooldown amount
   const pendingAmount = cooldownAmount
 
   const onClickClaimAllRewards = useCallback(() => {

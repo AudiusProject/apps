@@ -44,8 +44,6 @@ type CollaboratorRowProps = {
   onRemove: () => void
 }
 
-// A tagged collaborator: the artist, an overflow menu (remove), and the
-// invite status — mirrors the Figma "Add Collaborator" rows.
 const CollaboratorRow = ({
   user,
   isAccepted,
@@ -86,7 +84,6 @@ type CollaboratorSearchProps = {
   onSelect: (user: User) => void
 }
 
-// Inline artist search with a results list, shown when adding a collaborator.
 const CollaboratorSearch = ({
   excludedUserIds,
   onSelect
@@ -144,7 +141,6 @@ type CollaboratorsMenuFieldsProps = {
   acceptedUserIds?: number[]
 }
 
-// Body of the Collaborators ContextualMenu modal.
 export const CollaboratorsMenuFields = ({
   acceptedUserIds
 }: CollaboratorsMenuFieldsProps) => {

@@ -6,10 +6,6 @@ type TabBodyProps = FlexProps & {
   onHeightChange?: (height: number) => void
 }
 
-/**
- * A wrapper component that measures its content height and reports changes.
- * Designed to be used with tab content to enable smooth height transitions.
- */
 export const TabBody = ({
   children,
   onHeightChange,

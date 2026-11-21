@@ -38,7 +38,6 @@ export const BuySellModal = NiceModal.create(() => {
   const [modalScreen, setModalScreen] = useState<Screen>('input')
   const [isFlowLoading, setIsFlowLoading] = useState(false)
 
-  // Reset modal state when modal opens
   useEffect(() => {
     if (isOpen) {
       setModalScreen('input')
@@ -60,7 +59,6 @@ export const BuySellModal = NiceModal.create(() => {
       onClosed={resetState ?? undefined}
       size='medium'
       zIndex={zIndex.BUY_SELL_MODAL}
-      // We open the appkit modal from within this modal - dont want to close the modal while the other modal is on top
       dismissOnClickOutside={modalScreen !== 'confirm' && !isAppKitModalOpen}
     >
       <ModalHeader

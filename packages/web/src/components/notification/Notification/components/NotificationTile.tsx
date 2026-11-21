@@ -12,7 +12,6 @@ type NotificationTileProps = {
   notification: Notification
   children: ReactNode
   onClick?: ReactEventHandler
-  // When `true` do not close notification panel onClick
   disableClosePanel?: boolean
 }
 

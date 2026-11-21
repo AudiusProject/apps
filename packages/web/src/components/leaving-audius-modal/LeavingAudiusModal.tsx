@@ -26,9 +26,6 @@ const messages = {
 
 export const LeavingAudiusModal = NiceModal.create(() => {
   const modal = useModal()
-  // Continue reading the link payload from the redux slice that the
-  // useLeavingAudiusModal createModal hook stores; visibility is now owned
-  // by NiceModal via useModal().
   const { data } = useLeavingAudiusModal()
   const { link } = data
 

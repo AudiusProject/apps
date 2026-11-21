@@ -83,10 +83,6 @@ export const EditCollectionPage = () => {
       ...restValues
     }
 
-    // Returning the promise lets Formik keep `isSubmitting` true (and the
-    // submit button in its loading state) until the edit saga finishes its
-    // optimistic updates. We then navigate so the user lands on the
-    // playlist page with fresh data instead of the pre-edit version.
     return new Promise<void>((resolve) => {
       dispatch(
         editPlaylist(playlist_id!, collection as EditCollectionValues, () => {

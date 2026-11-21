@@ -58,7 +58,6 @@ export const useFanClubDetailTabs = ({
     </Button>
   ) : null
 
-  // If not wAUDIO, just return the content without tabs
   if (!isWAudio) {
     return {
       tabs: null,
@@ -67,7 +66,6 @@ export const useFanClubDetailTabs = ({
     }
   }
 
-  // For wAUDIO, return the full tabs system
   return {
     tabs: (
       <TabList value={selectedTab} onChange={updateTabSearchParam}>

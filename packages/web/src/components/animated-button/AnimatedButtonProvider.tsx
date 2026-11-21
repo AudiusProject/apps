@@ -31,8 +31,6 @@ type BaseAnimatedButtonProps = {
   stopPropagation?: boolean
   isMatrix: boolean
 
-  // If we mount in the active state,
-  // should we animate that transition or not?
   disableAnimationOnMount?: boolean
 }
 
@@ -143,12 +141,9 @@ const AnimatedButton = ({
 export type LottieThemeVariant = 'accent' | 'neutral'
 
 export type AnimatedButtonProviderProps = {
-  /** @deprecated No longer used - theme applied via useLottieThemeColors */
   darkMode?: boolean
   isMatrix: boolean
-  /** Base Lottie JSON loader - theme colors applied at runtime */
   iconJSON: () => Promise<IconJSON>
-  /** 'accent' = active state, 'neutral' = inactive state. Defaults from isActive. */
   variant?: LottieThemeVariant
 } & BaseAnimatedButtonProps
 

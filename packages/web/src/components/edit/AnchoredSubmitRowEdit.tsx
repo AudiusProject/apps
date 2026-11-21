@@ -33,17 +33,10 @@ export const AnchoredSubmitRowEdit = ({
     submitForm,
     isSubmitting: isFormikSubmitting
   } = useFormikContext()
-  // Fall back to Formik's submission state so flows that don't pass an
-  // explicit isSubmitting prop still get a loading indicator while the
-  // submit handler's promise is in flight.
   const isSubmitting = isSubmittingProp ?? isFormikSubmitting
 
   const navigate = useNavigate()
 
-  // Portal out of mainContentWrapper — its `transform` creates a containing
-  // block that breaks position:fixed relative to the viewport. Target the
-  // app shell (parent of mainContent) so the fixed row anchors to the
-  // viewport and still inherits the --nav-width / --play-bar-height vars.
   const mainContentRef = useMainContentRef()
   const Portal = usePortal({
     container: mainContentRef.current?.parentElement ?? undefined

@@ -58,7 +58,6 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
     [currentUserId, queryArgs]
   )
 
-  // Set Header Nav
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
     setLeft(LeftPreset.BACK)

@@ -108,7 +108,6 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
     linkFonts.addEventListener('error', () => reveal(), { once: true })
     linkUrbanist.addEventListener('error', () => reveal(), { once: true })
 
-    // Register listeners before append to avoid missing cached stylesheet load events.
     document.head.appendChild(linkFonts)
     document.head.appendChild(linkUrbanist)
 

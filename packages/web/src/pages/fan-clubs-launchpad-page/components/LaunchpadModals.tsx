@@ -58,9 +58,6 @@ const LoadingState = ({ numTxs }: { numTxs: number }) => (
   </ModalContent>
 )
 
-/**
- * Rare edge case modal where the SDK call to add the coin to Audius fails
- */
 const CoinNotInAudiusState = ({ mintAddress }: { mintAddress: string }) => (
   <>
     <ModalHeader showDismissButton={false}>
@@ -82,9 +79,6 @@ const CoinNotInAudiusState = ({ mintAddress }: { mintAddress: string }) => (
   </>
 )
 
-/**
- * Rare edge case modal where an uncaught error crashed the tan-query useLaunchCoin mutation
- */
 const UnknownErrorState = ({
   errorMetadata,
   mintAddress,
@@ -160,13 +154,8 @@ export const LaunchpadSubmitModal = ({
   const { payAmount } = values
   const payAmountNumber = Number(wAUDIO(payAmount).value)
 
-  // State to manage delayed error display
   const [showError, setShowError] = useState(false)
 
-  // This is a workaround.
-  // There's a few times where isError gets set to true but we're closing the modal at the same time
-  // This state "flashes" while the modal closes since the modal has a transition animation
-  // So to work around it, I added a small delay to show the error state
   useEffect(() => {
     if (isError && !isPending) {
       const timer = setTimeout(() => {
@@ -186,7 +175,6 @@ export const LaunchpadSubmitModal = ({
     !errorMetadata?.sdkCoinAdded
   const numTxs = payAmount && payAmountNumber > 0 && !isFirstBuyRetry ? 2 : 1
 
-  // Keep track of current state in a string so we avoid overlapping states
   const currentState = isPending ? 'pending' : showError ? 'error' : 'pending'
   return (
     <Modal

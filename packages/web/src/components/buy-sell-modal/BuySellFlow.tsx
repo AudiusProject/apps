@@ -94,7 +94,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     initialTab
   })
 
-  // Persistent state for each tab's input values
   const [tabInputValues, setTabInputValues] = useState<
     Record<BuySellTab, string>
   >({
@@ -103,7 +102,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     convert: ''
   })
 
-  // Update input value for current tab
   const handleTabInputValueChange = (value: string) => {
     setTabInputValues((prev) => ({
       ...prev,
@@ -111,10 +109,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }))
   }
 
-  // Track if user has attempted to submit the form
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
 
-  // Track the last handled error to prevent duplicate toast messages
   const lastHandledErrorRef = useRef<string | null>(null)
 
   const location = useLocation()
@@ -125,7 +121,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     quoteSymbol: 'USDC'
   })
 
-  // Use custom hooks for token state management
   const {
     getCurrentTabTokens,
     handleInputTokenChange: handleInputTokenChangeInternal,
@@ -133,12 +128,10 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     handleSwapDirection
   } = useCoinStates(selectedPair)
 
-  // Get current tab's token symbols
   const currentTabTokens = getCurrentTabTokens(activeTab)
   const baseTokenSymbol = currentTabTokens.baseToken
   const quoteTokenSymbol = currentTabTokens.quoteToken
 
-  // Handle token changes with transaction reset
   const handleInputTokenChange = (symbol: string) => {
     handleInputTokenChangeInternal(symbol, activeTab)
     resetTransactionData()
@@ -154,10 +147,8 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     resetTransactionData()
   }
 
-  // Get external wallet account (if connected via AppKit)
   const externalWalletAccount = appkitModal.getAccount('solana')
 
-  // Get all available tokens, filtered by external wallet if connected
   const { coins, isLoading: coinsLoading } = useTradeableCoins({
     includeSol: !!externalWalletAccount?.address
   })
@@ -166,18 +157,15 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
-  // Get tokens that user owns (includes USDC if user has balance) for internal wallet
   const { ownedCoins } = useOwnedCoins(
     availableCoins,
     externalWalletAccount?.address
   )
 
-  // Create owned addresses set for filtering (only needed for internal wallets)
   const ownedAddresses = useMemo(() => {
     return new Set(ownedCoins.map((coin) => coin.address))
   }, [ownedCoins])
 
-  // Create current token pair based on selected base and quote tokens
   const currentTokenPair = useCurrentCoinPair({
     baseTokenSymbol,
     quoteTokenSymbol,
@@ -185,7 +173,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     selectedPair
   })
 
-  // Get filtered tokens for sell tab (owned coins, excluding current base token and USDC)
   const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
     context: 'pay',
     excludeSymbols: [baseTokenSymbol],
@@ -193,29 +180,24 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     includeSol: !!externalWalletAccount?.address
   })
 
-  // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
   const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
     ownedAddresses,
     includeSol: !!externalWalletAccount?.address
   })
 
-  // Get filtered tokens for convert tab output (all coins except base token)
   const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol],
     includeSol: !!externalWalletAccount?.address
   })
 
-  // Get filtered tokens for buy tab output (all coins except quote token and USDC)
   const availableOutputTokensForBuy = availableCoins.filter(
     (t) => t.symbol !== quoteTokenSymbol && t.symbol !== 'USDC'
   )
 
-  // Use shared safe token pair logic
   const safeSelectedPair = useSafeTokenPair(currentTokenPair)
 
   const swapTokens = useMemo(() => {
-    // Return safe defaults if currentTokenPair is not available
     if (!currentTokenPair?.baseToken || !currentTokenPair?.quoteToken) {
       return {
         inputToken: activeTab === 'buy' ? quoteTokenSymbol : baseTokenSymbol,
@@ -268,7 +250,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     }) => {
       const swapParams = {
         ...params,
-        // External wallet swaps require some extra params. These are unused for internal swaps
         inputDecimals: swapTokens.inputTokenInfo!.decimals,
         outputDecimals: swapTokens.outputTokenInfo!.decimals,
         walletAddress: externalWalletAccount?.address as string
@@ -287,12 +268,9 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   }, [isConfirmButtonLoading, onLoadingStateChange])
 
   useEffect(() => {
-    // Handle swap data errors (returned error status) - show toast when swap fails
     if (swapData?.status === SwapStatus.ERROR && swapData?.error) {
-      // Create a stable identifier for this error to prevent duplicate handling
       const errorId = `${swapData.error.message || 'unknown'}_${swapData.errorStage || 'unknown'}`
 
-      // Only handle if this is a new error
       if (lastHandledErrorRef.current !== errorId) {
         lastHandledErrorRef.current = errorId
         trackSwapFailure(
@@ -317,7 +295,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
         toast(messages.transactionFailed, 5000)
       }
     } else if (swapData?.status === SwapStatus.SUCCESS) {
-      // Clear error ref when swap succeeds to allow handling of future errors
       lastHandledErrorRef.current = null
     }
   }, [
@@ -344,7 +321,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     selectedPair: safeSelectedPair
   })
 
-  // Track swap success when success screen is shown
   useEffect(() => {
     if (currentScreen === 'success' && successDisplayData && swapResult) {
       trackSwapSuccess({
@@ -375,7 +351,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
       !isContinueButtonLoading &&
       !transactionData?.isExchangeRateLoading
     ) {
-      // Track swap requested
       trackSwapRequested({
         activeTab,
         inputToken: swapTokens.inputToken,
@@ -398,7 +373,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     resetTransactionData()
     resetSuccessDisplayData()
     setCurrentScreen('input')
-    // Clear all tab input values on completion
     setTabInputValues({ buy: '', sell: '', convert: '' })
   }, [
     resetTransactionData,
@@ -421,25 +395,21 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
   const isTransactionInvalid = !transactionData?.isValid
 
   const displayErrorMessage = useMemo(() => {
-    // Show exchange rate errors immediately as they prevent transactions
     if (transactionData?.exchangeRateError) {
       return messages.unableToFetchExchangeRate
     }
     if (activeTab === 'sell' && !hasSufficientBalance) {
       return messages.insufficientAUDIOForSale
     }
-    // Show validation errors immediately for sell and convert tabs (like insufficient balance)
     if (
       (activeTab === 'sell' || activeTab === 'convert') &&
       transactionData?.error
     ) {
       return transactionData.error
     }
-    // For buy tab, only show validation errors after attempted submit
     if (activeTab === 'buy' && hasAttemptedSubmit && transactionData?.error) {
       return transactionData.error
     }
-    // Fallback for empty input, though zod should handle it via transactionData.error
     if (
       hasAttemptedSubmit &&
       isTransactionInvalid &&
@@ -465,7 +435,6 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     return <ModalLoading />
   }
 
-  // Show loading when fetching coins, or when external wallet is connected and still loading wallet coins
   if (coinsLoading) {
     return <SwapFormSkeleton />
   }

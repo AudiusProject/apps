@@ -10,7 +10,6 @@ const isSafari =
   typeof navigator !== 'undefined' &&
   /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
-// Pulled from: https://hackernoon.com/copying-text-to-clipboard-with-javascript-df4d4988697f
 export const copyToClipboard = (str: string) => {
   const el = document.createElement('textarea')
   el.value = str
@@ -38,15 +37,11 @@ export const copyToClipboard = (str: string) => {
   document.body.removeChild(el)
 }
 
-/**
- * Gets a copyable link for the app.
- * The protocol will change depending on the context (electron vs. mobile vs. web)
- */
 export const getCopyableLink = (link: string) => {
   if (typeof window === 'undefined') return link
 
   const protocol = window.location.protocol
-  const hostname = window.location.host // host instead of hostname to work with ports besides 80
+  const hostname = window.location.host
 
   if (protocol !== 'audius:') {
     return `${protocol}//${hostname}${link}`
@@ -55,9 +50,6 @@ export const getCopyableLink = (link: string) => {
   }
 }
 
-/**
- * Copies a link to the clipboard
- */
 export const copyLinkToClipboard = (link: string) => {
   copyToClipboard(getCopyableLink(link))
 }

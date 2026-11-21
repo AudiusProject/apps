@@ -28,7 +28,6 @@ export const SellTab = ({
 }: SellTabProps) => {
   const { baseToken, quoteToken } = tokenPair
 
-  // State for token selection
   const [selectedInputToken, setSelectedInputToken] = useState(baseToken)
 
   useEffect(() => {
@@ -66,13 +65,11 @@ export const SellTab = ({
     externalWalletAddress: externalWalletAccount?.address
   })
 
-  // Token change handlers
   const handleInputTokenChange = (token: CoinInfo) => {
     setSelectedInputToken(token)
     onInputTokenChange?.(token.symbol)
   }
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   if (currentExchangeRate !== null) {
     hasRateEverBeenFetched.current = true
@@ -80,8 +77,6 @@ export const SellTab = ({
 
   if (!tokenPair) return null
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     isBalanceLoading ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)
@@ -118,7 +113,7 @@ export const SellTab = ({
             tokenPrice={tokenPriceData?.price?.toString() ?? null}
             isTokenPriceLoading={isTokenPriceLoading}
             tokenPriceDecimalPlaces={decimalPlaces}
-            hideTokenDisplay={true} // Hide token display completely in sell tab output
+            hideTokenDisplay={true}
           />
           <BuySellTerms />
         </>

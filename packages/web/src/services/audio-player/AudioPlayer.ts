@@ -33,7 +33,6 @@ enum AudioError {
   AUDIO = 'AUDIO'
 }
 
-// Create a BroadcastChannel for cross-tab communication
 const audioChannel =
   typeof window !== 'undefined'
     ? new BroadcastChannel('audio-coordination')
@@ -63,52 +62,40 @@ export class AudioPlayer {
 
   constructor() {
     this.audio = new Audio()
-    // Connect this.audio to the window so that 3P's can interact with it.
     window.audio = this.audio
 
     this.audioCtx = null
     this.source = null
     this.gainNode = null
 
-    // Because we use a media stream, we need the duration from an
-    // outside source. Audio.duration returns Infinity until all the streams are
-    // concatenated together.
     this.duration = 0
 
-    // Variable to hold the playbackRate of the audio element
     this.playbackRate = '1x'
 
     this.bufferingTimeout = null
     this.loadTimeout = null
     this.buffering = false
-    // Callback fired when buffering status changes
     this.onBufferingChange = (isBuffering) => {}
 
     this.concatBufferInterval = null
     this.nextBufferIndex = 0
-    // Keeps a (monotonic) unique id for each load, so we know when to cancel the previous load.
     this.loadCounter = 0
 
-    this.recordListenedTime = 5 /* seconds */
+    this.recordListenedTime = 5
 
     this.onEnd = null
 
-    // Event listeners
     this.endedListener = null
     this.waitingListener = null
     this.canPlayListener = null
 
-    // M3U8 file
     this.url = null
 
-    // Listen for errors
     this.onError = (e, data) => {}
 
-    // Listen for play messages from other tabs
     if (audioChannel) {
       audioChannel.onmessage = (event) => {
         if (event.data === 'playing' && !this.audio.paused) {
-          // Another tab started playing, pause this one
           this.pause()
         }
       }
@@ -126,10 +113,7 @@ export class AudioPlayer {
       this.stop()
       const prevVolume = this.audio.volume
 
-      // Remove the current audio element to fix an issue in chrome
-      // where playing tracks quickly in succession breaks
       if (this.audio) {
-        // Remove listeners first so src = '' does not throw an error
         // @ts-ignore
         this.audio.removeAllListeners?.()
         this.audio.src = ''
@@ -147,7 +131,6 @@ export class AudioPlayer {
 
       this.audio = new Audio()
 
-      // Connect this.audio to the window so that 3P's can interact with it.
       window.audio = this.audio
 
       this.gainNode = null
@@ -160,7 +143,6 @@ export class AudioPlayer {
           this.loadTimeout = null
         }
         if (!this.audioCtx && !IS_SAFARI && !IS_UI_WEBVIEW) {
-          // Set up WebAudio API handles
           const AudioContext = window.AudioContext || window.webkitAudioContext
           try {
             this.audioCtx = new AudioContext()
@@ -202,7 +184,6 @@ export class AudioPlayer {
 
     this.duration = duration
 
-    // Set audio listeners.
     if (this.endedListener) {
       this.audio.removeEventListener('ended', this.endedListener)
     }
@@ -224,8 +205,6 @@ export class AudioPlayer {
   }
 
   play = () => {
-    // In case we haven't faded out the last pause, pause again and
-    // clear our listener for the end of the pause fade.
     this.audio.removeEventListener('fade-out', this._pauseInternal)
     if (this.audio.currentTime !== 0) {
       this._fadeIn()
@@ -233,29 +212,10 @@ export class AudioPlayer {
       this.gainNode.gain.setValueAtTime(1, 0)
     }
 
-    // Notify other tabs that we're playing
     if (audioChannel) {
       audioChannel.postMessage('playing')
     }
 
-    // This is a very nasty "hack" to fix a bug in chrome-like webkit browsers.
-    // Calling a traditional `audio.pause()` / `play()` and switching tabs leaves the
-    // AudioContext in a weird state where after the browser tab enters the background,
-    // and then comes back into the foreground, the AudioContext gives misinformation.
-    // Weirdly, the audio's playback rate is no longer maintained on resuming playback after a pause.
-    // Though the audio itself claims audio.playbackRate = 1.0, the actual resumed speed
-    // is nearish 0.9.
-    //
-    // In chrome like browsers (opera, edge), we disconnect and reconnect the source node
-    // instead of playing and pausing the audio element itself, which seems to fix this issue
-    // without any side-effects (though this behavior could change?).
-    //
-    // Another solution to this problem is calling `this.audioCtx.suspend()` and `resume()`,
-    // however, that doesn't play nicely with Analyser nodes (e.g. visualizer) because it
-    // freezes in place rather than naturally "disconnecting" it from audio.
-    //
-    // Web resources on this problem are limited (or none?), but this is a start:
-    // https://stackoverflow.com/questions/11506180/web-audio-api-resume-from-pause
     if (this.audioCtx && IS_CHROME_LIKE) {
       this.source!.connect(this.gainNode!)
     }
@@ -280,7 +240,6 @@ export class AudioPlayer {
 
   _pauseInternal = () => {
     if (this.audioCtx && IS_CHROME_LIKE) {
-      // See comment above in the `play()` method.
       this.source!.disconnect()
     }
     this.audio.pause()
@@ -356,7 +315,6 @@ export class AudioPlayer {
   _fadeOut = () => {
     if (this.gainNode) {
       setTimeout(() => {
-        // Prevent position from jumping after pause by rewinding to account for the fade out time.
         this.audio.currentTime = Math.max(
           0,
           this.audio.currentTime - FADE_OUT_TIME_MILLISECONDS / 1000.0

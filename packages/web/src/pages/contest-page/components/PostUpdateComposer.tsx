@@ -30,16 +30,6 @@ type PostUpdateComposerProps = {
   eventOwnerUserId: ID | undefined
 }
 
-/**
- * Standalone POST UPDATE composer card for the contest host. Renders only
- * for the event owner. Posts a top-level comment with `videoUrl` when
- * Attach Video is filled in — these top-level host posts are surfaced
- * elsewhere as the "Updates" feed (see ContestCommentsTile mode='updates').
- *
- * Use this on tabs / surfaces where the host should be able to compose an
- * update without also rendering the historical updates feed in-place
- * (e.g. mobile Details tab, where the Updates tab already owns the feed).
- */
 export const PostUpdateComposer = ({
   eventId,
   eventOwnerUserId

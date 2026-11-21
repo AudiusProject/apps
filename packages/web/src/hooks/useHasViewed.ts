@@ -1,11 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
-/**
- * `useHasViewed` checks if the reference element has scrolled into view.
- * @param {number} [pageOffset] Multiplies the viewport height to set the
- *   trigger boundary. 1 (default) = full viewport; 0.5 = top half only;
- *   values > 1 trigger before the element reaches the visible area.
- */
 const useHasViewed = (
   pageOffset = 1
 ): [boolean, (elementRef: HTMLDivElement) => void] => {

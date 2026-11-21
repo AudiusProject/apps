@@ -26,7 +26,6 @@ export type DroppableProps = {
     | ((id: string, kind: DragDropKind, index: number) => void)
   acceptedKinds: Array<DragDropKind>
   disabled?: boolean
-  // Allows kinds owned by currentUser to be dropped
   acceptOwner?: boolean
 } & (
   | {
@@ -53,14 +52,6 @@ export const Droppable = (props: DroppableProps) => {
   const { id, kind, index, isOwner } = useSelector(selectDragnDropState)
   const [hovered, setHovered] = useState(false)
 
-  /**
-   * Whether or not the currently dragged kind is accepted by this droppable.
-   * Conditions include:
-   * 1.) Must be accepted kind track/album/plylist
-   * 2.) Must not be disabled
-   * 3.) Either accept owner or the dragging entity if not owned by user
-   */
-
   const canDrop =
     kind &&
     acceptedKinds.includes(kind) &&
@@ -86,7 +77,6 @@ export const Droppable = (props: DroppableProps) => {
 
   const handleDrop = useDebouncedCallback(
     (e: DragEvent) => {
-      // This is the only way event bubbling could be prevented
       if (e.nativeEvent.defaultPrevented) return
       e.preventDefault()
       if (id) {

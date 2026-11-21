@@ -13,14 +13,13 @@ type WalletIconComponent =
   | typeof IconSolana
 
 const getWalletIcon = (): WalletIconComponent => {
-  // Check if Phantom is available
   if (typeof window !== 'undefined' && window.phantom) {
     return IconPhantom
   }
   if (typeof window !== 'undefined' && window.ethereum) {
     return IconMetamask
   }
-  return IconSolana // Fallback
+  return IconSolana
 }
 
 export const ConnectedWalletHeader = ({

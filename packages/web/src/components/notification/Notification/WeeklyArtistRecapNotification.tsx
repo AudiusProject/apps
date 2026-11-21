@@ -24,11 +24,6 @@ type WeeklyArtistRecapNotificationProps = {
   notification: WeeklyArtistRecapNotificationType
 }
 
-/**
- * An artist's numbers for the week that just closed (sent Wednesdays). Opens
- * the Artist Dashboard. Hidden when the flag is off, since the server sends
- * it regardless.
- */
 export const WeeklyArtistRecapNotification = (
   props: WeeklyArtistRecapNotificationProps
 ) => {

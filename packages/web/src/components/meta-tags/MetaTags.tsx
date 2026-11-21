@@ -9,53 +9,22 @@ const messages = {
 
 export type MetaTagsProps = {
   title?: string
-  /**
-   * Description of the page
-   */
   description?: string
-  /**
-   * Description of the content, for example a Track description
-   */
   ogDescription?: string
   image?: string
   imageAlt?: string
   canonicalUrl?: string
   structuredData?: object
   noIndex?: boolean
-  /**
-   * Entity type for OG URL generation
-   */
   entityType?: 'user' | 'collection' | 'track'
-  /**
-   * Hash ID for OG URL generation (id field from entities)
-   */
   hashId?: string
-  /**
-   * Whether to show embed player (for Twitter/Discord)
-   */
   embed?: boolean
-  /**
-   * URL to the embed player (e.g. /embed/track/xyz?flavor=card&twitter=true)
-   */
   embedUrl?: string
-  /**
-   * Deep link URL for mobile apps (e.g. audius://track/xyz)
-   */
   appUrl?: string
-  /**
-   * Web URL for the current page (e.g. https://audius.co/track/xyz)
-   */
   webUrl?: string
-  /**
-   * Whether the image shows as a small thumbnail version.
-   * Controls twitter:card type (summary vs summary_large_image)
-   */
   thumbnail?: boolean
 }
 
-/**
- * Generates the OG URL based on environment and entity type
- */
 const generateOgUrl = (
   entityType?: 'user' | 'collection' | 'track',
   hashId?: string
@@ -64,19 +33,13 @@ const generateOgUrl = (
     return undefined
   }
 
-  // Get the base OG URL based on environment
   const baseOgUrl = 'https://og.audius.co'
 
-  // Generate the path based on entity type
   const path = `/${entityType}/${hashId}`
 
   return `${baseOgUrl}${path}`
 }
 
-/**
- * This component is used to set the meta tags for a page.
- * This is important for SEO
- */
 export const MetaTags = (props: MetaTagsProps) => {
   const {
     title,
@@ -100,10 +63,8 @@ export const MetaTags = (props: MetaTagsProps) => {
     ? `${title} ${messages.dotAudius}`
     : messages.audius
 
-  // Generate OG URL if entity type and hash ID are provided
   const ogUrl = generateOgUrl(entityType, hashId)
 
-  // Determine twitter card type based on thumbnail and embed settings
   const getTwitterCardType = () => {
     if (thumbnail) return 'summary'
     if (embed && embedUrl) return 'player'

@@ -19,8 +19,6 @@ export const RouteContextProvider = (props: RouteContextProviderProps) => {
   const previousLocationRef = useRef(location)
 
   useEffect(() => {
-    // In React Router v6, navigationType can be 'POP', 'PUSH', or 'REPLACE'
-    // 'POP' indicates browser back/forward navigation
     if (navigationType === 'POP') {
       setIsGoBack(true)
     } else {

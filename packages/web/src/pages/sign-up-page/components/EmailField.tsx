@@ -11,8 +11,6 @@ import {
 
 export const EmailField = (props: Partial<HarmonyTextFieldProps>) => {
   const dispatch = useDispatch()
-  // We use email inputs in multiple places and want to keep values up to date whenever swapping between them
-  // So we keep the value in redux constantly up to date
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatch(setValueField('email', e.target.value))
   }

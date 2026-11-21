@@ -57,7 +57,6 @@ type TierProps = {
   isCompact?: boolean
 }
 
-/** Shows info about a tier - badge, level, tier # */
 const Tier = ({ tier, isActive = false, isCompact = false }: TierProps) => {
   const badgeImage = audioTierMapSvg[tier]
 
@@ -112,7 +111,6 @@ const TierExplainerModal = NiceModal.create(() => {
 
   const onClickLearnMore = useCallback(() => {
     handleDismiss()
-    // Audio page removed - redirect to rewards page instead
     dispatch(push(REWARDS_PAGE))
   }, [dispatch, handleDismiss])
 

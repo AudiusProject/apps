@@ -36,11 +36,6 @@ type DevToolCardProps = {
   buttonDisabled?: boolean
 }
 
-/**
- * Dev Tools page - only available in development environment
- * This page contains tools and utilities for developers to test and debug the application
- */
-
 export const useDevToolCardStyles = makeResponsiveStyles(({ theme }) => ({
   root: {
     mobile: {

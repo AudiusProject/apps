@@ -40,7 +40,6 @@ export const useCollectionCoverArt = ({
     preloadImageFn: preload
   })
 
-  // Return edited artwork from this session, if it exists
   if (artwork?.url) return { imageUrl: artwork.url, hasNoArtwork: false }
 
   return {

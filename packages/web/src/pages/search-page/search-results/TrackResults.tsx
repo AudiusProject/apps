@@ -65,10 +65,9 @@ export const TrackResults = (props: TrackResultsProps) => {
     [dispatch]
   )
 
-  // Wait for useSearchAllResults to finish loading before fetching tracks
   const { trackIds, hasNextPage, loadNextPage, queryKey } =
     useSearchTrackResults(searchParams, {
-      enabled: !waitForAllResults // Only fetch if not waiting for all results
+      enabled: !waitForAllResults
     })
 
   const querySource = useMemo(
@@ -76,7 +75,6 @@ export const TrackResults = (props: TrackResultsProps) => {
     [queryKey]
   )
 
-  // Whenever this component is shown on the AllResults page - we don't want to infinite scroll
   const shouldLoadMore = category === 'tracks'
 
   return (
@@ -99,7 +97,6 @@ export const TrackResults = (props: TrackResultsProps) => {
       {...(!isMobile
         ? {
             lineupContainerStyles: css({ width: '100%' }),
-            // Rows stack with no gap; tiles keep their spacing.
             tileContainerStyles: isRowLayout
               ? undefined
               : css({

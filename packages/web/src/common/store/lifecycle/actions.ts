@@ -1,5 +1,3 @@
-// Dispatched by the native app when it moves between foreground and
-// background. Web never dispatches these.
 export const ENTER_FOREGROUND = 'LIFECYCLE/ENTER_FOREGROUND'
 export const ENTER_BACKGROUND = 'LIFECYCLE/ENTER_BACKGROUND'
 

@@ -110,7 +110,6 @@ export const ImageUploadArea = ({
         css={borderContainerStyles}
       >
         {coinImage && imageUrl ? (
-          /* Selected State - Show hexagonal image */
           <>
             <Artwork
               src={imageUrl}
@@ -135,7 +134,6 @@ export const ImageUploadArea = ({
             </Button>
           </>
         ) : (
-          /* Empty State or Processing State - Show upload area or processing skeleton */
           <>
             {isProcessing ? (
               <Artwork

@@ -6,9 +6,6 @@ import { useAsync } from 'react-use'
 
 import { getLocation } from 'services/Location'
 
-/**
- * Hook to check if buy/sell functionality is supported in the user's region
- */
 export const useBuySellRegionSupport = () => {
   const buySellDeniedRegions = (
     useRemoteVar(StringKeys.BUY_SELL_DENIED_COUNTRIES) ?? ''

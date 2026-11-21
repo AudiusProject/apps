@@ -31,7 +31,6 @@ export const OAuthPayPage = () => {
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
 
-  // Redirect logged-out users to sign up, returning here after account creation
   useRequiresAccount(`${location.pathname}${location.search}`)
 
   const {
@@ -73,7 +72,6 @@ export const OAuthPayPage = () => {
     )
   }
 
-  // Determine if confirm button should be disabled
   const isConfirmDisabled =
     !isLoggedIn ||
     !recipient ||
@@ -89,10 +87,8 @@ export const OAuthPayPage = () => {
     handleLoading ||
     !!handleError
 
-  // Determine error message to show
   const displayError = queryParamsError || handleError || error
 
-  // Auto-close success screen after 1 second
   useEffect(() => {
     if (transactionSignature) {
       const timer = setTimeout(() => {
@@ -123,7 +119,6 @@ export const OAuthPayPage = () => {
     )
   }
 
-  // Show success screen if transaction completed
   if (transactionSignature) {
     return (
       <ContentWrapper display={display ?? 'popup'}>

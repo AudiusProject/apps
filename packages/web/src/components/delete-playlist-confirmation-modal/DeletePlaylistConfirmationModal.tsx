@@ -38,7 +38,6 @@ const DeletePlaylistConfirmationModal = NiceModal.create(() => {
     try {
       await deleteCollection({ collectionId: playlistId })
       setStackReset(true)
-      // Navigate to trending page after successful deletion
       dispatch(push(TRENDING_PAGE))
       handleClose()
     } catch (error) {

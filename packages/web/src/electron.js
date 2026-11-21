@@ -21,7 +21,7 @@ const { autoUpdater } = require('electron-updater')
 const semver = require('semver')
 const tar = require('tar')
 
-const POLL_FOR_WEB_UPDATES_INTERVAL_MS = 60_000 // 1 min
+const POLL_FOR_WEB_UPDATES_INTERVAL_MS = 60_000
 
 const Environment = Object.freeze({
   PRODUCTION: 0,
@@ -35,24 +35,13 @@ const appDataPath = (relativePath) => {
   return path.resolve(app.getPath('appData'), app.getName(), relativePath)
 }
 
-let appEnvironment,
-  buildName,
-  localhostPort,
-  // The main app window
-  mainWindow,
-  s3Bucket,
-  scheme
+let appEnvironment, buildName, localhostPort, mainWindow, s3Bucket, scheme
 
-// Try getting the env from the program args if available.
-// Otherwise, try getting env from the electronConfig file.
 let env = null
 if (args.length > 0) env = args[0]
 if (!env) {
   const configFile = path.resolve(app.getAppPath(), 'electronConfig.json')
   try {
-    // Needs to be readFileSync because async js here will take
-    // too long, leading the scheme to be decided after the app has
-    // registered the scheme.
     const data = fs.readFileSync(configFile)
     const config = JSON.parse(data)
     env = config.env
@@ -83,8 +72,6 @@ switch (env) {
     break
 }
 
-// The protocol scheme determines what URLs resolve to the app.
-// For example, the URL audius:// will trigger the application to open.
 protocol.registerSchemesAsPrivileged([
   {
     scheme,
@@ -104,16 +91,10 @@ const getPath = async (p) => {
   } catch (err) {}
 }
 
-/**
- * Transforms a url audius://route to audius://-/route so that it is
- * properly loaded from the filesystem.
- */
 const reformatURL = (url) => {
   if (!url) return `${scheme}://-`
   let path = url.replace(`${scheme}://`, '').replace(`${scheme}:`, '')
   if (path === '--updated') {
-    // This was a deeplink after an "update." We could build some nice
-    // "Thank you for updating feature," but for now, just omit it
     path = ''
   }
   return `${scheme}://-/${path}`
@@ -158,8 +139,6 @@ const downloadWebUpdateAndNotify = async (newVersion) => {
   const newBuildPath = appDataPath(`${buildName}.tar.gz`)
   const webUpdateDir = appDataPath('web-update')
 
-  // Fetch the build tar.gz file and write to file. Native fetch returns a web
-  // ReadableStream, so convert it to a Node stream to pipe it to disk.
   const data = await fetch(
     `https://s3.us-west-1.amazonaws.com/${s3Bucket}/${buildName}.tar.gz`
   )
@@ -172,14 +151,12 @@ const downloadWebUpdateAndNotify = async (newVersion) => {
     fs.createWriteStream(newBuildPath)
   )
 
-  // Create web-update directory and untar the build inside
   if (!fs.existsSync(webUpdateDir)) fs.mkdirSync(webUpdateDir)
   tar.x({
     cwd: webUpdateDir,
     file: newBuildPath
   })
 
-  // Notify the user of the update
   mainWindow.webContents.send('webUpdateAvailable', {
     version: newVersion,
     currentVersion: appVersion
@@ -198,8 +175,6 @@ const checkForWebUpdate = () => {
 
     const packageJsonPath = appDataPath(`${buildName}/package.json`)
 
-    // Additional check for the version from the build package.json
-    // Needed after web updates because the local package.json version is not updated
     if (fs.existsSync(packageJsonPath)) {
       const buildPackageJson = JSON.parse(fs.readFileSync(packageJsonPath))
       if (semver.gt(buildPackageJson.version, currentVersion)) {
@@ -207,8 +182,6 @@ const checkForWebUpdate = () => {
       }
     }
 
-    // If there is a patch version update, download it and notify the user
-    // Minor version updates should be handled by the autoupdater
     if (
       semver.major(currentVersion) === semver.major(newVersion) &&
       semver.minor(currentVersion) === semver.minor(newVersion) &&
@@ -220,21 +193,6 @@ const checkForWebUpdate = () => {
   }, POLL_FOR_WEB_UPDATES_INTERVAL_MS)
 }
 
-/**
- * Initializes the auto-updater. Updater flows as follows:
- *
- * A. If the app renders
- *    1. Check for updates
- *    2. Notify the app on
- *       i) There is an update available (not downloaded) 'updateAvailable'
- *      ii) We just downloaded an update 'updateDownloaded'
- *     iii) There is any progress on an udpate download 'updateDownloadProgress'
- *    3. Install update on quit
- *
- * B. If the app fails to render
- *    1. Check for updates
- *    2. Install update on quit
- */
 const initAutoUpdater = () => {
   autoUpdater.checkForUpdates()
   autoUpdater.autoInstallOnAppQuit = true
@@ -242,7 +200,6 @@ const initAutoUpdater = () => {
   autoUpdater.logger.transports.file.level = 'info'
 }
 
-// Set if the app is opened up via a deep link (e.g. audius://handle in the web browser)
 let deepLinkedURL
 const createWindow = () => {
   const config = {
@@ -250,24 +207,16 @@ const createWindow = () => {
     height: 1080,
     minWidth: 800,
     minHeight: 600,
-    // Use different title bar style based on platform
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
-    // Enable frame on Windows, hidden on macOS
     frame: process.platform !== 'darwin',
     webPreferences: {
       nodeIntegration: true,
-      // TODO: Look into a way to turn on contextIsolation (it is safer),
-      // but window.require('electron').ipcRenderer will not work from the client
-      // as is. This was changed to `true` default in electron v12.
-      // https://github.com/electron/electron/issues/9920
       contextIsolation: false
     }
   }
 
-  // Create the browser window.
   mainWindow = new BrowserWindow(config)
 
-  // Hide menu only on Windows, keeping the window controls
   if (process.platform === 'win32') {
     mainWindow.setMenuBarVisibility(false)
   }
@@ -279,7 +228,6 @@ const createWindow = () => {
     registerBuild(buildDir)
     checkForWebUpdate()
 
-    // Win protocol handler
     if (process.platform === 'win32') {
       const url = process.argv.slice(1)[0]
       deepLinkedURL = reformatURL(url)
@@ -307,7 +255,6 @@ const createWindow = () => {
     }
   })
 
-  // Initialize auto updater regardless of success or failure
   mainWindow.webContents.on('did-finish-load', () => {
     initAutoUpdater()
   })
@@ -330,13 +277,10 @@ const createWindow = () => {
   })
 }
 
-// Acquire a lock for Windows so the app only launches once.
-// See https://stackoverflow.com/questions/43912119/open-app-and-pass-parameters-with-deep-linking-using-electron-macos
 const lock = app.requestSingleInstanceLock()
 if (!lock) {
   app.quit()
 } else {
-  // Win protocol handler
   app.on('second-instance', (event, argv, workingDirectory) => {
     if (process.platform === 'win32') {
       const url = argv.slice(1)[0]
@@ -352,7 +296,6 @@ if (!lock) {
 }
 
 const initMenu = () => {
-  // Create the Application's main menu
   const template = [
     {
       label: 'Application',
@@ -433,7 +376,6 @@ function configureShortcuts() {
   // })
 }
 
-/* IPC Handlers */
 let canUpdate = false
 
 ipcMain.on('update', async (event, arg) => {
@@ -448,16 +390,13 @@ ipcMain.on('web-update', async (event, arg) => {
   const buildPath = appDataPath(`web-update/packages/web/${buildName}`)
   if (fs.existsSync(buildPath)) {
     try {
-      // Remove the existing build
       fs.rmdirSync(appDataPath(buildName), {
         recursive: true,
         force: true
       })
 
-      // Rename web-update dir and move to base folder
       fs.renameSync(buildPath, appDataPath(buildName))
 
-      // Remove the web-update dir
       fs.rmdirSync(appDataPath('web-update'), {
         recursive: true,
         force: true
@@ -477,7 +416,6 @@ ipcMain.on('quit', (event, arg) => {
   app.exit(0)
 })
 
-// We have finished downloading the electron update
 autoUpdater.on('update-downloaded', (info) => {
   console.info('update-downloaded', info)
   canUpdate = true
@@ -485,7 +423,6 @@ autoUpdater.on('update-downloaded', (info) => {
   if (mainWindow) mainWindow.webContents.send('updateDownloaded', info)
 })
 
-// We have discovered that there is an available electron update
 autoUpdater.on('update-available', (info) => {
   console.info('update-available', info)
   info.currentVersion = autoUpdater.currentVersion.version
@@ -501,21 +438,15 @@ autoUpdater.on('error', (info) => {
   if (mainWindow) mainWindow.webContents.send('updateError', info)
 })
 
-/* App Event Handlers */
 app.setAsDefaultProtocolClient(scheme)
 
 app.on('ready', () => {
   createWindow()
-  // Do not init the menu on windows because it only gets in the way of the app.
-  // We can re-enable this when we fix the close/maximize/etc buttons on windows
-  // with our own Audius style. Frame:hidden on the browser window config should be used
-  // then.
   if (process.platform === 'win32') {
     Menu.setApplicationMenu(null)
   } else {
     initMenu()
   }
-  // Configure electron-level global keyboard shortcuts
   configureShortcuts()
 })
 
@@ -531,11 +462,9 @@ app.on('activate', function () {
   }
 })
 
-// OSX protocol handler
 app.on('open-url', (event, url) => {
   event.preventDefault()
   deepLinkedURL = reformatURL(url)
-  // The app is already open, just redirect
   if (mainWindow) {
     mainWindow.loadURL(deepLinkedURL)
   }

@@ -134,7 +134,6 @@ describe('Inbox tabs', () => {
     const optionButtons = screen.getAllByRole('button', {
       name: /conversation options/i
     })
-    // one per row (new-chat, priority-chat)
     expect(optionButtons).toHaveLength(2)
     fireEvent.click(optionButtons[1])
     expect(screen.getByText('Move to General')).toBeInTheDocument()
@@ -191,8 +190,6 @@ describe('Inbox tabs', () => {
           general: 0,
           uncategorized: 1
         },
-        // The loaded general chat is optimistically read, so only the
-        // server counts drive the dots here
         optimisticChatRead: {
           'general-chat': {
             unread_message_count: 0,
@@ -211,7 +208,6 @@ describe('Inbox tabs', () => {
     renderWithChats(
       <InboxTabs currentTab={InboxTab.PRIORITY} onSelectTab={vi.fn()} />
     )
-    // general-chat has 2 unread messages in the fixture
     expect(screen.getByTestId('inbox-tab-dot-general')).toBeInTheDocument()
     expect(
       screen.queryByTestId('inbox-tab-dot-priority')

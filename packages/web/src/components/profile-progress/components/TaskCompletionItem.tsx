@@ -34,9 +34,6 @@ const CompletionIcon = ({ isCompleted, variant }: CompletionIconProps) => {
   )
 }
 
-/**
- * `TaskCompletionItem` represents a single item in a `TaskCompletionList`
- */
 export const TaskCompletionItem = ({
   title,
   isCompleted,

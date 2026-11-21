@@ -66,7 +66,7 @@ export const OAuthLoginPage = () => {
   )
   const [metaMaskTransactionStatus, setMetaMaskTransactionStatus] = useState<
     null | 'pending' | 'approved'
-  >(null) // Only applicable when tx = connect_dashboard_wallet
+  >(null)
 
   const clearErrors = () => {
     setGeneralSubmitError(null)

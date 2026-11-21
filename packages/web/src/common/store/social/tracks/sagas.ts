@@ -45,7 +45,6 @@ const { getNftAccessSignatureMap } = gatedContentSelectors
 const { incrementTrackSaveCount, decrementTrackSaveCount } = accountActions
 const { setVisibility } = modalsActions
 
-/* REPOST TRACK */
 export function* watchRepostTrack() {
   yield* takeEvery(socialActions.REPOST_TRACK, repostTrackAsync)
 }
@@ -65,7 +64,6 @@ export function* repostTrackAsync(
     return
   }
 
-  // Increment the repost count on the user
   const user = yield* queryUser(userId)
   if (!user) return
 
@@ -93,10 +91,7 @@ export function* repostTrackAsync(
   yield* put(event)
 
   const repostMetadata = action.isFeed
-    ? // If we're on the feed, and someone i follow has
-      // reposted the content i am reposting,
-      // is_repost_of_repost is true
-      { is_repost_of_repost: track.followee_reposts.length !== 0 }
+    ? { is_repost_of_repost: track.followee_reposts.length !== 0 }
     : { is_repost_of_repost: false }
   yield* call(confirmRepostTrack, action.trackId, user, repostMetadata)
 
@@ -109,7 +104,6 @@ export function* repostTrackAsync(
   const isCoSign = remixTrack?.user?.user_id === userId
 
   if (remixTrack && isCoSign) {
-    // This repost is a co-sign
     const remixOf = {
       tracks: [
         {
@@ -152,7 +146,6 @@ export function* confirmRepostTrack(
       function* () {},
       // @ts-ignore: remove when confirmer is typed
       function* ({ timeout, message }: { timeout: boolean; message: string }) {
-        // Revert the incremented repost count
         queryClient.setQueryData(getUserQueryKey(user.user_id), (prevUser) =>
           !prevUser
             ? undefined
@@ -191,7 +184,6 @@ export function* undoRepostTrackAsync(
     return
   }
 
-  // Decrement the repost count
   const user = yield* queryUser(userId)
   if (!user) return
 
@@ -222,7 +214,6 @@ export function* undoRepostTrackAsync(
   }
 
   if (track.remix_of?.tracks?.[0]?.user?.user_id === userId) {
-    // This repost is a co-sign
     const remixOf = {
       tracks: [
         {
@@ -264,7 +255,6 @@ export function* confirmUndoRepostTrack(trackId: ID, user: User) {
       function* () {},
       // @ts-ignore: remove when confirmer is typed
       function* ({ timeout, message }: { timeout: boolean; message: string }) {
-        // revert the decremented repost count
         queryClient.setQueryData(getUserQueryKey(user.user_id), (prevUser) =>
           !prevUser
             ? undefined
@@ -283,7 +273,6 @@ export function* confirmUndoRepostTrack(trackId: ID, user: User) {
     )
   )
 }
-/* SAVE TRACK */
 
 export function* watchSaveTrack() {
   yield* takeEvery(socialActions.SAVE_TRACK, saveTrackAsync)
@@ -307,7 +296,6 @@ export function* saveTrackAsync(
 
   if (track.has_current_user_saved) return
 
-  // Increment the save count on the user
   const user = yield* queryUser(userId)
   if (!user) return
 
@@ -325,9 +313,7 @@ export function* saveTrackAsync(
   yield* put(event)
 
   const saveMetadata = action.isFeed
-    ? // If we're on the feed, and the content
-      // being saved is a repost
-      { is_save_of_repost: track.followee_reposts.length !== 0 }
+    ? { is_save_of_repost: track.followee_reposts.length !== 0 }
     : { is_save_of_repost: false }
   yield* call(confirmSaveTrack, action.trackId, user, saveMetadata)
 
@@ -339,7 +325,6 @@ export function* saveTrackAsync(
   const remixTrack = track.remix_of?.tracks?.[0]
   const isCoSign = remixTrack?.user?.user_id === userId
   if (remixTrack && isCoSign) {
-    // This repost is a co-sign
     const remixOf = {
       tracks: [
         {
@@ -378,7 +363,6 @@ export function* confirmSaveTrack(
       function* () {},
       // @ts-ignore: remove when confirmer is typed
       function* ({ timeout, message }: { timeout: boolean; message: string }) {
-        // Revert the incremented save count
         yield* put(decrementTrackSaveCount())
 
         yield* put(
@@ -407,7 +391,6 @@ export function* unsaveTrackAsync(
     return
   }
 
-  // Decrement the save count
   const user = yield* queryUser(userId)
   if (!user) return
 
@@ -432,7 +415,6 @@ export function* unsaveTrackAsync(
     }
 
     if (track.remix_of?.tracks?.[0]?.user?.user_id === userId) {
-      // This save is a co-sign
       const remixOf = {
         tracks: [
           {
@@ -475,7 +457,6 @@ export function* confirmUnsaveTrack(trackId: ID, user: User) {
       function* () {},
       // @ts-ignore: remove when confirmer is typed
       function* ({ timeout, message }: { timeout: boolean; message: string }) {
-        // revert the decremented save count
         yield* put(incrementTrackSaveCount())
         yield* put(
           socialActions.unsaveTrackFailed(
@@ -534,10 +515,6 @@ export function* watchUnsetArtistPick() {
   })
 }
 
-/**
- * Downloads all tracks in the given quality. Can be used for a single
- * track or multiple tracks (usually for stems). First track is the parent track.
- */
 function* downloadTracks({
   tracks,
   original,
@@ -630,7 +607,6 @@ function* watchDownloadTrack() {
         const { trackIds, parentTrackId, original } = action
         yield* call(waitForRead)
 
-        // Make sure we have an account before proceeding
         yield* queryAccountUser()
 
         const mainTrackId = parentTrackId ?? trackIds[0]
@@ -648,7 +624,6 @@ function* watchDownloadTrack() {
           return
         }
         const rootDirectoryName = `${user.name} - ${mainTrack.title} (Audius)`
-        // Mobile typecheck complains if this array isn't typed
         const tracks: { trackId: ID; filename: string }[] = []
 
         for (const trackId of [...trackIds, parentTrackId].filter(
@@ -698,8 +673,6 @@ function* watchDownloadFinished() {
   )
 }
 
-/* SHARE */
-
 function* watchShareTrack() {
   yield* takeEvery(
     socialActions.SHARE_TRACK,
@@ -727,11 +700,6 @@ function* watchShareTrack() {
   )
 }
 
-// Contest share variant — same query + analytics kind as track, but
-// the clipboard + social link point at the contest page on the
-// parent track's permalink. Mirrors how the contest page itself
-// routes (`{permalink}/contest`) so a shared URL opens the same
-// surface the sender is on.
 function* watchShareContest() {
   yield* takeEvery(
     socialActions.SHARE_CONTEST,

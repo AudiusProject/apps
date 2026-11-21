@@ -74,7 +74,6 @@ export const useProfilePage = () => {
   const params = parseUserRoute(pathname)
   const handleLower = params?.handle?.toLowerCase() as string
 
-  // Get user data from route params
   const { data: profile, status: profileStatus } = useUserByParams(
     params ?? {},
     {
@@ -92,9 +91,7 @@ export const useProfilePage = () => {
 
   const blockeeList = useSelector(getBlockees)
 
-  // Local state
   const [activeTab, setActiveTab] = useState<ProfilePageTabs | null>(() => {
-    // Initialize with tab from URL if present
     return params?.tab ? getTabForRoute(params.tab) : null
   })
   const [editMode, setEditMode] = useState(false)
@@ -139,7 +136,6 @@ export const useProfilePage = () => {
     }>
   >(null)
 
-  // Effects
   useEffect(() => {
     if (params?.tab) {
       setActiveTab(getTabForRoute(params.tab))
@@ -152,7 +148,6 @@ export const useProfilePage = () => {
     }
   }, [profileStatus, navigate])
 
-  // Replace URL with properly formatted /handle route
   useEffect(() => {
     if (profile && profileStatus === 'success') {
       const currentParams = parseUserRoute(pathname)
@@ -174,23 +169,19 @@ export const useProfilePage = () => {
     }
   }, [profile, profileStatus, pathname, dispatch])
 
-  // Set default tab
   useEffect(() => {
     if (!activeTab && profile && accountUserId !== profile.user_id) {
       setActiveTab(isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS)
     }
   }, [activeTab, profile, isArtist, accountUserId])
 
-  // Set current user in Redux state for profile selectors
   useEffect(() => {
     if (handleLower) {
       dispatch(setCurrentUser(handleLower))
     }
   }, [handleLower, dispatch])
 
-  // Reset state when profile changes
   useEffect(() => {
-    // Preserve tab from URL if present, otherwise reset to null
     setActiveTab(params?.tab ? getTabForRoute(params.tab) : null)
     setEditMode(false)
     setUpdatedName(null)
@@ -206,7 +197,6 @@ export const useProfilePage = () => {
     setAreArtistRecommendationsVisible(false)
   }, [profile?.handle, params?.tab])
 
-  // Check if owner changed from visitor to owner
   useEffect(() => {
     if (profile && accountUserId === profile.user_id) {
       dispatch(fetchHasTracks())
@@ -214,7 +204,6 @@ export const useProfilePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.user_id, accountUserId, dispatch])
 
-  // Computed values
   const isOwner =
     profile && accountUserId ? profile.user_id === accountUserId : false
   const mode: ProfileMode = isOwner
@@ -300,7 +289,6 @@ export const useProfilePage = () => {
       ? updatedWebsite
       : (profile?.website ?? '')
 
-  // Determine fan club badge
   let fanClubBadge = null
   if (profile) {
     if (updatedFanClubBadge !== null) {
@@ -333,7 +321,6 @@ export const useProfilePage = () => {
   const dropdownDisabled = activeTab === ProfilePageTabs.REPOSTS
   const following = !!profile && profile.does_current_user_follow
 
-  // Handlers
   const goToRoute = useCallback(
     (route: string) => dispatch(push(route)),
     [dispatch]
@@ -508,7 +495,6 @@ export const useProfilePage = () => {
     ) => {
       setUpdatedFanClubBadge(badge)
 
-      // Optimistically update the user cache
       if (profile?.user_id && queryClient) {
         let optimisticBadge = badge
         if (badge?.mint === '__default__') {
@@ -775,7 +761,6 @@ export const useProfilePage = () => {
     chatPermissions?.callToAction === ChatPermissionAction.SIGN_UP
 
   return {
-    // Profile data
     profile,
     status:
       profileStatus === 'success'
@@ -821,7 +806,6 @@ export const useProfilePage = () => {
     tracksLineupOrder,
     handleLower,
 
-    // State
     editMode,
     shouldMaskContent,
     areArtistRecommendationsVisible,
@@ -833,7 +817,6 @@ export const useProfilePage = () => {
     isBlocked,
     canCreateChat,
 
-    // Handlers
     goToRoute,
     changeTab,
     onSortByRecent,

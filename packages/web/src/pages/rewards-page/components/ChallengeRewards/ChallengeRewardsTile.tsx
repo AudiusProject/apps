@@ -99,7 +99,6 @@ export const ChallengeRewardsTile = ({
   }, [userChallengesLoading, haveChallengesLoaded])
 
   useEffect(() => {
-    // Refresh user challenges on page visit
     dispatch(fetchUserChallenges())
   }, [dispatch])
 
@@ -115,27 +114,20 @@ export const ChallengeRewardsTile = ({
 
   const rewardIdsSorted = useMemo(() => {
     if (!isAuthenticated) {
-      // Show remote-config reward IDs for unauthenticated users, same as unverified view
       return remoteConfigRewardIds.filter(
         (id) =>
           id !== ChallengeName.Referred && !!challengeRewardsConfig[id]?.title
       )
     }
 
-    // Get all challenge IDs directly from userChallenges (from API)
-    // userChallenges is keyed by challenge_id
     const allRewardIds = Object.keys(userChallenges).filter((id) => {
       const challengeId = id as ChallengeRewardID
-      // Skip challenge IDs that don't have visible rewards tile content.
-      // This protects against deprecated/hidden IDs that may still be returned by API.
       if (!challengeRewardsConfig[challengeId]?.title) {
         return false
       }
-      // The referred challenge only needs a tile if the user was referred
       if (challengeId === ChallengeName.Referred) {
         return userChallenges[challengeId]?.is_complete === true
       }
-      // Include all other challenges
       return true
     }) as ChallengeRewardID[]
 
@@ -149,9 +141,7 @@ export const ChallengeRewardsTile = ({
     userChallenges
   ])
 
-  // Filter completed rewards based on toggle
   const filteredRewardIds = useMemo(() => {
-    // No disbursement data available without auth — show all
     if (!isAuthenticated || showCompleted) {
       return rewardIdsSorted
     }
@@ -171,12 +161,9 @@ export const ChallengeRewardsTile = ({
     showCompleted
   ])
 
-  // When verified, combine all rewards and sort by claimability
-  // When not verified, separate into open-to-all and verified-only
   const { allRewardsSorted, openToAllRewards, verifiedOnlyRewards } =
     useMemo(() => {
       if (isVerified) {
-        // When verified, combine all rewards and sort by claimability
         const allRewards = [...filteredRewardIds].sort(
           makeOptimisticChallengeSortComparator(optimisticUserChallenges)
         )
@@ -186,7 +173,6 @@ export const ChallengeRewardsTile = ({
           verifiedOnlyRewards: []
         }
       } else {
-        // When not verified, separate into open-to-all and verified-only
         const openToAll: typeof filteredRewardIds = []
         const verifiedOnly: typeof filteredRewardIds = []
 
@@ -208,7 +194,6 @@ export const ChallengeRewardsTile = ({
 
   const hasLockedRewards = !isVerified && verifiedOnlyRewards.length > 0
 
-  // When verified, render all rewards together sorted by claimability
   const allRewardsTiles = isVerified
     ? allRewardsSorted.map((id) => {
         const props = getChallengeConfig(id)
@@ -247,7 +232,6 @@ export const ChallengeRewardsTile = ({
         <Flex
           css={{
             position: 'relative',
-            /* Room before reward tiles; title ↔ subtitle is gap='s' on the inner flex */
             marginBottom: spacing['3xl'],
             width: '100%',
             paddingTop: isMobile ? spacing.m : 0

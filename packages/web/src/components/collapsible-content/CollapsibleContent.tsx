@@ -13,7 +13,7 @@ import useMeasure from 'react-use-measure'
 
 import styles from './CollapsibleContent.module.css'
 
-const BUTTON_HEIGHT = 48 // Height of the toggle button
+const BUTTON_HEIGHT = 48
 
 const messages = {
   seeMore: 'See More',

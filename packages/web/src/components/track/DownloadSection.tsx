@@ -87,7 +87,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
     shouldDisplayOwnerPremiumDownloads
   } = useDownloadableContentAccess({ trackId })
 
-  // Filter out uploading stems that are already in the stemTracks array
   const filteredUploadingStems = uploadingStems.filter(
     (s) => !stemTracks.find((t) => t.orig_filename === s.name)
   )
@@ -129,7 +128,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const handleDownload = useRequiresAccountCallback(
     ({ trackIds, parentTrackId }: { trackIds: ID[]; parentTrackId?: ID }) => {
       if (isMobile && shouldDisplayDownloadFollowGated) {
-        // On mobile, show a toast instead of a tooltip
         dispatch(toast({ content: messages.followToDownload }))
       } else if (partialTrack && partialTrack.access.download) {
         openWaitForDownloadModal({
@@ -161,9 +159,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const sectionTitle = hasStems ? messages.title : messages.downloadTitle
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
 
-  // No caret / no expandable list when there's a single downloadable track
-  // (download original ON, no stems). Tapping the row's download button
-  // should be the entire interaction — there's nothing to expand.
   const isSingleTrackDownload = !!is_downloadable && !hasStems
   const isExpanded = !isSingleTrackDownload && expanded
 

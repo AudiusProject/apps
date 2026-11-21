@@ -131,25 +131,6 @@ type ContestEventData = {
   sourceTrackIds?: number[]
 }
 
-/**
- * Full-page Create / Edit Remix Contest flow. Replaces the legacy
- * HostRemixContestModal.
- *
- * Routes:
- *   /:handle/:slug/host-contest — track-scoped entry (from a track page).
- *   /host-contest               — track-less entry (from the contests
- *                                 discovery page). User picks exactly one
- *                                 Source Track, which becomes the event's
- *                                 `entity_id`.
- *
- * When the target track already has a remix_contest event, the form
- * loads into "edit" mode pre-filled from event_data.
- *
- * New fields (Title, Video Link, Cover Photo, Source Tracks) live as
- * extra keys inside event_data — the backend entity_manager accepts
- * arbitrary JSON, so no schema change is required. `entity_id` points
- * at the primary / first source track.
- */
 export const HostRemixContestPage = () => {
   const navigate = useNavigate()
   useRequiresAccount()
@@ -160,8 +141,6 @@ export const HostRemixContestPage = () => {
     handle && slug ? `/${handle}/${slug}` : null
   )
   const primaryTrackId = primaryTrack?.track_id
-  // Only track-scoped entry (primaryTrack present) can show an existing
-  // contest in edit mode. Track-less entry is always create-mode.
   const { data: remixContest } = useRemixContest(primaryTrackId)
   const { data: remixes, isLoading: remixesLoading } = useRemixesLineup({
     trackId: primaryTrackId,
@@ -183,12 +162,6 @@ export const HostRemixContestPage = () => {
 
   const primaryPermalink = primaryTrack?.permalink ?? ''
 
-  // ---------------------------------------------------------------------------
-  // Draft persistence
-  // ---------------------------------------------------------------------------
-  // Drafts only apply to the create flow — edit mode is driven by the
-  // live event. Scope per user and per primary track (or "trackless" for
-  // the /host-contest entry).
   const { existingDraft, saveDraft, clearDraft } = useContestDraft({
     userId: currentUserId,
     primaryTrackId,
@@ -197,9 +170,6 @@ export const HostRemixContestPage = () => {
   const [showDraftBanner, setShowDraftBanner] = useState(!!existingDraft)
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null)
 
-  // ---------------------------------------------------------------------------
-  // Form state
-  // ---------------------------------------------------------------------------
   const [title, setTitle] = useState(existingEventData.title ?? '')
   const [description, setDescription] = useState(
     existingEventData.description ?? ''
@@ -230,15 +200,6 @@ export const HostRemixContestPage = () => {
     existingEventData.sourceTrackIds ?? (primaryTrackId ? [primaryTrackId] : [])
   )
 
-  // Hydrate form state once `remixContest` resolves.
-  //
-  // Why: `useState` initializers only run on first mount. On the edit route
-  // the form mounts before the React Query fetch finishes, so the initial
-  // state captures empty values and never picks up the resolved contest
-  // data — Title, Description, Prizes, Video Link, etc. all rendered blank
-  // even though the backend had them. Drafts are disabled in edit mode
-  // (the useContestDraft hook is gated on `!isEdit`), so there's no
-  // in-flight draft to worry about clobbering here.
   const hasHydratedRef = useRef(false)
   useEffect(() => {
     if (hasHydratedRef.current) return
@@ -261,17 +222,6 @@ export const HostRemixContestPage = () => {
     hasHydratedRef.current = true
   }, [remixContest])
 
-  // On the track-scoped route (/:handle/:slug/host-contest) the URL
-  // identifies the source track, but `useTrackByPermalink` is async — by
-  // the time it resolves, the `useState` initializer above has already
-  // captured `primaryTrackId === undefined` and seeded `sourceTrackIds`
-  // to `[]`. Without this sync, the Source Track section shows "+ Add
-  // Track" instead of the URL's track and the Launch button stays
-  // disabled forever (`sourceTrackIds.length === 0`), so clicking Launch
-  // appears to do nothing. Run once when `primaryTrackId` first
-  // resolves; skip if state was already populated from a draft or
-  // existing contest, and never re-populate after a user removes the
-  // row.
   const hasSeededPrimaryTrackRef = useRef(false)
   useEffect(() => {
     if (hasSeededPrimaryTrackRef.current) return
@@ -281,10 +231,6 @@ export const HostRemixContestPage = () => {
     setSourceTrackIds([primaryTrackId])
   }, [primaryTrackId, sourceTrackIds.length])
 
-  // The event's backing track: prefer the URL-scoped primary track, and
-  // fall back to the (required) first Source Track when entering from the
-  // track-less /host-contest route. This is the `entity_id` on create /
-  // update and drives the navigation target after save.
   const entityTrackId = primaryTrackId ?? sourceTrackIds[0]
   const { data: entityTrackPermalink } = useTrack(
     !primaryTrack ? (sourceTrackIds[0] ?? null) : null,
@@ -292,19 +238,12 @@ export const HostRemixContestPage = () => {
   )
   const effectivePermalink = primaryPermalink || entityTrackPermalink || ''
 
-  // Modal state
   const [isAddTracksOpen, setIsAddTracksOpen] = useState(false)
   const [manageStemsTargetId, setManageStemsTargetId] = useState<number | null>(
     null
   )
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
 
-  // Debounced auto-save: while the user is editing in create mode, persist
-  // the draft a couple of seconds after they stop typing. Skipped while the
-  // restore banner is up (the user hasn't decided what to do with their
-  // existing draft yet) and when the form is entirely empty (no point
-  // overwriting an existing localStorage entry — discarding it should
-  // mean discarded).
   const hasFormContent =
     !!title ||
     !!description ||
@@ -346,9 +285,6 @@ export const HostRemixContestPage = () => {
     sourceTrackIds
   ])
 
-  // ---------------------------------------------------------------------------
-  // Cover-photo upload + fallback to track artwork
-  // ---------------------------------------------------------------------------
   const { imageUrl: trackArtworkUrl } = useTrackCoverArt({
     trackId: entityTrackId,
     size: SquareSizes.SIZE_1000_BY_1000
@@ -373,9 +309,6 @@ export const HostRemixContestPage = () => {
     [uploadCover]
   )
 
-  // ---------------------------------------------------------------------------
-  // Handlers
-  // ---------------------------------------------------------------------------
   const handleEndDateChange = useCallback(
     (value: string) => {
       setContestEndDate(dayjs(value))
@@ -411,7 +344,6 @@ export const HostRemixContestPage = () => {
   }, [])
 
   const handleSourceTracksSelected = useCallback((ids: number[]) => {
-    // Only one Source Track supported today — take the first new pick.
     setSourceTrackIds((prev) => {
       if (prev.length > 0) return prev
       return ids.slice(0, 1)
@@ -466,8 +398,6 @@ export const HostRemixContestPage = () => {
       sourceTrackIds
     })
     setDraftSavedAt(new Date().toISOString())
-    // After saving, the banner is no longer offering to restore — the
-    // user is already working with that state.
     setShowDraftBanner(false)
   }, [
     saveDraft,
@@ -484,7 +414,6 @@ export const HostRemixContestPage = () => {
 
   const handleCancel = useCallback(() => {
     clearDraft()
-    // Track-less flow: fall back to the contests discovery page.
     if (!primaryPermalink) {
       navigate(CONTESTS_PAGE)
       return
@@ -512,8 +441,6 @@ export const HostRemixContestPage = () => {
     setEndDateTouched(true)
     setEndDateError(hasDateError)
     setDescriptionError(hasDescriptionError)
-    // entityTrackId is required on both track-scoped and track-less entry —
-    // on track-less entry it comes from the (required) first Source Track.
     if (hasError || !entityTrackId || !currentUserId) return
 
     const endDate = parsedDate.toISOString()
@@ -545,9 +472,6 @@ export const HostRemixContestPage = () => {
           userId: currentUserId
         })
       } catch {
-        // Mutation's onError already surfaces a toast; stay on the form so
-        // the user can retry instead of navigating to a half-created
-        // contest page.
         return
       }
     }
@@ -598,9 +522,6 @@ export const HostRemixContestPage = () => {
     navigate
   ])
 
-  // Track-scoped URL (/:handle/:slug/host-contest) but the track hasn't
-  // resolved yet — avoid flashing an empty form against the wrong track.
-  // Track-less entry (/host-contest) skips this and renders immediately.
   if (handle && slug && !primaryTrack) {
     return null
   }
@@ -920,7 +841,6 @@ export const HostRemixContestPage = () => {
               onChange={(e) => {
                 const file = e.target.files?.[0] ?? null
                 handleCoverFileSelected(file).catch(() => {})
-                // Reset so the same file can be re-selected after a mistake.
                 e.target.value = ''
               }}
             />
@@ -1083,17 +1003,10 @@ export const HostRemixContestPage = () => {
   )
 }
 
-// ----- Source-track row ------------------------------------------------------
-
 type SourceTrackRowProps = {
   sourceTrackId: number
   onRemove: () => void
   onManageStems: () => void
-  /**
-   * Path the track-edit page should return to when the user clicks
-   * Save / Back. Encoded into a `returnTo` query param so the in-flight
-   * contest-creation form can be picked back up from its draft on landing.
-   */
   editReturnTo: string
 }
 
@@ -1121,17 +1034,9 @@ const SourceTrackRow = ({
     trackId: sourceTrackId,
     size: SquareSizes.SIZE_150_BY_150
   })
-  // getTrackStems is a fast one-shot query that returns the full stem
-  // tracks; caching means subsequent rows hit the warm slot. Null when
-  // the request hasn't resolved so we can distinguish "still loading"
-  // from "actually 0 stems" if we want to.
   const { data: stems } = useStems(sourceTrackId)
   const stemsCount = stems?.length ?? 0
 
-  // Label matches the Figma's three states: "X Stems" when there are
-  // stems, "No Stems" otherwise. Until useStems resolves we render
-  // nothing — avoids a flash of "No Stems" on tracks that turn out to
-  // have stems.
   const stemsLabel =
     stems === undefined
       ? ''
@@ -1221,6 +1126,4 @@ const SourceTrackRow = ({
 
 export default HostRemixContestPage
 
-// Re-export the icon name used by the header decoration so WebPlayer can
-// pass `<IconTrophy />` directly without a duplicate import.
 export { IconTrophy }

@@ -1,5 +1,3 @@
-// Contest page SSR - meta tags only
-
 import type { Track, User } from '@audius/common/models'
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'

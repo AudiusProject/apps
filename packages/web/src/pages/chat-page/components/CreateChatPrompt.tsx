@@ -18,9 +18,6 @@ const messages = {
 }
 
 type CreateChatPromptProps = {
-  // When provided, overrides the internal `chats` selector. Used by ChatPage
-  // to keep this card in sync with the sidebar's visibility when the account
-  // has no chats.
   hasChats?: boolean
 }
 

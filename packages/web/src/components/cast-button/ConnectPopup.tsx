@@ -33,8 +33,6 @@ const messages = {
 
 const POPOVER_WIDTH = 320
 const POPOVER_GAP = 12
-// Approximate intrinsic content height used only for initial vertical
-// positioning above the anchor. The popup itself is content-sized.
 const POPOVER_HEIGHT_HINT = 180
 
 type ConnectPopupProps = {
@@ -116,8 +114,6 @@ export const ConnectPopup = ({
     const el = anchorRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    // Use the rendered height if we have one (re-positioning), otherwise an
-    // intrinsic-height hint for the first paint.
     const heightHint =
       popoverRef.current?.getBoundingClientRect().height ?? POPOVER_HEIGHT_HINT
     let top = rect.top - heightHint - POPOVER_GAP

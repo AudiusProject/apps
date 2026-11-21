@@ -5,9 +5,6 @@ type BackgroundOverlayArgs = {
   opacity: number
 }
 
-/** Renders a background overlay using a pseudo element to avoid affecting opacity
- * on children or the background of the element itself.
- */
 export const backgroundOverlay = ({
   color,
   opacity

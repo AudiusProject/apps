@@ -78,13 +78,12 @@ export const VolumeHoverButton = ({
       volumeChange(Math.max(volumeLevelRef.current - VOLUME_STEP, 0))
     }
     const hotkeysHook = setupHotkeys({
-      38 /* up */: { cb: volumeUp, or: [ModifierKeys.CTRL, ModifierKeys.CMD] },
-      40 /* down */: {
+      38: { cb: volumeUp, or: [ModifierKeys.CTRL, ModifierKeys.CMD] },
+      40: {
         cb: volumeDown,
         or: [ModifierKeys.CTRL, ModifierKeys.CMD]
       }
     })
-    // Ensure rounded edges at the default volume.
     volumeChange(volumeLevelRef.current)
     return () => {
       removeHotkeys(hotkeysHook)

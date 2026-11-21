@@ -54,7 +54,6 @@ export const ChatPage = () => {
     location.state as { presetMessage?: string } | undefined
   )?.presetMessage
 
-  // All hooks must be called before any early returns
   const dispatch = useDispatch()
   const { firstOtherUser, canSendMessage } = useCanSendMessage(currentChatId)
   const isGroup = useIsGroupChat(currentChatId)
@@ -73,9 +72,6 @@ export const ChatPage = () => {
   const chatAreaRef = useRef<HTMLDivElement>(null)
   const [composerEl, setComposerEl] = useState<HTMLDivElement | null>(null)
 
-  // The message list scrolls behind the composer using
-  // --chat-composer-height, so keep it in sync with the composer's real
-  // height (it grows with multi-line input and link previews).
   useLayoutEffect(() => {
     const chatArea = chatAreaRef.current
     if (!chatArea || !composerEl) return
@@ -105,9 +101,6 @@ export const ChatPage = () => {
   const chats = useSelector(getChats)
   const chatsStatus = useSelector(getChatsStatus)
   const [currentTab, setCurrentTab] = useState<InboxTab>(InboxTab.PRIORITY)
-  // Only collapse the sidebar once we know for sure the account has no chats.
-  // During LOADING / IDLE we keep the sidebar visible so the skeleton loader
-  // still renders and we don't flash a layout shift.
   const hideChatList =
     chatsStatus === Status.SUCCESS && (chats?.length ?? 0) === 0
 
@@ -115,8 +108,6 @@ export const ChatPage = () => {
     [styles.chatListCompact]: isNarrowLayout
   })
 
-  // Navigate to new chats
-  // Scroll to bottom if active chat is clicked again
   const handleChatClicked = useCallback(
     (chatId: string) => {
       if (chatId !== currentChatId) {
@@ -132,7 +123,6 @@ export const ChatPage = () => {
   )
 
   const handleMessageSent = useCallback(() => {
-    // Set a timeout so that the date etc has a chance to render first
     setTimeout(() => {
       messagesRef.current?.scrollTo({
         top: messagesRef.current.scrollHeight,
@@ -141,7 +131,6 @@ export const ChatPage = () => {
     }, 0)
   }, [messagesRef])
 
-  // Replace the preset message in browser history after the first navigation
   useEffect(() => {
     if (presetMessage) {
       navigate(location.pathname, {

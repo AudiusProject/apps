@@ -77,14 +77,12 @@ const PlayBar = () => {
     })
   })
 
-  // Redux state
   const playCounter = useSelector(getCounter)
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
   const playingTrackId = useSelector(getTrackId)
   const playbackRate = useSelector(getPlaybackRate)
 
-  // Local state - broken into individual useState hooks
   const [localPlayCounter, setLocalPlayCounter] = useState<number | null>(null)
   const [initialVolume, setInitialVolume] = useState<number | null>(null)
   const [mediaKey, setMediaKey] = useState(0)
@@ -95,7 +93,6 @@ const PlayBar = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const isNarrow = useIsContainerNarrow(wrapperRef, 720)
 
-  // Memoized values
   const trackTitle = currentTrack?.title || ''
   const artistName = currentUser?.name || ''
   const artistHandle = currentUser?.handle || ''
@@ -113,8 +110,6 @@ const PlayBar = () => {
 
   const playable = !!playingTrackId
 
-  // Update timing state. Only re-render when the displayed second or the
-  // duration changes; the scrubber animates itself between updates.
   const startSeeking = useCallback(() => {
     clearInterval(seekInterval.current)
     seekInterval.current = window.setInterval(() => {
@@ -127,17 +122,15 @@ const PlayBar = () => {
           ? prev
           : { position, duration }
       )
-    }, 500) // SEEK_INTERVAL
+    }, 500)
   }, [setTiming])
 
-  // Clean up interval on unmount
   useEffect(() => {
     return () => {
       if (seekInterval.current) clearInterval(seekInterval.current)
     }
   }, [seekInterval])
 
-  // Start seeking when play counter changes
   useEffect(() => {
     if (playCounter !== localPlayCounter) {
       setLocalPlayCounter(playCounter)
@@ -147,7 +140,6 @@ const PlayBar = () => {
     }
   }, [playCounter, localPlayCounter, startSeeking, timing.duration])
 
-  // Play button status
   let playButtonStatus: 'load' | 'pause' | 'play'
   if (isBuffering) {
     playButtonStatus = 'load'
@@ -157,7 +149,6 @@ const PlayBar = () => {
     playButtonStatus = 'play'
   }
 
-  // Handlers
   const goToTrackPage = useCallback(() => {
     if (currentTrack) {
       dispatch(push(currentTrack.permalink))
@@ -218,8 +209,6 @@ const PlayBar = () => {
     dispatch(shuffle({ enable: false }))
   }, [dispatch])
 
-  // Read the position from the player rather than state so these callbacks
-  // (and the hotkeys bound to them) don't change on every timing update
   const onPrevious = useCallback(() => {
     if (isLongFormContent) {
       const position = audioPlayer?.getPosition() || 0
@@ -249,15 +238,14 @@ const PlayBar = () => {
     }
   }, [isLongFormContent, dispatch])
 
-  // Effects
   useEffect(() => {
     hotkeysHook.current = setupHotkeys(
       {
-        32 /* space */: togglePlay,
-        37 /* left arrow */: onPrevious,
-        39 /* right arrow */: onNext
+        32: togglePlay,
+        37: onPrevious,
+        39: onNext
       },
-      /* throttle= */ 200
+      200
     )
 
     return () => {

@@ -88,7 +88,6 @@ describe('upload drafts', () => {
     expect(metadata.description).toBe('a long description')
     expect(metadata.stems.map((s: any) => s.file)).toEqual(stems)
     expect(metadata.stems[0].category).toBe('OTHER')
-    // Dead blob URLs are recreated and previews rebuilt.
     expect(metadata.artwork.file.name).toBe('Artwork')
     expect(metadata.artwork.url).not.toBe('blob:dead')
     expect((values.tracks[0] as any).preview).toBeInstanceOf(Audio)
@@ -125,8 +124,6 @@ describe('upload drafts', () => {
     const values = makeValues('t', [stems[0]])
     await saveUploadDraft(USER_ID, UploadType.INDIVIDUAL_TRACK, values)
     const after = [...items.keys()].filter((k) => k.startsWith('file:'))
-    // New audio/art files from makeValues replace the old ones; the
-    // removed stem is gone either way.
     expect(after.length).toBe(3)
     expect(before.length).toBe(4)
   })

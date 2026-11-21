@@ -152,22 +152,16 @@ const NowPlaying = g(
 
     const albumInfo = track?.album_backlink
 
-    // Keep a ref for the artwork and dynamically resize the width of the
-    // image as the height changes (which is flexed).
     const artworkRef = useRef<HTMLDivElement | null>(null)
     useEffect(() => {
       if (artworkRef.current) {
-        // 4px accounts for the borders on the image
         artworkRef.current.style.width = `${
           artworkRef.current.offsetHeight - 4
         }px`
       }
     }, [artworkRef, playCounter])
 
-    // Store position and duration together so they only trigger one state change
     const [timing, setTiming] = useState({ position: 0, duration: 0 })
-    // Additional media key to refresh scrubber in account for out of sync mobile seek position
-    // and UI seek position
     const [mediaKey, setMediaKey] = useState(0)
     const seekInterval = useRef<number | undefined>(undefined)
     const [prevPlayCounter, setPrevPlayCounter] = useState<number | null>(null)
@@ -182,8 +176,6 @@ const NowPlaying = g(
         if (!audioPlayer) return
         const position = audioPlayer.getPosition()
         const duration = audioPlayer.getDuration()
-        // Only re-render when the displayed second or the duration changes;
-        // the scrubber animates itself between updates
         setTiming((prev) =>
           Object.is(Math.floor(prev.position), Math.floor(position)) &&
           Object.is(prev.duration, duration)
@@ -193,14 +185,12 @@ const NowPlaying = g(
       }, SEEK_INTERVAL)
     }, [setTiming])
 
-    // Clean up
     useEffect(() => {
       return () => {
         if (seekInterval.current) clearInterval(seekInterval.current)
       }
     }, [seekInterval])
 
-    // The play counter changes (same song again or new song)
     useEffect(() => {
       if (playCounter !== prevPlayCounter) {
         setPrevPlayCounter(playCounter)
@@ -336,7 +326,6 @@ const NowPlaying = g(
       if (isLongFormContent) {
         const newPosition = position - SKIP_DURATION_SEC
         seek(Math.max(0, newPosition))
-        // Update mediakey so scrubber updates
         setTiming({ position: newPosition, duration: timing.duration })
         setMediaKey((mediaKey) => mediaKey + 1)
       } else {
@@ -344,7 +333,7 @@ const NowPlaying = g(
         if (shouldGoToPrevious) {
           previous()
         } else {
-          reset(true /* shouldAutoplay */)
+          reset(true)
         }
       }
     }
@@ -356,7 +345,6 @@ const NowPlaying = g(
         const position = audioPlayer?.getPosition() ?? timing.position
         const newPosition = position + SKIP_DURATION_SEC
         seek(Math.min(newPosition, timing.duration))
-        // Update mediakey so scrubber updates
         setTiming({ position: newPosition, duration: timing.duration })
         setMediaKey((mediaKey) => mediaKey + 1)
       } else {
@@ -474,8 +462,6 @@ const NowPlaying = g(
         </div>
         <div className={styles.timeControls}>
           <Scrubber
-            // Include the duration in the media key because the play counter can
-            // potentially update before the duration coming from the native layer if present
             mediaKey={`${queueTrackId}${mediaKey}${timing.duration}`}
             isPlaying={isPlaying && !isBuffering}
             isDisabled={!queueTrackId}

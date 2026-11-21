@@ -26,7 +26,6 @@ export const AccountsYouManageHomePage = ({
     isFetching,
     isSuccess
   } = useManagedAccounts(userId, {
-    // Always refetch the data
     staleTime: 0
   })
 

@@ -28,12 +28,6 @@ type CommentSectionInnerProps = {
   entityId: ID
 }
 
-/**
- * This component is responsible for
- * - Rendering header & containers
- * - Mapping through the root comments array
- * - Infinite scrolling pagination
- */
 const CommentSectionInner = (props: CommentSectionInnerProps) => {
   const { commentSectionRef, entityId } = props
   const {
@@ -74,7 +68,6 @@ const CommentSectionInner = (props: CommentSectionInnerProps) => {
     newSearchParams.delete('showComments')
     navigate({ search: newSearchParams.toString() }, { replace: true })
 
-    // replacing history scrolls to top, so we need to scroll to the comment section
     commentSectionRef.current?.scrollIntoView()
     setHasScrolledIntoView(true)
     mainContentRef.current?.removeEventListener('scrollend', handleScrollEnd)

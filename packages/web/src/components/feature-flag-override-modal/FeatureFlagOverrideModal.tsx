@@ -48,7 +48,7 @@ const setOverrideSetting = (flag: string, val: OverrideSetting) => {
 }
 
 export const FeatureFlagOverrideModal = () => {
-  const hotkeyToggle = useDevModeHotkey(70 /* f */)
+  const hotkeyToggle = useDevModeHotkey(70)
   const [ignoredHotkeyActive, setHotkeyActive] = useState(true)
   const [filter, setFilter] = useState('')
   const [remoteInstanceLoaded, setRemoteInstanceLoaded] = useState(false)

@@ -41,7 +41,6 @@ export const ChatComposer = forwardRef<HTMLDivElement, ChatComposerProps>(
     const chat = useSelector((state) => getChat(state, chatId ?? ''))
     const [value, setValue] = useState(presetMessage ?? '')
     const [messageId, setMessageId] = useState(0)
-    // The track and collection ids used to render the composer preview
     const [trackId, setTrackId] = useState<Nullable<ID>>(null)
     const [collectionId, setCollectionId] = useState<Nullable<ID>>(null)
 

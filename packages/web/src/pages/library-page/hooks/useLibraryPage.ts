@@ -151,8 +151,6 @@ export const useLibraryPage = () => {
     shouldReturnToTrackPurchases: false
   })
 
-  // Debounced query input — drives the tan-query queryKey, so each keystroke
-  // doesn't fire a new SDK request.
   const [debouncedFilterText, setDebouncedFilterText] = useState(urlSearch)
   const commitFilterText = useMemo(
     () => debounce(setDebouncedFilterText, FILTER_DEBOUNCE_MS),
@@ -164,7 +162,6 @@ export const useLibraryPage = () => {
       getCategory(state, { currentTab: urlTab })
   )
 
-  // Sync from URL to state and Redux when location changes
   useEffect(() => {
     const tab = getTabFromPathname(location.pathname)
     let category = categoryFromFilterParam(urlFilter)
@@ -191,7 +188,6 @@ export const useLibraryPage = () => {
     )
   }, [location.pathname, urlFilter, urlSearch, dispatch])
 
-  // When user changes category via menu (Redux updates), sync to URL
   useEffect(() => {
     const urlCategoryParam = filterParamFromCategory(selectedCategoryForUrlTab)
     if (lastCategoryUrlRef.current === urlCategoryParam) return
@@ -210,7 +206,6 @@ export const useLibraryPage = () => {
     )
   }, [selectedCategoryForUrlTab, setSearchParams])
 
-  // tan-query for the saved-tracks lineup. Replaces the legacy fetchSaves saga.
   const {
     trackIds: fetchedTrackIds,
     data: fetchedLineupData,
@@ -259,8 +254,6 @@ export const useLibraryPage = () => {
     isPending: isLibraryTracksPending
   } = useTracks(libraryTrackIds, { enabled: libraryTrackIds.length > 0 })
 
-  // `TQTrack = Omit<Track, 'user'>` so we also fetch owners and attach
-  // `user` on each entry — the legacy library table reads `metadata.user.name`.
   const libraryOwnerIds = useMemo(
     () => (libraryFetchedTracks ?? []).map((t) => t.owner_id),
     [libraryFetchedTracks]
@@ -298,8 +291,6 @@ export const useLibraryPage = () => {
 
   const hasReachedEndValue = !hasNextPage
 
-  // State-owned sort order (UID list) for the library track table. `null`
-  // means "render in the default order from saves".
   const [sortedOrder, setSortedOrder] = useState<UID[] | null>(null)
 
   const resetSavedTracks = useCallback(() => {
@@ -349,9 +340,6 @@ export const useLibraryPage = () => {
     [dispatch]
   )
 
-  // Matches legacy `libraryPageTracksLineupActions.prefix` so consumers
-  // that compare against the queue source (e.g. mobile AudioPlayer offline
-  // download status) keep working.
   const playbackSource = 'SAVED_TRACKS'
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
@@ -497,9 +485,6 @@ export const useLibraryPage = () => {
       const value = e.target.value
       setState((prev) => ({ ...prev, filterText: value }))
       debouncedUpdateSearchParam(value)
-      // Only push the filter to the server query when we don't already have
-      // every row locally — mirror the saga-era behavior where complete
-      // result sets get filtered client-side.
       if (!state.allTracksFetched) {
         commitFilterText(value)
       }
@@ -544,8 +529,6 @@ export const useLibraryPage = () => {
       )
   }, [formattedEntries, state.filterText])
 
-  // The currently-playing entry's uid (as constructed locally for the
-  // SAVED_TRACKS lineup), or null if a different source is playing.
   const currentPlayingUid = useMemo(() => {
     if (
       currentQueueItem.trackId == null ||
@@ -778,11 +761,9 @@ export const useLibraryPage = () => {
   const playingUid = getPlayingUid()
 
   return {
-    // Messages
     title: messages.title,
     description: messages.description,
 
-    // State
     currentTab: state.currentTab,
     filterText: state.filterText,
     initialOrder: state.initialOrder,
@@ -790,13 +771,11 @@ export const useLibraryPage = () => {
     reordering: state.reordering,
     allowReordering: state.allowReordering,
 
-    // Props from AppState
     tracks,
     currentQueueItem,
     playing,
     buffering,
 
-    // Props from dispatch
     fetchLibraryTracks: () => {},
     resetSavedTracks,
     updateLineupOrder,
@@ -808,11 +787,9 @@ export const useLibraryPage = () => {
     saveTrack,
     unsaveTrack,
 
-    // Calculated Props
     isQueued: isQueuedValue,
     playingUid,
 
-    // Methods
     onFilterChange,
     onSortChange,
     formatMetadata,
@@ -829,7 +806,6 @@ export const useLibraryPage = () => {
     onTogglePlay,
     fetchMoreTracks,
 
-    // Additional props
     hasReachedEnd: hasReachedEndValue,
     playlistUpdates: playlistUpdates as number[],
     updatePlaylistLastViewedAt,

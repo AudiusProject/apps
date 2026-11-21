@@ -16,11 +16,6 @@ const messages = {
 
 type CollaboratorsFormValues = { collaborators: UserMetadata[] }
 
-/**
- * Settings box (like Visibility / Remix Settings) for tagging collaborator
- * artists. Opens the "Add Collaborator" modal; the upload adapter maps the
- * selected users to numeric ids for the on-chain metadata.
- */
 export const CollaboratorsField = () => {
   const [{ value }, , { setValue }] =
     useTrackField<UserMetadata[]>('collaborators')

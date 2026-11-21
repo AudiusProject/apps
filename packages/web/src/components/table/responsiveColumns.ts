@@ -50,8 +50,6 @@ const getResponsiveBudgetWidth = (
   column: ColumnWithSize,
   fallbackColumnWidth: number
 ) => {
-  // For responsive collapse decisions, use the column's minimum visible width
-  // first, so columns shrink before they are dropped.
   if (isNumber(column.minWidth)) return column.minWidth
   if (isNumber(column.width)) return column.width
   if (isNumber(column.maxWidth)) return column.maxWidth

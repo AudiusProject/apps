@@ -131,9 +131,7 @@ export const FanClubDetailPage = () => {
 
   const isOwner = currentUserId === coin?.ownerId
 
-  // Visual title is just the coin name for the header
   const visualTitle = coin?.name ?? ''
-  // OG title includes the ticker for meta tags
   const ogTitle = messages.getTitle(coin?.name, coin?.ticker)
   const description = messages.getDescription(
     coin?.name,

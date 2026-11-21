@@ -27,7 +27,6 @@ function* trackLocation() {
 
       if (pathname !== prevPathname) {
         prevPathname = pathname
-        // Dispatch a track event and then resolve page/screen events with segment
         analytics.track({
           eventName: Name.PAGE_VIEW,
           properties: { route: pathname, queryParams: search, ...rest }

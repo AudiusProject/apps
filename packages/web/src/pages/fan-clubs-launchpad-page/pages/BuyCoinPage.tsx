@@ -41,7 +41,6 @@ const messages = {
   stepInfo: launchpadMessages.buy.stepInfo(AMOUNT_OF_STEPS)
 }
 
-// Not to be confused with AUDIO_DECIMALS - this is the amount of decimal places the input will alow you to enter
 const FORM_INPUT_DECIMALS = 8
 
 const INPUT_DEBOUNCE_TIME = 400
@@ -57,7 +56,6 @@ export const BuyCoinPage = ({
   submitErrorText?: string
   submitButtonText?: string
 }) => {
-  // Use Formik context to manage form state, including payAmount and receiveAmount
   const { values, setFieldValue, errors, touched, validateForm } =
     useFormikContext<LaunchpadFormValues>()
   const { data: launchpadConfig } = useLaunchpadConfig()
@@ -110,7 +108,6 @@ export const BuyCoinPage = ({
 
   const imageUrl = useFormImageUrl(values.coinImage)
 
-  // Get the first buy quote using the hook
   const {
     data: firstBuyQuoteData,
     mutate: getFirstBuyQuote,
@@ -118,7 +115,6 @@ export const BuyCoinPage = ({
     error: firstBuyQuoteError
   } = useFirstBuyQuote()
 
-  // Resets inputs from disabled when the api call is not pending
   useEffect(() => {
     if (!isFirstBuyQuotePending) {
       setIsPayAmountChanging(false)
@@ -127,7 +123,6 @@ export const BuyCoinPage = ({
   }, [isFirstBuyQuotePending])
 
   const prevFirstBuyQuoteData = usePrevious(firstBuyQuoteData)
-  // When quote comes back, update our inputs with the new values
   useEffect(() => {
     if (firstBuyQuoteData) {
       setFieldValue(
@@ -184,7 +179,6 @@ export const BuyCoinPage = ({
     setFieldValue(FIELDS.wantsToBuy, newValue)
     trackFormInputChange('wantsToBuy', newValue)
 
-    // If user selects "no", reset the first buy form fields and their errors
     if (newValue === 'no') {
       setFieldValue(FIELDS.payAmount, '')
       setFieldValue(FIELDS.receiveAmount, '')
@@ -203,7 +197,6 @@ export const BuyCoinPage = ({
   const debouncedPayAmountChange = useDebouncedCallback(
     async (payAmount: string) => {
       const payAmountNumber = parseFloat(payAmount)
-      // NOTE: unfortunately with the way this form is set up its easier to manually validate max values here (not using formik errors field)
       if (
         payAmount &&
         payAmountNumber <= maxAudioInputAmount &&
@@ -223,7 +216,6 @@ export const BuyCoinPage = ({
   const debouncedReceiveAmountChange = useDebouncedCallback(
     async (receiveAmount: string) => {
       const receiveAmountNumber = parseFloat(receiveAmount)
-      // NOTE: unfortunately with the way this form is set up its easier to manually validate max values here (not using formik errors field)
       if (
         receiveAmount &&
         receiveAmountNumber <= maxTokenOutputAmount &&

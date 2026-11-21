@@ -190,14 +190,12 @@ type PageFooterProps = {
 export const PageFooter = (props: PageFooterProps) => {
   const { prefix, postfix, buttonProps, sticky, ...other } = props
   const { isMobile } = useMedia()
-  // On the MobileCTAPage we use this footer outside a formik context, hence the default values
   const { isSubmitting, touched, isValid } = useFormikContext() ?? {
     isSubmitting: false,
     touched: true,
     isValid: true
   }
 
-  // Show buttons side-by-side on desktop when there's a postfix (Skip button)
   const showButtonsSideBySide = !isMobile && postfix && !prefix
 
   return (
@@ -291,10 +289,8 @@ export const ScrollView = (props: ScrollViewProps) => {
       direction={orientation === 'vertical' ? 'column' : 'row'}
       css={{
         overflow: disableScroll ? undefined : 'auto',
-        // Hide scrollbar
         scrollbarWidth: 'none', // Firefox
         msOverflowStyle: 'none', // IE + Edge
-        // Chrome + Safari
         '::-webkit-scrollbar': {
           display: 'none'
         }

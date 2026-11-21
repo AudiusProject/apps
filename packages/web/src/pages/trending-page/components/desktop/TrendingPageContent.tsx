@@ -65,8 +65,6 @@ type TrendingPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-// Keeps track of (timeRange,genre) combinations known to be empty so we can
-// skip to the next non-empty tab without re-fetching.
 const getTimeGenreCacheKey = (timeRange: TimeRange, genre: string | null) =>
   `${timeRange}-${genre || 'all'}`
 
@@ -93,9 +91,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   })
   const setCategory = useCallback(
     (next: TrendingCategory) => {
-      // Switching category swaps the lineup underneath the user, but the
-      // outer scroll parent (mainContent) keeps its position. Reset to top
-      // so the new category starts from the top instead of mid-scroll.
       if (containerRef?.current?.scrollTo) {
         containerRef.current.scrollTo(0, 0)
       }
@@ -119,12 +114,8 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const tileVariant = isTrackRowsEnabled ? 'row' : 'tile'
   const { data: genreSuggestions = [] } = usePopularGenres()
 
-  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
-  // the shared default (mobile-tuned) so successive load-mores keep up with a
-  // user scrolling deep into the lineup.
   const desktopLoadMorePageSize = 10
 
-  // ----- One tanquery stream per time range; only the visible one fetches
   const trendingArgs = useMemo(
     () => ({
       initialPageSize: TRENDING_INITIAL_PAGE_SIZE,
@@ -155,7 +146,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     []
   )
 
-  // ----- URL param sync ------------------------------------------------------
   const replaceRouteCallback = useCallback(
     (route: { search: string }) => {
       dispatch(replaceRoute(route))
@@ -163,12 +153,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     [dispatch]
   )
 
-  // A `?genre=` in the URL is the user's intent for this visit and must win
-  // over whatever genre an earlier trending visit left behind in redux —
-  // otherwise arriving from Explore with `?genre=Jazz` silently keeps showing
-  // the previous genre. With no genre in the URL, redux still wins so the last
-  // filter is remembered (and gets written back to the URL by the sync effect
-  // below).
   const genreFromUrlOnMount = useRef(parseUrlParams().genre)
 
   useEffect(() => {
@@ -189,9 +173,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   }, [trendingTimeRange, replaceRouteCallback])
 
   useEffect(() => {
-    // Skip the first run when the URL already carries the genre: redux has not
-    // caught up with the effect above yet, and writing the stale value back
-    // would clobber the incoming param.
     if (isValidGenre(genreFromUrlOnMount.current)) {
       genreFromUrlOnMount.current = null
       return
@@ -201,7 +182,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
 
-  // ----- Tab logic -----------------------------------------------------------
   const queryForRange = useCallback(
     (tr: TimeRange) => {
       if (tr === TimeRange.WEEK) return weekQuery
@@ -215,8 +195,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const cacheKey = getTimeGenreCacheKey(trendingTimeRange, trendingGenre)
   const currentQuery = queryForRange(trendingTimeRange)
 
-  // If a time range resolves empty (for the current genre), auto-advance to
-  // a richer tab.
   const shouldMoveToNextTab =
     (emptyTimeGenreSet.current.has(cacheKey) && !currentQuery.isFetching) ||
     (currentQuery.isSuccess &&
@@ -232,8 +210,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   const setTrendingGenre = useCallback(
     (genre: string | null) => {
-      // toTrendingGenreValue keeps freeform/community genres (from the dynamic
-      // popular-genres filter) while mapping the all-genres sentinel to null.
       dispatch(
         trendingPageActions.setTrendingGenre(toTrendingGenreValue(genre))
       )
@@ -242,7 +218,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   )
 
   if (shouldMoveToNextTab) {
-    // Mark every equally-or-more-restrictive range empty so we don't bounce.
     getRangesToDisable(trendingTimeRange)
       .map((r) => getTimeGenreCacheKey(r, trendingGenre))
       .forEach((k) => emptyTimeGenreSet.current.add(k))
@@ -288,8 +263,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     { label: messages.allTime, value: TimeRange.ALL_TIME }
   ]
 
-  // Popular genres (ranked by recent activity) lead the list, followed by the
-  // long-tail static genres; all are searchable via the filter input.
   const genreOptions = [
     { label: messages.allGenres, value: 'all' },
     ...genreSuggestions.map((g) => ({
@@ -458,7 +431,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const goToSignUp = useCallback(() => {
     dispatch(openSignOn(false))
   }, [dispatch])
-  // Preserve shape of previous actions export for WinnersView which may use it
   const actions = useMemo(
     () => ({
       replaceRoute: replaceRouteCallback,

@@ -29,13 +29,10 @@ import {
   DashboardWalletParams
 } from './utils'
 
-// Collapse space-separated OAuth scopes (e.g. 'read write') to the highest privilege.
-// This handles Swagger UI sending 'scope=read write' when multiple scopes are selected.
 const collapseScopes = (
   raw: string | string[] | (string | null)[] | null | undefined
 ): string | null => {
   if (!raw) return null
-  // Normalize to an array of individual scope tokens, splitting on whitespace
   const strings = Array.isArray(raw)
     ? raw.filter((t): t is string => typeof t === 'string')
     : [raw]
@@ -115,7 +112,6 @@ const useParsedQueryParams = () => {
     if (isRedirectValid === false) {
       error = messages.redirectURIInvalidError
     } else if (parsedRedirectUri === 'postmessage' && !parsedOrigin) {
-      // Only applicable if redirect URI set to `postMessage`
       error = messages.originInvalidError
     } else if (scope !== 'read' && scope !== 'write') {
       error = messages.scopeError
@@ -126,18 +122,15 @@ const useParsedQueryParams = () => {
     ) {
       error = messages.responseModeError
     } else if (scope === 'read') {
-      // Read scope-specific validations:
       if (!appName && !apiKey) {
         error = messages.missingAppNameError
       }
     } else if (scope === 'write') {
-      // Write scope-specific validations:
       if (!apiKey) {
         error = messages.missingApiKeyError
       } else if (!isValidApiKey(apiKey)) {
         error = messages.invalidApiKeyError
       }
-      // PKCE-specific validations when response_type=code
       if (!error && responseType === 'code') {
         if (!codeChallenge || typeof codeChallenge !== 'string') {
           error = messages.missingCodeChallengeError
@@ -145,7 +138,6 @@ const useParsedQueryParams = () => {
           error = messages.invalidCodeChallengeMethodError
         }
       }
-      // Optional dashboard wallet tx params
       if (!error && tx) {
         const { error: txParamsError, txParams: txParamsRes } =
           validateDashboardWalletParams({
@@ -235,7 +227,6 @@ export const useOAuthSetup = ({
   const [queryParamsError, setQueryParamsError] = useState<string | null>(
     initError
   )
-  /** The fetched developer app name if write OAuth (we use `queryParamAppName` if read OAuth and no API key is given) */
   const [registeredDeveloperAppName, setRegisteredDeveloperAppName] =
     useState<string>()
   const appName = registeredDeveloperAppName ?? queryParamAppName
@@ -526,7 +517,6 @@ export const useOAuthSetup = ({
         return
       }
 
-      // Handle dashboard wallet tx if present
       if (tx && txParams) {
         if (tx === 'connect_dashboard_wallet') {
           const success = await handleAuthorizeConnectDashboardWallet({
@@ -554,7 +544,6 @@ export const useOAuthSetup = ({
       }
     }
 
-    // PKCE flow: exchange for authorization code and redirect with code
     if (responseType === 'code') {
       const code = await exchangeForAuthorizationCode({
         account,
@@ -606,7 +595,6 @@ export const useOAuthSetup = ({
       return
     }
 
-    // Implicit flow: form JWT and redirect
     await formResponseAndRedirect({
       account,
       grantCreated: shouldCreateWriteGrant

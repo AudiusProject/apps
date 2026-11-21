@@ -1,24 +1,8 @@
-/**
- * nice-modal-react registrations.
- *
- * Modals are registered here with `registerLazyModal(id, loader)`, which
- * calls `NiceModal.register` and `registerNiceModalId`. Importing this file
- * from `AppProviders` ensures all registered modals are available before
- * anything tries to `showNiceModal(id)`.
- *
- * Add new NiceModal-managed modals here as they migrate.
- */
 import { createElement, lazy, Suspense, type ComponentType } from 'react'
 
 import { registerNiceModalId } from '@audius/common/services'
 import NiceModal from '@ebay/nice-modal-react'
 
-/**
- * Wallet, Coinflow, purchase and rewards modals are registered lazily to keep
- * AppKit, Coinflow and Solana out of the entry chunk. NiceModal only renders visible modals, so nothing
- * loads until one opens. Registration stays here (not in the modal modules) so
- * the lazy import can't re-register and remount an open modal.
- */
 const registerLazyModal = (
   id: string,
   loader: () => Promise<{ default: ComponentType<any> }>
@@ -57,7 +41,6 @@ registerLazyModal('CoinflowWithdraw', () =>
   ).then((m) => ({ default: m.CoinflowWithdrawModal }))
 )
 
-// Purchase, wallet and rewards modals
 registerLazyModal('AddCashModal', () =>
   import('components/add-cash-modal/AddCashModal').then((m) => ({
     default: m.AddCashModal
@@ -152,7 +135,6 @@ registerLazyModal('LockedContent', () =>
   }))
 )
 
-// Remaining modals, also lazy so none of them load until opened
 registerLazyModal(
   'AddToCollection',
   () => import('components/add-to-collection/desktop/AddToCollectionModal')

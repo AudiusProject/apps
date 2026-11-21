@@ -533,7 +533,6 @@ type GatedContentSectionProps = {
   className?: string
   buttonClassName?: string
   ownerId: ID | null
-  /** More context for analytics to know about where purchases are being triggered from */
   source?: ModalSource
 }
 

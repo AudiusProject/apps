@@ -14,7 +14,6 @@ import Rectangle from 'assets/img/dogEarRectangle.svg'
 
 export type DogEarProps = {
   type: DogEarType
-  /** Border width of container surrounding dog ear */
   borderOffset?: number
   className?: string
 }

@@ -36,11 +36,6 @@ const messages = {
   liked: ' liked your comment on ',
   your: 'your',
   their: 'their',
-  // Generic fallback when the notification entityType isn't a value we
-  // know how to render (e.g. backend hasn't indexed a remix-contest
-  // comment with a typed entity yet — the QA pass found these
-  // notifications were rendering "their undefined" because
-  // `entityType` was missing on the payload).
   fallbackEntityLabel: 'remix contest'
 }
 
