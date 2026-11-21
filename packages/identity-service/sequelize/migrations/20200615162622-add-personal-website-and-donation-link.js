@@ -1,9 +1,5 @@
 'use strict'
 
-/**
- * Adds 'website' and 'donation' fields to SocialHandles, which
- * signify a personal/artist website and a donation link
- */
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {

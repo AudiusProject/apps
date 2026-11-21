@@ -29,6 +29,7 @@ type AnimatedIconButtonProps = {
   activeClassName?: string
   disabledClassName?: string
   icon: AnimatedIconType
+  /** @deprecated Theme applied at runtime - no longer used */
   darkMode?: boolean
   isMatrix?: boolean
   'aria-label'?: string

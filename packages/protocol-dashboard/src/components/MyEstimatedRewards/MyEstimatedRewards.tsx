@@ -41,9 +41,6 @@ type OwnProps = {
 
 type MyEstimatedRewardsProps = OwnProps
 
-/**
- * Shows stats about staking. Lives on the SP page
- */
 const MyEstimatedRewards: React.FC<MyEstimatedRewardsProps> = ({ wallet }) => {
   const weeklyRewards = useUserWeeklyRewards({ wallet })
   const annualRewards = useUserAnnualRewardRate({ wallet })

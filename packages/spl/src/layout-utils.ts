@@ -38,8 +38,6 @@ export class EthereumAddress extends Layout<string> {
    * */
   encode(src: string, b: Uint8Array, offset = 0) {
     const strippedEthAddress = src.replace('0x', '')
-    // Need to pad the array to length 20 - otherwise, hex eth keys starting with '0' would
-    // result in truncated arrays, while eth spec is always 20 bytes
     const buf = Buffer.from(strippedEthAddress, 'hex')
     const fixedBuf = Buffer.alloc(20, 0)
     buf.copy(fixedBuf, 20 - buf.length)
@@ -51,7 +49,10 @@ export class EthereumAddress extends Layout<string> {
  * Wrapper that encodes strings the way Borsh does, with the length prepended
  */
 export class BorshString extends Layout<string> {
-  constructor(private readonly maxLength: number, property?: string) {
+  constructor(
+    private readonly maxLength: number,
+    property?: string
+  ) {
     super(-1, property)
   }
 

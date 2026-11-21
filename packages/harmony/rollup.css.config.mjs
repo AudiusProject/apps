@@ -8,13 +8,11 @@ import { NO_FONTS_CSS, harmonyCssWithFonts } from './rollup.fonts.mjs'
 const cjsRequire = createRequire(import.meta.url)
 const tspCompiler = cjsRequire('ts-patch/compiler')
 
-// CSS-only build: processes TypeScript to extract CSS
 export default {
   input: 'src/css-entry.ts',
   output: {
     dir: 'dist',
     format: 'es',
-    // Minimal JS output - just a placeholder since we only care about CSS
     entryFileNames: () => 'harmony.css.placeholder.js',
     sourcemap: false
   },
@@ -23,7 +21,6 @@ export default {
       typescript: tspCompiler,
       clean: false,
       useTsconfigDeclarationDir: false,
-      // Skip type checking to speed up
       check: false
     }),
     postcss({
@@ -34,7 +31,6 @@ export default {
     }),
     harmonyCssWithFonts()
   ],
-  // Process CSS imports so postcss can extract them; keep other imports external.
   external: (id) => !id.endsWith('.css'),
   treeshake: false
 }

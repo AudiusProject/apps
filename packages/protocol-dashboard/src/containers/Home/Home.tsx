@@ -85,7 +85,7 @@ const Home = () => {
   const { activeProposals } = useActiveProposals()
   const pushRoute = usePushRoute()
   const mobile = isMobile()
-  const { typography } = useTheme() as HarmonyTheme // Need to cast because the type from import is incorrect
+  const { typography } = useTheme() as HarmonyTheme
 
   const proposalsToShow =
     activeProposals && recentProposals

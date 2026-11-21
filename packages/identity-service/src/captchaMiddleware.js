@@ -28,7 +28,6 @@ const verifyAndRecordCaptcha = async ({
       )
     }
 
-    // TODO: Make middleware return errorResponse later
     if (!ok)
       logger.warn(
         `CAPTCHA - Failed captcha with score=${score} for wallet=${walletAddress}`

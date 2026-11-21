@@ -108,10 +108,8 @@ const getOptions = (id: string, max: number) => ({
     yAlign: 'bottom',
     position: 'nearest',
     custom: function (tooltipModel: any) {
-      // Tooltip Element
       let tooltipEl = document.getElementById(`chartjs-tooltip-${id}`)
 
-      // Create element on first render
       if (!tooltipEl) {
         tooltipEl = document.createElement('div')
         tooltipEl.id = `chartjs-tooltip-${id}`
@@ -119,7 +117,6 @@ const getOptions = (id: string, max: number) => ({
         document.body.appendChild(tooltipEl)
       }
 
-      // Hide if no tooltip
       if (tooltipModel.opacity === 0) {
         ;(tooltipEl as any).style.opacity = 0
         return

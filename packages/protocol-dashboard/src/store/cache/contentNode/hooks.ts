@@ -50,7 +50,6 @@ const filterNodes = (
   return cnNodes
 }
 
-// -------------------------------- Selectors  --------------------------------
 export const getStatus = (state: AppState) => state.cache.contentNode.status
 export const getTotal = (state: AppState) => state.cache.contentNode.total
 export const getNode = (spID: number) => (state: AppState) =>
@@ -63,8 +62,6 @@ export const getFilteredNodes =
     const nodes = state.cache.contentNode.nodes
     return filterNodes(nodes)
   }
-
-// -------------------------------- Helpers  --------------------------------
 
 const processNode = async (node: Node, aud: Audius): Promise<ContentNode> => {
   const { country, version } = await Audius.getContentNodeMetadata(
@@ -89,9 +86,6 @@ const processNode = async (node: Node, aud: Audius): Promise<ContentNode> => {
   }
 }
 
-// -------------------------------- Thunk Actions  --------------------------------
-
-// Async function to get
 export function fetchContentNodes(
   props: UseContentNodesProps = {}
 ): ThunkAction<void, AppState, Audius, Action<string>> {
@@ -119,7 +113,6 @@ export function fetchContentNodes(
   }
 }
 
-// Async function to get
 export function getContentNode(
   spID: number,
   setStatus?: (status: Status) => void
@@ -145,8 +138,6 @@ export function getContentNode(
     if (setStatus) setStatus(Status.Success)
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useContentNodes = ({
   owner,

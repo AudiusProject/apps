@@ -141,6 +141,7 @@ const AnimatedButton = ({
 export type LottieThemeVariant = 'accent' | 'neutral'
 
 export type AnimatedButtonProviderProps = {
+  /** @deprecated No longer used - theme applied via useLottieThemeColors */
   darkMode?: boolean
   isMatrix: boolean
   iconJSON: () => Promise<IconJSON>

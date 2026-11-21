@@ -17,7 +17,7 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
   private readonly config: StorageNodeSelectorConfigInternal
   private readonly logger: LoggerService
   private nodes: StorageNode[]
-  private orderedNodes?: string[] // endpoints (lowercase)
+  private orderedNodes?: string[]
   private selectedNode?: string | null
   private selectionState: 'healthy_only' | 'failed_all'
   private nodesPromise?: Promise<void>
@@ -78,7 +78,6 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     }
 
     this.nodes = contentNodes
-    // Drop any ordering computed from the bootstrap nodes
     this.orderedNodes = undefined
     this.selectionState = 'healthy_only'
     return true
@@ -98,25 +97,21 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
   }
 
   public getNodes(cid: string) {
-    // Synchronous, so this uses the current list and refreshes it for later
     this.ensureAvailableStorageNodes()
     return this.orderNodes(cid)
   }
 
   private async select(): Promise<string | null | undefined> {
-    // We've selected all healthy nodes. Restart from the beginning of the ordered list
     if (this.selectionState === 'failed_all') {
       this.selectionState = 'healthy_only'
     }
 
-    // Select the next node in rendezvous order from the list of all nodes
     const selectedNode = await this.selectUntilEndOfList()
 
     if (selectedNode) {
       this.selectedNode = selectedNode
       this.logger.info('Selected content node', this.selectedNode)
     } else {
-      // No healthy nodes found
       this.selectedNode = null
       this.logger.warn('No healthy nodes found')
       this.selectionState = 'failed_all'
@@ -129,7 +124,6 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     if (!this.orderedNodes?.length) {
       this.orderedNodes = this.orderNodes(new Date().toString())
     }
-    // A node list refresh can replace this.orderedNodes while we await below
     const orderedNodes = this.orderedNodes
 
     if (orderedNodes.length === 0) {
@@ -146,7 +140,7 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     while (nextNodeIndex !== orderedNodes.length - 1) {
       nextNodeIndex++
       const nextNode = orderedNodes[nextNodeIndex]
-      if (!nextNode) continue // should never happen unless orderedNodes has falsy values
+      if (!nextNode) continue
       if (await isNodeHealthy(nextNode)) {
         selectedNode = nextNode
         break

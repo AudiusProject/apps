@@ -20,11 +20,8 @@ export class Comstock {
     return result
   }
 
-  /* ------- INTERNAL FUNCTIONS ------- */
-
   async _makeRequest(axiosRequestObj: AxiosRequestConfig) {
     axiosRequestObj.baseURL = this.comstockEndpoint
-    // Axios throws for non-200 responses
     try {
       const resp = await axios(axiosRequestObj)
       return resp.data

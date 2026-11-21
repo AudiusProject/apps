@@ -1,9 +1,5 @@
 'use strict'
 
-/**
- * Adds a 'count' field to UserTrackListens, which signifies the
- * number of times a user has listened to a track
- */
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {

@@ -137,15 +137,11 @@ export class ClaimableTokensClient {
     const feePayer = feePayerOverride ?? (await this.client.getFeePayer())
     const userBank = await this.deriveUserBank(args)
 
-    // If already fetching/creating this user bank, wait for the existing promise.
-    // Then assume the user bank has been created and return with didExist=true.
-    // Don't attempt to catch and retry or concurrency will again be introduced.
     if (this._pendingUserBankCreationPromises[userBank.toBase58()]) {
       await this._pendingUserBankCreationPromises[userBank.toBase58()]
       return { userBank, didExist: true }
     }
 
-    // Create a new lock on the fetch/creation process for this user bank
     this._pendingUserBankCreationPromises[userBank.toBase58()] = (async () => {
       const connection = await this.client.getConnection()
       const userBankAccount = await connection.getAccountInfo(userBank)
@@ -176,12 +172,8 @@ export class ClaimableTokensClient {
       return { userBank, didExist: true }
     })()
     try {
-      // Wait for the promise and return the result.
-      // Note that the lock is not removed on success. Keep it as an in-memory
-      // cache that the user bank exists. Reduces RPC calls to check existence.
       return await this._pendingUserBankCreationPromises[userBank.toBase58()]!
     } catch (e) {
-      // Remove lock on error so that the next attempt retries creation.
       delete this._pendingUserBankCreationPromises[userBank.toBase58()]
       throw e
     }
@@ -514,7 +506,6 @@ export class ClaimableTokensClient {
           if (nestedError instanceof ClaimableTokensError) {
             throw nestedError
           } else {
-            // If failed to provide user friendly error, surface original error
             this.logger.warn(
               'Failed to parse ClaimableTokensError error',
               nestedError

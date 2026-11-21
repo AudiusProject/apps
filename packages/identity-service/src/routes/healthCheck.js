@@ -10,7 +10,6 @@ const { getRelayerFunds, fundRelayerIfEmpty } = require('../relay/txRelay')
 const { getEthRelayerFunds } = require('../relay/ethTxRelay')
 const Web3 = require('web3')
 
-// Defaults used in relay health check endpoint
 const RELAY_HEALTH_ACCOUNTS = new Set(
   config.get('relayerWallets').map((wallet) => wallet.publicKey)
 )
@@ -19,17 +18,6 @@ const ETH_RELAY_HEALTH_ACCOUNTS = new Set(
 )
 
 module.exports = function (app) {
-  /**
-   * Relay health check endpoint. Takes the query params startBlock, endBlock, maxTransactions, and maxErrors.
-   * If those query params are not specified, use default values.
-   */
-  /*
-  There are a few scenarios where a health check should return unhealthy
-  1. Some number of relays are failing for some number of users
-     To solve this, traverse the blocks for Audius transactions and count failures
-     for users. If it's greater than some threshold, return error
-  2. Relays are not being sent / sent but not acknowledged by blockchain
-  */
   app.get(
     '/health_check/relay',
     handleResponse(async (req, res) => {
@@ -42,7 +30,6 @@ module.exports = function (app) {
       const maxRelayLatency = parseInt(req.query.maxRelayLatency)
       let isError = false
 
-      // delete old entries from set in redis
       const epochTenMinutesAgo = Math.floor(Date.now() / 1000) - 600
       await redis.zremrangebyscore(
         'relayTxAttempts',
@@ -60,7 +47,6 @@ module.exports = function (app) {
         epochTenMinutesAgo
       )
 
-      // check if there have been any attempts in the time window that we processed the block health check
       const attemptedTxsInRedis = await redis.zrange(
         'relayTxAttempts',
         '0',
@@ -118,10 +104,8 @@ module.exports = function (app) {
   app.get(
     '/health_check',
     handleResponse(async (req, res) => {
-      // for now we just check db connectivity
       await sequelize.query('SELECT 1', { type: sequelize.QueryTypes.SELECT })
 
-      // get connected discprov via libs
       const audiusLibsInstance = req.app.get('audiusLibs')
       return successResponse({
         healthy: true,
@@ -154,7 +138,6 @@ module.exports = function (app) {
       const belowMinimumBalances = []
       let balances = []
 
-      // run fundRelayerIfEmpty so it'll auto top off any accounts below the threshold
       try {
         await fundRelayerIfEmpty()
       } catch (err) {
@@ -179,7 +162,6 @@ module.exports = function (app) {
       )
       const relayerAboveMinimum = relayerBalance >= minimumRelayerBalance
 
-      // no accounts below minimum balance
       if (!belowMinimumBalances.length && relayerAboveMinimum) {
         return successResponse({
           above_balance_minimum: true,
@@ -246,7 +228,6 @@ module.exports = function (app) {
         }
       }
 
-      // no accounts below minimum balance
       if (!belowMinimumBalances.length && funderAboveMinimum) {
         return successResponse({
           above_balance_minimum: true,
@@ -262,10 +243,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Exposes current and max db connection stats.
-   * Returns error if db connection threshold exceeded, else success.
-   */
   app.get(
     '/db_check',
     handleResponse(async (req, res) => {
@@ -277,7 +254,6 @@ module.exports = function (app) {
       let activeConnections = null
       let idleConnections = null
 
-      // Get number of open DB connections
       const numConnectionsQuery = await sequelize.query(
         "SELECT numbackends from pg_stat_database where datname = 'audius_centralized_service'"
       )
@@ -290,7 +266,6 @@ module.exports = function (app) {
         numConnections = numConnectionsQuery[0][0].numbackends
       }
 
-      // Get detailed connection info
       const connectionInfoQuery = await sequelize.query(
         "select wait_event_type, wait_event, state, query from pg_stat_activity where datname = 'audius_centralized_service'"
       )

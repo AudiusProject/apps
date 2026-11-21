@@ -21,7 +21,6 @@ addEventListener('fetch', (event) => {
 
 async function handleEvent(event) {
   const options = {}
-  // Always map requests to `/` since this is an SPA
   options.mapRequestToAsset = (request) => {
     const cleanedUrl = request.url.replace('/embed/', '/')
     const req = mapRequestToAsset(new Request(cleanedUrl, request))
@@ -34,7 +33,6 @@ async function handleEvent(event) {
   }
   try {
     if (DEBUG) {
-      // customize caching
       options.cacheControl = {
         bypassCache: true
       }
@@ -42,7 +40,6 @@ async function handleEvent(event) {
 
     const page = await getAssetFromKV(event, options)
 
-    // allow headers to be altered
     const response = new Response(page.body, page)
 
     response.headers.set('Access-Control-Allow-Origin', '*')

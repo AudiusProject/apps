@@ -57,7 +57,6 @@ const DeregisterServiceModal: React.FC<DeregisterServiceModalProps> = ({
     [setDeregisterText, setHasValidText]
   )
 
-  // Close All modals on success status
   useEffect(() => {
     setDeregisterText('')
     setHasValidText(false)

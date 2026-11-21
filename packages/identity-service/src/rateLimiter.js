@@ -19,11 +19,9 @@ const { libs } = require('@audius/sdk-legacy/dist/libs')
 const { errorResponseRateLimited, sendResponse } = require('./apiHelpers.js')
 const AudiusABIDecoder = libs.AudiusABIDecoder
 
-const DEFAULT_EXPIRY = 60 * 60 // one hour in seconds
+const DEFAULT_EXPIRY = 60 * 60
 
 const isIPWhitelisted = (ip, req) => {
-  // If the IP is either something in the regex whitelist or it is from
-  // a known content node, return true
   const whitelistRegex = config.get('rateLimitingListensIPWhitelist')
   const isWhitelisted = whitelistRegex && !!ip.match(whitelistRegex)
 
@@ -31,11 +29,9 @@ const isIPWhitelisted = (ip, req) => {
   try {
     isFromContentNode = isIPFromContentNode(ip, req)
   } catch (e) {
-    // Log out and continue if for some reason signature validation threw
     req.logger.error(e)
   }
 
-  // Don't return early so we can see logs for both paths
   req.logger.debug(
     `isIPWhitelisted - isWhitelisted: ${isWhitelisted}, isFromContentNode: ${isFromContentNode}`
   )
@@ -43,34 +39,18 @@ const isIPWhitelisted = (ip, req) => {
 }
 
 const getIP = (req) => {
-  // Gets the IP for rate-limiting based on X-Forwarded-For headers
-  // Algorithm:
-  // If 1 header or no headers:
-  //   We are not running behind a proxy, something is probably wonky, use req.ip (leftmost)
-  // If > 1 headers:
-  //   This assumes two proxies (some outer proxy like cloudflare and then some proxy like a load balancer)
-  //   Rightmost header is the outer proxy
-  //   Rightmost - 1 header is either a creator node OR the actual user
-  //    If creator node, use Rightmost - 2 (since creator node will pass this along)
-  //    Else, use Rightmost - 1 since it's the actual user
-
   const ip = req.ip
   const forwardedFor = req.get('X-Forwarded-For')
 
-  // This shouldn't ever happen since Identity will always be behind a proxy
   if (!forwardedFor) {
     return { ip, isWhitelisted: true }
   }
 
   const headers = forwardedFor.split(',')
-  // headers length == 1 means that we are not running behind normal 2 layer proxy (probably locally),
-  // We can just use req.ip which corresponds to the best guess forward-for that was added if any
   if (headers.length === 1) {
     return { ip }
   }
 
-  // Length is at least 2, length - 1 would be the outermost proxy, so length - 2 is the "sender"
-  // either the actual user or a content node
   const senderIP = headers[headers.length - 2]
   const isWhitelisted = isIPWhitelisted(senderIP, req)
   if (isWhitelisted) {
@@ -150,9 +130,6 @@ const getRateLimiter = ({
   })
 }
 
-/**
- * Create an express router to attach the rate-limiting middleware
- */
 const validRouteMethods = ['get', 'post', 'put', 'delete']
 const getRateLimiterMiddleware = () => {
   const router = express.Router()
@@ -188,7 +165,6 @@ const decodeABI = (encodedABI) => {
   const decodedABI = AudiusABIDecoder.decodeMethod('EntityManager', encodedABI)
   const mapping = {}
 
-  // map without leading underscore in _userId
   decodedABI.params.forEach((param) => {
     mapping[param.name.substring(1)] = param.value
   })

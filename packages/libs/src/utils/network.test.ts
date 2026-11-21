@@ -56,7 +56,6 @@ describe('timeRequests()', () => {
       currentVersion: '1.2.3'
     })
 
-    // All healthy nodes with valid version should be sorted by request duration, remaining by version then duration
     assert.strictEqual(res[0]?.request.url, 'https://fastest.audius.co')
     assert.strictEqual(res[1]?.request.url, 'https://fastAndAhead.audius.co')
     assert.strictEqual(res[2]?.request.url, 'https://slow.audius.co')
@@ -66,7 +65,6 @@ describe('timeRequests()', () => {
 
   it('respects an equivalency delta', async function () {
     // @ts-ignore annoying amount of time trying to figure out how to type this
-    // so that typescript knows that "this" is the TestFunction type from Mocha
     this.timeout(10000)
     const allResults: string[] = []
     for (let i = 0; i < 20; ++i) {
@@ -90,7 +88,6 @@ describe('timeRequests()', () => {
       })
       allResults.push(res.map((r) => r.request.url).join(''))
 
-      // Ensure that each round of testing separates by cohors
       assert(res[0]?.request.url.startsWith('https://cohort1'))
       assert(res[1]?.request.url.startsWith('https://cohort1'))
       assert(res[2]?.request.url.startsWith('https://cohort1'))
@@ -104,7 +101,6 @@ describe('timeRequests()', () => {
       assert(res[8]?.request.url.startsWith('https://cohort3'))
     }
 
-    // Make sure there is some variance
     assert(!allResults.every((val) => val === allResults[0]))
   })
 

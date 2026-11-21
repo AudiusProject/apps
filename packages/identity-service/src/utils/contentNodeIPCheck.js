@@ -7,9 +7,6 @@ const FIND_CONTENT_NODES_INTERVAL_MS = 10 * 60 * 1000
 const KNOWN_CONTENT_NODE_IP_ADDRESSES = new Set([])
 let KNOWN_CONTENT_NODE_WALLETS = new Set([])
 
-/**
- * Poll for content nodes and memoizes their delegate owner wallets
- */
 const findContentNodes = async () => {
   const libs = await audiusLibsWrapper.getAudiusLibsAsync()
   const { ethContracts, ethWeb3Manager } = libs
@@ -93,7 +90,6 @@ const isIPFromContentNode = (ip, req) => {
 }
 
 module.exports = {
-  // Exposed for testing purposes only
   _isIPFromContentNode,
   isIPFromContentNode
 }

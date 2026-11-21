@@ -16,9 +16,6 @@ type FindAssociatedTokenAddressConfig = {
   solanaTokenProgramKey: PublicKey
 }
 
-/**
- * Finds the associated token address given a solana wallet public key
- */
 export async function findAssociatedTokenAddress({
   solanaWalletKey,
   mintKey,
@@ -41,18 +38,11 @@ type GetTokenAccountInfoConfig = {
   commitment?: Commitment
 }
 
-/**
- * Gets token account information (e.g. balance, ownership, etc.)
- */
 export async function getTokenAccountInfo({
   tokenAccountAddressKey,
   connection,
   commitment = 'processed'
 }: GetTokenAccountInfoConfig) {
-  // Fetch token info with 'processed commitment to get any recently changed amounts.
-  // NOTE: Our version of spl-token omits the second argument
-  // in the type definitions even though it's actually available,
-  // so we suppress error until we can upgrade.
   const info = await getAccount(connection, tokenAccountAddressKey, commitment)
   return info
 }
@@ -66,9 +56,6 @@ type CreateAssociatedTokenAccountParams = {
   identityService: Nullable<IdentityService>
 }
 
-/**
- * Creates an associated token account for a given solana account (a wallet)
- */
 export async function createAssociatedTokenAccount({
   feePayerKey,
   solanaWalletKey,
@@ -84,43 +71,36 @@ export async function createAssociatedTokenAccount({
   })
 
   const accounts = [
-    // 0. `[sw]` Funding account (must be a system account)
     {
       pubkey: feePayerKey,
       isSigner: true,
       isWritable: true
     },
-    // 1. `[w]` Associated token account address to be created
     {
       pubkey: associatedTokenAddress,
       isSigner: false,
       isWritable: true
     },
-    // 2. `[r]` Wallet address for the new associated token account
     {
       pubkey: solanaWalletKey,
       isSigner: false,
       isWritable: false
     },
-    // 3. `[r]` The token mint for the new associated token account
     {
       pubkey: mintKey,
       isSigner: false,
       isWritable: false
     },
-    // 4. `[r]` System program
     {
       pubkey: SystemProgram.programId,
       isSigner: false,
       isWritable: false
     },
-    // 5. `[r]` SPL Token program
     {
       pubkey: solanaTokenProgramKey,
       isSigner: false,
       isWritable: false
     },
-    // 6. `[r]` Rent sysvar
     {
       pubkey: SYSVAR_RENT_PUBKEY,
       isSigner: false,

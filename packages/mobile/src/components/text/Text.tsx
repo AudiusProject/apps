@@ -9,6 +9,10 @@ type Props = {
   weight?: keyof typeof fontByWeight
 } & ConstructorParameters<typeof RNText>[0]
 
+/**
+ * A custom Text component that applies the default font family and color
+ * @deprecated use `import { Text } from 'app/components/core'` instead
+ */
 const Text = ({ children, weight = 'regular', style, ...props }: Props) => {
   const { neutral } = useThemeColors()
   return (

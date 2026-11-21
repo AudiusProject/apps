@@ -1,14 +1,10 @@
 const uuidv4 = require('uuid/v4')
 
-// Declaration of feature flags set in optimizely
 const FEATURE_FLAGS = Object.freeze({
   DETECT_ABUSE_ON_RELAY: 'detect_abuse_on_relay',
   BLOCK_ABUSE_ON_RELAY: 'block_abuse_on_relay'
 })
 
-// Default values for feature flags while optimizely has not loaded
-// Generally, these should be never seen unless variables are
-// consumed within a few seconds of server init
 const DEFAULTS = Object.freeze({
   [FEATURE_FLAGS.DETECT_ABUSE_ON_RELAY]: false,
   [FEATURE_FLAGS.BLOCK_ABUSE_ON_RELAY]: false

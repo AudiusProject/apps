@@ -14,7 +14,6 @@ import {
 import { AppState } from 'store/types'
 import { Address, Status } from 'types'
 
-// -------------------------------- Selectors  --------------------------------
 export const getPendingClaim = (wallet: Address) => (state: AppState) =>
   state.cache.claims.users[wallet]
 
@@ -27,8 +26,6 @@ export const getLastFundedBlock = () => (state: AppState) =>
 export const getClaimMetadata = () => (state: AppState) =>
   state.cache.claims.metadata
 
-// -------------------------------- Thunk Actions  --------------------------------
-
 export function fetchPendingClaim(
   wallet: Address
 ): ThunkAction<void, AppState, Audius, Action<string>> {
@@ -39,7 +36,6 @@ export function fetchPendingClaim(
       const hasClaim = await aud.Claim.claimPending(wallet)
       dispatch(setClaim({ wallet, hasClaim }))
     } catch (error) {
-      // TODO: Handle error case
       console.error(error)
     }
   }
@@ -74,13 +70,10 @@ export function setClaimMetadata(): ThunkAction<
         })
       )
     } catch (error) {
-      // TODO: Handle error case
       console.error(error)
     }
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const usePendingClaim = (wallet: Address) => {
   const pendingClaim = useSelector(getPendingClaim(wallet))

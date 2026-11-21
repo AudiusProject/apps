@@ -20,10 +20,8 @@ export const isNodeHealthy = async (
       return false
     }
 
-    // check has space + not slow
     const health = resp.data.data
 
-    // skip nodes if avg transcode time is over 3 minutes
     const avgTranscodeTime = health.transcodeStats?.AvgTranscodeTime || 0
     const isSlowTranscode = avgTranscodeTime > 180
     return health.diskHasSpace && !isSlowTranscode

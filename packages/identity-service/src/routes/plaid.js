@@ -9,11 +9,9 @@ const {
 const authMiddleware = require('../authMiddleware')
 const { logger } = require('../logging')
 
-// Plaid client configuration
 const plaidClient = new PlaidApi(new Configuration())
 
 module.exports = function (app) {
-  // Route to create a link token for identity verification
   app.get(
     '/create_link_token',
     authMiddleware,

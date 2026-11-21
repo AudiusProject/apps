@@ -89,7 +89,6 @@ export const Select = forwardRef(function Select<Value extends string>(
 
   useEffect(() => {
     if (isOpen) {
-      // Focus the input after the popup is open
       setTimeout(() => {
         inputRef.current?.focus({ preventScroll: true })
       }, 0)
@@ -203,7 +202,6 @@ export const Select = forwardRef(function Select<Value extends string>(
           onChange={() => {}}
           css={({ spacing }) => ({
             position: 'absolute',
-            // Magic values to align the selected option with the input
             top: (hideLabel ? spacing.unit3 : spacing.unit6) + 2,
             left: spacing.unit1,
             opacity: isOpen ? 0.5 : 1

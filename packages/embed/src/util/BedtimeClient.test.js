@@ -2,7 +2,6 @@ const mockGetBulkPlaylists = jest.fn()
 const mockGetPlaylist = jest.fn()
 const mockGetBulkTracks = jest.fn()
 
-// virtual: CI runs this before the sdk dist is built
 jest.mock(
   '@audius/sdk',
   () => ({
@@ -20,7 +19,6 @@ jest.mock(
   { virtual: true }
 )
 
-// Avoid loading amplitude-js (and its browser globals) at import time.
 jest.mock('../analytics/analytics', () => ({
   recordListen: jest.fn()
 }))
@@ -34,12 +32,9 @@ describe('getCollectionByPermalink', () => {
   })
 
   it('re-fetches the full collection by id so the track list is hydrated', async () => {
-    // The bulk/permalink endpoint resolves metadata but returns an empty
-    // `tracks` array (this is what produced the header-only embed bug).
     mockGetBulkPlaylists.mockResolvedValue({
       data: [{ id: 'vjgoJWp', playlistName: 'Halleluyah', tracks: [] }]
     })
-    // Fetching by (hash) id hydrates the full track list.
     mockGetPlaylist.mockResolvedValue({
       data: [
         {
@@ -59,7 +54,6 @@ describe('getCollectionByPermalink', () => {
     expect(mockGetBulkPlaylists).toHaveBeenCalledWith({
       permalink: ['/AcidRayn/playlist/halleluyah']
     })
-    // Must follow up with a by-id fetch using the resolved hash id.
     expect(mockGetPlaylist).toHaveBeenCalledWith({ playlistId: 'vjgoJWp' })
     expect(collection.tracks).toHaveLength(2)
   })

@@ -1,7 +1,7 @@
 const Bull = require('bull')
 const config = require('./config.js')
 
-const JOB_FREQUENCY_MS = 15 /* min */ * 60 /* sec */ * 1000 /* msec */
+const JOB_FREQUENCY_MS = 15 * 60 * 1000
 
 const registerNodes = async (audiusLibs, logger) => {
   try {

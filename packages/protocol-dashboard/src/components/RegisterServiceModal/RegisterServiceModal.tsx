@@ -63,13 +63,6 @@ const RegisterServiceModal = ({
   const { data: connectedAudiusUserData } = useDashboardWalletUser(user?.wallet)
   const calculatedMinStakeRef = useRef<BN | undefined>(undefined)
 
-  // Check how much available stake the SP can use for registration
-  // This computation is as follows:
-  //
-  // AVAILABLE_STAKE = ACTIVE_STAKE - USED_STAKE
-  //   where
-  //    ACTIVE_STAKE = amount that we have staked in audius
-  //    USED_STAKE = # of services we have * minstake for each service
   let availableStake: BN | undefined
   if (
     user &&
@@ -105,8 +98,6 @@ const RegisterServiceModal = ({
 
   const selectedServiceInfo = serviceInfo.contentNode
 
-  // Our calculated min stake is the service type min stake MINUS
-  // the "unused/available" stake we have in the system already.
   const calculatedMinStake = useMemo(() => {
     return selectedServiceInfo
       ? BN.max(
@@ -168,7 +159,6 @@ const RegisterServiceModal = ({
   } = useModalControls()
 
   const onRegister = useCallback(() => {
-    // TODO: validate each field
     onOpenConfirm()
   }, [onOpenConfirm])
 

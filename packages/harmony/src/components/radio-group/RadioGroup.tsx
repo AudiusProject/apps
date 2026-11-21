@@ -32,14 +32,12 @@ export const RadioGroup = (props: RadioGroupProps) => {
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      // Prevent concurrent changes
       if (isChanging.current) return
 
       isChanging.current = true
       setValueState(e.target.value)
       onChange?.(e)
 
-      // Reset the lock after a short delay
       requestAnimationFrame(() => {
         isChanging.current = false
       })

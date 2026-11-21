@@ -13,8 +13,6 @@ import { useDispatchBasedOnBlockNumber } from '../protocol/hooks'
 
 import { setVotes, setUserVote } from './slice'
 
-// -------------------------------- Selectors  --------------------------------
-
 export const getVotes = (
   state: AppState,
   { proposalId }: { proposalId: number }
@@ -33,8 +31,6 @@ export const getUserVote = (
   { proposalId }: { proposalId: number }
 ) => state.cache.votes.userVotes[proposalId]
 
-// -------------------------------- Thunk Actions  --------------------------------
-
 export function fetchVotes(
   proposalId: number
 ): ThunkAction<void, AppState, Audius, Action<string>> {
@@ -46,7 +42,6 @@ export function fetchVotes(
       await aud.Governance.getVoteUpdatesForProposal(proposalId)
     ).filter(Boolean) as VoteEvent[]
 
-    // Addresses to most up to date vote
     const updatedVoteMap: { [key: string]: VoteEvent } = {}
     for (const vote of voteUpdates) {
       updatedVoteMap[vote.voter] = vote
@@ -70,8 +65,6 @@ export function fetchUserVote(
     }
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useVotes = (proposalId: number) => {
   const votes = useSelector((state) =>

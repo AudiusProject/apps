@@ -98,9 +98,6 @@ async function run() {
     process.exit(1)
   }
 
-  /**
-   * Verify the project dir is empty or doesn't exist
-   */
   const root = path.resolve(resolvedProjectPath)
   const appName = path.basename(root)
   const folderExists = fs.existsSync(root)
@@ -109,7 +106,9 @@ async function run() {
     process.exit(1)
   }
 
-  const example = (typeof exampleOption === 'string' ? exampleOption : 'react-hono').trim() as ExampleType
+  const example = (
+    typeof exampleOption === 'string' ? exampleOption : 'react-hono'
+  ).trim() as ExampleType
 
   await createApp({
     appPath: resolvedProjectPath,

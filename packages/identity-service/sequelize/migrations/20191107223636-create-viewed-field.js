@@ -13,9 +13,6 @@ module.exports = {
         { transaction }
       )
 
-      // Raw SQL instead of models.Notification.update — the Notification model
-      // was removed in #14207 but the Notifications table still exists in the
-      // schema, so this migration must keep running on fresh databases.
       await queryInterface.sequelize.query(
         'UPDATE "Notifications" SET "isViewed" = false WHERE "isRead" IS NOT NULL',
         { transaction }

@@ -9,7 +9,6 @@ import {
 describe('generateCodeVerifier', () => {
   it('returns a 43-character base64url string', () => {
     const verifier = generateCodeVerifier()
-    // 32 bytes → ceil(32*4/3) = 43 chars after stripping padding
     expect(verifier).toHaveLength(43)
     expect(verifier).toMatch(/^[A-Za-z0-9_-]+$/)
   })
@@ -25,7 +24,6 @@ describe('generateCodeChallenge', () => {
   it('produces a base64url-encoded SHA-256 hash', async () => {
     const verifier = generateCodeVerifier()
     const challenge = await generateCodeChallenge(verifier)
-    // SHA-256 → 32 bytes → 43 base64url chars
     expect(challenge).toHaveLength(43)
     expect(challenge).toMatch(/^[A-Za-z0-9_-]+$/)
   })
@@ -43,10 +41,7 @@ describe('generateCodeChallenge', () => {
     expect(a).not.toBe(b)
   })
 
-  // RFC 7636 Appendix B test vector
   it('matches the RFC 7636 Appendix B test vector', async () => {
-    // The spec uses code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
-    // Expected S256 challenge = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
     const verifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
     const challenge = await generateCodeChallenge(verifier)
     expect(challenge).toBe('E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM')
@@ -56,7 +51,6 @@ describe('generateCodeChallenge', () => {
 describe('generateState', () => {
   it('returns a 22-character base64url string', () => {
     const state = generateState()
-    // 16 bytes → ceil(16*4/3) = 22 chars
     expect(state).toHaveLength(22)
     expect(state).toMatch(/^[A-Za-z0-9_-]+$/)
   })

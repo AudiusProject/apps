@@ -14,7 +14,6 @@ function clampBigInt(value: bigint, min: bigint, max: bigint): bigint {
   return value < min ? min : value > max ? max : value
 }
 
-// @beta - This component was directly ported from stems and subject to change
 export const ProgressBar = (props: ProgressBarProps) => {
   const {
     className,

@@ -43,6 +43,12 @@ export const useRecomputeToggle = (configLoaded: boolean) => {
   return recomputeToggle
 }
 
+/**
+ * @deprecated use `useFeatureFlag` instead
+ * Hooks into updates for a given feature flag.
+ * Returns both `isLoaded` and `isEnabled` for more granular control
+ * @param flag
+ */
 export const createUseFeatureFlagHook =
   ({
     remoteConfigInstance,

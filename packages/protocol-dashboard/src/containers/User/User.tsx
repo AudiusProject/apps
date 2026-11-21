@@ -58,7 +58,6 @@ const UserPage = () => {
 
   const replaceRoute = useReplaceRoute()
 
-  // Check if on user or operator page
   useEffect(() => {
     if (status !== Status.Success) return
     const isUserPath = !!matchPath(pathname, NODES_ACCOUNT_USER)
@@ -67,7 +66,6 @@ const UserPage = () => {
       replaceRoute(accountPage(wallet))
   }, [status, wallet, pathname, isServiceProvider, replaceRoute])
 
-  // const inboundDelegation = useActiveInboundDelegation({ wallet })
   const title = isOwner
     ? messages.owner
     : isServiceProvider

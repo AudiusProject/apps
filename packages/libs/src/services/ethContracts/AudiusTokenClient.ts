@@ -31,8 +31,6 @@ export class AudiusTokenClient {
     this.bustCacheNonce = 0
   }
 
-  /* ------- GETTERS ------- */
-
   async bustCache() {
     this.bustCacheNonce += 1
   }
@@ -48,23 +46,18 @@ export class AudiusTokenClient {
     return this.web3.utils.toBN(balance)
   }
 
-  // Get the name of the contract
   async name() {
     const name = await this.AudiusTokenContract.methods.name().call()
     return name
   }
 
-  // Get the name of the contract
   async nonces(wallet: string) {
-    // Pass along a unique param so the nonce value is always not cached
     const nonce = await this.AudiusTokenContract.methods.nonces(wallet).call({
       _audiusBustCache: Date.now()
     })
     const number = this.web3.utils.toBN(nonce).toNumber()
     return number
   }
-
-  /* ------- SETTERS ------- */
 
   async transfer(recipient: string, amount: BN) {
     const contractMethod = this.AudiusTokenContract.methods.transfer(
@@ -91,12 +84,11 @@ export class AudiusTokenClient {
       this.contractAddress,
       owner,
       relayer,
-      /* retries */ 0
+      0
     )
     return { txReceipt: tx }
   }
 
-  // Permit meta transaction of balance transfer
   async permit(
     owner: string, // address
     spender: string, // address
@@ -104,7 +96,7 @@ export class AudiusTokenClient {
     deadline: number, // uint
     v: number, // uint8
     r: Uint8Array | Buffer, // bytes32
-    s: Uint8Array | Buffer // bytes32
+    s: Uint8Array | Buffer
   ) {
     const contractMethod = this.AudiusTokenContract.methods.permit(
       owner,
@@ -120,13 +112,11 @@ export class AudiusTokenClient {
       this.contractAddress,
       owner,
       spender,
-      /* retries */ 0
+      0
     )
     return tx
   }
 
-  // Allow spender to withdraw from calling account up to value amount
-  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
   async approve(spender: string, value: BN, privateKey = null) {
     const contractMethod = this.AudiusTokenContract.methods.approve(
       spender,
@@ -157,7 +147,7 @@ export class AudiusTokenClient {
       this.contractAddress,
       owner,
       relayer,
-      /* retries */ 0
+      0
     )
     return { txReceipt: tx }
   }

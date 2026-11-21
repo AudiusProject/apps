@@ -42,8 +42,6 @@ const PausedPopoverCard = ({
         className={cn(styles.root, {
           [styles.blur]: popoverVisibility
         })}
-        // Ensure that when the popover
-        // is animating out, it's not clickable.
         style={popoverVisibility ? {} : { pointerEvents: 'none' }}
       >
         <div

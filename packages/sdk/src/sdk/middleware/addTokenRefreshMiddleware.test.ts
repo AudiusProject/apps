@@ -4,7 +4,6 @@ import type { OAuth } from '../oauth/OAuth'
 
 import { addTokenRefreshMiddleware } from './addTokenRefreshMiddleware'
 
-// Minimal fetch mock helper
 function mockResponse(status: number, body?: object): Response {
   return new Response(body ? JSON.stringify(body) : null, {
     status,
@@ -91,7 +90,6 @@ describe('addTokenRefreshMiddleware', () => {
       response: mockResponse(401)
     })
 
-    // Original request was retried with new token
     expect(contextFetch).toHaveBeenCalledWith(
       'https://api.example.com/v1/tracks/123',
       expect.objectContaining({

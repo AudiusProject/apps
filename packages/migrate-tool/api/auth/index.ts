@@ -9,11 +9,6 @@ import {
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
 
-/**
- * Exchange a Google ID token for a session cookie. Only @audius.co /
- * @audius.org accounts are allowed. Mirrors the notifications-dashboard
- * /api/auth handler.
- */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')

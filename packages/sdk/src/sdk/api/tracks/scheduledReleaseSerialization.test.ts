@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { TracksApi } from '../generated/default/apis/TracksApi'
 import { Configuration } from '../generated/default/runtime'
 
-// Exercise real HTTP serialization, including explicit false to cancel scheduling.
 describe('track scheduling over REST', () => {
   it('preserves scheduling and the exact release time on create and update', async () => {
     for (const operation of ['create', 'update'] as const) {

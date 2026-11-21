@@ -44,8 +44,6 @@ export default class Delegate {
     return this.aud.libs.ethContracts.DelegateManagerClient
   }
 
-  /* -------------------- Delegate Manager Client Read -------------------- */
-
   async getDelegatorsList(
     serviceProvider: Address
   ): Promise<GetDelegatorsListResponse> {
@@ -182,7 +180,6 @@ export default class Delegate {
     }))
   }
 
-  /* Can filter either by delegator or SP */
   async getDecreaseDelegateStakeEvaluatedEvents({
     delegator,
     serviceProvider
@@ -209,7 +206,6 @@ export default class Delegate {
     }))
   }
 
-  /* Can filter either by delegator or SP */
   async getUndelegateStakeRequestedEvents({
     serviceProvider,
     delegator
@@ -237,7 +233,6 @@ export default class Delegate {
     }))
   }
 
-  /* Can filter either by delegator or SP */
   async getUndelegateStakeCancelledEvents({
     serviceProvider,
     delegator
@@ -308,8 +303,6 @@ export default class Delegate {
       await this.getContract().getSPMinDelegationAmount({ serviceProvider })
     return minDelegationAmount
   }
-
-  /* -------------------- Delegate Manager Client Write -------------------- */
 
   async delegateStake(
     targetSP: Address,

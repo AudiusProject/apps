@@ -31,7 +31,6 @@ export class LazySolanaClient implements PublicInterface<Client> {
   get connection(): Connection {
     const client = this.loader.peek()
     if (!client) {
-      // Start loading so a retry after the next await can succeed.
       this.loader.get().catch(() => {})
       throw new Error(
         'solanaClient.connection is not available until the Solana client has loaded. Use `await solanaClient.getConnection()` instead.'

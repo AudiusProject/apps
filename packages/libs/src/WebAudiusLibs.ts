@@ -54,7 +54,6 @@ type LibsHedgehogConfig = Omit<
 >
 
 type LibsSolanaWeb3Config = SolanaWeb3Config & {
-  // fee payer secret keys, if client wants to switch between different fee payers during relay
   feePayerSecretKeys?: Uint8Array[]
 }
 
@@ -93,32 +92,18 @@ type AudiusLibsConfig = {
 }
 
 export class AudiusLibs {
-  /**
-   * Configures an identity service wrapper
-   */
-  static configIdentityService(
-    url: string,
-    // whether or not to read hedgehog entropy in local storage
-    useHedgehogLocalStorage = true
-  ) {
+  static configIdentityService(url: string, useHedgehogLocalStorage = true) {
     return { url, useHedgehogLocalStorage }
   }
 
-  /**
-   * Configures an identity service wrapper
-   */
   static configComstock(url: string) {
     return { url }
   }
 
   static configCreatorNode(
-    // creator node endpoint to fall back to on requests
     fallbackUrl: string,
-    // whether or not to include only specified nodes (default null)
     passList: Nullable<Set<string>> = null,
-    // whether or not to exclude any nodes (default null)
     blockList: Nullable<Set<string>> = null,
-    // callbacks to be invoked with metrics from requests sent to a service
     monitoringCallbacks: Nullable<MonitoringCallbacks> = {}
   ) {
     return {
@@ -129,18 +114,11 @@ export class AudiusLibs {
     }
   }
 
-  /**
-   * Configures an external web3 to use with Audius Libs (e.g. MetaMask)
-   */
   static async configExternalWeb3(
     registryAddress: string,
-    // equal to web.currentProvider
     web3Provider: string,
-    // network chain id
     networkId: string,
-    // wallet address to force use instead of the first wallet on the provided web3
     walletOverride: Nullable<string> = null,
-    // entity manager address
     entityManagerAddress: Nullable<string> = null
   ) {
     const web3Instance = await Utils.configureWeb3(web3Provider, networkId)
@@ -159,9 +137,6 @@ export class AudiusLibs {
     }
   }
 
-  /**
-   * Configures an internal web3 to use (via Hedgehog)
-   */
   static configInternalWeb3(
     registryAddress: string,
     providers: provider,
@@ -192,9 +167,6 @@ export class AudiusLibs {
     }
   }
 
-  /**
-   * Configures an eth web3
-   */
   static configEthWeb3(
     tokenAddress: string,
     registryAddress: string,
@@ -230,9 +202,6 @@ export class AudiusLibs {
     }
   }
 
-  /**
-   * Configures wormhole
-   */
   static configWormhole({ rpcHosts }: LibsWormholeConfig): ProxyWormholeConfig {
     let rpcHostList
     if (typeof rpcHosts === 'string') {
@@ -247,9 +216,6 @@ export class AudiusLibs {
     }
   }
 
-  /**
-   * Configures a solana web3
-   */
   static configSolanaWeb3({
     solanaClusterEndpoint,
     mintAddress,
@@ -302,7 +268,6 @@ export class AudiusLibs {
   AudiusABIDecoder: AudiusABIDecoder
   Utils: Utils
 
-  // Services to initialize. Initialized in .init().
   identityService: Nullable<IdentityService>
   hedgehog: Nullable<HedgehogBase>
   discoveryProvider: Nullable<DiscoveryProvider>
@@ -316,7 +281,6 @@ export class AudiusLibs {
   schemas?: Schemas
   comstock: Nullable<Comstock>
 
-  // API
   ServiceProvider: Nullable<ServiceProvider>
   Account: Nullable<Account>
   User: Nullable<Users>
@@ -332,20 +296,9 @@ export class AudiusLibs {
   preferHigherPatchForSecondaries: boolean
   localStorage: LocalStorage
 
-  // Temporary hack to facilitate SDK migration
   private currentWallet?: string
   private currentUserId?: number
 
-  /**
-   * Constructs an Audius Libs instance with configs.
-   * Unless default-valued, all configs are optional.
-   * @example
-   *  const audius = AudiusLibs({
-   *    discoveryProviderConfig: {},
-   *    creatorNodeConfig: configCreatorNode('https://my-creator.node')
-   *  })
-   *  await audius.init()
-   */
   constructor({
     web3Config,
     ethWeb3Config,
@@ -365,8 +318,6 @@ export class AudiusLibs {
     userId,
     wallet
   }: AudiusLibsConfig) {
-    // set version
-
     this.version = version
 
     this.ethWeb3Config = ethWeb3Config
@@ -385,7 +336,6 @@ export class AudiusLibs {
     this.AudiusABIDecoder = AudiusABIDecoder
     this.Utils = Utils
 
-    // Services to initialize. Initialized in .init().
     this.identityService = null
     this.hedgehog = null
     this.discoveryProvider = null
@@ -398,7 +348,6 @@ export class AudiusLibs {
     this.creatorNode = null
     this.comstock = null
 
-    // API
     this.ServiceProvider = null
     this.Account = null
     this.User = null
@@ -417,7 +366,6 @@ export class AudiusLibs {
     this.preferHigherPatchForSecondaries = preferHigherPatchForSecondaries
     this.localStorage = localStorage
 
-    // Schemas
     const schemaValidator = new SchemaValidator()
     schemaValidator.init()
     this.schemas = schemaValidator.getSchemas()
@@ -450,7 +398,6 @@ export class AudiusLibs {
     return creatorNodeEndpoint
   }
 
-  /** Update the current user for CreatorNode and DiscoveryProvider requests */
   async setCurrentUser({ wallet, userId }: { wallet: string; userId: number }) {
     this.currentWallet = wallet
     this.currentUserId = userId
@@ -465,7 +412,6 @@ export class AudiusLibs {
     return { wallet: this.currentWallet, userId: this.currentUserId }
   }
 
-  /** Clear the current user for CreatorNode and DiscoveryProvder requests */
   clearCurrentUser() {
     delete this.currentWallet
     delete this.currentUserId
@@ -474,16 +420,13 @@ export class AudiusLibs {
     this.EntityManager?.clearCurrentUserId()
   }
 
-  /** Init services based on presence of a relevant config. */
   async init() {
     if (!this.localStorage) {
       this.localStorage = await getPlatformLocalStorage()
     }
 
-    // Config external web3 is an async function, so await it here in case it needs to be
     this.web3Config = await this.web3Config
 
-    /** Identity Service */
     if (this.identityServiceConfig) {
       this.identityService = new IdentityService({
         identityServiceEndpoint: this.identityServiceConfig.url
@@ -500,7 +443,6 @@ export class AudiusLibs {
       throw new Error('Identity Service required for internal Web3')
     }
 
-    /** Web3 Managers */
     if (this.ethWeb3Config) {
       this.ethWeb3Manager = new EthWeb3Manager({
         web3Config: this.ethWeb3Config,
@@ -529,7 +471,6 @@ export class AudiusLibs {
       await this.solanaWeb3Manager.init()
     }
 
-    /** Contracts - Eth and Data Contracts */
     const contractsToInit = []
     if (this.ethWeb3Manager) {
       const {
@@ -580,7 +521,6 @@ export class AudiusLibs {
       )
     }
 
-    /** Discovery Provider */
     if (this.discoveryProviderConfig) {
       this.discoveryProvider = new DiscoveryProvider({
         ethContracts: this.ethContracts,
@@ -592,9 +532,7 @@ export class AudiusLibs {
       this.web3Manager?.setDiscoveryProvider(this.discoveryProvider)
     }
 
-    /** Creator Node */
     if (this.creatorNodeConfig) {
-      // Use rendezvous to select creatorNodeEndpoint
       const creatorNodeEndpoint =
         await this.determineCreatorNodeEndpointForWallet(
           this.creatorNodeConfig.wallet
@@ -615,12 +553,10 @@ export class AudiusLibs {
       await this.creatorNode.init()
     }
 
-    /** Comstock */
     if (this.comstockConfig) {
       this.comstock = new Comstock(this.comstockConfig.url)
     }
 
-    // Initialize apis
     const services = [
       this.identityService,
       this.hedgehog,

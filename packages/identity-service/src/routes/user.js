@@ -34,24 +34,16 @@ const isEmailDeliverable = async (email, logger) => {
     )
     return res?.data?.status === 'deliverable'
   } catch (err) {
-    // Couldn't figure out if deliverable, so say it was
     logger.error(`Unable to validate email for ${email}`, err)
     return true
   }
 }
 
 module.exports = function (app) {
-  /**
-   * Create a new user in the Users table
-   * This is one part of a two part route along with POST /authentication
-   * The user handle is not written here. that's added in /user/associate
-   */
   app.post(
     '/user',
     captchaMiddleware,
     handleResponse(async (req, res, next) => {
-      // body should contain {username, walletAddress}
-      // username is actually email, but hedgehog sends username
       const body = req.body
       if (body.username && body.walletAddress) {
         const email = body.username.toLowerCase()
@@ -84,7 +76,6 @@ module.exports = function (app) {
 
           await models.User.create({
             email,
-            // Store non checksummed wallet address
             walletAddress: body.walletAddress.toLowerCase(),
             lastSeenDate: Date.now(),
             IP,
@@ -123,9 +114,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Check if a email address is taken. email is passed in via query param
-   */
   app.get(
     '/users/check',
     handleResponse(async (req, res, next) => {
@@ -150,9 +138,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Update User Timezone / IP
-   */
   app.post(
     '/users/update',
     authMiddleware,
@@ -162,12 +147,10 @@ module.exports = function (app) {
       const { blockchainUserId } = req.user
       if (timezone) {
         try {
-          // Associate the blockchain id with this user
           await models.User.update(
             { IP, timezone },
             { where: { blockchainUserId } }
           )
-          // Create a user notification setting so the user can receive notifications.
           models.UserNotificationSettings.findOrCreate({
             where: { userId: blockchainUserId },
             defaults: { userId: blockchainUserId }
@@ -183,9 +166,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Retrieve authenticated user's email address
-   */
   app.get(
     '/user/email',
     authMiddleware,
@@ -203,8 +183,6 @@ module.exports = function (app) {
       })
     })
   )
-
-  /** DEPRECATED */
 
   app.post(
     '/user/associate',

@@ -183,6 +183,11 @@ export const pushWindowRoute = (route: string) => {
   }
 }
 
+/**
+ * Only calls push route if unique (not current route)
+ * Note: This function is deprecated. Use useNavigate hook instead.
+ * @deprecated Use useNavigate from react-router-dom
+ */
 export const pushUniqueRoute = (location: Location, route: string) => {
   const pathname = getPathname(location)
   if (route !== pathname) {

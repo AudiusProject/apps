@@ -9,11 +9,6 @@ import IconIndeterminate from './Indeterminate.svg'
 import IconSelect from './Select.svg'
 import { CheckboxProps } from './types'
 
-/*
- * An input for choosing from predefined options:
- * (1) when used alone, it gives a binary choice (checked/unchecked)
- * (2) in a group it allows the user to select multiple values from a list of options.
- */
 export const Checkbox = forwardRef(
   (props: CheckboxProps, ref: Ref<HTMLInputElement>) => {
     const {

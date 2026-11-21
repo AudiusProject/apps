@@ -12,8 +12,6 @@ const API_KEY = '2cc593fc814461263d282a84286fd4f72c79562e'
 const AUDIUS_URL = import.meta.env.VITE_AUDIUS_URL || 'https://audius.co'
 const OAUTH_BASE_URL = `${AUDIUS_URL}/oauth/auth`
 
-// --- PKCE helpers ---
-
 function base64url(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-')
@@ -92,7 +90,6 @@ export const useConnectAudiusProfile = ({
         throw new Error('The login popup was blocked.')
       }
 
-      // Listen for ALL messages from popup (userHandle, then code)
       const { userHandle } = await new Promise<{ userHandle: string }>(
         (resolve, reject) => {
           const closeCheck = setInterval(() => {
@@ -120,7 +117,6 @@ export const useConnectAudiusProfile = ({
         }
       )
 
-      // Sign with connected Ethereum wallet
       if (!walletProvider) {
         throw new Error('Wallet provider not available')
       }
@@ -136,13 +132,11 @@ export const useConnectAudiusProfile = ({
         params: [hexMessage, wallet]
       })
 
-      // Send wallet signature to popup for EntityManager tx
       popup.postMessage(
         { state, walletSignature: { message, signature } },
         oauthOrigin
       )
 
-      // Wait for auth code from popup (after EntityManager tx + PKCE exchange)
       const { code } = await new Promise<{ code: string }>(
         (resolve, reject) => {
           const closeCheck = setInterval(() => {
@@ -170,7 +164,6 @@ export const useConnectAudiusProfile = ({
         }
       )
 
-      // Exchange code for tokens
       const tokenRes = await fetch(`${apiEndpoint}/v1/oauth/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -189,7 +182,6 @@ export const useConnectAudiusProfile = ({
 
       const tokens = await tokenRes.json()
 
-      // Fetch user profile and update cache
       const meRes = await fetch(`${apiEndpoint}/v1/me`, {
         headers: { Authorization: `Bearer ${tokens.access_token}` }
       })
@@ -249,7 +241,6 @@ export const useConnectAudiusProfile = ({
         throw new Error('The login popup was blocked.')
       }
 
-      // Wait for auth code (disconnect doesn't need wallet signature)
       await new Promise<void>((resolve, reject) => {
         const closeCheck = setInterval(() => {
           if (popup.closed) {
@@ -275,7 +266,6 @@ export const useConnectAudiusProfile = ({
         window.addEventListener('message', handler, false)
       })
 
-      // Clear the connected user
       await queryClient.cancelQueries({
         queryKey: getDashboardWalletUserQueryKey(wallet)
       })

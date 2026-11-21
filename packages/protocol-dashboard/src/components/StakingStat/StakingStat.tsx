@@ -34,9 +34,6 @@ type OwnProps = {
 
 type StakingStatInfoProps = OwnProps
 
-/**
- * Shows stats about staking. Lives on the SP page
- */
 const StakingStatInfo: React.FC<StakingStatInfoProps> = ({
   className,
   totalDelegates,

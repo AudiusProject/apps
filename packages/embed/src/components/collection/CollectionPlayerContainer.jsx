@@ -56,10 +56,8 @@ const CollectionPlayerContainer = ({
     [collection.tracks]
   )
 
-  // callback for usePlayback
   const onTrackEnd = useCallback(
     ({ stop, onTogglePlay, load }) => {
-      // Handle last track case
       if (activeTrackIndex === collection.tracks.length - 1) {
         setActiveTrackIndex(0)
         load(getTrackInfoForPlayback(0))
@@ -81,7 +79,6 @@ const CollectionPlayerContainer = ({
     ]
   )
 
-  // Setup audio
   const {
     playingState,
     duration,
@@ -95,7 +92,6 @@ const CollectionPlayerContainer = ({
     audioPlayer
   } = usePlayback(getId(activeTrackIndex), onTrackEnd)
 
-  // Setup recording listens
   useRecordListens(
     position,
     mediaKey,
@@ -103,7 +99,6 @@ const CollectionPlayerContainer = ({
     LISTEN_INTERVAL_SECONDS
   )
 
-  // Setup twitter autoplay
   useEffect(() => {
     const mobile = isMobile()
     if (!isTwitter || mobile || !collection.tracks.length) return
@@ -125,8 +120,6 @@ const CollectionPlayerContainer = ({
       }
 
       if (trackIndex === activeTrackIndex) {
-        // Only show popover if we just toggled the already
-        // active track
         if (playingState === PlayingState.Playing) {
           setPopoverVisibility(true)
         }
@@ -140,7 +133,6 @@ const CollectionPlayerContainer = ({
       loadTrack(trackInfoForPlayback)
       onTogglePlay(getId(trackIndex))
     },
-    // TODO: Fix these deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       didInitAudio,
@@ -156,12 +148,10 @@ const CollectionPlayerContainer = ({
     ]
   )
 
-  // Setup spacebar
   const spacebarEnabled =
     playingState !== PlayingState.Buffering && !popoverVisibility
   useSpacebar(() => onTogglePlayTrack(activeTrackIndex), spacebarEnabled)
 
-  // Tiny flavor isn't allowed for collections
   if (flavor === PlayerFlavor.TINY) return null
 
   return (

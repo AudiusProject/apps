@@ -5,7 +5,6 @@ import { User, Operator, Address } from 'types'
 
 const DEPLOYER_CUT_BASE = new BN('100')
 
-// Get the operator's active stake = total staked - pending decrease stake + total delegated to operator - operator's delegators' pending decrease stake
 export const getOperatorTotalActiveStake = (user: Operator) => {
   const userActiveStake = user.serviceProvider.deployerStake.sub(
     user.pendingDecreaseStakeRequest?.amount ?? new BN('0')
@@ -17,12 +16,9 @@ export const getOperatorTotalActiveStake = (user: Operator) => {
   return totalActiveStake
 }
 
-// Get the amount locked - pending decrease stake, and the operator's delegator's pending decrease delegation
 export const getOperatorTotalLocked = (user: Operator) => {
   const lockedPendingDecrease =
     (user as Operator).pendingDecreaseStakeRequest?.amount ?? new BN('0')
-  // Another way to get the locked delegation value from contract read
-  // const lockedDelegation await aud.Delegate.getTotalLockedDelegationForServiceProvider(user.wallet)
   const lockedDelegation = user.delegators.reduce((totalLocked, delegate) => {
     return totalLocked.add(delegate.amount.sub(delegate.activeAmount))
   }, new BN('0'))
@@ -30,18 +26,6 @@ export const getOperatorTotalLocked = (user: Operator) => {
   return totalLocked
 }
 
-/**
- * Calculates the net minted amount for a service operator prior to
- * distribution among the service provider and their delegators
- * Reference processClaim in the claims manager contract
- * NOTE: minted amount is calculated using values at the init claim block
- * @param {AudiusClient} aud Instance of the audius client
- * @param {string} wallet The service operator's wallet address
- * @param {BN} totalLocked The total token currently locked (decrease stake and delegation)
- * @param {number} blockNumber The blocknumber of the claim to process
- * @param {BN} fundingAmount The amount of total funds allocated per claim round
- * @returns {BN} The net minted amount
- */
 export const getMintedAmountAtBlock = async ({
   aud,
   wallet,
@@ -121,15 +105,6 @@ export const getDelegateRewards = ({
   }
 }
 
-/**
- * Calculates the total rewards for a user from a claim given a blocknumber
- * @param {string} wallet The user's wallet address
- * @param {Object} users An object of all user wallets to their User details
- * @param {BN} fundsPerRound The amount of rewards given out in a round
- * @param {number} blockNumber The block number to process the claim event for
- * @param {AudiusClient} aud Instance of the audius client for contract reads
- * @returns {BN} expected rewards for the user at the claim block
- */
 export const getRewardForClaimBlock = async ({
   wallet,
   users,
@@ -146,7 +121,6 @@ export const getRewardForClaimBlock = async ({
   const user = users.find((u) => u.wallet === wallet)
   let totalRewards = new BN('0')
 
-  // If the user is a service provider, retrieve their expected rewards for staking
   if ('serviceProvider' in user!) {
     const lockedPendingDecrease =
       (user as Operator).pendingDecreaseStakeRequest?.amount ?? new BN('0')
@@ -166,8 +140,6 @@ export const getRewardForClaimBlock = async ({
     })
     totalRewards = totalRewards.add(operatorRewards)
   }
-
-  // For each service operator the user delegates to, calculate the expected rewards for delegating
 
   const delegateToUserRewards: { [address: string]: BN } = {}
 

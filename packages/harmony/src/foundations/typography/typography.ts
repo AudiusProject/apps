@@ -31,10 +31,8 @@ export const typography = {
     s: '16px',
     m: '20px',
     l: '24px',
-    // body multi-line one-off
     bl: '28px',
     xl: '32px',
-    // heading large one-off
     hl: '36px',
     '2xl': '48px',
     '3xl': '52px',

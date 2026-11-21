@@ -129,7 +129,6 @@ describe('test authentication routes', function () {
 
     const redis = app.get('redis')
     await redis.set('otp:dheeraj@audius.co', '123456')
-    // old lookup key doesn't work
     await request(app)
       .get('/authentication')
       .query({
@@ -140,7 +139,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // New lookup key works
     await request(app)
       .get('/authentication')
       .query({
@@ -151,7 +149,6 @@ describe('test authentication routes', function () {
       })
       .expect(200)
 
-    // Change back
     await request(app)
       .post('/authentication')
       .send({
@@ -165,7 +162,6 @@ describe('test authentication routes', function () {
       })
       .expect(200)
 
-    // old lookup key doesn't work
     await request(app)
       .get('/authentication')
       .query({
@@ -176,7 +172,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // New lookup key works
     await request(app)
       .get('/authentication')
       .query({
@@ -189,7 +184,6 @@ describe('test authentication routes', function () {
   })
 
   it('responds 400 for lookup authentication with invalid lookupKey', async function () {
-    // Try getting data without the correct query params, should fail
     await request(app)
       .get('/authentication')
       .query({
@@ -206,7 +200,6 @@ describe('test authentication routes', function () {
 
     const redis = app.get('redis')
     await redis.set('otp:dheeraj@audius.co', '123456')
-    // Try getting data with the right params
     const response = await request(app).get('/authentication').query({
       lookupKey:
         '9bdc91e1bb7ef60177131690b18349625778c14656dc17814945b52a3f07ac77',
@@ -259,7 +252,6 @@ describe('test authentication routes', function () {
 
     const redis = app.get('redis')
     await redis.set('otp:dheeraj@audius.co', '123456')
-    // Try getting data with the right params
     const response = await request(app).get('/authentication').query({
       lookupKey:
         '9bdc91e1bb7ef60177131690b18349625778c14656dc17814945b52a3f07ac77',
@@ -289,7 +281,6 @@ describe('test authentication routes', function () {
     const otp2 = await redis.get('otp:dheeraj@audius.co')
     assert.notStrictEqual(otp1, otp2)
 
-    // After the second request, we don't send any more new otp emails
     await requestSignUp()
     const otp3 = await redis.get('otp:dheeraj@audius.co')
     assert.strictEqual(otp2, otp3)
@@ -442,7 +433,6 @@ describe('test authentication routes', function () {
     const username = 'test+1@audius.co'
     const walletAddress = '0x1ea101eccdc55a2db6196eff5440ece24ecb55af'
 
-    // create user
     const [authRecord, userRecord] = await signUpUser({
       iv,
       cipherText,
@@ -454,15 +444,11 @@ describe('test authentication routes', function () {
 
     assert.strictEqual(authRecord.walletAddress, userRecord.walletAddress)
 
-    // change email
     const newIv = `${iv}-2`
     const newCipherText = `${cipherText}-2`
     const newLookupKey = `${cipherText}-2`
     const newUsername = 'test+2@audius.co'
 
-    // attempt to trigger OTP with malformed request
-
-    // no signed headers
     await request(app)
       .post('/authentication')
       .send({
@@ -474,7 +460,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // no new auth artifacts with signed headers
     await request(app)
       .post('/authentication')
       .set(
@@ -490,7 +475,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // just email
     await request(app)
       .post('/authentication')
       .send({
@@ -498,11 +482,9 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // expect otp not populated
     let otp = await redis.get(`otp:${newUsername}`)
     assert.strictEqual(otp, null)
 
-    // trigger OTP from first POST
     await request(app)
       .post('/authentication')
       .set(
@@ -524,9 +506,6 @@ describe('test authentication routes', function () {
 
     otp = await redis.get(`otp:${newUsername}`)
 
-    // attempt to change email with OTP and malformed request
-
-    // no signed headers
     await request(app)
       .post('/authentication')
       .send({
@@ -539,7 +518,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // no new auth artifacts with signed headers
     await request(app)
       .post('/authentication')
       .set(
@@ -556,7 +534,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // just email
     await request(app)
       .post('/authentication')
       .send({
@@ -565,7 +542,6 @@ describe('test authentication routes', function () {
       })
       .expect(400)
 
-    // right otp, correct signature that is derived from wrong wallet
     await request(app)
       .post('/authentication')
       .set(
@@ -615,7 +591,6 @@ describe('test authentication routes', function () {
     assert.strictEqual(newUserModel.email, newUsername)
     assert.strictEqual(newUserModel.walletAddress, walletAddress)
 
-    // check old auth model no longer works
     await request(app)
       .get('/authentication')
       .send({

@@ -9,7 +9,6 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
-      // Drop any DethronedNotifs
       await queryInterface.sequelize.query(
         `
         DELETE FROM "SolanaNotifications"
@@ -18,9 +17,6 @@ module.exports = {
         { transaction }
       )
 
-      // Recreate the old enum:
-
-      // Create a new enum
       await queryInterface.sequelize.query(
         `
         CREATE TYPE "enum_SolanaNotifications_type_new"
@@ -29,7 +25,6 @@ module.exports = {
         { transaction }
       )
 
-      // Set the column to the new enum
       await queryInterface.sequelize.query(
         `
         ALTER TABLE "SolanaNotifications"
@@ -40,7 +35,6 @@ module.exports = {
         { transaction }
       )
 
-      // Drop old enum
       await queryInterface.sequelize.query(
         `
         DROP TYPE "enum_SolanaNotifications_type";
@@ -48,7 +42,6 @@ module.exports = {
         { transaction }
       )
 
-      // Rename new enum
       await queryInterface.sequelize.query(
         `
         ALTER TYPE "enum_SolanaNotifications_type_new"

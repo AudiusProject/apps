@@ -188,6 +188,7 @@ export const themeColorsByThemeVariant: Record<ResolvedThemeName, ThemeColors> =
     matrix: matrixTheme
   }
 
+/** @deprecated Use useResolvedThemeName + themeColorsByThemeVariant */
 export const legacyThemeColorsByThemeVariant = {
   [Theme.LIGHT]: defaultTheme,
   [Theme.DARK]: darkTheme,

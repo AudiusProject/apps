@@ -1,10 +1,5 @@
 'use strict'
 
-/**
- * Makes entries in the user list table unique on track id and user id.
- * Deletes currently conflicting entries. We aren't sure how these arose in the
- * first place.
- */
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize
@@ -33,7 +28,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    // return new Promise(resolve => resolve())
     return queryInterface.removeConstraint(
       'UserTrackListens',
       'unique_on_user_id_and_track_id'

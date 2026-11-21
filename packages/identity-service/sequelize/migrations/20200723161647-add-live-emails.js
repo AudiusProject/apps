@@ -3,7 +3,6 @@ const models = require('../../src/models')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    // Add 'live' to "NotificatiionEmails" "emailFrequency"
     return (
       queryInterface.sequelize
         .query(
@@ -52,7 +51,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    // Set all the users who have the default (live) to daily
     return (
       models.UserNotificationSettings.update(
         {

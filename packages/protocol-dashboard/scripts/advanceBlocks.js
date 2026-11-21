@@ -12,7 +12,6 @@ if (args.length < 3) {
 
 const blockNumber = parseInt(args[2])
 
-// Advance blocks to block defined
 time.advanceBlockTo(blockNumber).then((res) => {
   console.log(res)
   console.log('Done')

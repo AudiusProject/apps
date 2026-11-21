@@ -35,7 +35,6 @@ describe('test redis locks', async () => {
     const keys = ['existinglock1', 'existinglock2', 'existinglock3']
     const keyPattern = 'existinglock*'
 
-    // locks shouldn't exist before
     for (const key of keys) {
       const value = await Lock.getLock(key)
       assert.deepStrictEqual(value, false)
@@ -45,7 +44,6 @@ describe('test redis locks', async () => {
       await Lock.setLock(key)
     }
 
-    // locks should exist after
     for (const key of keys) {
       const value = await Lock.getLock(key)
       assert.deepStrictEqual(value, true)
@@ -53,7 +51,6 @@ describe('test redis locks', async () => {
 
     await Lock.clearAllLocks(keyPattern)
 
-    // locks should not exist after clearing
     for (const key of keys) {
       const value = await Lock.getLock(key)
       assert.deepStrictEqual(value, false)

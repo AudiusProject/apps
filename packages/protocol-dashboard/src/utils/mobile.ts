@@ -1,5 +1,4 @@
 export const isMobile = () => {
-  // If we are running with the mobile env flag set, short-circuit to `true`
   let check = false
   ;(function (a) {
     if (
@@ -13,7 +12,6 @@ export const isMobile = () => {
       check = true
     // @ts-ignore
   })(navigator.userAgent || navigator.vendor || window.opera)
-  // iPad iOS 13
   if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
     check = true
   return check

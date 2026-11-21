@@ -167,7 +167,6 @@ export class ChatsApi
       ChatGetAllRequestSchema
     )(params)
 
-    // Get new blasts and upgrade them to chats
     this.upgradeBlasts(userId)
 
     const path = `/comms/chats`
@@ -772,7 +771,6 @@ export class ChatsApi
   ): Promise<ChatInvite[]> {
     const allUserIds = [userId, ...invitedUserIds]
 
-    // Fetch all public keys in parallel to avoid sequential network requests
     const publicKeyPromises = allUserIds.map((id) => this.getPublicKey(id))
     const publicKeys = await Promise.all(publicKeyPromises)
 
@@ -886,7 +884,6 @@ export class ChatsApi
     if (!this.publicKeyCache[userId]) {
       const promise = this.fetchPublicKey(userId)
       this.publicKeyCache[userId] = promise
-      // Don't cache failures, so a transient error can be retried
       promise.catch(() => {
         if (this.publicKeyCache[userId] === promise) {
           delete this.publicKeyCache[userId]
@@ -934,7 +931,6 @@ export class ChatsApi
         this.eventEmitter.emit('message', {
           chatId: blast.pending_chat_id,
           message: {
-            // the order of blast_id + pending_chat_id needs to match Misc.BlastMessageID in comms
             message_id: blast.blast_id + blast.pending_chat_id,
             message: blast.plaintext,
             sender_user_id: encodedSenderId,

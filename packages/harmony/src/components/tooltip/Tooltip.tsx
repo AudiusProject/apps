@@ -135,10 +135,6 @@ export const Tooltip = ({
   className = '',
   color = 'secondary',
   disabled = false,
-  // `position: fixed` coordinates are skewed inside any transformed ancestor
-  // (e.g. the sidebar-shift `transform: translateX` on the main app wrapper),
-  // so default to portaling outside the React tree rather than into the
-  // trigger's parent.
   mount = 'body',
   getPopupContainer,
   mouseEnterDelay = 0.5,
@@ -160,7 +156,6 @@ export const Tooltip = ({
   const leaveDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mousedOverRef = useRef(false)
 
-  // Handle mouse enter with delay
   const handleMouseEnter = useCallback(() => {
     if (disabled || isHiddenOverride) return
 
@@ -180,7 +175,6 @@ export const Tooltip = ({
     }
   }, [disabled, isHiddenOverride, mouseEnterDelay])
 
-  // Handle mouse leave with delay
   const handleMouseLeave = useCallback(() => {
     mousedOverRef.current = false
 
@@ -202,7 +196,6 @@ export const Tooltip = ({
     }
   }, [mouseLeaveDelay])
 
-  // Handle tooltip mouse enter (keep it visible when hovering over tooltip)
   const handleTooltipMouseEnter = useCallback(() => {
     mousedOverRef.current = true
     if (leaveDelayTimerRef.current) {
@@ -211,16 +204,13 @@ export const Tooltip = ({
     }
   }, [])
 
-  // Handle tooltip mouse leave
   const handleTooltipMouseLeave = useCallback(() => {
     mousedOverRef.current = false
     handleMouseLeave()
   }, [handleMouseLeave])
 
-  // Handle click on trigger
   const handleClick = useCallback(
     (event: any) => {
-      // Call the original onClick handler from the child if it exists
       if (isValidElement(children)) {
         const originalOnClick = (children as ReactElement<{ onClick?: any }>)
           .props?.onClick
@@ -229,7 +219,6 @@ export const Tooltip = ({
         }
       }
 
-      // Handle tooltip dismissal
       if (shouldDismissOnClick) {
         setIsHiddenOverride(true)
         setIsPositionReady(false)
@@ -296,24 +285,19 @@ export const Tooltip = ({
     setIsPositionReady(true)
   }, [calculatePosition])
 
-  // Measure position before paint to avoid flashing stale coordinates.
   useLayoutEffect(() => {
     if (!isVisible || !triggerRef.current || !tooltipRef.current) return
     updatePosition()
   }, [isVisible, text, updatePosition])
 
-  // Keep tooltip synced with scrolling/resizing and short-lived layout transitions
-  // (e.g. sidebar resize/translate animations).
   useEffect(() => {
     if (!isVisible || !triggerRef.current || !tooltipRef.current) return
 
     updatePosition()
 
-    // Update on scroll
     window.addEventListener('scroll', updatePosition, true)
     window.addEventListener('resize', updatePosition)
 
-    // Keep tracking briefly to absorb nearby layout transitions.
     const transitionTrackingMs = 400
     const startedAt = performance.now()
     let animationFrame = 0
@@ -334,7 +318,6 @@ export const Tooltip = ({
     }
   }, [isVisible, updatePosition])
 
-  // Get portal container
   const getPortalContainer = useCallback((): HTMLElement => {
     if (getPopupContainer) {
       const container = getPopupContainer()
@@ -357,8 +340,6 @@ export const Tooltip = ({
         }
         return page ?? document.body
       case 'page':
-        // `#page` may be translated by app layout (e.g. resizable sidebar),
-        // which skews fixed-position tooltip coordinates.
         return document.body
       case 'body':
         return document.body
@@ -367,7 +348,6 @@ export const Tooltip = ({
     }
   }, [mount, getPopupContainer])
 
-  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (enterDelayTimerRef.current) {
@@ -383,14 +363,10 @@ export const Tooltip = ({
     return <>{children}</>
   }
 
-  // Clone child element to add ref and event handlers
-  // In React 19, ref is a regular prop, so we can merge it cleanly
   const triggerElement = isValidElement(children)
     ? cloneElement(
         children as ReactElement,
         {
-          // Merge our ref with any existing ref on the child
-          // In React 19, ref is accessible as a prop
           ref: mergeRefs([triggerRef, (children as any).ref]),
           onMouseEnter: handleMouseEnter,
           onMouseLeave: handleMouseLeave,

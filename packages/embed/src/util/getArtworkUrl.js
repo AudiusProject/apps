@@ -1,9 +1,5 @@
 const fallback = 'https://creatornode.audius.co/content'
 
-/**
- * Preloads an image and returns a promise that resolves when the image loads
- * or rejects if it fails to load
- */
 const preloadImageFn = (url) => {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -23,9 +19,6 @@ const preloadImageFn = (url) => {
   })
 }
 
-/**
- * Fetches an image URL with fallback to mirrors if the first fetch fails
- */
 const fetchWithFallback = async (url, mirrors = []) => {
   const mirrorList = [...mirrors]
   let currentUrl = url
@@ -43,7 +36,6 @@ const fetchWithFallback = async (url, mirrors = []) => {
       currentUrl = nextUrl.toString()
     }
   }
-  // Try the current URL one more time if no mirrors worked
   try {
     await preloadImageFn(currentUrl)
     return currentUrl
@@ -61,7 +53,6 @@ export const getArtworkUrl = async (
 
   if (collectionOrTrack?.artwork) {
     artworkUrl = collectionOrTrack?.artwork._480x480
-    // Get mirrors from artwork object if available
     mirrors = collectionOrTrack?.artwork?.mirrors ?? []
   } else {
     artworkUrl = `${fallback}/${collectionOrTrack?.coverArtSizes}/480x480.jpg`
@@ -77,8 +68,6 @@ export const getArtworkUrl = async (
     try {
       return await fetchWithFallback(artworkUrl, mirrors)
     } catch {
-      // If all mirrors fail, return the original URL anyway
-      // The component will handle the error state
       return artworkUrl
     }
   }

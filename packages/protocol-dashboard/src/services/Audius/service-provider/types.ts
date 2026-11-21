@@ -39,8 +39,6 @@ export type IncreaseStakeResponse = {
 }
 export type DecreaseStakeResponse = { txReceipt: TxReceipt }
 
-/* Event Types */
-
 export type GetRegisteredServiceProviderEventsResponse = {
   blockNumber: number
   spID: number

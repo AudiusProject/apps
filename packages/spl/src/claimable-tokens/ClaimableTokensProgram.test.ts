@@ -7,9 +7,6 @@ import { Secp256k1Program } from '../secp256k1/Secp256k1Program'
 import { ClaimableTokensProgram } from './ClaimableTokensProgram'
 import { ClaimableTokensInstruction } from './constants'
 
-// Secp256k1 instruction preceding a mainnet SetAuthority instruction that
-// transferred ownership of user bank Bwde2Eu9... to 7gbjjeaa...
-// Transaction: 5P5QZjQhzhik7b4YGVmkBpiTRXzKKMqApL86bEjYXMjq8LJkvQkRJzbCyy5yTw7oJjqgcUQoExawXLMUpANuNyts
 const MAINNET_SET_AUTHORITY_SECP_DATA =
   'ASAAAAwAAGEAZwAAqa3Sldm1AP3Y5pW+XrSKsPWTSCY10DPjmy9H41ybWn1qnOD228tHJKP+2HVAoPYR/cp2NzDisog8Dhz+WpNrj1uvhx0FxK6CFpFnb9JZDCvQvdznAZ5oFp2hVwxgLEHrv0cngiL0NOpUdI/Qgk9bYH/htvWJIwAAAAYCAWNLDNbw11p9JYiGsQAm7ZmCOYs7zB0BRLQWG/CxkJOkopOo9nn6aEg4D4369kn7ivc9gOWiruJ81acljr1S/yQ='
 
@@ -32,7 +29,6 @@ describe('ClaimableTokensProgram', () => {
         '7gbjjeaajXHbgN5dH3gkJgZED2H5Sp5ANWE6K8L6R5Fy'
       )
 
-      // Re-encoding produces the exact bytes that were signed
       expect(
         ClaimableTokensProgram.createSignedSetAuthorityData(signed).equals(
           Buffer.from(secp.message)

@@ -16,19 +16,8 @@ const getSendMethod = (provider: HttpProvider | AbstractProvider) => {
 
 type Providers = [HttpProvider, ...Array<HttpProvider | AbstractProvider>]
 
-/**
- * web3 consumes a provider object on initialization
- * ref: https://github.com/ChainSafe/web3.js/blob/1.x/packages/web3/types/index.d.ts#L31
- * which references: https://github.com/ChainSafe/web3.js/blob/1.x/packages/web3-core/types/index.d.ts#L436
- * MultiProvider implements HttpProvider which can be consumed by web3
- * ref for HttpProvider: https://github.com/ChainSafe/web3.js/blob/1.x/packages/web3-providers-http/types/index.d.ts#L46-L66
- */
 export class MultiProvider extends Web3.providers.HttpProvider {
   providers: Providers
-  /**
-   * Creates a MultiProvider
-   * @param {Array<string | Provider> | string} - The providers to use.
-   */
   constructor(providers: string[] | string) {
     let web3Providers: string[]
     if (typeof providers === 'string') {
@@ -39,7 +28,6 @@ export class MultiProvider extends Web3.providers.HttpProvider {
       web3Providers = providers
     }
 
-    // The below line ensures that we support different types of providers i.e. comma separated strings, an array of strings or an array of providers.
     const web3ProviderInstances = web3Providers.map(
       (provider) => new Web3(provider).eth.currentProvider
     ) as Providers
@@ -51,14 +39,9 @@ export class MultiProvider extends Web3.providers.HttpProvider {
 
     this.providers = web3ProviderInstances
 
-    // We replace HttpProvider.send with a custom function that supports fallback providers.
-    this.send = callbackify(this._send.bind(this)) // web3 only supports callback functions and not async
+    this.send = callbackify(this._send.bind(this))
   }
 
-  /**
-   * @method _send
-   * @param {Object} payload
-   */
   async _send(payload: JsonRpcPayload) {
     let lastError: Error | null = null
 

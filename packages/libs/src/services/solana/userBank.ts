@@ -29,9 +29,6 @@ const createTokenAccountInstructionSchema = new Map([
   ]
 ])
 
-/**
- * Gets the back account address for a user given their ethAddress
- */
 export const getBankAccountAddress = async (
   ethAddress: string,
   claimableTokenPDA: PublicKey,
@@ -39,13 +36,12 @@ export const getBankAccountAddress = async (
 ) => {
   const ethAddressArr = SolanaUtils.ethAddressToArray(ethAddress)
 
-  // We b58 encode our eth address to use as seed later on
   const b58EthAddress = bs58.encode(ethAddressArr)
 
   const accountToGenerate = await PublicKey.createWithSeed(
-    /* from pubkey / base */ claimableTokenPDA,
-    /* seed */ b58EthAddress,
-    /* programId / owner */ solanaTokenProgramKey
+    claimableTokenPDA,
+    b58EthAddress,
+    solanaTokenProgramKey
   )
   return accountToGenerate
 }
@@ -61,10 +57,6 @@ type CreateUserBankFromConfig = {
   recentBlockhash?: string
 }
 
-/**
- * createUserBank deterministically creates a Solana wAudio token account
- * from a provided ethAddress
- */
 export const createUserBankFrom = async ({
   ethAddress,
   claimableTokenPDAKey,
@@ -75,7 +67,6 @@ export const createUserBankFrom = async ({
   transactionHandler,
   recentBlockhash
 }: CreateUserBankFromConfig) => {
-  // Create instruction data
   const ethAddressArr = SolanaUtils.ethAddressToArray(ethAddress)
 
   const instructionData = new CreateTokenAccountInstructionData({
@@ -86,13 +77,11 @@ export const createUserBankFrom = async ({
     instructionData
   )
 
-  // 0th index in the Rust instruction enum
   const serializedInstructionEnum = Uint8Array.of(
     0,
     ...serializedInstructionData
   )
 
-  // Create the account we aim to generate
   const accountToGenerate = await getBankAccountAddress(
     ethAddress,
     claimableTokenPDAKey,
@@ -100,43 +89,36 @@ export const createUserBankFrom = async ({
   )
 
   const accounts = [
-    // 0. `[sw]` Account to pay for creating token acc
     {
       pubkey: feePayerKey,
       isSigner: true,
       isWritable: true
     },
-    // 1. `[r]` Mint account
     {
       pubkey: mintKey,
       isSigner: false,
       isWritable: false
     },
-    // 2. `[r]` Base acc used in PDA token acc (need because of create_with_seed instruction)
     {
       pubkey: claimableTokenPDAKey,
       isSigner: false,
       isWritable: false
     },
-    // 3. `[w]` PDA token account to create
     {
       pubkey: accountToGenerate,
       isSigner: false,
       isWritable: true
     },
-    // `[r]` Rent id
     {
       pubkey: SYSVAR_RENT_PUBKEY,
       isSigner: false,
       isWritable: false
     },
-    // 5. `[r]` SPL token account id
     {
       pubkey: solanaTokenProgramKey,
       isSigner: false,
       isWritable: false
     },
-    // 6. `[r]` System program id
     {
       pubkey: SystemProgram.programId,
       isSigner: false,

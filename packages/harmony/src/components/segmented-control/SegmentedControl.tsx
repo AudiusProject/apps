@@ -43,7 +43,6 @@ export const SegmentedControl = <T extends string>(
   const [maxOptionWidth, setMaxOptionWidth] = useState(0)
 
   const rawSelectedOption = selected ?? localSelected
-  // If the selected value doesn't match any option, fall back to the first option
   const selectedOption = options.some(
     (option) => option.key === rawSelectedOption
   )
@@ -51,12 +50,10 @@ export const SegmentedControl = <T extends string>(
     : (options[0]?.key ?? rawSelectedOption)
 
   const onSetSelected = (option: T) => {
-    // Call props function if controlled
     if (onSelectOption) onSelectOption(option)
     setLocalSelected(option)
   }
 
-  // Background pill position - use state for direct control
   const [pillStyle, setPillStyle] = useState<{
     left: number
     width: number
@@ -64,14 +61,12 @@ export const SegmentedControl = <T extends string>(
     shouldAnimate: boolean
   }>({ left: 0, width: 0, ready: false, shouldAnimate: false })
 
-  // Update refs when options change
   useEffect(() => {
     optionRefs.current = options.map(
       (_, i) => optionRefs.current[i] ?? createRef<HTMLLabelElement>()
     )
   }, [options])
 
-  // Update localSelected if current selection is no longer valid
   useEffect(() => {
     if (
       options.length > 0 &&
@@ -90,7 +85,6 @@ export const SegmentedControl = <T extends string>(
     )
   }, [options])
 
-  // Watch for resizes and repositions so that we move and resize the slider appropriately
   const [selectedRef, bounds] = useMeasure({
     offsetSize: true,
     polyfill: ResizeObserver
@@ -107,10 +101,8 @@ export const SegmentedControl = <T extends string>(
     }
   }, [forceRefreshAfterMs])
 
-  // Track the last selected option to determine when to animate
   const lastSelectedOption = useRef<string | null>(null)
 
-  // Update pill position
   const updatePillPosition = useCallback(() => {
     let selectedRefIdx = options.findIndex(
       (option) => option.key === selectedOption
@@ -123,16 +115,13 @@ export const SegmentedControl = <T extends string>(
     const width = selectedEl.clientWidth
     const left = selectedEl.offsetLeft
 
-    // Don't position if we don't have valid measurements
     if (width === 0) return
 
-    // Determine if we should animate (only when user changes selection)
     const isUserSelection =
       lastSelectedOption.current !== null &&
       lastSelectedOption.current !== selectedOption
 
     setPillStyle((prev) => {
-      // Skip if position hasn't changed
       if (prev.left === left && prev.width === width && prev.ready) {
         return prev
       }
@@ -142,12 +131,10 @@ export const SegmentedControl = <T extends string>(
     lastSelectedOption.current = selectedOption
   }, [selectedOption, options])
 
-  // Run on mount and when dependencies change
   useLayoutEffect(() => {
     updatePillPosition()
   }, [updatePillPosition, equalWidth, bounds, forceRefresh])
 
-  // Also update after a short delay to handle any layout settling
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       updatePillPosition()
@@ -229,11 +216,8 @@ export const SegmentedControl = <T extends string>(
               <div
                 className={cn(styles.separator, {
                   [styles.invisible]:
-                    // Hide separator right of the selected option
                     selectedOption === option.key ||
-                    // Hide separator right of the last option
                     idx === options.length - 1 ||
-                    // Hide separator right of an option if the next one is selected
                     selectedOption === options[idx + 1].key
                 })}
               />

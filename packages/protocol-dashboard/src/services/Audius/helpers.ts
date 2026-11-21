@@ -6,7 +6,6 @@ import { formatAudString, formatNumber } from 'utils/format'
 
 import AudiusClient from './AudiusClient'
 
-// Helpers
 export async function hasPermissions(
   this: AudiusClient,
   ...permissions: Array<Permission>
@@ -110,7 +109,6 @@ export async function toChecksumAddress(this: AudiusClient, wallet: string) {
   return web3.utils.toChecksumAddress(wallet)
 }
 
-// Static Helpers
 export function getBNPercentage(
   n1: BigNumber,
   n2: BigNumber,
@@ -166,7 +164,6 @@ export async function getNodeMetadata(endpoint: string): Promise<NodeMetadata> {
     return { version, country }
   } catch (e) {
     console.error(e)
-    // Return no version if we couldn't find one, so we don't hold everything up
     return { version: '', country: '' }
   }
 }
@@ -181,7 +178,6 @@ export async function getDiscoveryNodeMetadata(
     } = await fetchWithTimeout(`${endpoint}/location?verbose=true`)
     return { version, country }
   } catch (e) {
-    // Try legacy method:
     return await getNodeMetadata(endpoint)
   }
 }
@@ -195,7 +191,6 @@ export async function getContentNodeMetadata(
     } = await fetchWithTimeout(`${endpoint}/version`)
     return { version, country }
   } catch (e) {
-    // Try legacy method:
     return await getNodeMetadata(endpoint)
   }
 }
@@ -209,13 +204,11 @@ export async function getValidatorMetadata(
     } = await fetchWithTimeout(`${endpoint}/version`)
     return { version, country }
   } catch (e) {
-    // Try legacy method:
     return await getNodeMetadata(endpoint)
   }
 }
 
 export function decodeCallData(types: string[], callData: string) {
-  // TODO: Like methods above and throughout, move to better pattern
   const web3 = window.audiusLibs.ethWeb3Manager!.web3
   return web3.eth.abi.decodeParameters(types, callData)
 }

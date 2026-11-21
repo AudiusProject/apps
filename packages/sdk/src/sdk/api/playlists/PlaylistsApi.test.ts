@@ -125,7 +125,6 @@ vitest
   .mockImplementation(async () => mockPlaylistResponse)
 
 describe('PlaylistsApi', () => {
-  // TODO: Move this setup out of describe
   let playlists: PlaylistsApi
 
   // eslint-disable-next-line mocha/no-setup-in-describe

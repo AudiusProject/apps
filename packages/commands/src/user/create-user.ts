@@ -35,7 +35,6 @@ export const createUserCommand = new Command('create')
       options
 
     const hedgehog = getHedgehog()
-    // Create identity service user
     const res = await hedgehog.signUp({ username: email, password })
 
     const userRes = await audiusSdk.users.createUser({

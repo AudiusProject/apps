@@ -1,4 +1,3 @@
-// Stolen from DAPP
 export const isMobile = () => {
   let check = false
   ;(function (a) {
@@ -12,7 +11,6 @@ export const isMobile = () => {
     )
       check = true
   })(navigator.userAgent || navigator.vendor || window.opera)
-  // iPad iOS 13
   if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
     check = true
   return check

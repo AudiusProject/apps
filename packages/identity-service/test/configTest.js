@@ -37,7 +37,6 @@ describe('convict configuration test', function () {
 
     assert(c.get('randomKey') === '123')
 
-    // Calling validate() should not throw an error. If an error is thrown, call assert.fail() to fail test
     try {
       c.validate()
     } catch (e) {
@@ -60,7 +59,6 @@ describe('convict configuration test', function () {
 
     assert(c.get('randomKey') === 123)
 
-    // Calling validate() should not throw an error. If an error is thrown, call assert.fail() to fail test
     try {
       c.validate()
     } catch (e) {
@@ -72,7 +70,6 @@ describe('convict configuration test', function () {
     const schema = config.getSchema().properties
 
     for (const key in schema) {
-      // special case this property since config.load will override the test value in the env var because of custom type coercion
       if (key === 'relayerWallets' || key === 'ethRelayerWallets') {
         assert.deepStrictEqual(Array.isArray(config.get(key)), true)
         continue
@@ -82,13 +79,11 @@ describe('convict configuration test', function () {
 
       const format = schema[key].format.toString()
 
-      // setting invalid values
       const invalidValue = getInvalidConfigValue(format)
 
       if (invalidValue) {
         setAndValidateEnvVar(key, invalidValue)
 
-        // Reload config to grab env vars
         config.load({})
 
         assert.throws(() => {
@@ -103,7 +98,6 @@ describe('convict configuration test', function () {
 
       config.load({})
 
-      // convict js converts env vars to its proper type
       assert(
         config.get(key) === validValue,
         `The config key '${key}' with format type '${schema[key].format}' is still retaining its old value of '${oldValue}' instead of '${validValue}'`
@@ -112,7 +106,6 @@ describe('convict configuration test', function () {
   })
 })
 
-// Retrieves proper values for validation tests
 function getValidConfigValue(format) {
   let validValue
 
@@ -136,7 +129,6 @@ function getValidConfigValue(format) {
   return validValue
 }
 
-// Retrieves bad values for validation tests
 function getInvalidConfigValue(format) {
   let invalidValue
 
@@ -150,9 +142,6 @@ function getInvalidConfigValue(format) {
     case 'port':
       invalidValue = generateRandomUUID()
       break
-    // A format of type string will convert any new value to its string value
-    // A format of type boolean will convert any new value to its t/f value
-    // A format of type number will convert any new value to NaN, which is a type of number
     case 'string':
     case 'boolean':
     case 'number':
@@ -162,11 +151,9 @@ function getInvalidConfigValue(format) {
   return invalidValue
 }
 
-// Sets and validates env var
 function setAndValidateEnvVar(key, newValue) {
   process.env[key] = newValue
 
-  // everything in process.env is typeof string
   assert(
     process.env[key] === newValue.toString(),
     'Env var was not set properly.'

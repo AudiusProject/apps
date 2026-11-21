@@ -56,8 +56,6 @@ export type EntityManagerCreateUserRequest = Omit<
   z.input<typeof CreateUserSchema>,
   'onProgress'
 > & {
-  // Typing function manually because z.function() does not
-  // support argument names
   onProgress?: (progress: number) => void
 }
 
@@ -162,8 +160,6 @@ export type EntityManagerUpdateProfileRequest = Omit<
   z.input<typeof UpdateProfileSchema>,
   'onProgress'
 > & {
-  // Typing function manually because z.function() does not
-  // support argument names
   onProgress?: ProgressHandler
 }
 
@@ -255,7 +251,6 @@ export type SendTipReactionRequest = z.input<
   typeof SendTipReactionRequestSchema
 >
 
-// Email-related types
 export interface EmailRequest {
   emailOwnerUserId: number
   receivingUserId: number
@@ -278,7 +273,6 @@ export const WalletSchema = z.discriminatedUnion('chain', [
     chain: z.literal('sol')
   }),
   z.object({
-    // Relaxing type here so we can pass in a string and use EthAddressSchema to validate at runtime
     address: z.string().pipe(EthAddressSchema),
     chain: z.literal('eth')
   })

@@ -25,9 +25,6 @@ export class TrackUploadHelper extends BaseAPI {
   }
 
   public transformTrackUploadMetadata<
-    // TrackMetadata is a less strict type
-    // only requiring the fields used in this function.
-    // This supports both track/playlist uploads and edits
     TrackMetadata extends Pick<
       PlaylistTrackMetadata,
       'isStreamGated' | 'streamConditions' | 'isUnlisted' | 'fieldVisibility'
@@ -42,12 +39,10 @@ export class TrackUploadHelper extends BaseAPI {
     const isUsdcGated = 'usdc_purchase' in (metadata.streamConditions ?? {})
     const isUnlisted = metadata.isUnlisted
 
-    // If track is stream gated and not usdc purchase gated, set remixes to false
     if (isStreamGated && !isUsdcGated && metadata.fieldVisibility) {
       metadata.fieldVisibility.remixes = false
     }
 
-    // If track is public, set required visibility fields to true
     if (!isUnlisted) {
       metadata.fieldVisibility = {
         ...metadata.fieldVisibility,
@@ -73,12 +68,10 @@ export class TrackUploadHelper extends BaseAPI {
     const isUsdcGated = 'usdc_purchase' in (metadata.streamConditions ?? {})
     const isUnlisted = metadata.isUnlisted
 
-    // If track is stream gated and not usdc purchase gated, set remixes to false
     if (isStreamGated && !isUsdcGated && metadata.fieldVisibility) {
       metadata.fieldVisibility.remixes = false
     }
 
-    // If track is public, set required visibility fields to true
     if (!isUnlisted) {
       metadata.fieldVisibility = {
         remixes: true, // default, but overwritten

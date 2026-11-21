@@ -8,19 +8,12 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        // Root monorepo has ajv@6; ajv-draft-04 (via @scalar) needs ajv@8.
-        'ajv': resolve(__dirname, 'node_modules/ajv'),
-        // Root monorepo has zod@3; @scalar/* needs zod@4.3.6 (pinned to match @scalar nested dep).
-        'zod': resolve(__dirname, 'node_modules/zod'),
+        ajv: resolve(__dirname, 'node_modules/ajv'),
+        zod: resolve(__dirname, 'node_modules/zod'),
       },
     },
     optimizeDeps: {
-      // Force Scalar to pre-bundle upfront (it's lazily imported in ApiReference.jsx).
-      // This ensures zod v4 is inlined into the pre-bundled chunks.
       include: ['@scalar/api-reference-react'],
-      // These are root monorepo deps (not docs deps) that import zod/v4 and
-      // zod/v3 sub-paths — which don't exist in the root's zod@3. Excluding
-      // them prevents vite from trying to pre-bundle them.
       exclude: ['ai', '@ai-sdk/provider-utils', '@ai-sdk/gateway'],
     },
   },
@@ -43,8 +36,7 @@ export default defineConfig({
         backgroundDark: { light: '#F7F7F8', dark: '#1F1F1F' },
       },
       fontFamily: {
-        default:
-          "'Avenir Next LT Pro', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+        default: "'Avenir Next LT Pro', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
       },
     },
   },

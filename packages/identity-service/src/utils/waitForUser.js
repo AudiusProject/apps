@@ -1,6 +1,4 @@
-/** How long to attempt to retry for (roughly) */
 const RETRY_TIMEOUT_MS = 45 * 1000
-/** How long to wait between retries */
 const RETRY_DELAY_MS = 1000
 
 module.exports = {

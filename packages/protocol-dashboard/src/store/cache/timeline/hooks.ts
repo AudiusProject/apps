@@ -27,8 +27,6 @@ const getFirstEvent = (...events: TimelineEvent[]) => {
       index = i
     }
   }
-  // TS thinks firstEvent can be null because it doesn't
-  // understand the algorithm, so cast
   return { firstEvent: firstEvent as TimelineEvent, index }
 }
 
@@ -46,53 +44,8 @@ const combineEvents = (...eventLists: TimelineEvent[][]) => {
   return combined
 }
 
-// -------------------------------- Helpers --------------------------------
-/*
-const getEventUsers = (events: TimelineEvent[]): Address[] => {
-  const users = new Set<Address>()
-  events.forEach(event => {
-    switch (event._type) {
-      case 'ServiceProviderIncreaseStake':
-      case 'ServiceProviderDecreaseStake':
-      case 'ServiceProviderRegistered':
-      case 'ServiceProviderDeregistered':
-        users.add(event.owner)
-        break
-      case 'DelegateIncreaseStake':
-      case 'DelegateDecreaseStake':
-      case 'DelegateRemoved':
-        users.add(event.delegator)
-        users.add(event.serviceProvider)
-        break
-      case 'DelegateClaim':
-        users.add(event.claimer)
-        break
-      case 'DelegateSlash':
-        users.add(event.target)
-        break
-      case 'GovernanceVote':
-      case 'GovernanceVoteUpdate':
-        users.add(event.voter)
-        break
-      case 'GovernanceProposal':
-        users.add(event.proposer)
-        break
-      case 'ClaimProcessed':
-        users.add(event.claimer)
-        break
-    }
-  })
-  // @ts-ignore
-  return [...users]
-}
-*/
-
-// -------------------------------- Selectors  --------------------------------
-
 export const getTimeline = (state: AppState, { wallet }: { wallet: Address }) =>
   state.cache.timeline.timelines[wallet]
-
-// -------------------------------- Thunk Actions  --------------------------------
 
 export type TimelineType = 'ServiceProvider' | 'Delegator'
 
@@ -101,17 +54,11 @@ export function fetchTimeline(
   timelineType: TimelineType
 ): ThunkAction<void, AppState, Audius, Action<string>> {
   return async (dispatch, _, aud) => {
-    // Some delegation methods allow you to either filter
-    // by delegator or service provider
     const filter =
       timelineType === 'Delegator'
         ? { delegator: wallet }
         : { serviceProvider: wallet }
 
-    /* Define the events outside Promise.all because Promise.all TS bindings
-     * only supports ten elements
-     * https://github.com/microsoft/TypeScript/issues/39788
-     */
     const rawEvents: Promise<TimelineEvent[]>[] = [
       aud.Governance.getVoteEventsByAddress([wallet]),
       aud.Governance.getVoteUpdateEventsByAddress([wallet]),
@@ -130,26 +77,16 @@ export function fetchTimeline(
 
     const timeline = combineEvents(...events).reverse()
 
-    // TODO: call dispatch fetchUsers with event users after the graph logic is
-    // consolidated with the fetch users logic
-    // const eventUsers = getEventUsers(timeline)
-
     dispatch(setTimeline({ wallet, timeline }))
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useTimeline = (wallet: Address, timelineType: TimelineType) => {
   const timeline = useSelector((state) =>
     getTimeline(state as AppState, { wallet })
   )
-  // const ethBlockNumber = useEthBlockNumber()
   const dispatch: ThunkDispatch<AppState, Audius, AnyAction> = useDispatch()
 
-  // Temporary fix
-  // The users from the timeline events need to be fetched, but the fetchUsers method
-  // is not yet consolidated w/ the graph fetching logic
   useUsers()
 
   useEffect(() => {

@@ -26,12 +26,10 @@ export const addTokenRefreshMiddleware = ({
         return context.response
       }
 
-      // Skip refresh when unauthenticated to avoid noisy error callbacks.
       if (!(await oauth.hasRefreshToken())) {
         return context.response
       }
 
-      // Coalesce concurrent 401s into a single refresh call.
       if (!refreshInFlight) {
         refreshInFlight = oauth
           .refreshAccessToken()
@@ -46,7 +44,6 @@ export const addTokenRefreshMiddleware = ({
         return context.response
       }
 
-      // Retry the original request with the new access token.
       const retryInit: RequestInit = {
         ...context.init,
         headers: {

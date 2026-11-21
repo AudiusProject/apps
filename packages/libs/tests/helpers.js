@@ -114,9 +114,7 @@ function convertAudsToWeiBN(ethWeb3, amountOfAUDS) {
 
 module.exports = {
   constants,
-  // Export configured libs instance
   audiusInstance: new AudiusLibs(audiusLibsConfig),
-  // Export libs config for re-use
   audiusLibsConfig,
   initializeLibConfig,
   getRandomLocalhost,
