@@ -47,3 +47,10 @@
 .disabled input {
   color: var(--harmony-n-600);
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .input input {
+    font-size: var(--harmony-font-m) !important;
+  }
+}
