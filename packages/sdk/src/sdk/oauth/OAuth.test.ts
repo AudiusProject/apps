@@ -6,7 +6,6 @@ import { OAuth } from './OAuth'
 import { TokenStoreMemory } from './TokenStoreMemory'
 import type { OAuthTokenStore } from './tokenStore'
 
-// Stub browser globals used by OAuth (sessionStorage, crypto, window.open, etc.).
 vi.stubGlobal('window', {
   localStorage: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() },
   sessionStorage: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() },
@@ -40,10 +39,6 @@ function makeOAuth(
     ...(apiKey !== null ? { apiKey } : {})
   })
 }
-
-// ---------------------------------------------------------------------------
-// refreshAccessToken
-// ---------------------------------------------------------------------------
 
 describe('OAuth.refreshAccessToken', () => {
   let tokenStore: OAuthTokenStore
@@ -187,10 +182,6 @@ describe('OAuth.refreshAccessToken', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// login — guard conditions
-// ---------------------------------------------------------------------------
-
 describe('OAuth.login guards', () => {
   let oauth: OAuth
 
@@ -254,17 +245,11 @@ describe('OAuth.login guards', () => {
       oauth.login({ redirectUri: 'https://example.com/cb' })
     ).rejects.toThrow('Storage quota exceeded')
 
-    // Lock must be released — a subsequent login() must not throw "already in progress".
-    // Both calls fail at sessionStorage.setItem so neither reaches the popup.
     await expect(
       oauth.login({ redirectUri: 'https://example.com/cb' })
     ).rejects.toThrow('Storage quota exceeded')
   })
 })
-
-// ---------------------------------------------------------------------------
-// message listener lifecycle
-// ---------------------------------------------------------------------------
 
 describe('OAuth message listener lifecycle', () => {
   beforeEach(() => {
@@ -304,7 +289,6 @@ describe('OAuth message listener lifecycle', () => {
     const oauth = makeOAuth()
     oauth.login({ redirectUri: 'https://example.com/cb' }).catch(() => {})
     await flushPromises()
-    // Second call throws "A login is already in progress" — suppress rejection
     oauth.login({ redirectUri: 'https://example.com/cb' }).catch(() => {})
     await flushPromises()
     const messageAddCalls = vi
@@ -348,10 +332,6 @@ describe('OAuth message listener lifecycle', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// _receiveMessage — popup parent-side handler
-// ---------------------------------------------------------------------------
-
 describe('OAuth._receiveMessage (popup parent handler)', () => {
   const CSRF_STATE = 'test-csrf-state'
   const CODE_VERIFIER = 'test-code-verifier'
@@ -383,7 +363,6 @@ describe('OAuth._receiveMessage (popup parent handler)', () => {
   })
 
   afterEach(() => {
-    // Settle any pending login to clear the popup-check interval and message listener
     ;(oauth as any)._settleLogin(new Error('test teardown'))
     loginPromise.catch(() => {})
   })
@@ -409,7 +388,6 @@ describe('OAuth._receiveMessage (popup parent handler)', () => {
   })
 
   it('rejects login when code verifier is missing from sessionStorage', async () => {
-    // Clear instance property so it falls through to sessionStorage (which returns null)
     ;(oauth as any)._pkceVerifier = null
     const settled = loginPromise.catch((e: Error) => e)
     await oauth._receiveMessage(makeEvent({ code: 'c', state: CSRF_STATE }))
@@ -488,10 +466,6 @@ describe('OAuth._receiveMessage (popup parent handler)', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// isAuthenticated / hasRefreshToken
-// ---------------------------------------------------------------------------
-
 describe('OAuth.isAuthenticated / hasRefreshToken', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -522,7 +496,6 @@ describe('OAuth.isAuthenticated / hasRefreshToken', () => {
 
   it('isAuthenticated attempts refresh when access token is expired', async () => {
     const tokenStore = new TokenStoreMemory()
-    // Set tokens with 1-second expiry, then backdate
     await tokenStore.setTokens('at', 'rt', 1)
     ;(tokenStore as any)._accessTokenExpiry = Date.now() - 1000
 
@@ -576,10 +549,6 @@ describe('OAuth.isAuthenticated / hasRefreshToken', () => {
     expect(await makeOAuth({ tokenStore }).hasRefreshToken()).toBe(true)
   })
 })
-
-// ---------------------------------------------------------------------------
-// getUser
-// ---------------------------------------------------------------------------
 
 describe('OAuth.getUser', () => {
   afterEach(() => {
@@ -695,10 +664,6 @@ describe('OAuth.getUser', () => {
   })
 })
 
-// ---------------------------------------------------------------------------
-// logout
-// ---------------------------------------------------------------------------
-
 describe('OAuth.logout', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -765,10 +730,6 @@ describe('OAuth.logout', () => {
     )
   })
 })
-
-// ---------------------------------------------------------------------------
-// handleRedirect / _exchangeCodeForTokens
-// ---------------------------------------------------------------------------
 
 describe('OAuth.handleRedirect', () => {
   let tokenStore: OAuthTokenStore
@@ -850,7 +811,6 @@ describe('OAuth.handleRedirect', () => {
       })
     )
 
-    // Result is consumed — subsequent calls are no-ops
     expect(oauth.hasRedirectResult()).toBe(false)
     await oauth.handleRedirect()
 

@@ -2,7 +2,6 @@ import { CSSObject } from '@emotion/react'
 
 import { useMedia } from '../hooks/useMedia'
 
-// Use ReturnType to get the actual MediaContextType from useMedia hook
 type MediaContextType = ReturnType<typeof useMedia>
 
 type ResponsiveStyleValue = CSSObject | ((media: MediaContextType) => CSSObject)
@@ -45,10 +44,8 @@ export const createResponsiveStyle = (
     }
   }
 
-  // Apply base styles first
   applyStyles(config.base)
 
-  // Apply breakpoint-specific styles, allowing overrides
   if (media.isMobile) applyStyles(config.mobile)
   if (media.isTablet) applyStyles(config.tablet)
   if (media.isDesktop) applyStyles(config.desktop)

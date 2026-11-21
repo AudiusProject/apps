@@ -153,8 +153,6 @@ export const UploadTrackMetadataSchema = z.object({
     .nullable(),
   accessAuthorities: z.optional(z.array(z.string()).nullable()),
   allowedApiKeys: z.optional(z.array(z.string()).nullable()),
-  // Collaborator artist user ids (numeric). Indexed by the ETL as pending
-  // invites; each tagged artist must accept before the credit is active.
   collaborators: z.optional(z.array(z.number()).nullable()),
   isDownloadGated: z.optional(z.boolean()),
   downloadConditions: z
@@ -265,19 +263,11 @@ export type UploadTrackRequest = Omit<
   z.input<typeof UploadTrackSchema>,
   'onProgress'
 > & {
-  // Typing function manually because z.function() does not
-  // support argument names
   onProgress?: UploadTrackFilesProgressHandler
 }
 
 export const UploadTrackFilesSchema = z
   .object({
-    // The user the upload is made for. Required — and always explicit, never
-    // derived from auth state, because a manager or developer-app session can
-    // act for more than one user. Audio uploads carry it so the validator can
-    // attest on chain that the bytes were uploaded for this user, which is
-    // what makes the resulting cids claimable on a track. Without a claim,
-    // publishing fails once content authorization is enforced.
     userId: HashId,
     audioFile: z.optional(AudioFile),
     imageFile: z.optional(ImageFile),
@@ -295,8 +285,6 @@ export type UploadTrackFilesRequest = Omit<
   z.input<typeof UploadTrackFilesSchema>,
   'onProgress'
 > & {
-  // Typing function manually because z.function() does not
-  // support argument names
   onProgress?: UploadTrackFilesProgressHandler
 }
 
@@ -328,8 +316,6 @@ export const DeleteTrackSchema = z
 
 export type EntityManagerDeleteTrackRequest = z.input<typeof DeleteTrackSchema>
 
-// A collaborator accepts/declines (or leaves) a track collaboration. userId is
-// the collaborator; trackId is the track they were tagged on.
 export const TrackCollaboratorSchema = z
   .object({
     userId: HashId,

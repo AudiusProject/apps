@@ -20,7 +20,6 @@ import { AudiusClient } from '../AudiusClient'
 
 import { RawProposal, RawVoteEvent } from './types'
 
-// NOTE: Temporary fix- Set the start query block so that the getPastEvent does not error
 const QUERY_PROPOSAL_START_BLOCK = parseInt(
   import.meta.env.VITE_QUERY_PROPOSAL_START_BLOCK || '0'
 )
@@ -31,8 +30,6 @@ export default class Governance {
   constructor(aud: AudiusClient) {
     this.aud = aud
   }
-
-  /* -------------------- Governance Read -------------------- */
 
   async getProposalById(proposalId: ProposalId) {
     await this.aud.hasPermissions()
@@ -119,7 +116,6 @@ export default class Governance {
     return this.getVoteByProposalAndVoter(proposalId, ownerWallet)
   }
 
-  /** Gets all vote submission events for a given proposal */
   async getVotesForProposal(
     proposalId: ProposalId,
     queryStartBlock: number = QUERY_PROPOSAL_START_BLOCK
@@ -132,7 +128,6 @@ export default class Governance {
     return votes.map(formatVoteEvent).filter(Boolean) as VoteEvent[]
   }
 
-  /** Gets all vote update events for a given proposal */
   async getVoteUpdatesForProposal(
     proposalId: ProposalId,
     queryStartBlock: number = QUERY_PROPOSAL_START_BLOCK
@@ -145,7 +140,6 @@ export default class Governance {
     return votes.map(formatVoteEvent).filter(Boolean) as VoteEvent[]
   }
 
-  /** Gets all vote submission events on any proposal by addresses */
   async getVotesByAddress(
     addresses: Address[],
     queryStartBlock: number = QUERY_PROPOSAL_START_BLOCK
@@ -170,7 +164,6 @@ export default class Governance {
     }))
   }
 
-  /** Gets all vote update events on any proposal by addresses */
   async getVoteUpdatesByAddress(
     addresses: Address[],
     queryStartBlock: number = QUERY_PROPOSAL_START_BLOCK
@@ -234,8 +227,6 @@ export default class Governance {
     return quorumAmount
   }
 
-  /* -------------------- Governance Write -------------------- */
-
   async submitProposal(args: {
     targetContractName: string
     functionSignature: string
@@ -243,7 +234,6 @@ export default class Governance {
     name: string
     description: string
   }) {
-    // Current callValue is always 0. Changing this is unsupported.
     const proposal = {
       targetContractRegistryKey:
         this.aud.libs.ethWeb3Manager.web3.utils.utf8ToHex(
@@ -293,16 +283,11 @@ export default class Governance {
     await this.getContract().evaluateProposalOutcome(proposalId)
   }
 
-  // Helpers
-
   getContract() {
     return this.aud.libs.ethContracts.GovernanceClient
   }
 }
 
-/* Helpers */
-
-// Maps from index (proposal outcome raw value) to Outcome
 const proposalOutcomeArr = [
   Outcome.InProgress,
   Outcome.Rejected,
@@ -315,7 +300,6 @@ const proposalOutcomeArr = [
   Outcome.TargetContractCodeHashChanged
 ]
 
-// Create a proposal from a RawProposal
 const formatProposal = (proposal: RawProposal): Proposal => {
   const outcome = proposalOutcomeArr[proposal.outcome]
   return {
@@ -333,7 +317,6 @@ const formatVote = (rawVote: 0 | 1 | 2): Vote | undefined => {
   return voteMap[rawVote]
 }
 
-// Create a VoteEvent from a RawVoteEvent
 const formatVoteEvent = (voteEvent: RawVoteEvent): VoteEvent | undefined => {
   const vote = formatVote(voteEvent.vote)
   if (!vote) return undefined
@@ -343,7 +326,6 @@ const formatVoteEvent = (voteEvent: RawVoteEvent): VoteEvent | undefined => {
   }
 }
 
-// Create a RawVote (number) from Vote (string enum)
 const createRawVote = (vote: Vote): 1 | 2 => {
   const voteMap = {
     [Vote.No]: 1,

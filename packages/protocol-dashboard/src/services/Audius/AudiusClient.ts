@@ -60,14 +60,13 @@ export class AudiusClient {
   walletAccountLoadedPromise: undefined | Promise<string>
   _metaMaskAccountLoadedResolve: undefined | ((account: string | null) => void)
 
-  isSetup = false // If the setup is complete
-  isMetaMaskAccountLoaded = false // If we're done trying to load the metamask account
-  hasValidAccount = false // If metamask is set up correctly
-  isAccountMisconfigured = false // If metamask is present and account is not connected
-  isMisconfigured = false // If metamask is present and misconfigured (wrong network)
-  isViewOnly = false // If metamask is not present
+  isSetup = false
+  isMetaMaskAccountLoaded = false
+  hasValidAccount = false
+  isAccountMisconfigured = false
+  isMisconfigured = false
+  isViewOnly = false
 
-  // Class helpers
   hasPermissions = hasPermissions
   awaitSetup = awaitSetup
 
@@ -75,10 +74,8 @@ export class AudiusClient {
   onSetupFinished = onSetupFinished
   onWalletAccountLoaded = onWalletAccountLoaded
 
-  // Wrapper functions
   getUserDelegates = getUserDelegates
 
-  // Util Functions
   getEthBlockNumber = getEthBlockNumber
   getEthWallet = getEthWallet
   getAverageBlockTime = getAverageBlockTime
@@ -87,7 +84,6 @@ export class AudiusClient {
   isEoa = isEoa
   toChecksumAddress = toChecksumAddress
 
-  // Static Util Functions
   static getBNPercentage = getBNPercentage
   static displayAud = displayAud
   static displayShortAud = displayShortAud

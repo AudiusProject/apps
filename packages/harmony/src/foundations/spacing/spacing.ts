@@ -1,10 +1,8 @@
 export const spacing = {
-  /* --- Base Unit Variables --- */
   unit: 4,
   unitHalf: 2,
   negativeUnit: -4,
 
-  /* --- 4*n Unit Variables --- */
   unit1: 4,
   unit2: 8,
   unit3: 12,
@@ -30,7 +28,6 @@ export const spacing = {
   unit23: 92,
   unit24: 96,
 
-  /* --- Spacing Variables --- */
   '2xs': 2,
   xs: 4,
   s: 8,

@@ -2,24 +2,12 @@ export type Maybe<T> = T | undefined
 export type Nullable<T> = T | null
 
 export interface Logger {
-  /**
-   * Write a 'info' level log.
-   */
   info: (message: any, ...optionalParams: any[]) => any
 
-  /**
-   * Write an 'error' level log.
-   */
   error: (message: any, ...optionalParams: any[]) => any
 
-  /**
-   * Write a 'warn' level log.
-   */
   warn: (message: any, ...optionalParams: any[]) => any
 
-  /**
-   * Write a 'debug' level log.
-   */
   debug?: (message: any, ...optionalParams: any[]) => any
 }
 
@@ -55,7 +43,6 @@ export type UserMetadata = {
   donation: Nullable<string>
   is_storage_v2: boolean
   location: Nullable<string>
-  // this should be removed
   is_creator: boolean
   name: string
   playlist_count: number
@@ -69,7 +56,6 @@ export type UserMetadata = {
   primary_id: number
   secondary_ids: number[]
 
-  // Only present on the "current" account
   track_save_count?: number
   wallet?: string
 }
@@ -205,7 +191,6 @@ export type TrackMetadata = {
     }>
   }>
 
-  // Optional Fields
   is_invalid?: boolean
   stem_of?: {
     parent_track_id: ID
@@ -213,7 +198,6 @@ export type TrackMetadata = {
   cover_original_song_title?: Nullable<string>
   cover_original_artist?: Nullable<string>
 
-  // Added fields
   dateListened?: string
   duration: number
 
@@ -267,10 +251,6 @@ export type CollectionMetadata = {
   parental_warning_type?: Nullable<string>
 }
 
-/**
- * Used for upload functions, as those won't need these fields.
- * They are populated upon successful upload.
- */
 export type UploadTrackMetadata = Omit<
   TrackMetadata,
   | 'preview_cid'

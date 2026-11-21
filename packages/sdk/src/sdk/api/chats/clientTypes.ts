@@ -10,8 +10,6 @@ import {
   ChatBlastAudience
 } from './serverTypes'
 
-// REQUEST PARAMETERS
-
 export const ChatGetAllRequestSchema = z.object({
   userId: z.string(),
   limit: z.optional(z.number()),

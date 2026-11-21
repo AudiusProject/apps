@@ -50,7 +50,6 @@ const filterNodes = (
   return dpNodes
 }
 
-// -------------------------------- Selectors  --------------------------------
 export const getStatus = (state: AppState) =>
   state.cache.discoveryProvider.status
 export const getTotal = (state: AppState) => state.cache.discoveryProvider.total
@@ -64,8 +63,6 @@ export const getFilteredNodes =
     const nodes = getNodes(state)
     return filterNodes(nodes, { owner, sortBy, limit })
   }
-
-// -------------------------------- Helpers  --------------------------------
 
 const processDP = async (
   node: Node,
@@ -92,9 +89,6 @@ const processDP = async (
   }
 }
 
-// -------------------------------- Thunk Actions  --------------------------------
-
-// Async function to get
 export function fetchDiscoveryProviders(): ThunkAction<
   void,
   AppState,
@@ -137,7 +131,6 @@ export function fetchDiscoveryProviders(): ThunkAction<
   }
 }
 
-// Async function to get
 export function getDiscoveryProvider(
   spID: number,
   setStatus?: (status: Status) => void
@@ -163,8 +156,6 @@ export function getDiscoveryProvider(
     if (setStatus) setStatus(Status.Success)
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useDiscoveryProviders = ({
   owner,

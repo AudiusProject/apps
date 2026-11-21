@@ -13,7 +13,7 @@ const SENDER_ATTESTATION_PREFIX_BYTES = encoder.encode(
 
 export class SenderAttestationLayout extends Layout<SenderAttestation> {
   constructor(property?: string) {
-    super(55, property) // 3 ('add') + 32 (pubkey) + 20 (ethAddress)
+    super(55, property)
   }
 
   decode(b: Uint8Array, offset?: number): SenderAttestation {

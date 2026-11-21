@@ -17,11 +17,17 @@ const styles = StyleSheet.create({
 })
 
 export type LoadingSpinnerProps = {
+  /**
+   * @deprecated The color of the spinner
+   */
   color?: string
   fill?: string
   style?: StyleProp<ViewStyle>
 }
 
+/**
+ * @deprecated Use the harmony-native LoadingSpinner component instead
+ */
 const LoadingSpinner = (props: LoadingSpinnerProps) => {
   const { neutralLight4 } = useThemeColors()
   const color = props.color ?? props.fill ?? neutralLight4

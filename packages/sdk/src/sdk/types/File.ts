@@ -67,7 +67,6 @@ const getFileType = async (file: CrossPlatformFile) => {
     if (file.type) {
       return { mime: file.type }
     }
-    // Loaded on demand so browser and native bundles don't evaluate it
     const fileTypeNode: any = await import('file-type')
     const { fromBuffer } =
       'fromBuffer' in fileTypeNode ? fileTypeNode : fileTypeNode.default

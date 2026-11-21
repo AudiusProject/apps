@@ -42,9 +42,6 @@ export class HedgehogWalletNotFoundError extends Error {
 export function createHedgehogWalletClient(
   hedgehog: HedgehogLike
 ): AudiusWalletClient {
-  // Gets the local privateKeyAccount for the Hedgehog wallet.
-  // Unfortunately, Hedgehog loads the wallet asynchronously from storage,
-  // so we can't have the account already initialized on start.
   let account_: AudiusAccount | undefined
   const getAccount = async () => {
     await hedgehog.waitUntilReady()
@@ -59,29 +56,23 @@ export function createHedgehogWalletClient(
     return account_
   }
 
-  // Init the client as though we have an account
   const client = createClient<CustomTransport, undefined, AudiusAccount>({
     name: 'hedgehog',
     type: 'audius',
     transport: custom(localTransport())
   })
 
-  // Set the account lazily, without making this method async
   getAccount()
     .then((account) => {
       client.account = account
     })
     .catch((e) => {
       if (e instanceof HedgehogWalletNotFoundError) {
-        // Do nothing - to be expected if the user is not logged in yet.
-        // Throw only if they actually try to do something without a wallet.
         return
       }
       throw e
     })
 
-  // Custom implements each action to inject the account asynchronously, since
-  // Hedgehog needs to make the async calls to storage to restore wallets.
   return client.extend((client) => ({
     getAddresses: async () => {
       client.account = await getAccount()

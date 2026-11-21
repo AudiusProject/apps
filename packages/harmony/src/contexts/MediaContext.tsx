@@ -5,26 +5,22 @@ import { useMedia as useMediaQuery } from 'react-use'
 import { breakpoints } from '../foundations/breakpoints'
 
 export type MediaContextType = {
-  // Specific size breakpoint checks
-  isExtraSmall: boolean // <= 480px
-  isSmall: boolean // <= 768px
-  isMedium: boolean // <= 1024px
-  isLarge: boolean // <= 1280px
-  isExtraLarge: boolean // <= 1440px
+  isExtraSmall: boolean
+  isSmall: boolean
+  isMedium: boolean
+  isLarge: boolean
+  isExtraLarge: boolean
 
-  // Specific "larger than" checks
-  isAboveExtraSmall: boolean // > 480px
-  isAboveSmall: boolean // > 768px
-  isAboveMedium: boolean // > 1024px
-  isAboveLarge: boolean // > 1280px
-  isAboveExtraLarge: boolean // > 1440px
+  isAboveExtraSmall: boolean
+  isAboveSmall: boolean
+  isAboveMedium: boolean
+  isAboveLarge: boolean
+  isAboveExtraLarge: boolean
 
-  // Common device categories
-  isMobile: boolean // <= 768px
-  isTablet: boolean // > 768px and <= 1024px
-  isDesktop: boolean // > 1024px
+  isMobile: boolean
+  isTablet: boolean
+  isDesktop: boolean
 
-  // Utility function for custom queries
   matchesQuery: (query: string) => boolean
 }
 
@@ -39,7 +35,6 @@ type MediaProviderProps = {
  * available throughout the app via context.
  */
 export const MediaProvider = ({ children }: MediaProviderProps) => {
-  // Use react-use's useMedia hook for each breakpoint query
   const isExtraSmall = useMediaQuery(breakpoints.down.xs)
   const isSmall = useMediaQuery(breakpoints.down.sm)
   const isMedium = useMediaQuery(breakpoints.down.md)
@@ -52,12 +47,10 @@ export const MediaProvider = ({ children }: MediaProviderProps) => {
   const isAboveLarge = useMediaQuery(breakpoints.up.lg)
   const isAboveExtraLarge = useMediaQuery(breakpoints.up.xl)
 
-  // Derived properties
-  const isMobile = isSmall // <= 768px
-  const isTablet = !isSmall && !isAboveMedium // > 768px and <= 1024px
-  const isDesktop = isAboveMedium // > 1024px
+  const isMobile = isSmall
+  const isTablet = !isSmall && !isAboveMedium
+  const isDesktop = isAboveMedium
 
-  // Utility function for custom queries
   const matchesQuery = (query: string) => {
     return window.matchMedia(query).matches
   }

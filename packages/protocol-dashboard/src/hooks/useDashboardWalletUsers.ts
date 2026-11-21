@@ -55,7 +55,6 @@ export const useDashboardWalletUser = (wallet: string) => {
         return res ?? null
       } else {
         try {
-          // Try to get Safe address info and if nothing is found, return null
           const { owners } = await safeService.getSafeInfo(wallet)
           for (const owner of owners) {
             const res = await dashboardWalletUsersBatcher.fetch(owner)

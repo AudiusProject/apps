@@ -17,6 +17,11 @@ export enum FrostedSurfaceIntensity {
   STRONG = 'strong'
 }
 
+/**
+ * @deprecated Use ThemePalette + ThemeMode. Legacy theme enum.
+ * - LIGHT/DARK/AUTO = mode (map to ThemeMode)
+ * - MATRIX = palette (map to ThemePalette.MATRIX)
+ */
 export enum Theme {
   DARK = 'dark',
   AUTO = 'auto',

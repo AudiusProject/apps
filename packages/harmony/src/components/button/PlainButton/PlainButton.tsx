@@ -22,7 +22,6 @@ export const PlainButton = forwardRef<HTMLButtonElement, PlainButtonProps>(
     const isDisabled = disabled || baseProps.isLoading
     const { color, spacing, typography } = useTheme()
 
-    // Size Styles
     const defaultStyles: CSSObject = {
       gap: spacing.xs,
       height: spacing.unit4,
@@ -94,8 +93,6 @@ export const PlainButton = forwardRef<HTMLButtonElement, PlainButtonProps>(
 
     const iconCss = size === 'large' ? largeIconStyles : defaultIconStyles
 
-    // When using asChild, we don't want to wrap a span around the children
-    // as it can mess up links with icons
     return (
       <BaseButton
         ref={ref}

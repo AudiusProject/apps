@@ -10,6 +10,7 @@ import {
 import { Nullable } from '../../../utils'
 
 export type ThemeState = {
+  /** @deprecated Use themePalette + themeMode. Legacy - when MATRIX, palette is matrix. */
   theme: Nullable<Theme>
   themePalette: Nullable<ThemePalette>
   themeMode: Nullable<ThemeMode>

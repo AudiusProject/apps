@@ -20,7 +20,6 @@ function decreaseStake(
     try {
       await aud.ServiceProviderClient.decreaseStake()
 
-      // Repull for user information and pending transactions
       const state = getState()
       const wallet = getAccountWallet(state)
       if (wallet) await dispatch(fetchUser(wallet))
@@ -46,7 +45,6 @@ function updateOperatorCut(
       if (!wallet) throw new Error('Not signed in')
       await aud.ServiceProviderClient.updateDeployerCut(wallet)
 
-      // Repull for user information and pending transactions
       await dispatch(fetchUser(wallet))
       await dispatch(fetchPendingTransactions(wallet))
 
@@ -68,7 +66,6 @@ function undelegate(
     try {
       await aud.Delegate.undelegateStake()
 
-      // Repull for user information and pending transactions
       const state = getState()
       const wallet = getAccountWallet(state)
       if (wallet) await dispatch(fetchUser(wallet))
@@ -96,7 +93,6 @@ function removeDelegator(
       if (!wallet) throw new Error('Delegator wallat not provided')
       await aud.Delegate.removeDelegator(accountWallet, wallet)
 
-      // Repull for user information and pending transactions
       await dispatch(fetchUser(wallet))
       await dispatch(fetchUser(accountWallet))
       await dispatch(fetchPendingTransactions(accountWallet))

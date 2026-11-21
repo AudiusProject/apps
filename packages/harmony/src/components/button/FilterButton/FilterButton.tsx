@@ -25,10 +25,8 @@ import { IconCaretDown, IconCloseAlt, IconSearch } from '~harmony/icons'
 import { OptionsList } from './FilterButtonOptionsList'
 import { FilterButtonProps } from './types'
 
-// Lazy so react-virtualized only loads when a virtualized menu opens.
 const VirtualizedOptionsList = lazy(() =>
   import('./FilterButtonVirtualizedOptionsList').then((m) => ({
-    // Cast restores the generic signature that lazy() drops.
     default: m.VirtualizedOptionsList as typeof m.VirtualizedOptionsList
   }))
 ) as typeof import('./FilterButtonVirtualizedOptionsList').VirtualizedOptionsList
@@ -84,7 +82,6 @@ export const FilterButton = forwardRef(function FilterButton<
   const optionRefs = useRef<HTMLButtonElement[]>([])
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
-  // Size Styles
   const defaultStyles: CSSObject = {
     paddingLeft: spacing.m,
     paddingRight: spacing.m,
@@ -126,7 +123,6 @@ export const FilterButton = forwardRef(function FilterButton<
     transform: 'none'
   }
 
-  // Button Styles
   const buttonCss: CSSObject = {
     background: color.background.white,
     border: `1px solid ${color.border.strong}`,
@@ -202,7 +198,6 @@ export const FilterButton = forwardRef(function FilterButton<
 
   useEffect(() => {
     if (isOpen) {
-      // Focus the input after the popup is open
       setTimeout(() => {
         inputRef.current?.focus({ preventScroll: true })
       }, 0)

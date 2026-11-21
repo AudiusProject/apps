@@ -1,13 +1,6 @@
 'use strict'
 const models = require('../../src/models')
 
-/**
- * Update the `UserNotificationBrowserSettings` table to add column `remixes`
- * Update the `UserNotificationMobileSettings` table to add column `remixes`
- * Update the enum `enum_Notifications_type` used in table `Notifications` column `type`
- *   Add the values `RemixCreate` and `RemixCosign`
- */
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
@@ -63,7 +56,6 @@ module.exports = {
     ]
 
     return queryInterface.sequelize.transaction(async (transaction) => {
-      // Create a copy of the type
       await queryInterface.removeColumn(
         'UserNotificationBrowserSettings',
         'remixes',
@@ -87,7 +79,6 @@ module.exports = {
         `,
         { transaction }
       )
-      // Change column type to the new ENUM TYPE
       await queryInterface.sequelize.query(
         `
         ALTER TABLE "${tableName}"
@@ -97,14 +88,12 @@ module.exports = {
       `,
         { transaction }
       )
-      // Drop old ENUM
       await queryInterface.sequelize.query(
         `
         DROP TYPE "${enumName}"
       `,
         { transaction }
       )
-      // Rename new ENUM name
       await queryInterface.sequelize.query(
         `
         ALTER TYPE "${newEnumName}"

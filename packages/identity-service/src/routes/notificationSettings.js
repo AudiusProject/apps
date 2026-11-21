@@ -8,11 +8,6 @@ const models = require('../models')
 const authMiddleware = require('../authMiddleware')
 
 module.exports = function (app) {
-  /**
-   * Updates fields for a user's settings (or creates the settings w/ db defaults if not created)
-   * postBody: {object} settings      Identitifies if the notification is to be marked as read
-   *
-   */
   app.post(
     '/notifications/settings',
     authMiddleware,
@@ -35,9 +30,6 @@ module.exports = function (app) {
       }
     })
   )
-  /**
-   * Fetches the settings for a given userId
-   */
   app.get(
     '/notifications/settings',
     authMiddleware,

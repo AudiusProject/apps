@@ -41,7 +41,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const isSmallOrXs = size === 'small' || size === 'xs'
 
-    // Size Styles
     const smallStyles: CSSObject = {
       gap: spacing.xs,
       height: size === 'xs' ? spacing.unit7 : spacing.unit8,
@@ -89,7 +88,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       height: spacing.unit6
     }
 
-    // Variant Styles
     const primaryStyles: CSSObject = {
       '&:hover': { color: themeColors.static.white },
 

@@ -60,7 +60,6 @@ const HoverCardComponent = ({
     setIsClicked
   } = useHoverDelay(mouseEnterDelay, triggeredBy)
 
-  // Call onHover callback when hover state changes
   useEffect(() => {
     onHover?.(isVisible)
   }, [isVisible, onHover])

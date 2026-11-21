@@ -56,7 +56,6 @@ module.exports = function (app) {
           url: 'https://api.stripe.com/v1/crypto/onramp_sessions',
           method: 'POST',
           headers: {
-            // Required form-urlencoded for the Stripe API
             'Content-Type': 'application/x-www-form-urlencoded',
             ...createAuthHeader()
           },

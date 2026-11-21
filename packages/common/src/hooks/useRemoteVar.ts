@@ -12,6 +12,7 @@ import {
 import { useHasConfigLoaded } from './helpers'
 import { useRecomputeToggle } from './useFeatureFlag'
 
+/** @deprecated Use `useRemoteVar` directly instead */
 export const createUseRemoteVarHook = ({
   remoteConfigInstance,
   useHasConfigLoaded

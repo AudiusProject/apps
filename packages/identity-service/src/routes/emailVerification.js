@@ -17,10 +17,6 @@ const {
 const WEBSITE_HOST = config.get('websiteHost') || 'https://audius.co'
 
 module.exports = function (app) {
-  /**
-   * Verify an email address using a token from the verification email.
-   * On success, redirects to the app with a status query param.
-   */
   app.get('/email/verify', async (req, res) => {
     const token = typeof req.query.token === 'string' ? req.query.token : null
     const redirectTo = (status) =>
@@ -61,10 +57,6 @@ module.exports = function (app) {
     }
   })
 
-  /**
-   * Resend the verification email for the authenticated user.
-   * Generates a new token, invalidating any previous one.
-   */
   app.post(
     '/email/resend-verification',
     authMiddleware,

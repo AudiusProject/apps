@@ -19,18 +19,12 @@ export * from './sdk'
 export const sdk = (config: SdkConfig): AudiusSdk => {
   const tokenStore = new TokenStoreAsyncStorage()
 
-  // `let` with a definite-assignment assertion is required here because
-  // defaultOpenUrl closes over sdkInstance, which is assigned on the very
-  // next line. login() can only be called after sdk() returns, so
-  // sdkInstance is always initialised before defaultOpenUrl is invoked.
   // eslint-disable-next-line prefer-const
   let sdkInstance!: AudiusSdk
 
   const defaultOpenUrl = async (url: string) => {
     let WebBrowser: any
     try {
-      // Use require() instead of dynamic import() so Metro can resolve the
-      // module statically via extraNodeModules / resolveRequest at bundle time.
       WebBrowser = require('expo-web-browser')
     } catch (error) {
       const message =

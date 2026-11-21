@@ -6,10 +6,6 @@ export class Reactions extends Base {
     this.submitReaction = this.submitReaction.bind(this)
   }
 
-  /**
-   * Submit a user's reaction, represented by a numberic ID,
-   * to an entity e.g. a notification for a received tip.
-   */
   async submitReaction({
     reactedTo,
     reactionValue,

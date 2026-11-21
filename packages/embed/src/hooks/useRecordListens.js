@@ -5,7 +5,6 @@ import { recordListen } from '../util/BedtimeClient'
 export const useRecordListens = (
   position,
   listenId,
-  /** the encoded track id (i.e. the hash id) */
   trackId,
   listenThresholdSec
 ) => {

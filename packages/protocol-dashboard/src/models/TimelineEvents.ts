@@ -14,8 +14,6 @@ import {
 } from 'services/Audius/service-provider/types'
 import { Address, ProposalEvent, VoteEvent } from 'types'
 
-/* ServiceProvider Events */
-
 export type ServiceProviderRegisteredEvent =
   GetRegisteredServiceProviderEventsResponse & {
     _type: 'ServiceProviderRegistered'
@@ -31,7 +29,6 @@ export type ServiceProviderIncreaseStakeEvent =
     _type: 'ServiceProviderIncreaseStake'
   }
 
-/** Decrease Stake Event, in requested | cancelled | evaluated phases */
 export type ServiceProviderDecreaseStakeEvent = {
   _type: 'ServiceProviderDecreaseStake'
   blockNumber: number
@@ -52,9 +49,6 @@ export type ServiceProviderDecreaseStakeEvent = {
       }
 }
 
-/* Delegate Client events */
-
-/** Increase Delegation Event, from Received and Sent directions */
 export type DelegateIncreaseStakeEvent =
   GetIncreaseDelegateStakeEventsResponse & {
     _type: 'DelegateIncreaseStake'
@@ -93,8 +87,6 @@ export type DelegateRemovedEvent = GetDelegatorRemovedEventsResponse & {
   _type: 'DelegateRemoved'
 }
 
-/* Governance Events */
-
 export type GovernanceVoteEvent = VoteEvent & {
   _type: 'GovernanceVote'
 }
@@ -107,13 +99,9 @@ export type GovernanceProposalEvent = ProposalEvent & {
   _type: 'GovernanceProposal'
 }
 
-/* Claim Events */
-
 export type ClaimProcessedEvent = GetClaimProcessedResponse & {
   _type: 'ClaimProcessed'
 }
-
-/* Combined Events */
 
 export type TimelineEvent =
   | ServiceProviderRegisteredEvent

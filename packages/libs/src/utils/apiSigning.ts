@@ -6,7 +6,6 @@ import Web3 from '../LibsWeb3'
 
 const web3Instance = new Web3()
 
-// From https://github.com/AudiusProject/sig/blob/main/node/index.js
 export async function hashAndSign(input: string, privateKey: string) {
   const toSignHash = web3Instance.utils.keccak256(input)
   const signedMessage = await web3Instance.eth.accounts.sign(
@@ -21,10 +20,6 @@ interface WalletResponse {
   signer: string
 }
 
-/**
- * Recover the public wallet address given the response contains the signature and timestamp
- * @param {object} response entire service provider response (not axios)
- */
 export function recoverWallet(web3: Web3Type, response: WalletResponse) {
   let recoveredDelegateWallet = null
 
@@ -50,9 +45,6 @@ export function recoverWallet(web3: Web3Type, response: WalletResponse) {
 type ValueOrArray<T> = undefined | string | number | T | Array<ValueOrArray<T>>
 type SortObject = ValueOrArray<Record<string, string | number>>
 
-/**
- * Recursively sorts object keys alphabetically
- */
 export function sortObjectKeys(x: SortObject): SortObject {
   if (typeof x !== 'object' || !x) {
     return x

@@ -4,9 +4,6 @@ import clsx from 'clsx'
 
 import styles from './InlineStat.module.css'
 
-/**
- * Inline stat item, used on a `StatChip`.
- */
 const InlineStat = ({
   className,
   label,

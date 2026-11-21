@@ -108,10 +108,7 @@ const WaitingTransaction: React.FC<WaitingTransactionProps> = (props) => {
       cancelTransaction()
     }
   }, [name, target, cancelTransaction])
-  const { timeRemaining } = useTimeRemaining(
-    props.lockupExpiryBlock,
-    0 /* period - 0 because lockupExpiry has time period baked in */
-  )
+  const { timeRemaining } = useTimeRemaining(props.lockupExpiryBlock, 0)
 
   return (
     <div
@@ -217,7 +214,6 @@ const ReadyTransaction: React.FC<ReadyTransactionProps> = (props) => {
     }
   }, [name, target, cancelTransaction])
 
-  // Disable complete undelegation from operator if operator has a pending claim
   const { hasClaim, status: claimStatus } = usePendingClaim(
     props.name === PendingTransactionName.Undelegate ? props.target : ''
   )

@@ -21,6 +21,7 @@ type ProfileCardProps = Partial<Omit<BaseProfileCardProps, 'onPress'>> & {
   onPress?: (id: ID) => void
 }
 
+// @deprecated -- use UserCard instead
 export const ProfileCard = (props: ProfileCardProps) => {
   const { profile, preventNavigation, onPress, ...other } = props
   const { user_id, handle } = profile

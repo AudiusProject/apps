@@ -62,7 +62,6 @@ const OperatorCutModal: React.FC<OperatorCutModalProps> = ({
     updateOperatorCut(operatorCutNumber)
   }, [updateOperatorCut, operatorCutNumber])
 
-  // Close All modals on success status
   useEffect(() => {
     if (status === Status.Success) {
       onCloseConfirm()

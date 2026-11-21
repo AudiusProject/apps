@@ -22,7 +22,6 @@ export function undelegateAudiusStake(
     try {
       await aud.Delegate.requestUndelegateStake(address, amount)
 
-      // Repull pending transactions
       const state = getState()
       const wallet = getAccountWallet(state)
       if (wallet) await dispatch(fetchPendingTransactions(wallet))

@@ -24,7 +24,6 @@ interface TotalClaimableVars {
   id: string
 }
 
-// -------------------------------- Hooks  --------------------------------
 export const useTotalStaked = () => {
   const { error: gqlError, data: gqlData } = useQuery<
     TotalClaimable,

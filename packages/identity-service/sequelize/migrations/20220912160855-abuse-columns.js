@@ -43,7 +43,6 @@ module.exports = {
         { transaction }
       )
 
-      // Safe to drop this now since we've moved users
       await queryInterface.removeColumn('Users', 'isAbusive', { transaction })
       await queryInterface.removeColumn('Users', 'isAbusiveErrorCode', {
         transaction

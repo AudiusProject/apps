@@ -14,17 +14,14 @@ export const formatStake = (stake: number) => {
   return formatNumber(stake)
 }
 
-// Format deployer cut
 export const formatDeployerCut = (cut: number) => {
   return (cut * 100).toFixed(2)
 }
 
-// Formats a weight
 export const formatWeight = (weight: number) => {
   return (weight * 100).toFixed(0)
 }
 
-// Format a number with commas
 export const formatNumber = (num: number | BN) => {
   const parts = num.toString().split('.')
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
@@ -37,20 +34,10 @@ export const formatAudString = (num: string) => {
   return parts.join('.')
 }
 
-/**
- * Format a number with thousands abbreviations for shotened display
- * ie. formatShortNumber(1010) => 1k
- * @param {number} num
- */
 export const formatShortNumber = (num: number) => {
   return numeral(num).format('0a')
 }
 
-/**
- * Format a wallet into the shorted form for display with an optional digit after
- * the decimal place
- * @param {number} num
- */
 export const formatShortNumberWithDecimal = (num: number) => {
   return numeral(num).format('0[.]0a')
 }
@@ -59,10 +46,6 @@ export const formatShortWallet = (wallet: Address) => {
   return `${wallet.slice(0, 6)}...${wallet.slice(wallet.length - 5)}`
 }
 
-/**
- * Format a BN to the shortened $audio currency
- * @param {BN} amount
- */
 export const formatAud = (amount: BN | null) => {
   if (!BN.isBN(amount as any)) return ''
   let aud = (amount as BN).div(new BN('1000000000000000000')).toString()
@@ -82,10 +65,6 @@ export const formatWei = (amount: BN | null) => {
   return `${aud} ${TICKER}`
 }
 
-/**
- * Format a number to have commas
- * @param num string
- */
 export const formatNumberCommas = (num: string) => {
   const parts = num.toString().split('.')
   return (

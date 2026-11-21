@@ -322,7 +322,6 @@ export class ClaimableTokensProgram {
     newAuthority,
     tokenProgramId = TOKEN_PROGRAM_ID
   }: SetClaimableTokensAuthoritySignedData & { tokenProgramId?: PublicKey }) {
-    // Only the data is used, so the current authority is irrelevant
     const tokenInstructionData = createSetAuthorityInstruction(
       userBank,
       userBank,

@@ -2,8 +2,6 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    // This migration requires each enum add in it's own query, otherwise Sequelize complains
-    // that this can't be performed within a transaction
     return queryInterface.sequelize
       .query(`ALTER TYPE "enum_SolanaNotifications_type" ADD VALUE 'TipSend'`)
       .then(() =>
@@ -46,9 +44,6 @@ module.exports = {
         { transaction }
       )
 
-      // Recreate the old enum:
-
-      // Create a new enum
       await queryInterface.sequelize.query(
         `
         CREATE TYPE "enum_SolanaNotifications_type_new"
@@ -57,7 +52,6 @@ module.exports = {
         { transaction }
       )
 
-      // Set the column to the new enum
       await queryInterface.sequelize.query(
         `
         ALTER TABLE "SolanaNotifications"
@@ -68,7 +62,6 @@ module.exports = {
         { transaction }
       )
 
-      // Drop old enum
       await queryInterface.sequelize.query(
         `
         DROP TYPE "enum_SolanaNotifications_type";
@@ -76,7 +69,6 @@ module.exports = {
         { transaction }
       )
 
-      // Rename new enum
       await queryInterface.sequelize.query(
         `
         ALTER TYPE "enum_SolanaNotifications_type_new"

@@ -8,9 +8,7 @@ import { MenuContentProps, MenuProps } from '~harmony/components/internal/Menu'
 
 export type FilterButtonSize = 'default' | 'small'
 
-export type FilterButtonVariant =
-  | 'fillContainer' // When a value is present, the button will be in an active state and have a remove icon (default)
-  | 'replaceLabel' // Shows the value as the label of the button, but doesn't show an active state
+export type FilterButtonVariant = 'fillContainer' | 'replaceLabel'
 
 export type FilterButtonOptionType<Value extends string> = {
   value: Value

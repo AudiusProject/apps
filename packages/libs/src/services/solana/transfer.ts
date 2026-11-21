@@ -26,10 +26,6 @@ type DeriveTransferNonceAccountConfig = {
   claimableTokenProgramKey: PublicKey
 }
 
-/**
- * Derives the 'transfer nonce account' - the account which contains the nonce for transfers
- * and is used to prevent replay attacks
- */
 export const deriveTransferNonceAccount = async ({
   ethAddress,
   mintKey,
@@ -79,9 +75,6 @@ type GetAccountNonceParams = {
   claimableTokenProgramKey: PublicKey
 }
 
-/**
- * Retrieves the nonce account for transfers, if non-existant it returns 0
- */
 async function getAccountNonce({
   connection,
   ethAddress,
@@ -118,9 +111,6 @@ type TransferInstructionDataConfig = {
   nonce: BN
 }
 
-/**
- * Transfer wAUDIO between wallets on solana
- */
 class TransferInstructionData {
   target_pubkey: Buffer
   amount: BN
@@ -164,11 +154,6 @@ type TransferWAudioBalanceConfig = {
   nonceOffset?: number
 }
 
-/**
- * transferWAudioBalance transfers wrapped Audio from one generated solana account to another.
- * For it to work, you have to have the eth private key belonging to the eth public key
- * that generated the solana account
- */
 export async function transferWAudioBalance(args: TransferWAudioBalanceConfig) {
   const instructions = await createTransferInstructions(args)
   return await args.transactionHandler.handleTransaction({
@@ -209,55 +194,46 @@ export const createTransferInstructions = async ({
   })
 
   const accounts = [
-    // 0. `[sw]` Fee payer
     {
       pubkey: feePayerKey,
       isSigner: true,
       isWritable: false
     },
-    // 1. `[w]` Token acc from which tokens will be send (bank account)
     {
       pubkey: senderSolanaPubkey,
       isSigner: false,
       isWritable: true
     },
-    // 2. `[w]` Receiver token acc
     {
       pubkey: recipientPubkey,
       isSigner: false,
       isWritable: true
     },
-    // 3. `[w]` Nonce Account
     {
       pubkey: accountNonce,
       isSigner: false,
       isWritable: true
     },
-    // 4. `[r]` Banks token account authority
     {
       pubkey: claimableTokenPDA,
       isSigner: false,
       isWritable: false
     },
-    // 5. `[r]` Sysvar Rent id
     {
       pubkey: SYSVAR_RENT_PUBKEY,
       isSigner: false,
       isWritable: false
     },
-    // 6. `[r]` Sysvar instruction id
     {
       pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
       isSigner: false,
       isWritable: false
     },
-    // 7. `[r]` System program id
     {
       pubkey: SystemProgram.programId,
       isSigner: false,
       isWritable: false
     },
-    // 8. `[r]` SPL token account id
     {
       pubkey: solanaTokenProgramKey,
       isSigner: false,
@@ -265,7 +241,6 @@ export const createTransferInstructions = async ({
     }
   ]
 
-  // eth pubkey is different from the ethAddress - addresses are len 20, pub keys are len 64
   const ethPrivateKeyArr = Buffer.from(senderEthPrivateKey, 'hex')
   const ethPubkey = secp256k1.publicKeyCreate(ethPrivateKeyArr, false).slice(1)
 

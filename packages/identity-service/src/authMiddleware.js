@@ -60,12 +60,6 @@ const getManagedUser = async (
   }
 }
 
-/**
- * Authentication Middleware
- * 1) Using the `Encoded-Data-Message` & `Encoded-Data-Signature` header recover the wallet address
- * 2) If a user in the `Users` table with the `walletAddress` value, attach that user to the request
- * 3) Else query the discovery provider for the user's blockchain userId w/ the wallet address & attach to query
- */
 async function authMiddleware(req, res, next) {
   try {
     const encodedDataMessage = req.get('Encoded-Data-Message')
@@ -90,7 +84,6 @@ async function authMiddleware(req, res, next) {
         'handle'
       ]
     })
-    // We are managing someone else
     if (actingUserId && actingUserId !== user.blockchainUserId) {
       try {
         const actingUser = await getManagedUser(walletAddress, actingUserId, {
@@ -111,8 +104,6 @@ async function authMiddleware(req, res, next) {
           `[Error]: no user found for wallet address ${walletAddress}`
         )
 
-      // This overwrites any provisionally set handles (b/c blockchainUserId is never set with those),
-      // ensuring that the user.handle always represents the latest state on chain
       if (!user.blockchainUserId || !user.handle) {
         try {
           const res = await req.app.get('audiusSdk').users.getUserAccount({

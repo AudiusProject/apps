@@ -6,10 +6,6 @@ import type { Web3Manager } from '../web3Manager'
 import type { GetRegistryAddress } from './ContractClient'
 import { ContractClient } from './ContractClient'
 
-/**
- * Contract class that extends a ContractClient and provides an interface
- * to retrieve governed methods that cannot be executed directly.
- */
 export class GovernedContractClient extends ContractClient {
   governanceClient: GovernanceClient
 
@@ -31,11 +27,6 @@ export class GovernedContractClient extends ContractClient {
     this.governanceClient = governanceClient
   }
 
-  /**
-   * Gets a governed version of a method and allows a single transaction
-   * to be sent to the governance client with the appropriate payload.
-   * Similar to `getMethod`
-   */
   async getGovernedMethod(methodName: string, ...args: unknown[]) {
     const contractMethod = await this.getMethod(methodName, ...args)
     const { signature, callData } =

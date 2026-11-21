@@ -23,8 +23,6 @@ export const getLocation = async ({
     return {
       city,
       region,
-      // country from res is returned as ISO 2-alpha code and we want
-      // full english name.
       country: country_name
     }
   } catch (e) {

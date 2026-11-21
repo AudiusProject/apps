@@ -78,7 +78,6 @@ const VotesTable: React.FC<VotesTableProps> = ({ title, votes, className }) => {
         limit={10}
         renderRow={(data: VoteEvent) => <RenderRow data={data} />}
         alwaysShowMore
-        // Click handled by row component
         onClickMore={() => setIsModalOpen(true)}
         moreText={messages.more}
       />

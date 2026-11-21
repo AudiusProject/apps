@@ -10,7 +10,6 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
   default: mockAsyncStorage
 }))
 
-// Import after mock is registered
 const { TokenStoreAsyncStorage } = await import('./TokenStoreAsyncStorage')
 
 describe('TokenStoreAsyncStorage — AsyncStorage persistence', () => {

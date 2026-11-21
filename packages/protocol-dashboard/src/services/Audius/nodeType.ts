@@ -20,8 +20,6 @@ export default class NodeType {
     return this.aud.libs.ethContracts.ServiceTypeManagerClient
   }
 
-  /* -------------------- Service Type Manager Client Read -------------------- */
-
   async getValidServiceTypes(): Promise<GetValidServiceTypesResponse> {
     await this.aud.hasPermissions()
     const serviceTypes = await this.getContract().getValidServiceTypes()

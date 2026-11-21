@@ -128,9 +128,6 @@ export class OAuth {
       this._csrfToken = csrfToken
       this._pkceVerifier = codeVerifier
       this._pkceRedirectUri = resolvedRedirectUri
-      // Also persist to sessionStorage so the values survive a full-page redirect
-      // (which destroys the JS context). Popup and mobile flows use the instance
-      // properties above and never need the sessionStorage fallback.
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
         window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
@@ -302,7 +299,6 @@ export class OAuth {
   async isAuthenticated(): Promise<boolean> {
     const store = this.config.tokenStore
 
-    // If the refresh token is known-expired, the session is dead
     const refreshExpiry = await store.getRefreshTokenExpiry()
     if (refreshExpiry != null && Date.now() >= refreshExpiry) {
       return false
@@ -310,13 +306,11 @@ export class OAuth {
 
     const accessToken = await store.getAccessToken()
     if (!accessToken) {
-      // No access token but we may still have a valid refresh token
       return !!(await store.getRefreshToken())
     }
 
     const accessExpiry = await store.getAccessTokenExpiry()
     if (accessExpiry != null && Date.now() >= accessExpiry) {
-      // Access token expired — try a silent refresh
       const refreshed = await this.refreshAccessToken()
       return refreshed != null
     }
@@ -441,8 +435,6 @@ export class OAuth {
     this._clearPkceState()
   }
 
-  /* ------- INTERNAL FUNCTIONS ------- */
-
   /**
    * Exchange an authorization code + PKCE verifier for tokens and store them.
    * Shared by the popup `_receiveMessage` handler and `_handleRedirectResult`.
@@ -495,9 +487,6 @@ export class OAuth {
       queryParams.get('origin') ?? hashParams.get('origin') ?? parsed.origin
 
     if (!code || !state) {
-      // The server may redirect back with an error instead of a code
-      // (e.g. access_denied when the user cancels on the consent page).
-      // Settle the login promise so callers are not left hanging.
       const errorCode = queryParams.get('error') ?? hashParams.get('error')
       if (errorCode) {
         const errorDesc =
@@ -509,9 +498,6 @@ export class OAuth {
       return
     }
 
-    // If running inside a popup (opened by login on the parent page),
-    // forward the code + state back to the opener and close. The opener's
-    // _receiveMessage handler will do the exchange using its own verifier.
     if (typeof window !== 'undefined' && window.opener) {
       try {
         window.opener.postMessage({ code, state }, openerOrigin)
@@ -522,7 +508,6 @@ export class OAuth {
       return
     }
 
-    // Full-page redirect / mobile — handle the exchange locally
     const codeVerifier = this.pkceVerifier
     if (!codeVerifier) {
       this._settleLogin(
@@ -531,7 +516,6 @@ export class OAuth {
       return
     }
 
-    // Verify CSRF state
     if (this.csrfToken !== state) {
       this._clearPkceState()
       this._settleLogin(
@@ -549,7 +533,6 @@ export class OAuth {
 
     this._clearPkceState()
 
-    // Remove code/state from the URL to prevent stale bookmarks (web only)
     if (typeof window !== 'undefined' && window.history) {
       try {
         const cleanUrl = new URL(url)

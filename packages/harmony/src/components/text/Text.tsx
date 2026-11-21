@@ -30,21 +30,17 @@ const getColorCss = (color: TextProps['color'], theme: Theme) => {
   return { color: theme.color.text[color] }
 }
 
-// Check if text contains Unicode subscript characters
 const containsSubscripts = (children: any): boolean => {
   if (!children) return false
   const text = typeof children === 'string' ? children : String(children)
-  // Unicode subscript range: \u2080-\u2089 (₀-₉) and other subscript chars
   return /[\u2080-\u209F]/.test(text)
 }
 
-// Process children to replace Unicode subscripts with <sub> tags
 const processSubscripts = (children: any): any => {
   if (!children) return children
   if (typeof children === 'string') {
-    // Replace Unicode subscript characters with <sub> tags
     const parts = children.split(/([\u2080-\u209F]+)/)
-    if (parts.length === 1) return children // No subscripts found
+    if (parts.length === 1) return children
 
     return parts.map((part, index) => {
       if (/[\u2080-\u209F]/.test(part)) {
@@ -151,8 +147,6 @@ export const Text = forwardRef(
 
     const Tag: ElementType = asChild ? Slot : (tag ?? variantTag ?? 'span')
 
-    // Only convert Unicode subscripts to <sub> tags for body variants with default strength.
-    // Other variants/strengths render Unicode subscripts correctly without this conversion.
     const shouldProcessSubscripts =
       hasSubscripts &&
       variant === 'body' &&

@@ -4,7 +4,6 @@ import { TimelineEvent } from 'models/TimelineEvents'
 import { Address } from 'types'
 
 export type State = {
-  // Timeline events keyed by wallet
   timelines: { [wallet: string]: TimelineEvent[] }
 }
 

@@ -27,20 +27,15 @@ describe('Currency tests', function () {
     const onlyUsdcWei = (a: UsdcWei) => {
       return a === BigInt(1000000)
     }
-    // Throw for unexpected brand of bigint
     // @ts-expect-error
     onlyUsdcWei(AUDIO(1).value)
-    // Don't throw for USDC bigints
     onlyUsdcWei(USDC(1).value)
   })
 
   it('typechecks constructor bigint', function () {
-    // Throw for unexpected brand of bigint
     // @ts-expect-error
     USDC(BigInt(1) as AudioWei)
-    // Don't throw for raw bigint
     USDC(BigInt(2))
-    // Don't throw for correct bigint brand
     USDC(BigInt(3) as UsdcWei)
   })
 

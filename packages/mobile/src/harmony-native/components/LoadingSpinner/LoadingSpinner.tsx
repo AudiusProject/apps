@@ -17,6 +17,9 @@ const styles = StyleSheet.create({
 })
 
 export type LoadingSpinnerProps = {
+  /**
+   * @deprecated The color of the spinner
+   */
   color?: string
   fill?: string
   style?: StyleProp<ViewStyle>

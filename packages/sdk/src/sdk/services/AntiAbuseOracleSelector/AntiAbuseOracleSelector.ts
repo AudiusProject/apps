@@ -45,11 +45,9 @@ export class AntiAbuseOracleSelector implements AntiAbuseOracleSelectorService {
         return { url, init: context.init }
       },
       onError: async (context: ErrorContext) => {
-        // Reselect and retry on new healthy AAO
         const path = getPathFromUrl(context.url)
         this.selectedNode = null
         const newService = await this.getSelectedService()
-        // Use context.fetch to retry just once.
         return context.fetch(`${newService.endpoint}${path}`, context.init)
       }
     }

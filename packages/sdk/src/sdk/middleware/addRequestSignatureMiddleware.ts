@@ -12,8 +12,7 @@ import {
 } from '../services/AudiusWalletClient'
 import { ServicesContainer } from '../types'
 
-const SIGNATURE_EXPIRY_MS =
-  24 /* hr */ * 60 /* min */ * 60 /* sec */ * 1000 /* ms */ // 1 day
+const SIGNATURE_EXPIRY_MS = 24 * 60 * 60 * 1000
 const MESSAGE_HEADER = 'Encoded-Data-Message'
 const SIGNATURE_HEADER = 'Encoded-Data-Signature'
 
@@ -39,12 +38,9 @@ export const addRequestSignatureMiddleware = ({
   let appWalletClient: AudiusWalletClient | null = null
 
   const getSignature = async () => {
-    // Run this exclusively to prevent multiple requests from updating the signature at the same time
-    // and reverting to an older signature
     return mutex.runExclusive(async () => {
       const { audiusWalletClient, logger } = services
       try {
-        // Prefer signing with audiusWalletClient if provided
         if (apiSecret && !audiusWalletClient) {
           appWalletClient = createAppWalletClient({
             apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
@@ -77,17 +73,14 @@ export const addRequestSignatureMiddleware = ({
               message: m
             })) ?? null
 
-          // Cache the new signature and message
           message = m
           timestamp = currentTimestamp
         }
       } catch (e) {
-        // Don't keep sending a stale signature, e.g. after logout
         message = null
         signature = null
         signatureAddress = null
         timestamp = null
-        // Don't log a warning for HedgehogWalletNotFoundError as it's expected when user is logged out
         if (!(e instanceof HedgehogWalletNotFoundError)) {
           logger?.warn(`Unable to add request signature: ${e}`)
         }
@@ -98,7 +91,6 @@ export const addRequestSignatureMiddleware = ({
 
   return {
     pre: async (context: RequestContext): Promise<FetchParams> => {
-      // If request already has a signature, skip adding it
       const existingHeaders = context.init.headers as Record<string, string>
       if (
         existingHeaders[MESSAGE_HEADER] &&
@@ -109,7 +101,6 @@ export const addRequestSignatureMiddleware = ({
 
       const { message, signature } = await getSignature()
 
-      // Return the updated request with the signature in the headers
       return !!message && !!signature
         ? {
             ...context,

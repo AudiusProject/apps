@@ -3,17 +3,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Proposal, Outcome } from 'types'
 
 export type State = {
-  // Ordered array of active proposals
   activeProposals: Proposal[] | null
-  // Mapping of all proposals, keyed by proposal id
   allProposals: { [key: number]: Proposal }
-  // Recent proposals
   recentProposals: Proposal[] | null
-  // Ordered array recent proposals
   resolvedProposals: number[] | null
-  // Voting period to determine when votes are due
   votingPeriod: number | null
-  // Execution delay after voting period but before being able to execute a governance proposal
   executionDelay: number | null
 }
 

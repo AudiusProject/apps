@@ -25,6 +25,27 @@ type ModalDrawerProps = ModalProps &
       }
   )
 
+/**
+ * @deprecated Use ResponsiveModal from 'components/modal/ResponsiveModal' instead.
+ * This component will be removed in a future version.
+ *
+ * ModalDrawer was a transitional component that conditionally renders either a Modal or Drawer
+ * based on screen size. It has been superseded by ResponsiveModal which provides a more
+ * consistent API and better mobile/desktop experience.
+ *
+ * @example
+ * ```tsx
+ * // Old usage with ModalDrawer
+ * <ModalDrawer isOpen={isOpen} onClose={handleClose}>
+ *   <p>Content</p>
+ * </ModalDrawer>
+ *
+ * // New usage with ResponsiveModal
+ * <ResponsiveModal isOpen={isOpen} onClose={handleClose}>
+ *   <p>Content</p>
+ * </ResponsiveModal>
+ * ```
+ */
 const ModalDrawer = (props: ModalDrawerProps) => {
   if (process.env.NODE_ENV !== 'production') {
     console.warn(

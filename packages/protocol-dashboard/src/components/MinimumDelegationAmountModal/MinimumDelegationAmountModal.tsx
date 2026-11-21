@@ -67,7 +67,6 @@ const MinimumDelegationAmountModal: React.FC<
     updateMinimum(minDelegationBN)
   }, [updateMinimum, minDelegationBN])
 
-  // Close All modals on success status
   useEffect(() => {
     if (status === Status.Success) {
       onCloseConfirm()

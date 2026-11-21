@@ -42,19 +42,10 @@ export const parseWeiNumber = (number: string) => {
   }
 }
 
-/**
- * Divides $AUDIO in Wei into whole $AUDIO and casts to number
- * @param num
- */
 export const weiAudToAud = (num: BN) => {
   return num.div(WEI).toNumber()
 }
 
-/**
- * Computes the fraction between two BNs when they are
- * @param numerator
- * @param denominator
- */
 export const fraction = (numerator: BN, denominator: BN) => {
   return numerator.div(WEI).toNumber() / denominator.div(WEI).toNumber()
 }

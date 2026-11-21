@@ -34,16 +34,11 @@ export interface Timing {
   millis: number | null
 }
 
-/**
- * Fetches a url and times how long it took the request to complete.
- */
 async function timeRequest(
   request: Request,
   timeout?: number | null,
   headers?: object | null
 ): Promise<Timing> {
-  // This is non-perfect because of the js event loop, but enough
-  // of a proximation. Don't use for mission-critical timing.
   const startTime = new Date().getTime()
   const config: AxiosConfig = {}
   if (timeout !== null && timeout !== undefined) {
@@ -65,17 +60,9 @@ interface SortServiceTimingsConfig {
   serviceTimings: Timing[]
   sortByVersion: boolean
   currentVersion?: string | null
-  /*
-   *  the number of milliseconds at which we consider services to be equally as fast
-   *  and pick randomly between them. Default of null implies that the faster service
-   *  (even if by 1ms) will be picked always.
-   */
   equivalencyDelta?: number | null
 }
 
-/**
- * Custom sort for `serviceTimings`, the response from `timeRequest()` function above
- */
 function sortServiceTimings({
   serviceTimings,
   sortByVersion,
@@ -83,7 +70,6 @@ function sortServiceTimings({
   equivalencyDelta = null
 }: SortServiceTimingsConfig) {
   return serviceTimings.sort((a, b) => {
-    // If health check failed, send to back of timings
     if (a.response == null) return 1
     if (b.response == null) return -1
 
@@ -91,11 +77,9 @@ function sortServiceTimings({
     const bVersion = b.response.data.data.version
 
     if (sortByVersion) {
-      // Always sort by version desc
       if (semver.gt(aVersion, bVersion)) return -1
       if (semver.lt(aVersion, bVersion)) return 1
     } else if (!sortByVersion && currentVersion) {
-      // Only sort by version if behind current on-chain version
       if (
         semver.gt(currentVersion, aVersion) &&
         semver.gt(currentVersion, bVersion)
@@ -109,12 +93,9 @@ function sortServiceTimings({
       }
     }
 
-    // If same version and transcode queue load, do a tie breaker on the response time
-    // If the requests are near eachother (delta < equivalencyDelta), pick randomly
-
     const delta = (a.millis ?? 0) - (b.millis ?? 0)
     if (equivalencyDelta !== null && delta < equivalencyDelta) {
-      return 1 - 2 * Math.random() // [-1, 1]
+      return 1 - 2 * Math.random()
     }
     return delta
   })
@@ -124,23 +105,12 @@ interface TimeRequestsConfig {
   requests: Request[]
   sortByVersion?: boolean
   filterNonResponsive?: boolean
-  // current on-chain service version - only required if `sortByVersion` = false
   currentVersion?: string | null
-  // ms applied to each individual request
   timeout?: number | null
-  /*
-   *  the number of milliseconds at which we consider services to be equally as fast
-   *  and pick randomly between them. Default of null implies that the faster service
-   *  (even if by 1ms) will be picked always.
-   */
   equivalencyDelta?: number | null
   headers?: object | null
 }
 
-/**
- * Fetches multiple urls and times each request and returns the results sorted
- * first by version and then by lowest-latency.
- */
 async function timeRequests({
   requests,
   sortByVersion = false,
@@ -174,14 +144,6 @@ type RequestResponses =
   // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- this is a return type
   | void
 
-/**
- * Races multiple requests
- * @param urls
- * @param callback invoked with the first successful url
- * @param axiosConfig extra axios config for each request
- * @param timeout timeout for any requests to be considered bad
- * @param timeBetweenRequests time between requests being dispatched to free up client network interface
- */
 async function raceRequests(
   urls: string[],
   callback: (url: string) => void,
@@ -198,9 +160,6 @@ async function raceRequests(
     const source = CancelToken.source()
     sources.push(source)
 
-    // Slightly offset requests by their order, so:
-    // 1. We try creator node gateways first
-    // 2. We give requests the opportunity to get canceled if other's are very fast
     await Utils.wait(timeBetweenRequests * i)
     if (hasFinished) return
     return await new Promise<RequestResponses>((resolve, reject) => {
@@ -219,7 +178,6 @@ async function raceRequests(
               url
             })
           } else {
-            // Invalid because of validity check
             reject(response)
           }
         })
@@ -260,25 +218,11 @@ async function raceRequests(
 }
 
 interface AllRequestsConfig {
-  /*
-   * map of actual URL to hit (e.g. https://resource/endpoint)
-   * and identifying value (e.g. https://resource)
-   */
   urlMap: Record<string, Service>
-  /*
-   * timeout for any request to be considered bad
-   */
   timeout: number
-  /* a check invoked for each response.
-   *  If invalid, the response is filtered out.
-   *  (response: any) => boolean
-   */
   validationCheck: (_: AxiosResponse) => boolean
 }
 
-/**
- * Gets the response for many requests with a timeout to each
- */
 async function allRequests({
   urlMap,
   timeout,

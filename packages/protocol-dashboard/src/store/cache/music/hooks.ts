@@ -20,14 +20,10 @@ import {
 
 const AUDIUS_URL = import.meta.env.VITE_AUDIUS_URL
 
-// -------------------------------- Selectors  ---------------------------------
-
 export const getTopTracks = (state: AppState) => state.cache.music.topTracks
 export const getTopPlaylists = (state: AppState) =>
   state.cache.music.topPlaylists
 export const getTopAlbums = (state: AppState) => state.cache.music.topAlbums
-
-// -------------------------------- Thunk Actions  ---------------------------------
 
 export function fetchTopTracks(): ThunkAction<
   void,
@@ -109,8 +105,6 @@ export function fetchTopAlbums(): ThunkAction<
     }
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useTopTracks = () => {
   const [doOnce, setDoOnce] = useState(false)

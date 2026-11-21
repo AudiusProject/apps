@@ -55,7 +55,6 @@ describe('ClaimableTokensClient', () => {
       expect(ClaimableTokensProgram.isCreateAccountInstruction(decodedCreate))
       expect(decodedCreate.keys.authority.pubkey).toBeDefined()
 
-      // Secp256k1 instruction follows the create at index 3
       const decodedSecp = Secp256k1Program.decode(secp!)
       expect(Secp256k1Program.verifySignature(decodedSecp)).toBe(true)
       expect(decodedSecp.messageInstructionIndex).toBe(3)

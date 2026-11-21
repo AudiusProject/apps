@@ -28,7 +28,7 @@ type PlaylistParam = {
   playlist_id: number
   playlist_name: string
   artwork?: { file?: File; url?: string }
-  playlist_contents: { track_ids: PlaylistTrack[] } // number[] for playlist upload flow
+  playlist_contents: { track_ids: PlaylistTrack[] }
   cover_art_sizes: string
   description: string
   is_private: boolean
@@ -42,11 +42,6 @@ type PlaylistParam = {
   upc?: string | null
 }
 
-/*
-  API surface for updated data contract interactions.
-  Provides simplified entity management in a generic fashion
-  Handles metadata + file upload etc. for entities such as Playlist/Track/User
-*/
 export class EntityManager extends Base {
   private userId?: number
 
@@ -65,14 +60,10 @@ export class EntityManager extends Base {
     return this.userId
   }
 
-  /**
-   * Generate random integer between two known values
-   */
-
   mapTimestamps(addedTimestamps: PlaylistTrack[]) {
     const trackIds = addedTimestamps.map((trackObj) => ({
       track: trackObj.track,
-      time: trackObj.metadata_time ?? trackObj.time // default to time for legacy playlists
+      time: trackObj.metadata_time ?? trackObj.time
     }))
 
     return trackIds
@@ -86,7 +77,6 @@ export class EntityManager extends Base {
     }
   }
 
-  /** Social Features */
   createSocialMethod =
     (entityType: EntityType, action: Action) =>
     async (entityId: number, metadata = ''): Promise<EntityManagerResponse> => {
@@ -120,8 +110,6 @@ export class EntityManager extends Base {
     EntityType.PLAYLIST,
     Action.UNREPOST
   )
-
-  /** Playlist */
 
   async createPlaylist(
     playlist: PlaylistParam
@@ -277,10 +265,6 @@ export class EntityManager extends Base {
     }
   }
 
-  /**
-   * Manage an entity with the updated data contract flow
-   * Leveraged to manipulate User/Track/Playlist/+ other entities
-   */
   async manageEntity({
     userId,
     entityType,

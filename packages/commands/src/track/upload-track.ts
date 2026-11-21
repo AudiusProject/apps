@@ -46,7 +46,7 @@ function generateWhiteNoise(duration: number, outFile: string) {
       '-i', // input flag
       `anoisesrc=d=${duration}`, // generate a noise audio signal for the duration
       outFile, // output filepath
-      '-y' // overwrite existing file
+      '-y'
     ])
 
     let error = ''
@@ -237,7 +237,6 @@ export const uploadTrackCommand = new Command('upload')
 
     let trackStream
     if (track.startsWith('%')) {
-      // %filesize
       const match = track.match(/%(\d+)(.*)/)!
       let size = parseInt(match[1])
       let unit = match[2]
@@ -252,7 +251,6 @@ export const uploadTrackCommand = new Command('upload')
       await generateWhiteNoise(size / 8064, '/tmp/audius-cmd.mp3')
       trackStream = createReadStream('/tmp/audius-cmd.mp3')
     } else if (track.startsWith(':')) {
-      // :/path/to/track
       trackStream = createReadStream(track.slice(1))
     } else {
       throw new Error(`Failed to parse track "${track}"`)

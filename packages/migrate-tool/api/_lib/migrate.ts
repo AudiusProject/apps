@@ -4,16 +4,13 @@ import { getServerSDK } from './audius'
 import { getSupabase, TABLE } from './supabase'
 import type { DbRow, TrackResult } from './types'
 
-/**
- * Fetch a URL into a Blob with a reasonable timeout. Used for pulling the
- * old track's audio and artwork before re-uploading them to the new owner.
- */
 async function fetchBlob(url: string, timeoutMs = 90_000): Promise<Blob> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
     const res = await fetch(url, { signal: controller.signal })
-    if (!res.ok) throw new Error(`Fetch ${res.status} ${res.statusText} (${url})`)
+    if (!res.ok)
+      throw new Error(`Fetch ${res.status} ${res.statusText} (${url})`)
     return await res.blob()
   } finally {
     clearTimeout(timer)
@@ -31,7 +28,9 @@ function filenameFromUrl(url: string, fallback: string): string {
 }
 
 function blobToFile(blob: Blob, name: string): File {
-  return new File([blob], name, { type: blob.type || 'application/octet-stream' })
+  return new File([blob], name, {
+    type: blob.type || 'application/octet-stream'
+  })
 }
 
 type AudioCandidate = {
@@ -39,13 +38,6 @@ type AudioCandidate = {
   resolve: () => Promise<{ url: string; filename: string }>
 }
 
-/**
- * Build a prioritized list of source URLs for the track's audio. Each
- * candidate is tried in order, so a hard failure on the original (pruned
- * bytes, unhealthy node, missing index) silently falls through to the
- * next best source. The MP3 stream is always last so every track ends up
- * with at least *some* content copy.
- */
 function buildAudioCandidates(
   sdk: AudiusSdkWithServices,
   track: Track,
@@ -54,9 +46,6 @@ function buildAudioCandidates(
 ): AudioCandidate[] {
   const candidates: AudioCandidate[] = []
 
-  // 1. Original master via raw CID. Validator nodes serve content-addressed
-  //    files at /content/{cid} with no gating, so this works regardless of
-  //    isDownloadable. Tried first because it's a bit-for-bit copy.
   if (track.origFileCid && track.isOriginalAvailable !== false) {
     const cid = track.origFileCid
     candidates.push({
@@ -66,8 +55,6 @@ function buildAudioCandidates(
         if (nodes.length === 0) {
           throw new Error('No storage node available for original file CID.')
         }
-        // Pick the rendezvous-primary; the mirror candidate below handles
-        // failover when this fetch throws.
         return {
           url: `${nodes[0]}/content/${cid}`,
           filename: track.origFilename ?? cid
@@ -75,8 +62,6 @@ function buildAudioCandidates(
       }
     })
 
-    // Same CID, mirrors. Each mirror becomes its own candidate so a single
-    // unhealthy node doesn't take down the migration.
     candidates.push({
       label: `orig-cid-mirrors:${cid}`,
       resolve: async () => {
@@ -93,8 +78,6 @@ function buildAudioCandidates(
     })
   }
 
-  // 2. Gated download URL — only works for tracks the artist flagged as
-  //    downloadable, but the bytes are still the original master.
   if (isDownloadablePreview) {
     candidates.push({
       label: 'download-url',
@@ -105,8 +88,6 @@ function buildAudioCandidates(
     })
   }
 
-  // 3. Transcoded MP3 stream — always available, lossy. Ensures every
-  //    track migrates with *something* even if the original is gone.
   candidates.push({
     label: 'stream-url',
     resolve: async () => {
@@ -128,30 +109,19 @@ async function fetchAudio(
       const blob = await fetchBlob(url)
       return { blob, filename, source: candidate.label }
     } catch (e) {
-      errors.push(`${candidate.label}: ${e instanceof Error ? e.message : String(e)}`)
+      errors.push(
+        `${candidate.label}: ${e instanceof Error ? e.message : String(e)}`
+      )
     }
   }
   throw new Error(`No audio source succeeded. Tried: ${errors.join(' | ')}`)
 }
 
-/**
- * Run the migration for one DB row. Updates the row in-place with per-track
- * results as it goes, and sets the final status when done.
- *
- * Audio source order (see buildAudioCandidates): the original master via
- * raw CID, then mirrors, then the gated download URL (downloadable tracks
- * only), then the transcoded MP3 stream. Each candidate is tried until
- * one succeeds — guarantees every track migrates with the highest-fidelity
- * copy that's still reachable.
- */
 export async function executeMigration(row: DbRow): Promise<void> {
   const supabase = getSupabase()
   const sdk = getServerSDK()
 
-  await supabase
-    .from(TABLE)
-    .update({ status: 'running' })
-    .eq('id', row.id)
+  await supabase.from(TABLE).update({ status: 'running' }).eq('id', row.id)
 
   const results: TrackResult[] = row.tracks.map((t) => ({
     oldTrackId: t.trackId,
@@ -159,10 +129,7 @@ export async function executeMigration(row: DbRow): Promise<void> {
   }))
 
   const persistResults = async () => {
-    await supabase
-      .from(TABLE)
-      .update({ results })
-      .eq('id', row.id)
+    await supabase.from(TABLE).update({ results }).eq('id', row.id)
   }
 
   let anyFailed = false
@@ -201,9 +168,6 @@ export async function executeMigration(row: DbRow): Promise<void> {
         userId: row.new_user_id,
         audioFile,
         imageFile,
-        // The generated type requires trackCid here, but the wrapped
-        // createTrack populates it from the audio upload response. See
-        // TracksApi.createTrack → populateTrackMetadataWithUploadResponseV2.
         // @ts-expect-error trackCid is set by the SDK after audio upload
         metadata: {
           title: track.title,

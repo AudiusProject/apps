@@ -1,13 +1,11 @@
 import { IconComponent, SVGIconProps } from '~harmony/components/icon'
 
-// Two Tone / Special Styling
 import IconArtistBadgeSVG from '../assets/icons/ArtistBadge.svg'
 import IconContestSignSVG from '../assets/icons/ContestSign.svg'
 import IconCosignSVG from '../assets/icons/Cosign.svg'
 import IconLabelBadgeSVG from '../assets/icons/LabelBadge.svg'
 import IconMultiselectAddSVG from '../assets/icons/MultiselectAdd.svg'
 import IconMultiselectRemoveSVG from '../assets/icons/MultiselectRemove.svg'
-// Token Tier Badges
 import TokenAUDIOPng from '../assets/icons/TokenAUDIO.png'
 import TokenBonkPng from '../assets/icons/TokenBonk.png'
 import TokenBronzePng from '../assets/icons/TokenBronze.png'
@@ -16,7 +14,6 @@ import TokenNoTierPng from '../assets/icons/TokenNoTier.png'
 import TokenPlatinumPng from '../assets/icons/TokenPlatinum.png'
 import TokenSilverPng from '../assets/icons/TokenSilver.png'
 import IconVerifiedSVG from '../assets/icons/Verified.svg'
-// File Types
 import IconCcBySVG from '../assets/icons/ccBy.svg'
 import IconCcCCSVG from '../assets/icons/ccCC.svg'
 import IconCcNC_EUSVG from '../assets/icons/ccNC-EU.svg'
@@ -63,8 +60,6 @@ import IconFileWAVSVG from '../assets/icons/fileWAV.svg'
 import IconFileWAVESVG from '../assets/icons/fileWAVE.svg'
 import IconFileWEBMSVG from '../assets/icons/fileWEBM.svg'
 import IconFileXWMASVG from '../assets/icons/fileXWMA.svg'
-// Creative Commons
-// Playback Rate Icons
 import IconPlaybackRate0_5xSVG from '../assets/icons/iconPlaybackRate0_5x.svg'
 import IconPlaybackRate0_8xSVG from '../assets/icons/iconPlaybackRate0_8x.svg'
 import IconPlaybackRate0_9xSVG from '../assets/icons/iconPlaybackRate0_9x.svg'
@@ -77,7 +72,6 @@ import IconPlaybackRate2xSVG from '../assets/icons/iconPlaybackRate2x.svg'
 import IconPlaybackRate3xSVG from '../assets/icons/iconPlaybackRate3x.svg'
 import { createImageIcon } from '../utils/createImageIcon'
 
-// Two Tone / Special Styling
 export const IconContestSign = IconContestSignSVG as IconComponent
 export const IconCosign = IconCosignSVG as IconComponent
 export const IconArtistBadge = IconArtistBadgeSVG as IconComponent
@@ -85,7 +79,6 @@ export const IconLabelBadge = IconLabelBadgeSVG as IconComponent
 export const IconMultiselectAdd = IconMultiselectAddSVG as IconComponent
 export const IconMultiselectRemove = IconMultiselectRemoveSVG as IconComponent
 
-// Token Tier Badge Components
 export const IconVerified = ((props: SVGIconProps) => (
   <IconVerifiedSVG color='active' colorSecondary='white' {...props} />
 )) as IconComponent
@@ -96,7 +89,6 @@ export const IconTokenPlatinum = createImageIcon(TokenPlatinumPng)
 export const IconTokenSilver = createImageIcon(TokenSilverPng)
 export const IconTokenBonk = createImageIcon(TokenBonkPng)
 
-// File Types
 export const IconFile3GA = IconFile3GASVG as IconComponent
 export const IconFile3GP = IconFile3GPSVG as IconComponent
 export const IconFileAAC = IconFileAACSVG as IconComponent
@@ -131,7 +123,6 @@ export const IconFileWAVE = IconFileWAVESVG as IconComponent
 export const IconFileWEBM = IconFileWEBMSVG as IconComponent
 export const IconFileXWMA = IconFileXWMASVG as IconComponent
 
-// Creative Commons
 export const IconCcBy = IconCcBySVG as IconComponent
 export const IconCcCC = IconCcCCSVG as IconComponent
 export const IconCcNC_EU = IconCcNC_EUSVG as IconComponent
@@ -146,7 +137,6 @@ export const IconCcSamplingPlus = IconCcSamplingPlusSVG as IconComponent
 export const IconCcShare = IconCcShareSVG as IconComponent
 export const IconCcZero = IconCcZeroSVG as IconComponent
 
-// Playback Rate Icons
 export const IconPlaybackRate0_5x = IconPlaybackRate0_5xSVG as IconComponent
 export const IconPlaybackRate0_8x = IconPlaybackRate0_8xSVG as IconComponent
 export const IconPlaybackRate0_9x = IconPlaybackRate0_9xSVG as IconComponent
@@ -158,5 +148,4 @@ export const IconPlaybackRate2x = IconPlaybackRate2xSVG as IconComponent
 export const IconPlaybackRate2_5x = IconPlaybackRate2_5xSVG as IconComponent
 export const IconPlaybackRate3x = IconPlaybackRate3xSVG as IconComponent
 
-// Token Icons
 export const IconTokenAUDIO = createImageIcon(TokenAUDIOPng)

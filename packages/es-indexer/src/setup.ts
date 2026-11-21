@@ -45,15 +45,11 @@ export async function setupTriggers() {
     WHERE routine_name = '${functionName}';`)
   let skip = count.rows[0].count == 1
 
-  // skip = false
-
   if (skip) {
-    // quick fix to re-enable the incorrectly disabled trigger
     client.query(`alter table tracks enable trigger trg_tracks;`)
 
     logger.info(`function ${functionName} already exists... skipping`)
   } else {
-    // drop existing triggers
     logger.info({ tables }, `dropping any existing triggers`)
     await Promise.all(
       tables.map((t) =>
@@ -61,11 +57,9 @@ export async function setupTriggers() {
       )
     )
 
-    // create function
     logger.info(`creating plpgsql function`)
     await client.query(trigger)
 
-    // create triggers
     logger.info({ tables }, `creating triggers`)
     if (process.argv[2] !== 'drop') {
       await Promise.all(

@@ -119,9 +119,6 @@ export const decodeAssociatedTokenAccountInstruction = (
   instruction: TransactionInstruction
 ) => {
   switch (instruction.data[0]) {
-    // CreateAssociatedTokenAccount is with null/undefined or 0 as the data
-    // AssociatedTokenAccount program code: https://github.com/solana-labs/solana-program-library/blob/a95c6d14d9305d6a77656bc6bc36c10d54ad7e97/associated-token-account/program/src/processor.rs#L37C1-L63C2
-    // @solana/spl-token createAssociatedTokenAccountInstruction: https://github.com/solana-labs/solana-program-library/blob/a95c6d14d9305d6a77656bc6bc36c10d54ad7e97/token/js/src/instructions/associatedTokenAccount.ts#L17
     case null:
     case undefined:
     case AssociatedTokenInstruction.Create:

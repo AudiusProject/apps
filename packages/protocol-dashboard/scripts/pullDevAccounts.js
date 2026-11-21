@@ -1,9 +1,3 @@
-/**
- * For local development, you may want to grab the public & private keys for available
- * funded wallets.
- * node ./scripts/pullDevAccounts.js
- */
-
 const { exec } = require('child_process')
 
 exec(`

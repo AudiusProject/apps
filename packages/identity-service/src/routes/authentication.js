@@ -23,11 +23,6 @@ const EncodedDataMessageHeader = 'encoded-data-message'
 const EncodedDataSignatureHeader = 'encoded-data-signature'
 
 module.exports = function (app) {
-  /**
-   * This signup function writes the encryption values from the user's browser(iv, cipherText, lookupKey)
-   * into the Authentications table and the email to the Users table. This is the first step in the
-   * authentication process
-   */
   app.post(
     '/authentication',
     handleResponse(async (req, res, next) => {
@@ -37,7 +32,6 @@ module.exports = function (app) {
         req.logger.error('Missing sendgrid api key')
       }
 
-      // body should contain {iv, cipherText, lookupKey}
       const body = req.body
       const headers = req.headers
 
@@ -45,7 +39,6 @@ module.exports = function (app) {
         try {
           const transaction = await models.sequelize.transaction()
 
-          // default to null
           let walletAddress = null
           if (
             headers &&
@@ -60,7 +53,6 @@ module.exports = function (app) {
                 sig: encodedDataSignature
               })
             } catch (err) {
-              // keep address as null for future user recovery
               req.logger.error(err, 'Error recovering users signed address')
             }
           }
@@ -76,7 +68,6 @@ module.exports = function (app) {
               )
             }
 
-            // require signed headers for changing email
             if (walletAddress === null) {
               req.logger.error('Missing wallet')
               return errorResponseBadRequest('Invalid credentials')
@@ -89,20 +80,17 @@ module.exports = function (app) {
               return errorResponseBadRequest('Invalid credentials')
             }
 
-            // check if new artifacts already exist and are active
             const newArtifacts = await models.Authentication.findOne({
               where: { lookupKey: body.lookupKey }
             })
 
             if (newArtifacts) {
-              // artifacts passed already exist
               req.logger.error(
                 `Credentials already exist for lookupKey: ${body.lookupKey}`
               )
               return errorResponseBadRequest('Invalid credentials')
             }
 
-            // if user has wallet connected to auth artifacts, compare old lookupkey with wallet address
             const oldArtifacts = await models.Authentication.findOne({
               where: { lookupKey: oldLookupKey }
             })
@@ -115,7 +103,6 @@ module.exports = function (app) {
               oldArtifacts.walletAddress !== undefined &&
               oldArtifacts.walletAddress !== null
             ) {
-              // if signature doesn't match old artifacts
               if (walletAddress !== oldArtifacts.walletAddress) {
                 req.logger.error('Signature mismatch for credentials')
                 return errorResponseBadRequest('Invalid credentials')
@@ -135,8 +122,6 @@ module.exports = function (app) {
               return errorResponseBadRequest('Invalid credentials')
             }
 
-            // change email of user whose signature was passed in the call
-            // require wallet address from signature when updating email
             if (walletAddress !== null) {
               const userRecord = await models.User.findOne({
                 where: { walletAddress },
@@ -147,10 +132,6 @@ module.exports = function (app) {
             }
           }
 
-          // Check if an existing record exists but is soft deleted (since the Authentication model is 'paranoid')
-          // Setting the option paranoid to false searches both soft-deleted and non-deleted objects
-          // https://sequelize.org/master/manual/paranoid.html
-          // https://sequelize.org/master/class/lib/model.js~Model.html#static-method-findAll
           let existingRecord = await models.Authentication.findOne({
             where: { lookupKey: body.lookupKey },
             paranoid: false
@@ -168,8 +149,6 @@ module.exports = function (app) {
           } else if (existingRecord.isSoftDeleted()) {
             await existingRecord.restore({ transaction })
           } else {
-            // old auth artifacts may not be recoverable
-            // restart sign up flow and overwrite existing auth artifacts
             existingRecord = await existingRecord.update({
               iv: body.iv,
               cipherText: body.cipherText,
@@ -199,11 +178,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Checks to see if a given lookup key exists in the authentications table.
-   * Does not log a user in. Does not return credential information. Does not
-   * send OTP emails. Requires a signed in user.
-   */
   app.get(
     '/authentication/check',
     authMiddleware,
@@ -235,7 +209,6 @@ module.exports = function (app) {
       if (!email) {
         return errorResponseBadRequest('Missing email')
       }
-      // Avoid issues looking up values if user enters email in different casing
       email = email.toLowerCase()
 
       const existingUser = await models.Authentication.findOne({
@@ -262,7 +235,6 @@ module.exports = function (app) {
         }
         return successResponse(existingUser)
       } else if (!otp) {
-        // use email from registered address if available
         const associatedEmail = await getWalletAssociatedEmail({
           req,
           authUser: existingUser
@@ -286,7 +258,6 @@ module.exports = function (app) {
         }
         return errorResponseForbidden('Missing otp')
       } else {
-        // otp was included in request
         const isOtpValid = await validateOtp({ email, otp, redis })
         if (!isOtpValid) {
           return errorResponseBadRequest('Invalid credentials')

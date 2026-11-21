@@ -270,7 +270,6 @@ export class RewardManagerClient {
       return null
     }
     const rewardManagerState = await this.getRewardManagerState()
-    // Min Votes = discovery votes, +1 for AAO oracle
     const maxAttestations = rewardManagerState.minVotes + 1
     return RewardManagerProgram.decodeAttestationsAccountData(
       maxAttestations,
@@ -333,7 +332,6 @@ export class RewardManagerClient {
           if (nestedError instanceof RewardManagerError) {
             throw nestedError
           } else {
-            // If failed to provide user friendly error, surface original error
             this.logger.warn(
               'Failed to parse RewardManagerError error',
               nestedError

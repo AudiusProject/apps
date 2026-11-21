@@ -41,20 +41,13 @@ const TrackPlayerCard = ({
   const getBottomWrapperStyle = () =>
     mobileWebTwitter ? { flex: '0 0 84px' } : {}
   const [artworkWrapperStyle, setArtworkWrapperStyle] = useState({
-    // Need to start the wrapper with 0
-    // opacity bc it doesn't have valid
-    // size information until the
-    // cardDimensionsContext gives us
-    // non-zero values post-mount.
     opacity: 0
   })
   const { height, width } = useContext(CardDimensionsContext)
 
   useEffect(() => {
     if (width === 0) return
-    // 124px: 84px bottom component, 18 px bottom margin, 24px top margin
     const desiredHeight = height - 124
-    // 48 width to account for horizontal margins
     const maxWidth = width - 48
     const side = Math.min(desiredHeight, maxWidth)
     const newStyle = {

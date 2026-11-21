@@ -13,7 +13,6 @@ const parseFixedDecimalString = <T extends bigint>(
   value: string,
   decimalPlaces?: number
 ): FixedDecimalCtorArgs<T> => {
-  // Expand scientific notation using strings
   if (value.includes('e')) {
     const [coefficient, exponent] = value.split('e')
     const exp = parseInt(exponent, 10)
@@ -289,14 +288,12 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
       throw new RangeError('Digits must be non-negative')
     }
     const divisor = BigInt(10 ** digitsToRemove)
-    // Subtract one if negative w/ remainder
     if (this.value < 0 && this.value % divisor !== BigInt(0)) {
       return new FixedDecimal<BigIntBrand>({
         value: ((this.value / divisor) * divisor - divisor) as BigIntBrand,
         decimalPlaces: this.decimalPlaces
       })
     }
-    // Truncate otherwise
     return new FixedDecimal<BigIntBrand>({
       value: ((this.value / divisor) * divisor) as BigIntBrand,
       decimalPlaces: this.decimalPlaces
@@ -339,14 +336,10 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
       throw new RangeError('Digits must be non-negative')
     }
     const signMultiplier = this.value > 0 ? BigInt(1) : BigInt(-1)
-    // Divide to get the test digit in the ones place
     const divisor = BigInt(10 ** (digitsToRemove - 1))
     let quotient = this.value / divisor
-    // Round the tens digit by adding or subtracting 5
     quotient += signMultiplier * BigInt(5)
-    // Divide by 10 to remove the rounding test digit
     quotient /= BigInt(10)
-    // Multiply by the original divisor and 10 to get the number of digits back
     return new FixedDecimal<BigIntBrand>({
       value: (quotient * divisor * BigInt(10)) as BigIntBrand,
       decimalPlaces: this.decimalPlaces
@@ -369,12 +362,10 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
     }
     const divisor = BigInt(10 ** digitsToRemove)
     const remainder = this.value % divisor
-    // If whole number, do nothing
     if (remainder === BigInt(0)) {
       return this
     }
     const signMultiplier = this.value > 0 ? BigInt(1) : BigInt(-1)
-    // If not, truncate and add/sub 1 to the place we're rounding to
     return new FixedDecimal<BigIntBrand>({
       value: ((this.value / divisor) * divisor +
         divisor * signMultiplier) as BigIntBrand,
@@ -452,12 +443,10 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
    * @param options The options for formatting. The available options and defaults are different than NumberFormat.
    */
   public toLocaleString(locale?: string, options?: FixedDecimalFormatOptions) {
-    // Apply defaults
     const mergedOptions = {
       ...this._defaultFormatOptions,
       ...options
     }
-    // Apply rounding method
     let str = ''
     switch (mergedOptions.roundingMode) {
       case 'ceil':
@@ -479,7 +468,6 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
 
     let [whole, decimal] = str.split('.')
 
-    // Strip trailing zeros
     decimal = (decimal ?? '').replace(/0+$/, '')
 
     if (mergedOptions.minimumFractionDigits !== undefined) {
@@ -491,7 +479,6 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
       }
     }
 
-    // Localize with a decimal to extract the separator
     const wholeInt = BigInt(whole.replace('-', ''))
     whole = wholeInt.toLocaleString(locale, {
       ...mergedOptions,
@@ -499,8 +486,6 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
       maximumFractionDigits: 0
     })
 
-    // Annoyingly, React Native doesn't respect minimumFractionDigits for
-    // bigint formatting. Instead, get the decimalSeparator from a Number.
     const decimalSeparator = Number(0).toLocaleString(locale, {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
@@ -547,7 +532,6 @@ export class FixedDecimal<BigIntBrand extends bigint = bigint> {
         .toString()
         .padStart(this.decimalPlaces, '0')
       const decimalStart = amountString.length - this.decimalPlaces
-      // Get the first two decimals (truncated)
       const decimal = amountString.substring(decimalStart, decimalStart + 2)
       if (decimal === '00') {
         return quotient.toString()

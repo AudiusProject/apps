@@ -12,9 +12,6 @@ type HintProps = {
   actions?: ReactNode
 } & PaperProps
 
-/*
- * A way of informing the user of important details in line in a prominent way.
- */
 export const Hint = (props: HintProps) => {
   const {
     icon: Icon = IconQuestionCircle,

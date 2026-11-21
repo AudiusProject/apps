@@ -142,12 +142,8 @@ export class SolanaRelay extends BaseAPI {
         initOverrides
       )
     } catch (e) {
-      // Catch response errors, and if possible, recreate the original
-      // SendTransactionError to transparently raise to the caller.
       if (e instanceof Error && e.name === 'ResponseError') {
         const resp = (e as runtime.ResponseError).response.clone()
-        // The error body isn't always JSON; if it can't be parsed, surface the
-        // original ResponseError instead of a SyntaxError
         const body = await resp.json().catch(() => null)
         if (
           body !== null &&
@@ -198,7 +194,6 @@ export class SolanaRelay extends BaseAPI {
 
     const headerParameters: runtime.HTTPHeaders = {}
 
-    // API uses multipart/form-data for the upload
     const formData = new FormData()
     formData.append('name', name)
     formData.append('symbol', symbol)

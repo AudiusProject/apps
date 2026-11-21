@@ -78,10 +78,8 @@ export class PlaylistIndexer extends BaseIndexer<PlaylistDoc> {
           },
         },
 
-        // saves
         saved_by: { type: 'keyword' },
         save_count: { type: 'integer' },
-        // reposts
         reposted_by: { type: 'keyword' },
         repost_count: { type: 'integer' },
 
@@ -162,13 +160,6 @@ export class PlaylistIndexer extends BaseIndexer<PlaylistDoc> {
   }
 
   checkpointSql(checkpoint: BlocknumberCheckpoint): string {
-    // really we should mark playlist stale if any of the playlist tracks changes
-    // but don't know how to do the sql for that... so the low tech solution would be to re-do playlists from scratch
-    // which might actually be faster, since it's a very small collection
-    // in which case we could just delete this function
-
-    // track play_count will also go stale (same problem as above)
-
     return `
       and playlist_id in (
         select playlist_id from playlists where blocknumber >= ${checkpoint.playlists}
@@ -180,7 +171,6 @@ export class PlaylistIndexer extends BaseIndexer<PlaylistDoc> {
   }
 
   async withBatch(rows: PlaylistDoc[]) {
-    // collect all the track IDs
     const trackIds = new Set<number>()
     for (let row of rows) {
       row.playlist_contents.track_ids
@@ -189,16 +179,13 @@ export class PlaylistIndexer extends BaseIndexer<PlaylistDoc> {
         .forEach((t: any) => trackIds.add(t))
     }
 
-    // fetch the tracks...
     const tracksById = await this.getTracks(Array.from(trackIds))
 
-    // pull track data onto playlist
     for (let playlist of rows) {
       playlist.tracks = playlist.playlist_contents.track_ids
         .map((t: any) => tracksById[t.track])
         .filter(Boolean)
 
-      // determine most common mood
       playlist.dominant_mood = flow(
         compact,
         countBy,
@@ -229,8 +216,6 @@ export class PlaylistIndexer extends BaseIndexer<PlaylistDoc> {
     if (!trackIds.length) return {}
     const pg = dialPg()
     const idList = Array.from(trackIds).join(',')
-    // do we want artist name from users
-    // or save + repost counts from aggregate_track?
     const q = `
       select 
         track_id,

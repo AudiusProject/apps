@@ -8,8 +8,7 @@ const { Lock } = require('../redis')
 const ENVIRONMENT = config.get('environment')
 const DEFAULT_GAS_LIMIT = config.get('defaultGasLimit')
 
-// L1 relayer wallets
-const ethRelayerWallets = config.get('ethRelayerWallets') // { publicKey, privateKey }
+const ethRelayerWallets = config.get('ethRelayerWallets')
 
 const generateETHWalletLockKey = (publicKey) =>
   `ETH_RELAYER_WALLET:${publicKey}`
@@ -18,19 +17,15 @@ async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// Calculates index into eth relayer addresses
 const getEthRelayerWalletIndex = (walletAddress) => {
   const walletParsedInteger = parseInt(walletAddress, 16)
   return walletParsedInteger % ethRelayerWallets.length
 }
 
-// Select from the list of eth relay wallet addresses
-// Return the public key that will be used to relay this address
 const queryEthRelayerWallet = (walletAddress) => {
   return ethRelayerWallets[getEthRelayerWalletIndex(walletAddress)].publicKey
 }
 
-// Query current balance for a given relayer public key
 const getEthRelayerFunds = async (walletPublicKey) => {
   return ethWeb3.eth.getBalance(walletPublicKey)
 }
@@ -56,11 +51,9 @@ const selectEthWallet = async (walletPublicKey, reqLogger) => {
   }
 }
 
-// Relay a transaction to the ethereum network
 const sendEthTransaction = async (req, txProps, reqBodySHA) => {
   const { contractAddress, encodedABI, senderAddress, gasLimit } = txProps
 
-  // Calculate relayer from senderAddress
   const { selectedEthRelayerWallet, ethWalletIndex } = await selectEthWallet(
     senderAddress,
     logger
@@ -90,7 +83,6 @@ const sendEthTransaction = async (req, txProps, reqBodySHA) => {
     req.logger.info(
       `L1 txRelay - Unlocking ${ethRelayerWallets[ethWalletIndex].publicKey}, index=${ethWalletIndex}}`
     )
-    // Unlock wallet
     await Lock.clearLock(
       generateETHWalletLockKey(ethRelayerWallets[ethWalletIndex].publicKey)
     )
@@ -155,9 +147,6 @@ const createAndSendEthTransaction = async (
   return { txHash: receipt.transactionHash, txParams }
 }
 
-/**
- * Fund L1 wallets as necessary to facilitate multiple relayers
- */
 const fundEthRelayerIfEmpty = async () => {
   const minimumBalance = ethWeb3.utils.toWei(
     config.get('ethMinimumBalance').toString(),
@@ -172,7 +161,7 @@ const fundEthRelayerIfEmpty = async () => {
     const validBalance = parseInt(balance) >= minimumBalance
     if (ENVIRONMENT === 'development') {
       if (!validBalance) {
-        const account = (await ethWeb3.eth.getAccounts())[0] // local acc is unlocked and does not need private key
+        const account = (await ethWeb3.eth.getAccounts())[0]
         logger.info(
           `L1 txRelay - transferring funds [${minimumBalance}] from ${account} to wallet ${ethWalletPublicKey}`
         )
@@ -190,8 +179,6 @@ const fundEthRelayerIfEmpty = async () => {
         )
       }
     } else {
-      // In non-development environments, ethRelay wallets must be funded prior to deployment of this service
-      // Automatic funding in L1 environment is TBD
       logger.info(`L1 txRelay -  ${ethWalletPublicKey} below minimum balance`)
       throw new Error(
         `Invalid balance for ethRelayer account ${ethWalletPublicKey}. Found ${balance}, required minimumBalance ${minimumBalance}`

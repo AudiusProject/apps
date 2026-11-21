@@ -261,23 +261,19 @@ describe('UsersApi', () => {
     })
   })
 
-  // TODO: PAY-2911
   describe.skip('sendTip', () => {
     it('creates and relays a tip transaction with properly formed instructions', async () => {
       const senderUserId = '7eP5n'
       const receiverUserId = 'ML51L'
       const amount = 1
-      const outputAmount = BigInt(100000000) // wAUDIO has 8 decimals
-      // Arbitrary
+      const outputAmount = BigInt(100000000)
       const ethWallets: Record<string, string> = {
         [senderUserId]: '0x0000000000000000000000000000000000000001',
         [receiverUserId]: '0x0000000000000000000000000000000000000002'
       }
-      // Arbitrary
       const feePayer = new PublicKey(
         'EAzM1rRJf31SVB4nDHqi2oBtLWUtyXfQSaiq6r2yt7BY'
       )
-      // Derived from fake eth wallets
       const userBanks: Record<string, PublicKey> = {
         [senderUserId]: new PublicKey(
           '3rbiBEM3Qf9jyx64kZ8TDBwMSFPn4yv52eTNHLXMn5gs'
@@ -287,7 +283,6 @@ describe('UsersApi', () => {
         )
       }
 
-      // Turn the relay call into a bunch of assertions on the final transaction
       vitest
         .spyOn(SolanaRelay.prototype, 'relay')
         .mockImplementation(async ({ transaction }) => {
@@ -307,7 +302,6 @@ describe('UsersApi', () => {
           expect(ClaimableTokensProgram.isTransferInstruction(decoded)).toBe(
             true
           )
-          // Typescript hint - see above assert
           const decoded2 = decoded as DecodedTransferClaimableTokensInstruction
 
           expect(decoded2.keys.destination.pubkey.toBase58()).toBe(
@@ -327,14 +321,12 @@ describe('UsersApi', () => {
           return { signature: 'fake-sig' }
         })
 
-      // Mock getFeePayer
       vitest
         .spyOn(SolanaRelay.prototype, 'getFeePayer')
         .mockImplementation(async () => {
           return feePayer
         })
 
-      // Mock getWalletAndUserBank
       vitest
         // @ts-ignore
         .spyOn(UsersApi.prototype, 'getWalletAndUserBank')
@@ -346,7 +338,6 @@ describe('UsersApi', () => {
           }
         })
 
-      // Mock sign
       vitest.spyOn(audiusWalletClient, 'sign').mockImplementation(async () => {
         return [Uint8Array.from(new Array(64).fill(0)), 0]
       })
@@ -357,7 +348,6 @@ describe('UsersApi', () => {
         receiverUserId
       })
 
-      // Ensure relay was attempted to ensure the assertions run
       expect(solanaRelay.relay).toHaveBeenCalledTimes(1)
     })
   })
@@ -482,7 +472,6 @@ describe('UsersApi', () => {
       await expect(async () => {
         await users.shareEmail({
           emailOwnerUserId: 123,
-          // Missing receivingUserId
           encryptedEmail: 'encryptedEmailString',
           encryptedKey: 'encryptedKeyString'
         } as any)
@@ -493,7 +482,6 @@ describe('UsersApi', () => {
       await expect(async () => {
         await users.shareEmail({
           emailOwnerUserId: 123,
-          // Incorrect type for receivingUserId
           receivingUserId: '456',
           encryptedEmail: 'encryptedEmailString',
           encryptedKey: 'encryptedKeyString'
@@ -696,7 +684,7 @@ describe('UsersApi', () => {
       await expect(async () => {
         await users.updateCollectibles({
           userId: '7eP5n',
-          collectibles: {} as any // Invalid collectibles metadata
+          collectibles: {} as any
         })
       }).rejects.toThrow()
     })

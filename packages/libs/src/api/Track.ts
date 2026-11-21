@@ -50,29 +50,7 @@ export class Track extends Base {
     this.logTrackListen = this.logTrackListen.bind(this)
     this.deleteTrack = this.deleteTrack.bind(this)
   }
-  /* ------- GETTERS ------- */
 
-  /**
-   * get tracks with all relevant track data
-   * can be filtered by providing an integer array of ids
-   * @param limit
-   * @param offset
-   * @param idsArray
-   * @param targetUserId the owner of the tracks being queried
-   * @param sort a string of form eg. blocknumber:asc,timestamp:desc describing a sort path
-   * @param minBlockNumber The min block number
-   * @param filterDeleted If set to true filters out deleted tracks
-   * @returns Array of track metadata Objects
-   * additional metadata fields on track objects:
-   *  {Integer} repost_count - repost count for given track
-   *  {Integer} save_count - save count for given track
-   *  {Array} followee_reposts - followees of current user that have reposted given track
-   *  {Boolean} has_current_user_reposted - has current user reposted given track
-   *  {Boolean} has_current_user_saved - has current user saved given track
-   * @example
-   * await getTracks()
-   * await getTracks(100, 0, [3,2,6]) - Invalid track ids will not be accepted
-   */
   async getTracks(
     limit = 100,
     offset = 0,
@@ -96,27 +74,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * get tracks with all relevant track data
-   * can be filtered by providing an integer array of ids
-   * @param limit
-   * @param offset
-   * @param idsArray
-   * @param targetUserId the owner of the tracks being queried
-   * @param sort a string of form eg. blocknumber:asc,timestamp:desc describing a sort path
-   * @param minBlockNumber The min block number
-   * @param filterDeleted If set to true filters out deleted tracks
-   * @returns Array of track metadata Objects
-   * additional metadata fields on track objects:
-   *  {Integer} repost_count - repost count for given track
-   *  {Integer} save_count - save count for given track
-   *  {Array} followee_reposts - followees of current user that have reposted given track
-   *  {Boolean} has_current_user_reposted - has current user reposted given track
-   *  {Boolean} has_current_user_saved - has current user saved given track
-   * @example
-   * await getTracks()
-   * await getTracks(100, 0, [3,2,6]) - Invalid track ids will not be accepted
-   */
   async getTracksVerbose(
     limit = 100,
     offset = 0,
@@ -140,19 +97,11 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Gets tracks by their slug and owner handle
-   * @param handle the owner's handle
-   * @param slug the track's slug, including collision identifiers
-   */
   async getTracksByHandleAndSlug(handle: string, slug: string) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getTracksByHandleAndSlug(handle, slug)
   }
 
-  /**
-   * gets all tracks matching identifiers, including unlisted.
-   */
   async getTracksIncludingUnlisted(identifiers: string[], withUsers = false) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getTracksIncludingUnlisted(
@@ -161,11 +110,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Gets random tracks from trending tracks for a given genre.
-   * If genre not given, will return trending tracks across all genres.
-   * Excludes specified track ids.
-   */
   async getRandomTracks(
     genre: string,
     limit: number,
@@ -181,17 +125,11 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Gets all stems for a given trackId as an array of tracks.
-   */
   async getStemsForTrack(trackId: number) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getStemsForTrack(trackId)
   }
 
-  /**
-   * Gets all the remixes of a given trackId as an array of tracks.
-   */
   async getRemixesOfTrack(
     trackId: number,
     limit: Nullable<number> = null,
@@ -205,9 +143,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Gets the remix parents of a given trackId as an array of tracks.
-   */
   async getRemixTrackParents(
     trackId: number,
     limit: Nullable<number> = null,
@@ -221,10 +156,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Return saved tracks for current user
-   * NOTE in returned JSON, SaveType string one of track, playlist, album
-   */
   async getLibraryTracks(limit = 100, offset = 0, withUsers = false) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getLibraryTracks(
@@ -234,9 +165,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Gets tracks trending on Audius.
-   */
   async getTrendingTracks(
     genre: Nullable<string> = null,
     time: Nullable<string> = null,
@@ -254,9 +182,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Gets listens for tracks bucketted by timeFrame.
-   */
   async getTrackListens(
     timeFrame = null,
     idsArray = null,
@@ -276,13 +201,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * get users that saved saveTrackId, sorted by follower count descending
-   * additional metadata fields on user objects:
-   *  {Integer} follower_count - follower count of given user
-   * @example
-   * getSaversForTrack(100, 0, 1) - ID must be valid
-   */
   async getSaversForTrack(limit = 100, offset = 0, saveTrackId: number) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getSaversForTrack(
@@ -292,13 +210,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * get users that saved savePlaylistId, sorted by follower count descending
-   * additional metadata fields on user objects:
-   *  {Integer} follower_count - follower count of given user
-   * @example
-   * getSaversForPlaylist(100, 0, 1) - ID must be valid
-   */
   async getSaversForPlaylist(limit = 100, offset = 0, savePlaylistId: number) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getSaversForPlaylist(
@@ -308,13 +219,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * get users that reposted repostTrackId, sorted by follower count descending
-   * additional metadata fields on user objects:
-   *  {Integer} follower_count - follower count of given user
-   * @example
-   * getRepostersForTrack(100, 0, 1) - ID must be valid
-   */
   async getRepostersForTrack(limit = 100, offset = 0, repostTrackId: number) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getRepostersForTrack(
@@ -324,13 +228,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * get users that reposted repostPlaylistId, sorted by follower count descending
-   * additional metadata fields on user objects:
-   *  {Integer} follower_count - follower count of given user
-   * @example
-   * getRepostersForPlaylist(100, 0, 1) - ID must be valid
-   */
   async getRepostersForPlaylist(
     limit = 100,
     offset = 0,
@@ -344,20 +241,6 @@ export class Track extends Base {
     )
   }
 
-  /* ------- SETTERS ------- */
-
-  /**
-   * Takes in a readable stream if isServer is true, or a file reference if isServer is
-   * false.
-   * Uploads file, retrieves multihash, adds multihash to input metadata object,
-   * uploads metadata, and finally returns metadata multihash
-   * Wraps the stateless function in AudiusLib.
-   *
-   * @param trackFile ReadableStream from server, or File handle on client
-   * @param coverArtFile ReadableStream from server, or File handle on client
-   * @param metadata json of the track metadata with all fields, missing fields will error
-   * @param onProgress callback fired with (loaded, total) on byte upload progress
-   */
   async uploadTrackV2AndWriteToChain(
     userId: number,
     trackFile: File,
@@ -386,17 +269,6 @@ export class Track extends Base {
     return { trackId: updatedTrackId, metadataCid, updatedMetadata, txReceipt }
   }
 
-  /**
-   * Only uploads track but does not write to chain. Do not call by itself.
-   *
-   * @dev To upload a single track, call uploadTrackV2AndWriteToChain() instead.
-   * @dev To upload multiple uploads, call this function multiple times and then call addTracksToChainV2() once.
-   *
-   * @param trackFile ReadableStream from server, or File handle on client
-   * @param coverArtFile ReadableStream from server, or File handle on client
-   * @param metadata json of the track metadata with all fields, missing fields will error
-   * @param onProgress callback fired with (loaded, total) on byte upload progress
-   */
   async uploadTrackV2(
     userId: number,
     trackFile: File,
@@ -404,7 +276,6 @@ export class Track extends Base {
     metadata: UploadTrackMetadata,
     onProgress: ProgressCB
   ) {
-    // Validate inputs
     this.REQUIRES(Services.CREATOR_NODE)
     this.FILE_IS_VALID(trackFile)
     if (coverArtFile) this.FILE_IS_VALID(coverArtFile)
@@ -416,7 +287,6 @@ export class Track extends Base {
     metadata.owner_id = userId
     this._validateTrackMetadata(metadata)
 
-    // Upload track audio and cover art to storage node
     const updatedMetadata =
       await this.creatorNode.uploadTrackAudioAndCoverArtV2(
         trackFile,
@@ -427,12 +297,7 @@ export class Track extends Base {
     return updatedMetadata
   }
 
-  /**
-   * Creates a trackId for each CID in metadataCids and adds each track to chain for this user.
-   */
   async addTracksToChainV2(trackMetadatas: TrackMetadata[], userId: number) {
-    // Any failures in adding track to the blockchain will prevent further progress.
-    // The list of successful track uploads is returned for revert operations by caller
     let requestFailed = false
     const trackIds = (
       await Promise.all(
@@ -457,9 +322,6 @@ export class Track extends Base {
     return { error, trackIds }
   }
 
-  /**
-   * Adds the given track's metadata to chain for this user, optionally creating a trackId if one doesn't exist.
-   */
   async writeTrackToChain(
     userId: number,
     trackMetadata: TrackMetadata,
@@ -467,7 +329,6 @@ export class Track extends Base {
     trackId?: number
   ) {
     if (!trackId) trackId = await this.generateTrackId()
-    // Prevent extra fields from being added to metadata
     const parsedTrackMetadata = Track._parseTrackMetadata(trackMetadata)
     const metadataCid =
       await Utils.fileHasher.generateMetadataCidV1(parsedTrackMetadata)
@@ -485,11 +346,6 @@ export class Track extends Base {
     return { trackId, metadataCid, txReceipt }
   }
 
-  /**
-   * Updates an existing track given metadata using only chain and not creator node.
-   * @param metadata json of the track metadata with all fields, missing fields will error
-   * @param transcodePreview bool: retranscode track preview and set preview_cid if true
-   */
   async updateTrackV2(
     userId: number,
     metadata: TrackMetadata,
@@ -511,7 +367,6 @@ export class Track extends Base {
         throw new Error('Missing required audio_upload_id')
       }
 
-      // Transcode the new preview and receive back updated metadata
       updatedMetadata = await this.creatorNode.transcodeTrackPreview(metadata)
     }
 
@@ -530,11 +385,6 @@ export class Track extends Base {
     }
   }
 
-  /**
-   * Logs a track listen for a given user id.
-   * @param unauthUuid account for those not logged in
-   * @param trackId listened to
-   */
   async logTrackListen(
     trackId: number,
     unauthUuid: number,
@@ -552,10 +402,6 @@ export class Track extends Base {
     )
   }
 
-  /**
-   * Marks a tracks as deleted
-   * @param trackId
-   */
   async deleteTrack(userId: number, trackId: number) {
     return await this.contracts.EntityManagerClient!.manageEntity(
       userId,
@@ -574,17 +420,11 @@ export class Track extends Base {
     return decodeHashId(encodedId)!
   }
 
-  /* ------- PRIVATE  ------- */
-
-  // Throws an error upon validation failure
   _validateTrackMetadata(metadata: Partial<TrackMetadata>) {
     this.OBJECT_HAS_PROPS(metadata, TRACK_PROPS, TRACK_REQUIRED_PROPS)
     this.creatorNode.validateTrackSchema(metadata)
   }
 
-  /**
-   * Prevents additional fields from being included in metadata
-   */
   static _parseTrackMetadata(trackMetadata: TrackMetadata): TrackMetadata {
     const {
       blocknumber,

@@ -13,7 +13,6 @@ import type { TrackRowProps } from './types'
 
 const ROW_HEIGHT = 56
 const ART_SIZE = 40
-// Fits a three-digit rank at the smaller size used from 100 up.
 const RANK_SIZE = 32
 
 const REVEAL_CLASS = 'trackRowReveal'
@@ -94,8 +93,6 @@ export const TrackRow = forwardRef<HTMLDivElement, TrackRowProps>(
 
     const isInteractive = !isLoading && !isDisabled
 
-    // Clicks on links, buttons and the menu belong to those controls; any
-    // other click on the row toggles playback, like the tile does.
     const handleRowClick = useCallback(
       (event: MouseEvent<HTMLDivElement>) => {
         if (!isInteractive) return
@@ -124,7 +121,6 @@ export const TrackRow = forwardRef<HTMLDivElement, TrackRowProps>(
       [onToggleFavorite]
     )
 
-    // Title column starts after the rank and artwork cells and two gaps.
     const contextCss = css({
       display: 'flex',
       alignItems: 'center',
@@ -159,8 +155,6 @@ export const TrackRow = forwardRef<HTMLDivElement, TrackRowProps>(
       })
     })
 
-    // The numeral, the equalizer and the play button share one grid cell so
-    // they stack dead-center and cross-fade on hover.
     const rankCss = css({
       display: 'grid',
       placeItems: 'center',

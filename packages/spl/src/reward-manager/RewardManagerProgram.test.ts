@@ -185,7 +185,6 @@ describe('RewardManagerProgram', () => {
     )
     expect(decoded.count).toBe(3)
 
-    // Check message 0: DN Attestation
     expect(decoded.messages[0].senderEthAddress).toBe(
       '0xf2897993951d53a7e3eb2242d6a14d2028140dc8'
     )
@@ -203,7 +202,6 @@ describe('RewardManagerProgram', () => {
       '0xe5b256d302ea2f4e04b8f3bfd8695ade147ab68d'
     )
 
-    // Check message 1: Oracle Attestation
     expect(decoded.messages[1].senderEthAddress).toBe(
       '0x9811ba3eab1f2cd9a2dfedb19e8c2a69729dc8b6'
     )
@@ -219,7 +217,6 @@ describe('RewardManagerProgram', () => {
       '0x9811ba3eab1f2cd9a2dfedb19e8c2a69729dc8b6'
     )
 
-    // Check message 2: DN Attestation
     expect(decoded.messages[2].senderEthAddress).toBe(
       '0x2cd66a3931c36596efb037b06753476dce6b4e86'
     )
@@ -262,7 +259,7 @@ describe('RewardManagerProgram', () => {
       BigInt('100000000')
     )
     expect(instruction.data.subarray(9).readUint16LE()).toBe(
-      instruction.data.byteLength - 20 - 9 - 4 // ethAddress, curOffset, size of this number
+      instruction.data.byteLength - 20 - 9 - 4
     )
     expect(
       instruction.data

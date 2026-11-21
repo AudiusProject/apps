@@ -1,5 +1,3 @@
-// NOTE: No imports allowed - quicktype is not yet able to track imports!
-
 export type ValidateCanChatRPC = {
   method: 'user.validate_can_chat'
   params: {
@@ -12,8 +10,8 @@ export type ChatBlastRPC = {
   params: {
     blast_id: string
     audience: ChatBlastAudience
-    audience_content_type?: 'track' | 'album' // if targeting buyers / remixers of a specific track or album
-    audience_content_id?: string // if targeting buyers / remixers of a specific track or album
+    audience_content_type?: 'track' | 'album'
+    audience_content_id?: string
     message: string
   }
 }
@@ -142,7 +140,6 @@ export type RPCPayload = RPCPayloadRequest & {
 export type RPCMethod = RPCPayload['method']
 
 export type UserChat = {
-  // User agnostic
   chat_id: string
   last_message: string
   last_message_at: string
@@ -152,7 +149,6 @@ export type UserChat = {
   /** True for group chats (created with more than two members). */
   is_group?: boolean
 
-  // User specific
   invite_code: string
   unread_message_count: number
   last_read_at: string
@@ -165,7 +161,6 @@ export type UserChat = {
    */
   has_replied?: boolean
 
-  // If blast:
   is_blast: false
   audience: ChatBlastAudience
   audience_content_id?: string
@@ -208,16 +203,14 @@ type ChatBlastBase = {
   audience_content_type?: 'track' | 'album'
 }
 
-// Return type of getNewBlasts
 export type UpgradableChatBlast = ChatBlastBase & {
-  pending_chat_id: string // chat_id to be created when upgrading to UserChat
+  pending_chat_id: string
   from_user_id: number
   plaintext: string
   created_at: string
   blast_id: string
 }
 
-// Client-side chat blast
 export type ChatBlast = ChatBlastBase & {
   is_blast: true
   last_message_at: string
@@ -225,7 +218,7 @@ export type ChatBlast = ChatBlastBase & {
 
 export type ValidatedChatPermissions = {
   user_id: string
-  permits: ChatPermission // depricated: use multi-value permit_list in future
+  permits: ChatPermission
   permit_list: ChatPermission[]
   current_user_has_permission: boolean
 }
@@ -286,8 +279,6 @@ export type CommsResponse = {
     next_count: number
     total_count: number
   }
-  // Overridden in client types but left as any for the server.
-  // quicktype/golang doesn't do well with union types
   data: any
 }
 

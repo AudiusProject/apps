@@ -7,12 +7,7 @@ import { Attestation } from './types'
 
 export class AttestationLayout extends Layout<Attestation> {
   constructor(property?: string) {
-    super(
-      // ethAddress().span + 1 + u64().span + 1 + 32 + 1 + ethAddress().span,
-      // 20 + 1 + 8 + 1 + 32 + 1 + 20 = 83
-      83,
-      property
-    )
+    super(83, property)
   }
 
   getSpan(b: Uint8Array, offset = 0) {

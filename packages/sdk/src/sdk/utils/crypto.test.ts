@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { CryptoUtils } from './crypto'
 
-// Fixes the IV both implementations draw from crypto.getRandomValues
 const withFixedIv = async <T>(iv: Uint8Array, fn: () => Promise<T>) => {
   const spy = vi
     .spyOn(globalThis.crypto, 'getRandomValues')
@@ -45,7 +44,6 @@ describe('CryptoUtils matches micro-aes-gcm', () => {
   })
 
   it('uses the last 32 bytes of a longer secret, like before', async () => {
-    // Shared secrets are 33-byte compressed points
     const secret = new Uint8Array(randomBytes(33))
     const iv = new Uint8Array(randomBytes(12))
     const payload = new TextEncoder().encode('hello')

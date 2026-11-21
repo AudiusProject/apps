@@ -1,7 +1,7 @@
 const { runMigrations, clearDatabase } = require('../../src/migrationManager')
 
 async function getApp() {
-  delete require.cache[require.resolve('../../src/app')] // force reload between each test
+  delete require.cache[require.resolve('../../src/app')]
   const App = require('../../src/app')
   const config = require('../../src/config')
   config.set('isTestRun', true)
@@ -27,7 +27,6 @@ async function getApp() {
 
   server.app.set('audiusLibs', audiusLibs)
 
-  // run all migrations before each test
   await clearDatabase()
   await runMigrations()
 

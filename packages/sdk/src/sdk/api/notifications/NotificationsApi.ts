@@ -38,7 +38,6 @@ export class NotificationsApi extends GeneratedNotificationsApi {
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.NOTIFICATION,
-      // In this case, we are the entityId since we are marking our own notifications as viewed
       entityId: userId,
       action: Action.VIEW,
       metadata: ''

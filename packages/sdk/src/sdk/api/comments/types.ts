@@ -43,7 +43,6 @@ export type CommentMetadata = {
   mentions?: number[]
 }
 
-// Zod schemas for dual-auth support
 export const CreateCommentSchema = z
   .object({
     userId: HashId,
