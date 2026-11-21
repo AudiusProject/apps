@@ -33,14 +33,7 @@ const emptyMessageForTab: Record<InboxTab, string> = {
   [InboxTab.GENERAL]: messages.generalEmpty
 }
 
-/**
- * Chats are paginated by recency across all categories, so a tab can be
- * empty while older pages still hold chats that belong in it. Keep fetching
- * until the tab has at least this many rows or there is nothing left.
- */
 const MIN_VISIBLE_CHATS_PER_TAB = 10
-// Stop backfilling after this many pages per tab visit, so a mostly empty tab
-// doesn't page through the whole chat history.
 const MAX_BACKFILL_PAGES = 5
 
 type ChatListProps = {
@@ -68,7 +61,6 @@ export const ChatList = (props: ChatListProps) => {
     }
   }, [status, setHasLoadedOnce])
 
-  // Backfill the current tab from older pages when it is nearly empty
   const [backfillPages, setBackfillPages] = useState(0)
   useEffect(() => {
     setBackfillPages(0)
@@ -83,8 +75,6 @@ export const ChatList = (props: ChatListProps) => {
     }
   }, [status, needsBackfill, dispatch])
 
-  // While there are still pages to load, the InfiniteScroll loader (below)
-  // shows skeletons, so only show the empty state once we've run out.
   const isEmptyTab =
     chats.length === 0 &&
     hasLoadedOnce &&

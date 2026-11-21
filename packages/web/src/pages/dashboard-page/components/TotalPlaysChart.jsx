@@ -240,8 +240,6 @@ const TotalPlaysChart = ({
   useEffect(() => {
     setChartWidthHeight()
     window.addEventListener('resize', setChartWidthHeight)
-    // chart.js measures text via canvas, so we wait for fonts to be ready
-    // before triggering an update so axis labels size correctly.
     document.fonts.ready.then(() => {
       chart.current?.update()
     })

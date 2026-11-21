@@ -59,7 +59,6 @@ export class SolanaClient {
       throw new Error('RPC Endpoints not configured')
     }
     this.connection = new Connection(
-      // Only supports one RPC endpoint right now
       configWithDefaults.rpcEndpoints[0],
       configWithDefaults.rpcConfig
     )
@@ -105,7 +104,6 @@ export class SolanaClient {
 
     const payerKey = feePayer ?? (await this.getFeePayer())
 
-    // Calculate priority fees
     if (priorityFee) {
       if ('microLamports' in priorityFee) {
         instructions.push(
@@ -128,7 +126,6 @@ export class SolanaClient {
           0
         )
         const baseFee = (orderedFees[percentileIndex] ?? 0) * multiplier
-        // setComputeUnitPrice converts to BigInt, which throws on fractions
         const microLamports = Math.round(
           Math.min(
             Math.max(baseFee, priorityFee.minimumMicroLamports ?? 0),
@@ -149,7 +146,6 @@ export class SolanaClient {
       ? addressLookupTables
       : await this.getLookupTableAccounts(addressLookupTables)
 
-    // Simulate to get compute units
     if (computeLimit) {
       if ('units' in computeLimit) {
         instructions.push(
@@ -184,7 +180,6 @@ export class SolanaClient {
             )
           }
         } catch (e) {
-          // For now, even if specifying compute budget limit, ignore errors
           this.logger.warn('Failed to get computeLimit', e)
         }
       }

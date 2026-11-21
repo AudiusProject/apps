@@ -71,17 +71,9 @@ module.exports = function (app) {
           return errorResponseServerError('hCaptcha Verification failed.')
         }
 
-        // save hCaptcha score for user in BotScores
         await models.BotScores.create({
           walletAddress: user.walletAddress,
-          // hCaptcha scores represent risk scores
-          // the score values go from 0 to 1
-          // the higher the score the worse it is
-          // e.g. 0 is 'safe' and 1 is 'bot'
-          // given we are using the free publisher tier of hCaptcha, we only get the binary success/fail and no score value
-          // therefore we use the score of 1 to denote that verification was ok and remain consistent with our other scores
           recaptchaScore: 1,
-          // the recaptcha context is very important because that's how we know whether the score is from hCaptcha
           recaptchaContext: 'hCaptcha',
           recaptchaHostname: hostname
         })

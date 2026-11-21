@@ -85,7 +85,6 @@ const ChangePasswordNavigator = ({
   const styles = useStyles()
   const navigation = useNavigation()
 
-  // Only show the back button on the OTP page
   const screenOptions = useAppScreenOptions({
     headerRight: () => null,
     headerLeft: () => {
@@ -93,8 +92,6 @@ const ChangePasswordNavigator = ({
     }
   })
 
-  // Map hook page state to screen navigations. The pages live in the nested
-  // stack, so target them through this screen's route.
   useEffect(() => {
     navigation.navigate('ChangePassword', {
       screen: ChangePasswordPage[page],
@@ -102,7 +99,6 @@ const ChangePasswordNavigator = ({
     })
   }, [page, navigation])
 
-  // Map navigations back to the hook page state
   const stateListener = useCallback<
     EventListenerCallback<EventMapCore<NavigationState>, 'state'>
   >(

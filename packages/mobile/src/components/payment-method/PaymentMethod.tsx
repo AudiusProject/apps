@@ -108,7 +108,6 @@ export const PaymentMethod = ({
     PurchaseVendor.STRIPE
   ].filter(removeNullable)
 
-  // Set initial state if coinflow is enabled
   useEffect(() => {
     if (isCoinflowEnabled) {
       dispatch(setPurchaseVendor(PurchaseVendor.COINFLOW))
@@ -225,7 +224,6 @@ export const PaymentMethod = ({
     })
   }
 
-  // NEW: If showExtraItemsToggle is false, append extraItems to items
   const summaryTableItems = showExtraItemsToggle
     ? items
     : [...items, ...extraItems]

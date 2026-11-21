@@ -33,7 +33,6 @@ type ProfileBioProps = {
   tikTokHandle: string
 }
 
-// Line height is 16px, 4 lines
 const MAX_BIO_SIZE = 16 * 4
 
 export const ProfileBio = ({
@@ -60,11 +59,6 @@ export const ProfileBio = ({
   ].filter(Boolean).length
   const hasSocial = twitterHandle || instagramHandle || tikTokHandle
 
-  /**
-   * Collapse the component by default if:
-   * - The bio is more than four lines OR
-   * - There's more than one link
-   */
   useEffect(() => {
     if (
       !isCollapsed &&

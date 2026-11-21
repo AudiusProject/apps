@@ -208,17 +208,6 @@ const DelegationDecreaseEvent: React.FC<{
     if (parentOnClick) parentOnClick()
   }
 
-  // Text looks like
-  // Evaluated:
-  //  Delegator: Decreased delegation X Audio To SP Y
-  //  SP: Delegator X decreased delegation by Y Audio
-  // Requested:
-  //  Delegator: Requested to decrease delegation to SP Y by X Audio
-  //  SP: Delegator X requested to decrease delegation by Y Audio
-  // Cancelled:
-  //  Delegator: Cancelled request to decrease delegation To SP Y by X Audio'
-  //  SP: Delegator X cancelled requested to decrease delegation by Y Audio
-
   const renderRequestSent = () => {
     return (
       <>
@@ -374,7 +363,6 @@ const RegistrationDeregistrationEvent: React.FC<{
 }> = ({ event, parentOnClick, className, isDisabled }) => {
   const didRegister = event._type === 'ServiceProviderRegistered'
 
-  // is it discovery-node or creator-node
   const onClick = () => {
     if (parentOnClick) parentOnClick()
   }
@@ -532,7 +520,6 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({
   if (!event) return null
 
   switch (event._type) {
-    // Governance
     case 'GovernanceVote':
     case 'GovernanceVoteUpdate':
       return (
@@ -553,7 +540,6 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({
         />
       )
 
-    // Delegation
     case 'DelegateIncreaseStake':
       return (
         <DelegationIncreaseEvent
@@ -571,7 +557,6 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({
         />
       )
 
-    // SP
     case 'ServiceProviderRegistered':
     case 'ServiceProviderDeregistered':
       return (
@@ -592,7 +577,6 @@ const TimelineEvent: React.FC<TimelineEventProps> = ({
         />
       )
 
-    // Claim
     case 'DelegateClaim':
     case 'ClaimProcessed':
       return (

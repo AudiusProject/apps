@@ -115,17 +115,15 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     onScreenChange: stableOnScreenChange
   })
 
-  // Set the screen to 'confirm' when this component mounts
   useEffect(() => {
     setCurrentScreen('confirm')
   }, [setCurrentScreen])
 
-  // Create transaction data from the confirmation data passed via navigation
   const transactionData = useMemo(
     () => ({
       inputAmount: payAmount,
       outputAmount: receiveAmount,
-      isValid: true // If we got to the confirmation screen, the data should be valid
+      isValid: true
     }),
     [payAmount, receiveAmount]
   )
@@ -194,7 +192,6 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     trackSwapSuccess
   ])
 
-  // Handle swap data errors (when swap returns error status) - navigate back and show toast
   useEffect(() => {
     if (
       (swapData?.status === SwapStatus.ERROR && swapData?.error) ||
@@ -219,10 +216,8 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
         }
       )
 
-      // Navigate back to input screen (matching web behavior)
       navigation.popTo('BuySellMain')
 
-      // Show toast notification
       toast({ content: messages.transactionFailed, type: 'error' })
     }
   }, [
@@ -239,7 +234,6 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     swapError
   ])
 
-  // balance isn't needed so we pass 0
   const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     availableBalance: 0,
@@ -276,7 +270,6 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
     return null
   }
 
-  // Show loading screen when confirming transaction
   if (isConfirmButtonLoading) {
     return (
       <Screen variant='white' url='/buy-sell/confirm-loading'>

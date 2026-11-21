@@ -28,7 +28,6 @@ type ReviewHandleValues = {
   handle: string
 }
 
-// Users land here if their handle doesn't work with our validation for some reason
 export const ReviewHandleScreen = () => {
   const dispatch = useDispatch()
   const { value: handle } = useSelector(getHandleField)

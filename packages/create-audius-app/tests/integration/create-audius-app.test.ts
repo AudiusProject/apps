@@ -101,8 +101,6 @@ describe('create audius app', () => {
     await useTempDir(async (cwd) => {
       const projectName = 'not-writable'
 
-      // if the folder isn't able to be write restricted we can't test
-      // this so skip
       if (
         await fs
           .writeFile(path.join(cwd, 'test'), 'hello')

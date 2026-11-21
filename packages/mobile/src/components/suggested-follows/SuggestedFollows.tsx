@@ -55,13 +55,10 @@ export const SuggestedFollows = () => {
   const { isPersonalized } = useFollowSuggestions()
 
   const handleArtistsSelected = useCallback(() => {
-    // Set eager users and refetch feed
     dispatch(signOnActions.followArtists())
-    // Invalidate the feed tan-query so it refetches after following
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.feed]
     })
-    // Async go follow users
     selectedUserIds.forEach((userId) => {
       dispatch(usersSocialActions.followUser(userId, FollowSource.EMPTY_FEED))
     })

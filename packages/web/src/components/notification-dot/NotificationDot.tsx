@@ -9,7 +9,6 @@ type NotificationDotProps = {
   variant: NotificationDotVariant
 } & ComponentProps<'span'>
 
-/** Renders a basic notification dot used to decorate controls and indicate new information */
 export const NotificationDot = (props: NotificationDotProps) => {
   const { variant, className, ...other } = props
 

@@ -10,8 +10,6 @@ import type { ImageHasher, NonImageHasher, HashedImage } from './fileHasher'
 import { MultiProvider } from './multiProvider'
 import { uuid } from './uuid'
 
-// Hashids
-
 const HASH_SALT = 'azowernasdfoia'
 const MIN_LENGTH = 5
 const hashids = new Hashids(HASH_SALT, MIN_LENGTH)
@@ -74,7 +72,6 @@ export class Utils {
     )
   }
 
-  // Regular expression to check if endpoint is a FQDN. https://regex101.com/r/kIowvx/2
   static isFQDN(url: string) {
     const FQDN =
       /(?:^|[ \t])((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/gm
@@ -86,7 +83,6 @@ export class Utils {
     return https.test(url)
   }
 
-  // Function to check if the endpont/health_check returns JSON object [ {'healthy':true} ]
   static async isHealthy(url: string) {
     try {
       const { data: body }: AxiosResponse<{ data: { healthy: boolean } }> =
@@ -114,18 +110,8 @@ export class Utils {
     }
   }
 
-  /**
-   * Given a digest value (written on chain, obtained through AudiusABIDecoder.decodeMethod),
-   * convert back to a IFPS CIDv0
-   * @param multihashDigest digest value from decodeMultihash
-   * @returns String CID value
-   */
   static encodeMultihash(multihashDigest: string) {
-    // the 1220 is from reconstructing the hashFn and size with digest, the opposite of decodeMultihash
-    // since IPFS CIDv0 has a fixed hashFn and size, the first two values are always 12 and 20
-    // concat them together with digest and encode back to base58
     const digestStr = `1220${multihashDigest.replace('0x', '')}`
-    // convert digestStr from hex to base 58
     return bs58.encode(Buffer.from(digestStr, 'hex'))
   }
 
@@ -134,7 +120,6 @@ export class Utils {
 
     const obj = response.data
 
-    // adapted from https://github.com/jashkenas/underscore/blob/master/underscore.js _.isEmpty function
     if (obj == null) return null
     if ((Array.isArray(obj) || typeof obj === 'string') && obj.length === 0)
       return null
@@ -148,8 +133,6 @@ export class Utils {
     chainNetworkId: string,
     requiresAccount = true
   ) {
-    // Initializing web3 with a HttpProvider wrapper for multiple providers
-    // ref: https://github.com/ChainSafe/web3.js/blob/1.x/packages/web3/types/index.d.ts#L31.
     const web3Instance = new Web3(new MultiProvider(web3Provider))
 
     try {
@@ -182,9 +165,6 @@ export class Utils {
     return uuid()
   }
 
-  /**
-   * Decodes a string id into an int. Returns null if an invalid ID.
-   */
   static decodeHashId(id: string) {
     try {
       const ids = hashids.decode(id)
@@ -198,9 +178,6 @@ export class Utils {
     }
   }
 
-  /**
-   * Encodes an int to a string based hashid
-   */
   static encodeHashId(id: number | null) {
     try {
       if (id === null) return null
@@ -212,10 +189,6 @@ export class Utils {
     }
   }
 
-  /**
-   * If `promise` responds before `timeoutMs`,
-   * this function returns its response; else rejects with `timeoutMessage`
-   */
   static async racePromiseWithTimeout(
     promise: Promise<void>,
     timeoutMs: number,

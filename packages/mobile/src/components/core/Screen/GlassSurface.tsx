@@ -12,52 +12,18 @@ import Animated, {
 
 import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 
-/**
- * Opacity of the tint laid over the blur. Mirrors the desktop `Frosted`
- * surface, which sits at 65% of `--harmony-n-25` over a 10px backdrop blur.
- * Slightly higher here because mobile blurs a much busier backdrop (album art
- * scrolling underneath) and the header text has to stay legible at a glance.
- */
 const IOS_TINT_OPACITY = 0.72
 
-/**
- * Scroll distance (px) over which the bottom edge fades from invisible to
- * fully drawn. Short enough that the edge is there by the time the first tile
- * is meaningfully behind the glass, long enough not to snap.
- */
 const EDGE_FADE_DISTANCE = 24
 
 type GlassSurfaceProps = ViewProps & {
   children?: ReactNode
-  /** Draw a hairline separator along the bottom edge. */
   showBorder?: boolean
-  /**
-   * Which edge the separator sits on. Bottom for glass that content scrolls
-   * *under* (the header stack), top for glass that content scrolls *behind*
-   * from below (the bottom tab bar).
-   */
   borderEdge?: 'top' | 'bottom'
-  /**
-   * Scroll offset of the content behind the glass. When provided, the bottom
-   * edge (hairline + soft shadow) is absent at rest and fades in as content
-   * slides underneath — so the stack reads flush with the page until there is
-   * actually something behind it to separate from. Without it the edge is
-   * drawn statically.
-   */
   scrollY?: SharedValue<number>
-  /** Override the blur radius used on iOS. */
   blurAmount?: number
 }
 
-/**
- * A translucent "frosted glass" surface that content scrolls behind.
- *
- * Renders the blur/tint as an absolutely-positioned layer so the caller keeps
- * full control of its own layout — drop it in as the first child of a
- * position-relative container and the surface fills it.
- *
- * iOS gets a backdrop blur under a tint; Android gets an opaque tint.
- */
 export const GlassSurface = (props: GlassSurfaceProps) => {
   const {
     children,
@@ -72,7 +38,6 @@ export const GlassSurface = (props: GlassSurfaceProps) => {
   const { backgroundSurface, borderStrong } = useThemeColors()
 
   const edgeStyle = useAnimatedStyle(() => {
-    // Without scrollY the edge is always drawn.
     if (!scrollY) return { opacity: 1 }
     return {
       opacity: interpolate(
@@ -84,11 +49,6 @@ export const GlassSurface = (props: GlassSurfaceProps) => {
     }
   })
 
-  // Android has no backdrop blur (too costly on a surface composited every
-  // scroll frame), so the tint is opaque there, and it goes on the root. Gesture
-  // handler's Android hit test treats a view group without a background as
-  // see-through: a tap between this surface's buttons would also reach a
-  // gesture handler underneath it, like a track tile's tap to play.
   const androidTint =
     Platform.OS === 'android' ? { backgroundColor: backgroundSurface } : null
 
@@ -136,8 +96,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: StyleSheet.hairlineWidth,
-    // Soft drop off the hairline so the glass reads as a layer above the
-    // content passing under it, not just a ruled line.
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -150,7 +108,6 @@ const styles = StyleSheet.create({
   borderTop: {
     top: 0,
     shadowOffset: { width: 0, height: -2 },
-    // Android elevation always casts downward, into the bar itself
     elevation: 0
   }
 })

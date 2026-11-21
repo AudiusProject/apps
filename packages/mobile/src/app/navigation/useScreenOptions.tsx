@@ -26,7 +26,6 @@ export const ScreenOptionsContext = createContext<{
 }>({ options: defaultScreenOptions, updateOptions: () => {} })
 
 export const useScreenOptions = () => {
-  // These are managed via useState in SignOnStack
   const { options, updateOptions } = useContext(ScreenOptionsContext) ?? {}
   return { options, updateOptions }
 }

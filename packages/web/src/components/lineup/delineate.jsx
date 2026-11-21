@@ -66,7 +66,6 @@ export const delineateByTime = (tiles, isMobile) => {
           key = bucket
           text = bucket
         }
-        // Don't show a delineator at the top.
         if (i !== 0) {
           const d = <Delineator key={key} text={text} isMobile={isMobile} />
           tiles.splice(i, 0, d)

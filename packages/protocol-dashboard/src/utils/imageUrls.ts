@@ -1,7 +1,3 @@
-/**
- * Builds a full URL list from an Audius API artwork/profilePicture object.
- * Primary URL first, then each mirror host with the same path.
- */
 export function getImageUrls(
   artworkObj: Record<string, any> | null | undefined,
   size = '_480x480'

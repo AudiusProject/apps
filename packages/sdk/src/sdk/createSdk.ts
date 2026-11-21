@@ -62,10 +62,8 @@ export const createSdk = (config: SdkConfig) => {
 
   const middleware: Middleware[] = []
 
-  // Token store for PKCE flow — provides dynamic accessToken to Configuration
   const tokenStore = services?.tokenStore ?? new TokenStoreLocalStorage()
 
-  // Initialize OAuth early so it can be passed to middleware
   const redirectUri = 'redirectUri' in config ? config.redirectUri : undefined
 
   const oauth = new OAuth({
@@ -108,7 +106,6 @@ export const createSdk = (config: SdkConfig) => {
 
   middleware.push(addSolanaWalletSignatureMiddleware({ solanaWallet }))
 
-  // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
   if (apiKey && oauth) {
     middleware.push(
       addTokenRefreshMiddleware({
@@ -122,25 +119,19 @@ export const createSdk = (config: SdkConfig) => {
     middleware,
     basePath,
     accessToken: (name, _scopes) => {
-      // 'OAuth2' comes from the name in the securitySchemes in the OpenAPI spec
       if (name === 'OAuth2') {
-        // For OAuth2, we need to return the token with the 'Bearer ' prefix ourselves
-        // See: https://github.com/OpenAPITools/openapi-generator/issues/12514#issuecomment-1166293860
         return tokenStore
           .getAccessToken()
           .then((t) => (t ? `Bearer ${t}` : undefined))
       }
       // 'BearerAuth' comes from the name in the securitySchemes in the OpenAPI spec
       else if (name === 'BearerAuth') {
-        // The template adds the 'Bearer ' prefix, so we don't need to add it here
         return bearerToken
       }
-      // Default to bearerToken for any other auth schemes that require a token, for backward compatibility with older SDK versions
       return bearerToken
     }
   })
 
-  // Initialize API clients
   const usersApi = new UsersApi(apiConfig)
   const resolveApi = new ResolveApi(apiConfig)
 
@@ -150,16 +141,12 @@ export const createSdk = (config: SdkConfig) => {
     tokenStore,
     tracks: new TracksApi(apiConfig),
     users: usersApi,
-    // albums
     playlists: new PlaylistsApi(apiConfig),
     tips: new TipsApi(apiConfig),
     resolve: resolveApi.resolve.bind(resolveApi),
-    // chats
-    // grants
     developerApps: new DeveloperAppsApi(apiConfig),
     dashboardWalletUsers: new DashboardWalletUsersApi(apiConfig),
     rewards: new RewardsApi(apiConfig),
-    // services
     comments: new CommentsApi(apiConfig),
     notifications: new NotificationsApi(apiConfig),
     events: new EventsApi(apiConfig),

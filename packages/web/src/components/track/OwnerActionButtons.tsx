@@ -27,7 +27,7 @@ const messages = {
 }
 
 type OwnerActionButtonProps = {
-  contentId: ID // Collection or Track ID
+  contentId: ID
   isDisabled?: boolean
   isLoading?: boolean
   rightActions?: ReactNode

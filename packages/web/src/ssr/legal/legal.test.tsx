@@ -32,8 +32,6 @@ describe('legal SSR routes', () => {
       expect(html).toContain(`<h1>${title}</h1>`)
       expect(html).toContain(`href="${documentPath}"`)
       expect(html).toContain(`src="${documentPath}"`)
-      // Use a filesystem path: Vite rewrites new URL(..., import.meta.url)
-      // as an asset URL in the browser test environment.
       expect(
         existsSync(path.join(__dirname, '../../../public', documentPath))
       ).toBe(true)

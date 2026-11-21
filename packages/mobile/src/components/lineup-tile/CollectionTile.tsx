@@ -122,9 +122,6 @@ export const CollectionTile = (props: CollectionTileProps) => {
   const { primary } = useThemeColors()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Mirror the web mobile CollectionTile path exactly: fetch the collection
-  // by ID (no select), feed it to useOrderedCollectionTracks. Returns plain
-  // CollectionTrack[] / TrackMetadata[] — no UID plumbing required.
   const { data: cachedCollection } = useCollection(id)
   const collection = collectionOverride ?? cachedCollection
   const collectionTracks = useOrderedCollectionTracks(cachedCollection)
@@ -144,16 +141,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
     return tracks.find((track) => track.track_id === trackId) ?? null
   })
 
-  // Title tints to the active/playing color whenever any track in this
-  // collection is the one currently playing. Mirrors TrackTile's per-tile
-  // highlight (LineupTileMetadata: `color={isActive ? 'primary' : 'neutral'}`)
-  // and the per-row highlight in CollectionTileTrackList (each TrackItem
-  // already runs its own `getTrackId(state) === trackId` selector and
-  // applies `styles.active` / `palette.primary` to its title text).
   const isActive = currentTrack != null
-  // True only while audio is actively playing (not paused) AND one of this
-  // collection's tracks is the current track. Mirrors LineupTileMetadata's
-  // `isPlaying` derivation — drives the speaker icon next to the title.
   const isPlaying = useSelector((state) => getPlaying(state) && isActive)
 
   const isCollectionMarkedForDownload = useSelector((state) =>
@@ -185,10 +173,6 @@ export const CollectionTile = (props: CollectionTileProps) => {
         childPressedRef.current = false
         return
       }
-      // Don't try to play a deleted-by-artist track. Pick the current
-      // track (if it's one of ours and not deleted), else the first
-      // non-deleted track in the collection. If everything is deleted,
-      // the tile tap is a no-op.
       const startTrackId =
         currentTrack && !currentTrack.is_delete
           ? currentTrack.track_id
@@ -219,9 +203,6 @@ export const CollectionTile = (props: CollectionTileProps) => {
     )
   }, [tracks])
 
-  // Use track_count if present on the collection (canonical full count);
-  // fall back to the loaded tracks length. Drives the skeleton state on the
-  // track list while tracks are still being fetched.
   const trackCount =
     collection?.track_count ??
     collection?.playlist_contents?.track_ids?.length ??

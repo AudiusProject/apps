@@ -10,19 +10,12 @@ const toCssSize = (value: CssLength | undefined) => {
 }
 
 export type SkeletonProps = {
-  // Width (css string) of the skeleton to display. Default 100%.
   width?: string
-  // Height (css string) of the skeleton to display. Default 100%.
   height?: string
-  /** Shorthand for `width`; ignored when `width` is set. Numbers become px. */
   w?: CssLength
-  /** Shorthand for `height`; ignored when `height` is set. Numbers become px. */
   h?: CssLength
-  /** Maps to CSS `border-radius`. Use `'circle'` for a round avatar (50%). */
   borderRadius?: string
-  // Optional class name to pass in and override styles with
   className?: string
-  // Whether to disable the shimmer animation
   noShimmer?: boolean
 }
 

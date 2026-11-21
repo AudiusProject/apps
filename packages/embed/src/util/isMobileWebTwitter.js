@@ -1,4 +1,3 @@
-// Only display the twitter footer if we're taller than this
 const TWITTER_FOOTER_HEIGHT_THRESHOLD = 400
 
 export const isMobileWebTwitter = (isTwitter) => {

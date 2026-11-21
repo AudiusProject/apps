@@ -19,7 +19,6 @@ module.exports = function (app) {
 
       const twitterUser = await models.TwitterUser.findOne({
         where: {
-          // Twitter stores case sensitive screen names
           'twitterProfile.screen_name': handle,
           verified: true
         }
@@ -27,7 +26,6 @@ module.exports = function (app) {
 
       const instagramUser = await models.InstagramUser.findOne({
         where: {
-          // Instagram does not store case sensitive screen names
           'profile.username': handle.toLowerCase(),
           verified: true
         }
@@ -35,7 +33,6 @@ module.exports = function (app) {
 
       const tikTokUser = await models.TikTokUser.findOne({
         where: {
-          // TikTok does not store case sensitive screen names
           'profile.display_name': handle.toLowerCase(),
           verified: true
         }
@@ -63,7 +60,6 @@ module.exports = function (app) {
         where: { handle }
       })
 
-      // If twitterUser is verified, audiusHandle must match twitterHandle.
       const twitterUser = await models.TwitterUser.findOne({
         where: {
           'twitterProfile.screen_name': twitterHandle,

@@ -28,7 +28,6 @@ const { claimAllChallengeRewards, resetAndCancelClaimReward } =
 const { getClaimStatus } = audioRewardsPageSelectors
 
 const messages = {
-  // Claim success toast
   claimSuccessMessage: 'All rewards successfully claimed!',
   pending: (amount: number) => `${formatNumberCommas(amount)} Pending`,
   claimAudio: (amount: number) => `Claim ${formatNumberCommas(amount)} $AUDIO`,

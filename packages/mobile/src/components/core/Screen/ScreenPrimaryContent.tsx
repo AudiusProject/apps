@@ -10,13 +10,6 @@ type ScreenPrimaryContentProps = {
   skeleton?: ReactNode
 }
 
-/**
- * ScreenPrimaryContent is a wrapper that ensures the primary content is only rendered
- * after the screen is ready and blocks any ScreenSecondaryContent from rendering until
- * the PrimaryContent is ready
- *
- * _Note: ScreenPrimaryContent should not be used outside of a Screen component_
- */
 export const ScreenPrimaryContent = (props: ScreenPrimaryContentProps) => {
   const { children, skeleton } = props
   const { isScreenReady, setIsPrimaryContentReady } = useScreenContext()
@@ -32,7 +25,5 @@ export const ScreenPrimaryContent = (props: ScreenPrimaryContentProps) => {
       <Animated.View entering={FadeIn}>{children}</Animated.View>
     )
 
-  // Note: not animating on Android because shadows are rendered natively behind the
-  // animated view and thus don't follow the animation.
   return <>{isScreenReady ? screenContent : (skeleton ?? null)}</>
 }

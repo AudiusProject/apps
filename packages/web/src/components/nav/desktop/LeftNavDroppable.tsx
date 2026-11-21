@@ -22,7 +22,6 @@ export const LeftNavDroppable = (props: LeftNavDroppableProps) => {
           className={css({
             width: '100%',
             position: 'relative',
-            // Drop Background
             '::before': {
               content: '""',
               position: 'absolute',
@@ -34,7 +33,6 @@ export const LeftNavDroppable = (props: LeftNavDroppableProps) => {
               transition: `opacity ${theme.motion.quick}`,
               opacity: 0
             },
-            // Drop Indicator
             '::after': {
               content: '""',
               position: 'absolute',
@@ -50,14 +48,12 @@ export const LeftNavDroppable = (props: LeftNavDroppableProps) => {
           })}
           hoverClassName={
             kind === 'track'
-              ? // Show drop background when hovering with a track
-                css({
+              ? css({
                   '::before': {
                     opacity: 0.15
                   }
                 })
-              : // Show drop indicator below the item when hovering with a playlist
-                css({
+              : css({
                   '::after': {
                     opacity: 1
                   }

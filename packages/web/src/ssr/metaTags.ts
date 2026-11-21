@@ -1,8 +1,3 @@
-/**
- * SSR Meta Tags Utilities
- * Centralized meta tag generation for both SSR and client-side rendering
- */
-
 import {
   fullCollectionPage,
   fullProfilePage,
@@ -11,17 +6,14 @@ import {
 } from 'utils/route'
 import { getWeeklyRotationOgImageUrl } from 'utils/weeklyRotationPeriod'
 
-// Image URLs - default OG uses the Audius logo on black from og.audius.co
 export const DEFAULT_IMAGE_URL = 'https://og.audius.co/default'
 export const AUDIO_REWARDS_IMAGE_URL =
   'https://download.audius.co/static-resources/audio-rewards.png'
 export const SIGNUP_REF_IMAGE_URL =
   'https://download.audius.co/static-resources/signup_referral.png'
 
-// Regex to detect Twitter/Discord bots that can embed players
 const CAN_EMBED_USER_AGENT_REGEX = /(twitter|discord)/i
 
-// Regex to detect Discord bot specifically
 const DISCORD_USER_AGENT_REGEX = /discord/i
 
 export type PlayableType = 'track' | 'playlist' | 'album'
@@ -32,18 +24,12 @@ export interface ExploreInfo {
   image: string
 }
 
-/**
- * Create SEO description with consistent formatting
- */
 export const createSeoDescription = (msg: string, userPage?: boolean) => {
   if (userPage)
     return `${msg} | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
   return `${msg} | Stream tracks, albums, playlists on desktop and mobile`
 }
 
-/**
- * Get base public URL based on environment (used for canonical, og:url, etc.)
- */
 export const getPublicUrl = (): string => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {
@@ -54,48 +40,28 @@ export const getPublicUrl = (): string => {
   }
 }
 
-/**
- * Generate embed player URL for Twitter/Discord
- */
 export const getEmbedUrl = (type: PlayableType, hashId: string): string => {
   const publicUrl = getPublicUrl()
   return `${publicUrl}/embed/${type}/${hashId}?flavor=card&twitter=true`
 }
 
-/**
- * Check if User-Agent can show embed player (Twitter/Discord bots)
- */
 export const canEmbed = (userAgent: string): boolean => {
   return CAN_EMBED_USER_AGENT_REGEX.test(userAgent)
 }
 
-/**
- * Check if User-Agent is Discord bot
- * Discord uses a weird aspect ratio for OG unfurls, so we serve artwork
- * directly instead of the custom OG image.
- */
 export const isDiscord = (userAgent: string): boolean => {
   return DISCORD_USER_AGENT_REGEX.test(userAgent)
 }
 
-/**
- * Generate deep link URL for mobile apps
- */
 export const getAppUrl = (path: string): string => {
   return `audius:/${path}`
 }
 
-/**
- * Generate web URL for the page
- */
 export const getWebUrl = (path: string): string => {
   const publicUrl = getPublicUrl()
   return `${publicUrl}${path}`
 }
 
-/**
- * Explore type to metadata mapping
- */
 export const exploreMap: Record<string, ExploreInfo> = {
   'weekly-rotation': {
     title: 'Weekly Rotation',
@@ -106,9 +72,6 @@ export const exploreMap: Record<string, ExploreInfo> = {
   }
 }
 
-/**
- * Get explore info for a given type
- */
 export const getExploreInfo = (type?: string): ExploreInfo => {
   if (!type || !exploreMap[type]) {
     return {
@@ -120,9 +83,6 @@ export const getExploreInfo = (type?: string): ExploreInfo => {
   return exploreMap[type]
 }
 
-/**
- * Homepage schema markup for Organization, WebSite, SoftwareApplication
- */
 const getHomepageStructuredData = () => {
   const publicUrl = getPublicUrl()
   return {
@@ -156,9 +116,6 @@ const getHomepageStructuredData = () => {
   }
 }
 
-/**
- * Default meta tag context
- */
 export const getDefaultContext = () => {
   const publicUrl = getPublicUrl()
   return {
@@ -176,7 +133,6 @@ export const getDefaultContext = () => {
   }
 }
 
-/** Meta tags for a not-found page. Pair with noIndex. */
 export const getNotFoundContext = () => ({
   title: 'Not Found',
   description: '404 - Page not found',
@@ -186,9 +142,6 @@ export const getNotFoundContext = () => ({
   thumbnail: true
 })
 
-/**
- * Upload page meta tag context
- */
 export const getUploadContext = () => ({
   title: 'Upload',
   description: 'Upload your tracks to Audius',
@@ -196,9 +149,6 @@ export const getUploadContext = () => ({
   thumbnail: true
 })
 
-/**
- * $AUDIO token page meta tag context
- */
 export const getAudioContext = () => ({
   title: '$AUDIO & Rewards',
   description: 'Earn $AUDIO tokens while using the app!',
@@ -206,9 +156,6 @@ export const getAudioContext = () => ({
   thumbnail: false
 })
 
-/**
- * Rewards page meta tag context
- */
 export const getRewardsContext = () => ({
   title: '$AUDIO & Rewards',
   description: 'Earn $AUDIO tokens while using the app!',
@@ -216,9 +163,6 @@ export const getRewardsContext = () => ({
   thumbnail: false
 })
 
-/**
- * Signup page meta tag context
- */
 export const getSignupContext = () => ({
   title: 'Signup',
   description: 'Sign up for Audius',
@@ -226,9 +170,6 @@ export const getSignupContext = () => ({
   thumbnail: true
 })
 
-/**
- * Signup referral page meta tag context
- */
 export const getSignupRefContext = (handle?: string) => ({
   title: handle
     ? `Invite to join Audius from @${handle}!`
@@ -238,9 +179,6 @@ export const getSignupRefContext = (handle?: string) => ({
   thumbnail: false
 })
 
-/**
- * Download app page meta tag context
- */
 export const getDownloadAppContext = () => ({
   title: 'Download',
   description: 'Artists Deserve More.',
@@ -248,9 +186,6 @@ export const getDownloadAppContext = () => ({
   thumbnail: false
 })
 
-/**
- * Trending page meta tag context
- */
 export const getTrendingContext = () => ({
   title: 'Trending',
   description: createSeoDescription(
@@ -260,9 +195,6 @@ export const getTrendingContext = () => ({
   thumbnail: true
 })
 
-/**
- * Feed page meta tag context
- */
 export const getFeedContext = () => ({
   title: 'Feed',
   description: 'Your personalized feed on Audius',
@@ -270,9 +202,6 @@ export const getFeedContext = () => ({
   thumbnail: true
 })
 
-/**
- * Library page meta tag context
- */
 export const getLibraryContext = () => ({
   title: 'Library',
   description: 'Your music library on Audius',
@@ -280,9 +209,6 @@ export const getLibraryContext = () => ({
   thumbnail: true
 })
 
-/**
- * History page meta tag context
- */
 export const getHistoryContext = () => ({
   title: 'History',
   description: 'Your listening history on Audius',
@@ -290,9 +216,6 @@ export const getHistoryContext = () => ({
   thumbnail: true
 })
 
-/**
- * Dashboard page meta tag context
- */
 export const getDashboardContext = () => ({
   title: 'Dashboard',
   description: 'Your artist dashboard on Audius',
@@ -300,9 +223,6 @@ export const getDashboardContext = () => ({
   thumbnail: true
 })
 
-/**
- * Settings page meta tag context
- */
 export const getSettingsContext = () => ({
   title: 'Settings',
   description: 'Manage your Audius account settings',
@@ -310,9 +230,6 @@ export const getSettingsContext = () => ({
   thumbnail: true
 })
 
-/**
- * Notifications page meta tag context
- */
 export const getNotificationsContext = () => ({
   title: 'Notifications',
   description: 'Your notifications on Audius',
@@ -320,9 +237,6 @@ export const getNotificationsContext = () => ({
   thumbnail: true
 })
 
-/**
- * Messages page meta tag context
- */
 export const getMessagesContext = () => ({
   title: 'Messages',
   description: 'Your messages on Audius',
@@ -330,9 +244,6 @@ export const getMessagesContext = () => ({
   thumbnail: true
 })
 
-/**
- * Search page meta tag context
- */
 export const getSearchContext = () => ({
   title: 'Search',
   description: 'Search for tracks, artists, and playlists on Audius',
@@ -340,10 +251,6 @@ export const getSearchContext = () => ({
   thumbnail: true
 })
 
-/**
- * Meta tags for /explore/weekly-rotation/:handle. The OG image comes from
- * og.audius.co.
- */
 export const getWeeklyRotationPageContext = ({
   handle,
   userName
@@ -367,14 +274,6 @@ export const getWeeklyRotationPageContext = ({
   }
 }
 
-/**
- * SEO Utility functions to generate titles and descriptions
- * Used by both SSR and client-side rendering
- */
-
-/**
- * User/profile page meta tag context
- */
 export const getUserPageContext = ({
   handle,
   userName,
@@ -431,12 +330,6 @@ export const getUserPageContext = ({
   }
 }
 
-/**
- * Track page meta tag context.
- * Use isRemix and originalTrackCanonicalUrl so the original track can rank
- * above remixes for the track name: originals get "Original" in the snippet,
- * remixes get "Remix" and isBasedOn pointing to the original.
- */
 export const getTrackPageContext = ({
   title,
   userName,
@@ -502,9 +395,6 @@ export const getTrackPageContext = ({
   }
 }
 
-/**
- * Collection (playlist/album) page meta tag context
- */
 export const getCollectionPageContext = ({
   playlistName,
   playlistId,
@@ -571,9 +461,6 @@ export const getCollectionPageContext = ({
   }
 }
 
-/**
- * Coins page meta tag context
- */
 export const getCoinsPageContext = () => {
   const pageTitle = 'Discover Fan Clubs • Audius'
   const pageDescription =
@@ -590,9 +477,6 @@ export const getCoinsPageContext = () => {
   }
 }
 
-/**
- * Wallet page meta tag context
- */
 export const getWalletPageContext = () => {
   const pageTitle = 'Wallet'
   const pageDescription =
@@ -609,9 +493,6 @@ export const getWalletPageContext = () => {
   }
 }
 
-/**
- * Cash page meta tag context
- */
 export const getCashPageContext = () => {
   const pageTitle = 'Cash'
   const pageDescription =

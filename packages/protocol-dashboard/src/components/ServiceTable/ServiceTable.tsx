@@ -53,7 +53,6 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
 
   const renderRow = (data: NodeService) => {
     let error: boolean, uptimeData: DataObject[]
-    // TODO: This is wrong, may need to make a row component
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const { uptime } = useIndividualNodeUptime(
       data.type,
@@ -70,7 +69,6 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
         hoursToDisplay
       )) {
         uptimeData.push({
-          // TODO add harmony and use harmony css vars
           color: up === 1 ? '#13c65a' : '#f9344c'
           // color: up === 1 ? 'var(--harmony-light-green)' : 'var(--harmony-red)',
         })

@@ -14,7 +14,6 @@ import {
 const AMP_API_KEY = env.AMPLITUDE_API_KEY
 const AMPLITUDE_PROXY = env.AMPLITUDE_PROXY
 
-// Crawlers load pages but never use them, so they get no analytics at all
 const isAmplitudeConfigured =
   !!AMP_API_KEY && !!AMPLITUDE_PROXY && !isLikelyBot()
 
@@ -38,7 +37,6 @@ const writeStorage = (key: string, value: string) => {
   }
 }
 
-// Lazy-loaded Amplitude SDK
 let amplitudeInstance: typeof import('@amplitude/analytics-browser') | null =
   null
 let sessionReplayPluginInstance:
@@ -47,9 +45,6 @@ let sessionReplayPluginInstance:
 let amplitudeInitPromise: Promise<void> | null = null
 let isInitialized = false
 
-/**
- * Lazy-load Amplitude SDK
- */
 const getAmplitude = async () => {
   if (amplitudeInstance) {
     return amplitudeInstance
@@ -59,9 +54,6 @@ const getAmplitude = async () => {
   return amplitudeInstance
 }
 
-/**
- * Lazy-load Session Replay Plugin
- */
 const getSessionReplayPlugin = async () => {
   if (sessionReplayPluginInstance) {
     return sessionReplayPluginInstance
@@ -73,11 +65,6 @@ const getSessionReplayPlugin = async () => {
   return sessionReplayPluginInstance
 }
 
-/**
- * ========================= Amplitude Analytics =========================
- * Description:
- *  The Amplitude library using V2 API
- */
 export const init = async (isMobile: boolean) => {
   if (amplitudeInitPromise) {
     return amplitudeInitPromise
@@ -90,15 +77,11 @@ export const init = async (isMobile: boolean) => {
   amplitudeInitPromise = (async () => {
     try {
       if (isAmplitudeConfigured) {
-        // Lazy load Amplitude SDK and plugin
         const [amplitude, sessionReplayPlugin] = await Promise.all([
           getAmplitude(),
           getSessionReplayPlugin()
         ])
 
-        // Every option left out of defaultTracking defaults to on. Amplitude
-        // derives sessions from session ids without the automatic events, and
-        // attribution stays on for utm/referrer user properties.
         await amplitude.init(AMP_API_KEY, {
           serverUrl: AMPLITUDE_PROXY,
           defaultTracking: {
@@ -113,8 +96,6 @@ export const init = async (isMobile: boolean) => {
         const sessionReplayTracking = sessionReplayPlugin.sessionReplayPlugin()
         amplitude.add(sessionReplayTracking)
 
-        // Which client the user is on, as a user property. Only sent when it
-        // changes for this device.
         const client = getSource(isMobile) ?? 'Desktop Web'
         if (readStorage(CLIENT_KEY) !== client) {
           const identifyObj = new amplitude.Identify()
@@ -135,7 +116,6 @@ export const init = async (isMobile: boolean) => {
   return amplitudeInitPromise
 }
 
-// Identify User
 export const identify = async (
   traits?: IdentifyTraits,
   callback?: () => void
@@ -152,9 +132,6 @@ export const identify = async (
       amplitude.setUserId(traits.handle)
     }
     if (traits && Object.keys(traits).length > 0) {
-      // User properties persist in Amplitude, so skip an identify that would
-      // set the same values again (it runs on every account load). Resend
-      // weekly in case an earlier one was dropped.
       const serializedTraits = JSON.stringify([
         Math.floor(Date.now() / WEEK_MS),
         Object.keys(traits)
@@ -175,7 +152,6 @@ export const identify = async (
   }
 }
 
-// Track Event
 export const track = async (
   event: string,
   properties?: Record<string, any>,

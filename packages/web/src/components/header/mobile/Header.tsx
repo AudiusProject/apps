@@ -11,7 +11,6 @@ interface HeaderProps {
 }
 
 const Header = ({ title, children, className }: HeaderProps) => {
-  // Don't render anything if there's no title and no children
   if (!title && !children) {
     return null
   }

@@ -6,9 +6,6 @@ module.exports = {
   extends: ['audius'],
   settings: {
     'import/resolver': {
-      // NOTE: sk - These aliases are required for the import/order rule.
-      // We are using the typescript baseUrl to do absolute import paths
-      // relative to /src, which eslint can't tell apart from 3rd party deps
       alias: {
         map: [
           ['__mocks__', './src/__mocks__'],
@@ -57,10 +54,7 @@ module.exports = {
     'import/no-unresolved': [
       'error',
       {
-        ignore: [
-          '^react-datepicker/dist/.*\\.css$',
-          '\\.css$'
-        ]
+        ignore: ['^react-datepicker/dist/.*\\.css$', '\\.css$']
       }
     ]
   }

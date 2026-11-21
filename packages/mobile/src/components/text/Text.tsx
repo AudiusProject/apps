@@ -27,9 +27,6 @@ type AnimatedProps = {
   weight?: keyof typeof fontByWeight
 } & Parameters<typeof Animated.Text>[0]
 
-/**
- * A custom Animated.Text component that applies the default font family and color
- */
 export const AnimatedText = ({
   children,
   weight = 'regular',

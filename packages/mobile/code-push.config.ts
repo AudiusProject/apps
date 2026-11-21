@@ -1,9 +1,3 @@
-/**
- * CodePush CLI config for publishing OTA updates.
- * Implement bundleUploader, getReleaseHistory, and setReleaseHistory to use
- * your storage (e.g. S3, GCS, or a custom API). See OTA_UPDATES.md.
- */
-
 import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import * as os from 'os'
@@ -15,7 +9,6 @@ import type {
   ReleaseHistoryInterface
 } from '@bravemobile/react-native-code-push'
 
-// ESM (how ts-node / code-push load this file in CI): __dirname is undefined; use import.meta.url.
 const packageDir = path.dirname(fileURLToPath(import.meta.url))
 const OTA_OUTPUT_DIR = path.join(packageDir, 'build', 'codepush')
 const DEFAULT_S3_PREFIX = 'mobile-ota'
@@ -37,11 +30,18 @@ const getBaseUrl = () => {
 
 const getS3Path = (...parts: string[]) => {
   const bucket = getRequiredEnv('OTA_S3_BUCKET')
-  const prefix = (process.env.OTA_S3_PREFIX ?? DEFAULT_S3_PREFIX).replace(/^\/|\/$/g, '')
+  const prefix = (process.env.OTA_S3_PREFIX ?? DEFAULT_S3_PREFIX).replace(
+    /^\/|\/$/g,
+    ''
+  )
   return `s3://${bucket}/${prefix}/${parts.join('/')}`
 }
 
-const uploadFileToS3 = (sourcePath: string, destinationPath: string, cacheControl: string) => {
+const uploadFileToS3 = (
+  sourcePath: string,
+  destinationPath: string,
+  cacheControl: string
+) => {
   execFileSync(
     'aws',
     [
@@ -69,9 +69,20 @@ const Config: CliConfigInterface = {
     const objectKey = `bundles/${platform}/${id}/${Date.now()}-${fileName}`
     const destinationPath = getS3Path(objectKey)
 
-    execFileSync('aws', ['s3', 'cp', source, destinationPath, '--cache-control', 'public,max-age=31536000,immutable'], {
-      stdio: 'inherit'
-    })
+    execFileSync(
+      'aws',
+      [
+        's3',
+        'cp',
+        source,
+        destinationPath,
+        '--cache-control',
+        'public,max-age=31536000,immutable'
+      ],
+      {
+        stdio: 'inherit'
+      }
+    )
 
     return {
       downloadUrl: `${getBaseUrl()}/${objectKey}`
@@ -101,7 +112,9 @@ const Config: CliConfigInterface = {
         `${targetBinaryVersion}.json`
       )
       if (fs.existsSync(filePath)) {
-        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as ReleaseHistoryInterface
+        const data = JSON.parse(
+          fs.readFileSync(filePath, 'utf-8')
+        ) as ReleaseHistoryInterface
         return data
       }
       return {}
@@ -132,12 +145,14 @@ const Config: CliConfigInterface = {
       id,
       `${targetBinaryVersion}.json`
     )
-    uploadFileToS3(tmpJsonPath, destinationPath, 'no-store, no-cache, must-revalidate')
+    uploadFileToS3(
+      tmpJsonPath,
+      destinationPath,
+      'no-store, no-cache, must-revalidate'
+    )
   }
 }
 
-// CommonJS `require()` (used by the code-push CLI) only attaches named exports to `module.exports`.
-// A default export ends up as `.default`, so `config.setReleaseHistory` would be undefined without these.
 export const bundleUploader = Config.bundleUploader
 export const getReleaseHistory = Config.getReleaseHistory
 export const setReleaseHistory = Config.setReleaseHistory

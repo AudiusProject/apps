@@ -27,12 +27,10 @@ export const useActivityPing = () => {
     }
   }, [currentUserId, audiusSdk])
 
-  // Ping on initial page load
   useEffect(() => {
     pingActivity()
   }, [pingActivity])
 
-  // Ping when tab becomes visible again
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {

@@ -25,11 +25,6 @@ type WeeklyRotationFeaturedNotificationProps = {
   notification: WeeklyRotationFeaturedNotificationType
 }
 
-/**
- * Tells an artist how many listeners' Weekly Rotations included their tracks
- * last period (sent on the Wednesday rollover). One track: names it and opens
- * it. Several: opens the artist's profile.
- */
 export const WeeklyRotationFeaturedNotification = (
   props: WeeklyRotationFeaturedNotificationProps
 ) => {

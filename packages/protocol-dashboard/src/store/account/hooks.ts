@@ -22,7 +22,6 @@ import {
   setPendingTransactions
 } from './slice'
 
-// -------------------------------- Selectors  --------------------------------
 export const getIsLoggedIn = (state: AppState) => state.account.loggedIn
 export const getAccountWallet = (state: AppState) => state.account.wallet
 export const getAccountStatus = (state: AppState) => state.account.status
@@ -32,9 +31,6 @@ export const getPendingClaim = (state: AppState) => state.account.pendingClaim
 export const getIsAudiusProfileRefetchDisabled = (state: AppState) =>
   state.account.isAudiusProfileRefetchDisabled
 
-// -------------------------------- Thunk Actions  --------------------------------
-
-// Async function to get
 export function fetchAccount(): ThunkAction<
   void,
   AppState,
@@ -126,13 +122,11 @@ export function fetchPendingTransactions(
 
       dispatch(setPendingTransactions(pendingRequests))
     } catch (error) {
-      // TODO: Handle error case
       console.error(error)
     }
   }
 }
 
-// -------------------------------- Hooks  --------------------------------
 export const useAccount = () => {
   const isLoggedIn = useSelector(getIsLoggedIn)
   const wallet = useSelector(getAccountWallet)
@@ -164,7 +158,6 @@ export const useAccountUser = () => {
   return { status, user }
 }
 
-// Fetch the pending transactions
 export const usePendingTransactions = () => {
   const wallet = useSelector(getAccountWallet)
   const pendingTransactions = useSelector(getPendingTransactions)

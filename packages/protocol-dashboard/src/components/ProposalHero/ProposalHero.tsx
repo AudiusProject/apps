@@ -262,7 +262,6 @@ const ProposalHero: React.FC<ProposalHeroProps> = ({
     ? totalMagnitudeVoted.gte(proposal.quorum)
     : false
 
-  // execute proposal
   const [executeProposalReset, setExecuteProposalReset] = useState(false)
   useEffect(() => {
     if (executeProposalReset) setExecuteProposalReset(false)

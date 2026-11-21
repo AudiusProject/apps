@@ -13,7 +13,6 @@ const PATH_TO_SCREEN = {
   'managing-you': 'AccountsManagingYouScreen'
 } as const
 
-/** Handles /settings/accounts-you-manage and /settings/managing-you links */
 export const useShowManagerModeNotAvailable = () => {
   const { params } = useRoute()
   const path = (params as { path: string })?.path

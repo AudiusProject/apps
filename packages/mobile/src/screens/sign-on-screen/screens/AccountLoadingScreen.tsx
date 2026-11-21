@@ -1,5 +1,3 @@
-// This loading page shows up when the users account is still being created either due to slow creation or a fast user
-
 import { useCallback, useEffect } from 'react'
 
 import {
@@ -30,7 +28,6 @@ const messages = {
   retry: 'Try Again'
 }
 
-// The user just waits here until the account is created and before being shown the welcome modal on the trending page
 export const AccountLoadingScreen = () => {
   const dispatch = useDispatch()
   const navigation = useNavigation<SignOnScreenParamList>()
@@ -38,7 +35,6 @@ export const AccountLoadingScreen = () => {
   const accountReady = useSelector(getAccountReady)
   const accountCreationStatus = useSelector(getStatus)
 
-  // Match web's logic: conditional check based on referral type
   const isAccountReady = isFastReferral
     ? accountReady
     : accountReady || accountCreationStatus === EditingStatus.SUCCESS
@@ -50,7 +46,6 @@ export const AccountLoadingScreen = () => {
 
   useEffect(() => {
     if (isAccountReady) {
-      // Mark sign up as finished so RootScreen shows HomeStack
       dispatch(finishSignUp())
       navigation.navigate('HomeStack', { screen: 'Trending' })
     }

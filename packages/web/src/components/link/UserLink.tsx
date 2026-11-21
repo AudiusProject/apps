@@ -16,9 +16,8 @@ type UserLinkProps = Omit<TextLinkProps, 'to' | 'popover'> & {
   userId: ID | undefined
   badgeSize?: IconSize
   popover?: boolean
-  noText?: boolean // Should be used if you're intending for the children to be the link element (i.e. Avatar)
+  noText?: boolean
   noBadges?: boolean
-  // Hack to fix avatars wrapped in user link
   noOverflow?: boolean
   center?: boolean
   fullWidth?: boolean
@@ -67,7 +66,6 @@ export const UserLink = (props: UserLinkProps) => {
     return null
   }
 
-  // Prepare the user badges
   const badges = noBadges ? null : (
     <UserBadges
       userId={userId}
@@ -109,7 +107,6 @@ export const UserLink = (props: UserLinkProps) => {
     ...focusStyles
   }
 
-  // Badges should be outside the TextLink to prevent hover effects on badges
   const textLink = (
     <span css={containerStyles}>
       <span css={nameRowStyles}>
@@ -130,7 +127,6 @@ export const UserLink = (props: UserLinkProps) => {
   const noTextLink = <Link to={url}>{children}</Link>
   const linkElement = noText ? noTextLink : textLink
 
-  // Wrap the text in ArtistPopover if needed
   if (popover && handle && !noText) {
     return (
       <span css={containerStyles}>

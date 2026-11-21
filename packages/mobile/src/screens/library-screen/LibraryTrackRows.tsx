@@ -13,10 +13,8 @@ type Item = UID | LoadingItem
 
 type LibraryTrackRowsProps = {
   uids?: UID[]
-  /** Renders only skeleton rows. */
   showSkeleton?: boolean
   skeletonRowCount?: number
-  /** Appends a page of skeleton rows while the next page loads. */
   hasNextPage?: boolean
   pageSize?: number
   togglePlay: (uid: UID, trackId: ID) => void
@@ -43,11 +41,6 @@ const isLoadingItem = (item: Item): item is LoadingItem =>
 const keyExtractor = (item: Item, index: number) =>
   isLoadingItem(item) ? `loading-${index}` : item
 
-/**
- * Library tracks as dense rows, the same row Trending and profiles use.
- * The list is full-bleed: the filter in its header and the page provide
- * the spacing, not a card.
- */
 export const LibraryTrackRows = (props: LibraryTrackRowsProps) => {
   const {
     uids,

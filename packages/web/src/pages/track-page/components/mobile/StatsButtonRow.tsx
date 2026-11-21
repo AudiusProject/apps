@@ -23,7 +23,6 @@ type StatsButtonRowProps = {
   onClickComments: () => void
 }
 
-// A row of stats, visible on playlist and tracks pages.
 const StatsButtonRow = ({
   className,
   showListenCount,

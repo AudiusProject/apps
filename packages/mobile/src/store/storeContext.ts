@@ -42,7 +42,6 @@ export const storeContext: CommonStoreContext = {
   env,
   explore,
   nftClient: null,
-  // Shim in main, but defined in native-reloaded branch
   audioPlayer,
   trackDownload,
   instagramAppId: env.INSTAGRAM_APP_ID,

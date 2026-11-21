@@ -118,7 +118,6 @@ type TrackItemProps = {
   noShimmer?: boolean
 }
 
-// Max number of track to display in a playlist
 const DISPLAY_TRACK_COUNT = 5
 
 const messages = {
@@ -217,8 +216,6 @@ const TrackList = ({
             track={track}
           />
         )
-        // On desktop web, allow dragging each row onto a playlist/queue target.
-        // Skip on native mobile (no drag) and for deleted tracks.
         return isMobile || track.is_delete ? (
           <div key={`${track.track_id}-${index}`}>{item}</div>
         ) : (
@@ -525,7 +522,6 @@ export const CollectionTile = ({
     record
   ])
 
-  // Original CollectionTile logic
   useEffect(() => {
     if (!isLoading) {
       hasLoaded?.(index)

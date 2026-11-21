@@ -12,7 +12,7 @@ import mobileStyles from './PageMobile.module.css'
 
 const styles = createStyles({ desktopStyles, mobileStyles })
 
-const FADE_DURATION = 200 // (ms)
+const FADE_DURATION = 200
 
 interface PageProps {
   className?: string
@@ -26,7 +26,6 @@ const Page = ({ className, children, title, icon }: PageProps) => {
   const IconComponent = icon
 
   useEffect(() => {
-    // Scroll to top on component mount if mobile
     if (isMobile) {
       window.scrollTo(0, 0)
     }

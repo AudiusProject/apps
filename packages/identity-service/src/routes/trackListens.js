@@ -22,7 +22,6 @@ const oneWeekInMs = oneDayInMs * 7
 const oneMonthInMs = oneDayInMs * 30
 const oneYearInMs = oneMonthInMs * 12
 
-// Limit / offset related constants
 const defaultLimit = 100
 const minLimit = 1
 const maxLimit = 500
@@ -49,7 +48,6 @@ const parseTimeframe = (inputTime) => {
       inputTime = undefined
   }
 
-  // Allow default empty value
   if (inputTime === undefined) {
     inputTime = 'millennium'
   }
@@ -80,7 +78,6 @@ const getTrackListens = async (
     logger.error(e)
   }
 
-  // Allow default empty value
   if (timeFrame === undefined) {
     timeFrame = 'millennium'
   }
@@ -168,7 +165,6 @@ const getTrendingTracks = async (idList, timeFrame, limit, offset) => {
     where: {}
   }
 
-  // If id list present, add filter
   if (idList) {
     dbQuery.where.trackId = { [models.Sequelize.Op.in]: idList }
   }
@@ -229,16 +225,6 @@ const getTrendingTracks = async (idList, timeFrame, limit, offset) => {
 }
 
 module.exports = function (app) {
-  /*
-   * Return listen history for a given user
-   *  tracks/history/
-   *    - tracks w/ recorded listen event sorted by date listened
-   *
-   *  GET query parameters (optional):
-   *    userId (int) - userId of the requester
-   *    limit (int) - limits number of results w/ a max of 100
-   *    offset (int) - offset results
-   */
   app.get(
     '/tracks/history',
     handleResponse(async (req, res) => {
@@ -268,31 +254,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Return track listen history grouped by a specific time frame
-   *  tracks/listens/
-   *    - all tracks, sorted by play count
-   *
-   *  tracks/listens/<time>
-   *    - <time> - day, week, month, year
-   *    - returns all track listen info for given time period, sorted by play count
-   *
-   *  POST body parameters (optional):
-   *    limit (int) - limits number of results
-   *    offset (int) - offset results
-   *    start (string) - ISO time string, used to define the start time period for query
-   *    end (string) - ISO time string, used to define the end time period for query
-   *    start/end are BOTH required if filtering based on time
-   *    track_ids - filter results for specific track(s)
-   *
-   *  GET query parameters (optional):
-   *    limit (int) - limits number of results
-   *    offset (int) - offset results
-   *    start (string) - ISO time string, used to define the start time period for query
-   *    end (string) - ISO time string, used to define the end time period for query
-   *    start/end are BOTH required if filtering based on time
-   *    id (array of int) - filter results for specific track(s)
-   */
   app.post(
     '/tracks/listens/:timeframe*?',
     handleResponse(async (req, res, next) => {
@@ -337,25 +298,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Return aggregate track listen count with various parameters
-   *  tracks/trending/
-   *    - all tracks, sorted by play count
-   *
-   *  tracks/trending/<time>
-   *    - <time> - day, week, month, year
-   *    - returns all tracks for given time period, sorted by play count
-   *
-   *  POST body parameters (optional):
-   *    limit (int) - limits number of results
-   *    offset (int) - offset results
-   *    track_ids (array of int) - filter results for specific track(s)
-   *
-   *  GET query parameters (optional):
-   *    limit (int) - limits number of results
-   *    offset (int) - offset results
-   *    id (array of int) - filter results for specific track(s)
-   */
   app.post(
     '/tracks/trending/:time*?',
     handleResponse(async (req, res) => {
@@ -393,14 +335,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Gets the tracks and listen counts for a user.
-   * Useful for populating views like "Heavy Rotation" which
-   * require sorted lists of track listens for a given user.
-   *
-   * GET query parameters:
-   *  limit: (optional) The number of tracks to fetch
-   */
   app.get(
     '/users/listens/top',
     authMiddleware,
@@ -424,14 +358,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Gets whether or not tracks have been listened to by a target user.
-   * Useful in filtering out tracks that a user has already listened to.
-   * Requires auth.
-   *
-   * GET query parameters:
-   *  trackIdList: The ids of tracks to check
-   */
   app.get(
     '/users/listens',
     authMiddleware,
@@ -471,13 +397,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Gets user listen records in bulk.
-   *
-   * GET query parameters:
-   *  startTime (string) the start time to fetch listens from (in unix seconds format)
-   *  limit (number) the number of records to fetch from each user listens and anonymous listens
-   */
   app.get(
     '/listens/bulk',
     handleResponse(async (req, res) => {

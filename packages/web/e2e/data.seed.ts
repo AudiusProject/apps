@@ -31,7 +31,6 @@ setup('seed data', async () => {
     console.error(stderr)
   }
 
-  // Create a user
   console.info('Creating user...')
   await audiusCmd(`user create -o json > ${dataFilePath('user.json')}`)
 
@@ -39,7 +38,6 @@ setup('seed data', async () => {
   await audiusCmd(`entropy > ${dataFilePath('entropy.txt')}`)
   console.info('User and entropy created.')
 
-  // Upload a track
   console.info('Uploading track...')
   await audiusCmd(`track upload -o json > ${dataFilePath('track.json')}`)
   const trackId = JSON.parse(
@@ -97,12 +95,10 @@ setup('seed data', async () => {
     })()
   ])
 
-  // Create another user
   console.info('Creating user2...')
   await audiusCmd(`user create -ai -o json > ${dataFilePath('user2.json')}`)
   console.info('User2 created.')
 
-  // Upload another track
   console.info('Uploading track2...')
   await audiusCmd(`track upload -o json > ${dataFilePath('track2.json')}`)
   const track2Id = JSON.parse(

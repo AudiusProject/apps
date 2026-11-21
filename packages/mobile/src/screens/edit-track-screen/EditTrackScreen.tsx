@@ -45,14 +45,6 @@ const errorMessages = {
 const useEditTrackSchema = () => {
   const { minContentPriceCents, maxContentPriceCents } = useUSDCPurchaseConfig()
   return useMemo(
-    /**
-     * The refine functions only get executed if the original object definition (before refine) validation passes.
-     * This means that if one of the fields is invalid in the original object definition, while there are other fields
-     * that are invalid but would only trigger the error in the refine functions, we would only see the first error.
-     * We want all errors to surface at once, so I'm using the refine functions to do the validations.
-     * I understand this is somewhat antithetical to the purpose of the zod types in the first place, but unless
-     * we are okay with occasionally showing one error at a time, we will have to do it this way.
-     */
     () =>
       z
         .object({
@@ -160,14 +152,10 @@ const useEditTrackSchema = () => {
               preview_start_seconds: previewStartSeconds
             } = values
 
-            // We only care about preview if track is usdc gated
             if (!isContentUSDCPurchaseGated(streamConditions)) return true
 
-            // If preview is falsy and track is usdc gated (because we got to this line),
-            // validation passes because we will simply set it to 0
             if (!previewStartSeconds) return true
 
-            // If duration is NaN, validation passes because we were unable to get duration from a track
             if (duration === null || isNaN(duration)) return true
 
             return (
@@ -253,7 +241,6 @@ export const EditTrackScreen = (props: EditTrackScreenProps) => {
         initialValuesProp
       )
 
-      // submit the metadata
       onSubmit(metadata)
       setSubmitting(false)
     },

@@ -15,22 +15,13 @@ type ScrollContextProps = {
   getScrollForRoute: (route: string) => number
 }
 
-/**
- * `ScrollContext` provides a getter and setter for individual routes
- * to recover their last scroll position on mount and preserve it on unmount.
- */
 export const ScrollContext = createContext<ScrollContextProps>({
   setScrollForRoute: (route: string, scroll: number) => {},
   getScrollForRoute: (route: string) => 0
 })
 
-// Routes where we know we never want to preserve scroll
 const SCROLL_PRESERVATION_BLACKLIST = [TRACK_PAGE, NOTIFICATION_PAGE]
 
-/**
- * `ScrollProvider` is a context provider that tracks
- * the last maintained scroll position for given route.
- */
 export const ScrollProvider = memo((props: { children: JSX.Element }) => {
   const [getScrollRecords, setScrollRecords] = useInstanceVar<ScrollRecords>({})
 

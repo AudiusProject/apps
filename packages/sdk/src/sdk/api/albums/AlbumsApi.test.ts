@@ -98,7 +98,6 @@ vitest
   .mockImplementation(async () => mockPlaylistResponse)
 
 describe('AlbumsApi', () => {
-  // TODO: Remove this setup in describe
   let albums: AlbumsApi
   // eslint-disable-next-line mocha/no-setup-in-describe
   const audiusWalletClient = createAppWalletClient({ apiKey: '' })

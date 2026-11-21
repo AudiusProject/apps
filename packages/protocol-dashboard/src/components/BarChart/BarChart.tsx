@@ -13,7 +13,6 @@ import { formatShortNumber } from 'utils/format'
 import { useIsMobile } from 'utils/hooks'
 import { createStyles } from 'utils/mobile'
 
-// Custom draw fn
 import './draw'
 import desktopStyles from './BarChart.module.css'
 import mobileStyles from './BarChartMobile.module.css'

@@ -97,29 +97,15 @@ const { fetchTrackSucceeded, reset } = remixesPageActions
 
 export const CONTEST_PAGE_SIZE = 10
 
-// Fluid hero: clamps between the mobile-web height (≈220) and the design
-// spec height (288). The `cqi` unit is relative to the named `contest`
-// container so the hero tracks the real content width (collapsed sidebar,
-// resizable nav) rather than the viewport.
 const HERO_MIN_HEIGHT = 220
 const HERO_MAX_HEIGHT = 288
 const MAX_CONTENT_WIDTH = 1080
 const RIGHT_COLUMN_WIDTH_PX = 360
-// Container-query breakpoints. These stack the header rows and the
-// details two-column layout when the desktop shell gets narrow
-// (collapsed sidebar, short window, resizable main pane) without
-// needing a viewport-based `useIsMobile()` check. Mobile web still
-// renders the dedicated mobile file via the parent router.
 const DETAILS_STACK_BREAKPOINT_PX = 900
 const HEADER_STACK_BREAKPOINT_PX = 640
 
 type ContestTab = 'details' | 'submissions'
 
-// Figma-aligned countdown (node 2857-99182). Four plain columns
-// separated by thin vertical dividers. Number and label share the
-// same text color (both `default`, or both `subdued` when the unit
-// is a leading zero). Leading-zero units read as subdued so the
-// most-significant non-zero unit pulls focus.
 const CountdownTile = ({
   value,
   label,
@@ -163,9 +149,6 @@ const HeaderCountdown = ({ endDate }: { endDate: string }) => {
       gap='l'
       alignItems='center'
       css={{
-        // When the header stacks below `HEADER_STACK_BREAKPOINT_PX` the
-        // countdown sits on its own row and should fill the row instead
-        // of hugging the right edge.
         [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]: {
           width: '100%',
           justifyContent: 'space-between',
@@ -222,9 +205,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     useEventFollowState(eventId)
   const { mutate: followEvent } = useFollowEvent()
   const { mutate: unfollowEvent } = useUnfollowEvent()
-  // Drives the Following → Unfollow label swap on hover for the contest
-  // follow button. Local state keeps the parity with FollowButton's old
-  // behavior without bringing back the size mismatch.
   const [isFollowHovering, setIsFollowHovering] = useState(false)
 
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
@@ -250,11 +230,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   })
   const coverArtUrl = contest?.eventData?.coverPhotoUrl || trackCoverArtUrl
 
-  // Only render the Stems & Downloads panel when the track actually has
-  // downloadable content. The DownloadSection component assumes a
-  // downloadable track and its internal useFileSizes query throws for
-  // non-downloadable tracks, blowing up the whole page via the error
-  // boundary.
   const { data: downloadableFlag } = useTrack(trackId, {
     select: (t) => t?.is_downloadable
   })
@@ -265,18 +240,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const [activeTab, setActiveTab] = useState<ContestTab>('details')
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false)
 
-  // Submissions tab filter state — reads from + writes to URL search
-  // params so deep links + back/forward work the same way they do on
-  // the track-page `RemixesPage` (the reference component for this
-  // filter bar).
   const { sortMethod, isCosign } = useRemixPageParams()
   const updateSortParam = useUpdateSearchParams('sortMethod')
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
 
-  // Lineup for the submissions tab — full TrackTile treatment. Includes
-  // the original (parent) track at the top of the lineup so viewers can
-  // compare the source the remixes are built on without jumping back out
-  // to the track page, matching the track-page `RemixesPage`.
   const remixesLineupArgs = useMemo(
     () => ({
       trackId: trackId ?? undefined,
@@ -318,9 +285,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     return dayjs(contest.endDate).isBefore(dayjs())
   }, [contest?.endDate])
 
-  // Split the deadline into date + time so each part can be styled
-  // independently — Figma 2888-131667 shows the date in strong
-  // uppercase next to a lighter subdued time.
   const deadlineParts = useMemo(() => {
     if (!contest?.endDate) return null
     const d = dayjs(contest.endDate)
@@ -330,11 +294,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     }
   }, [contest?.endDate])
 
-  // Submissions count comes from the API total (count-only query) so
-  // the SelectablePill matches the contest card on the explore grid.
-  // Previously this was derived from `lineupTrackIds.length`, which
-  // only reflects what infinite-scroll has loaded — the count crept
-  // up as the user scrolled rather than reading as a stable total.
   const winnerCount = contest?.eventData?.winners?.length ?? 0
   const { data: submissionsCount } = useRemixesCount(
     { trackId, isContestEntry: true },
@@ -347,8 +306,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
       return
     }
     if (trackId) {
-      // Fallback to the legacy modal if we somehow don't have a permalink
-      // for the track (which the page navigation route is built from).
       openHostRemixContest({ trackId })
     }
   }, [track?.permalink, trackId, navigate, openHostRemixContest])
@@ -358,11 +315,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     navigate(pickWinnersPage(track.permalink))
   }, [track?.permalink, navigate])
 
-  // Deep-link into the upload flow with the source track's artwork +
-  // genre + remix_of pre-filled. See `useEnterContest` for the full
-  // shape; reused across the desktop + mobile contest pages and the
-  // mobile track-page contest details tab so submitters get the same
-  // pre-filled form regardless of entry point.
   const enterContest = useEnterContest(trackId)
   const handleEnterContest = useCallback(async () => {
     await enterContest()
@@ -370,9 +322,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
   const handleShareContest = useCallback(() => {
     if (!trackId) return
-    // `type: 'contest'` routes through the contest share content
-    // variant so the modal's copy-link + X share use the contest
-    // URL (`{permalink}/contest`) rather than the parent track.
     dispatch(
       shareModalUIActions.requestOpen({
         type: 'contest',
@@ -396,11 +345,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         </Flex>
       )
     }
-    // Public view: Share icon + Follow / Following + Enter Contest, all
-    // size='small' (h=32) to match Figma 2857:94748. Renders the
-    // Follow / Following / Unfollow swap on the regular Button so its
-    // height aligns with the Enter Contest CTA next to it (FollowButton
-    // is 28px tall at small, which produced a visual mismatch).
     const isFollowed = !!followState?.isFollowed
     let followIcon = IconUserFollow
     let followLabel = messages.follow
@@ -424,10 +368,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           size='small'
           variant={isFollowed ? 'primary' : 'secondary'}
           iconLeft={followIcon}
-          // While the follow state is still loading, render a spinner-only
-          // button (fixed width keeps layout stable) so it doesn't flash
-          // "Follow" before snapping to "Following" for users who already
-          // follow the contest.
           isLoading={isFollowStatePending}
           onClick={handleToggleFollow}
           onMouseEnter={() => setIsFollowHovering(true)}
@@ -461,10 +401,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     return null
   }
 
-  // Contest hasn't resolved yet (or no contest exists for this track).
-  // Render a skeleton matching the page layout instead of the old
-  // "No contest is currently running" copy — covers the initial-load
-  // flash and avoids a confusing empty state.
   if (!contest || !eventId) {
     return (
       <Page
@@ -555,9 +491,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           css={{
             paddingInline: 'var(--harmony-unit-8)',
             paddingBlock: 'var(--harmony-unit-6)',
-            // Tighten the gutter on phone-sized containers so the header
-            // Paper can breathe at the edges instead of the gutter
-            // eating most of the row.
             [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
               {
                 paddingInline: 'var(--harmony-unit-4)'
@@ -859,15 +792,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           {activeTab === 'submissions' ? (
             <Flex direction='column' gap='l'>
               {(() => {
-                // Lineup shape is [original, ...winners, ...remixes].
-                // Mirror the legacy `RemixesPage` delineator pattern:
-                // a WINNERS label after the original, and a
-                // `SUBMISSIONS (N) + filter bar` delineator after
-                // the last winner (or after the original when there
-                // are no winners). Keeps the filter controls docked
-                // to the boundary between winners and submissions
-                // where they're most contextual, and matches the
-                // native mobile + track-page reference.
                 const winnersDelineator = (
                   <Box pt='l' pb='s'>
                     <Divider />

@@ -23,8 +23,6 @@ function browserDownload({ url, filename }: DownloadFile) {
   if (document) {
     const link = document.createElement('a')
     link.href = url
-    // taget=_blank does not work on ios safari and will cause the download to be
-    // unresponsive.
     if (!isMobileSafari()) {
       link.target = '_blank'
     }
@@ -53,18 +51,12 @@ class TrackDownload extends TrackDownloadBase {
         files.map(({ url }) => window.fetch(url, { signal: abortSignal }))
       )
 
-      // `allSettled` swallows the abort rejection, so check for it explicitly
-      // and rethrow in the shape the catch below expects.
       if (abortSignal?.aborted) {
         const abortError = new Error('Download aborted')
         abortError.name = 'AbortError'
         throw abortError
       }
 
-      // Download whatever is actually available rather than failing the whole
-      // batch on one bad file. A single unavailable track — most commonly a
-      // parent whose `is_downloadable` is false, whose download URL 404s —
-      // used to take every other file down with it.
       const available: { file: DownloadFile; response: Response }[] = []
       const skipped: string[] = []
 
@@ -87,7 +79,6 @@ class TrackDownload extends TrackDownloadBase {
         )
       }
 
-      // Only a batch where nothing at all could be fetched is a failure.
       if (available.length === 0) {
         throw new Error('Download unsuccessful')
       }

@@ -13,7 +13,6 @@ const EmptyFeed = () => {
 
   if (!hasAccount) return null
 
-  // Use mobile web specific component on mobile web, desktop component on desktop
   return isMobile ? <MobileWebEmptyFeed /> : <FollowArtists />
 }
 

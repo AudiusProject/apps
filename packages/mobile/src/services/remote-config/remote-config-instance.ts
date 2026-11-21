@@ -18,11 +18,6 @@ const { version: appVersion } = packageInfo
 const OPTIMIZELY_KEY = env.OPTIMIZELY_KEY
 const DATA_FILE_URL = 'https://experiments.audius.co/datafiles/%s.json'
 
-/**
- * Sentinel returned when no OTA bundle is applied (the app is running its
- * embedded binary bundle). Lets Optimizely audiences target "native vs OTA"
- * without distinguishing missing data from a real value.
- */
 const OTA_VERSION_NATIVE = 'native'
 
 const getOtaVersion = async (): Promise<string> => {
@@ -50,9 +45,6 @@ export const remoteConfigInstance = remoteConfig({
   appVersion,
   platform: 'mobile',
   getMobileClientInfo,
-  // Named imports referenced only inside these callbacks let inline requires
-  // load the SDK when the client is created (after the async session id and
-  // CodePush reads) instead of while the app's modules first evaluate.
   createOptimizelyClient: async () => {
     setLogLevel('warn')
     return createInstance({

@@ -50,14 +50,6 @@ const messages = {
   signInToComment: 'Sign in to comment.'
 }
 
-/**
- * - `feed` is the legacy single-pane layout (updates + comments together).
- *   Kept for the mobile contest page which hasn't been redesigned yet.
- * - `updates` renders only host-authored top-level posts; composer shown
- *   only to the host.
- * - `comments` renders everything that *isn't* a host post-update
- *   (community comments + replies). Composer shown to every signed-in user.
- */
 type ContestCommentsSectionMode = 'feed' | 'updates' | 'comments'
 
 type ContestCommentsSectionProps = {
@@ -66,19 +58,6 @@ type ContestCommentsSectionProps = {
   mode?: ContestCommentsSectionMode
 }
 
-/**
- * A Paper-wrapped comment stream for a remix-contest event.
- *
- * Two types of content share the same feed:
- *  - **Post updates**: top-level comments authored by the event owner. These
- *    are rendered with a "Post Update" badge and, in the backend indexer,
- *    fan out a notification to every follower of the event.
- *  - **User comments**: anyone else's top-level comments (no badge).
- *
- * Artist *replies* to user comments are NOT post updates — they render as
- * regular comments. This is enforced server-side (only root-level comments
- * by the event owner trigger the notification fanout) and mirrored here.
- */
 export const ContestCommentsSection = ({
   eventId,
   eventOwnerUserId,
@@ -93,9 +72,6 @@ export const ContestCommentsSection = ({
   const showComposer =
     currentUserId !== null &&
     (mode === 'feed' || mode === 'comments' || isEventOwner)
-  // The Top/Newest sort toggle only makes sense on the Comments panel.
-  // Updates is owner-curated and Feed is the legacy single-pane mobile
-  // view; both pin to newest-first.
   const showSortTabs = mode === 'comments'
   const composerLabel =
     mode === 'updates' || (mode === 'feed' && isEventOwner)
@@ -143,8 +119,6 @@ export const ContestCommentsSection = ({
   const [videoUrlOpen, setVideoUrlOpen] = useState(false)
   const [videoUrlDraft, setVideoUrlDraft] = useState('')
 
-  // Attach-video is only meaningful on the Updates feed (host-authored
-  // post-updates). Hide the affordance on plain community comments.
   const showAttachVideo =
     mode === 'updates' || (mode === 'feed' && isEventOwner)
 
@@ -309,14 +283,6 @@ type ContestCommentRowProps = {
   mode: ContestCommentsSectionMode
 }
 
-/**
- * A single comment card. If the author is the event owner AND this is a
- * top-level comment (parent_comment_id null), render a "Post Update" badge.
- * Replies (even by the event owner) are plain.
- *
- * Honors `mode` so the same feed can be filtered down to "updates only"
- * (host top-level posts) or "comments only" (everything else).
- */
 const ContestCommentRow = ({
   commentId,
   eventOwnerUserId,
@@ -330,13 +296,8 @@ const ContestCommentRow = ({
   const isPostUpdate =
     eventOwnerUserId !== undefined &&
     comment.userId === eventOwnerUserId &&
-    // Parent id is unset on top-level comments. Replies authored by the
-    // artist are *not* post updates.
     !('parentCommentId' in comment && comment.parentCommentId)
 
-  // Client-side filter: updates-only panel drops non-updates, and the
-  // comments panel drops updates so they don't double-appear alongside
-  // the dedicated Updates feed.
   if (mode === 'updates' && !isPostUpdate) return null
   if (mode === 'comments' && isPostUpdate) return null
 

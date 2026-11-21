@@ -1,4 +1,3 @@
-// Keep these URLs aligned with the documents displayed by the public site.
 export const legalDocuments: Record<
   string,
   { title: string; documentPath: string }

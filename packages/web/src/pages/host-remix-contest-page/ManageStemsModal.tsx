@@ -70,15 +70,6 @@ type ManageStemsModalProps = {
   trackId: ID | null
 }
 
-/**
- * Host-facing "Manage Stems" modal. Opened from the source-track kebab on
- * the Create Contest page. Edits the *track itself* (no per-contest
- * override) — toggling Full Track Download + Download Availability maps
- * straight onto the track's is_downloadable / download_conditions.
- *
- * Upload of additional stem files is scoped out for this pass — it lives
- * on the track edit page today, so we link users there instead.
- */
 export const ManageStemsModal = ({
   isOpen,
   onClose,
@@ -98,16 +89,8 @@ export const ManageStemsModal = ({
   const { mutate: deleteTrack } = useDeleteTrack()
   const dispatch = useDispatch()
 
-  // Existing stems on the track (already uploaded). Refetched in real-time
-  // by the publishStems success path, so newly-uploaded stems migrate from
-  // the "uploading" list into here once they finish.
   const { data: existingStems = [] } = useStems(trackId ?? undefined)
-  // In-flight stem uploads triggered by the dropzone below. Comes from
-  // redux (stems-upload slice) — the upload-tracks saga consumes this and
-  // calls publishStems when ready.
   const { uploadingTracks } = useUploadingStems(trackId ?? 0)
-  // The redux slice doesn't clear once publishStems completes, so dedupe
-  // anything already represented in `existingStems` to avoid double rows.
   const stillUploading = uploadingTracks.filter(
     (u) => !existingStems.some((s) => s.orig_filename === u.name)
   )
@@ -120,8 +103,6 @@ export const ManageStemsModal = ({
     [trackId]
   )
 
-  // Seed form state from the track whenever the modal opens / the target
-  // track changes.
   useEffect(() => {
     if (!isOpen) return
     if (!trackMeta) return
@@ -184,11 +165,6 @@ export const ManageStemsModal = ({
 
   const handleSave = useCallback(() => {
     if (!trackId) return
-    // Only "public" availability is round-trippable without more form
-    // state (we'd need a USDC price or NFT gate to save premium; the
-    // follower-gate needs the host's own user id). For anything richer,
-    // the user should go through the full track edit page — link
-    // in-modal rather than silently failing.
     const nextConditions: AccessConditions | null =
       availability === 'public'
         ? null
@@ -365,8 +341,6 @@ export const ManageStemsModal = ({
     </Modal>
   )
 }
-
-// ----- Stem row --------------------------------------------------------------
 
 type StemRowProps = {
   title: string

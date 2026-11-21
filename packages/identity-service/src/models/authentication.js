@@ -11,9 +11,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
-      // the primary key that external queries will interact with this table
-      // it's a scrypt hash of the email and password combined with three colons(:)
-      // and a fixed iv
       lookupKey: {
         type: DataTypes.STRING,
         allowNull: false,

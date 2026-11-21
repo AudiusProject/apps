@@ -65,7 +65,6 @@ export const ProfileSocials = () => {
 
   const { tier } = useTierAndVerifiedForUser(user_id)
 
-  // Need to start opacity at 1 so skeleton is visible.
   const opacity = useRef(new Animated.Value(1)).current
 
   useLayoutEffect(() => {
@@ -79,8 +78,6 @@ export const ProfileSocials = () => {
     }
   }, [opacity, socialsCount])
 
-  // Renders a single social link with handle text, or renders 2/3 social links
-  // with dividers
   const renderSocialLinks = () => {
     if (socialsCount === 1) {
       const { SocialLink } = socialLinks[0]

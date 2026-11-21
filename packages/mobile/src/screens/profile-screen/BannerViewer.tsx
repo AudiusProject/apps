@@ -19,13 +19,6 @@ type BannerViewerProps = {
   onClose: () => void
 }
 
-/**
- * Full-screen viewer for the profile-screen cover photo / banner. Renders
- * the image at the largest cached size with `resizeMode="contain"` so the
- * cover-photo aspect ratio is preserved (no crop, letterboxed on the black
- * backdrop). Modal + swipe-to-dismiss + close button come from the shared
- * {@link FullscreenImageViewer}.
- */
 export const BannerViewer = ({
   userId,
   isOpen,
@@ -33,7 +26,6 @@ export const BannerViewer = ({
 }: BannerViewerProps) => {
   const { width: windowWidth } = useWindowDimensions()
 
-  // Largest cached cover-photo size. Header uses SIZE_640.
   const { source } = useCoverPhoto({
     userId,
     size: WidthSizes.SIZE_2000

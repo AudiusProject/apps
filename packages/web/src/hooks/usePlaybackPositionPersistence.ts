@@ -17,8 +17,6 @@ const { initializePlaybackPositionState } = playbackPositionActions
 const { getPlaybackPositions } = playbackPositionSelectors
 const { getPlaying, getTrackId } = playbackSelectors
 
-// Positions change every second during long-form playback, so batch the
-// localStorage writes. Pending writes are flushed when the page is hidden.
 const PERSIST_INTERVAL_MS = 5000
 
 export const usePlaybackPositionPersistence = () => {
@@ -91,7 +89,6 @@ export const usePlaybackPositionPersistence = () => {
     }
   }, [positions, flush])
 
-  // Write right away when playback starts, pauses or moves to another track
   useEffect(() => {
     flush()
   }, [playing, trackId, flush])

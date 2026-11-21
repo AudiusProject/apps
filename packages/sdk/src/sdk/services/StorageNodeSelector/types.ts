@@ -31,8 +31,6 @@ export type StorageNodeSelectorConfigInternal = {
 export type StorageNodeSelectorConfig =
   Partial<StorageNodeSelectorConfigInternal>
 
-// Partial shape of response from API /health_check endpoint
-// that we use to get the list of storage nodes
 export type HealthCheckResponseData = {
   network?: {
     content_nodes: StorageNode[]

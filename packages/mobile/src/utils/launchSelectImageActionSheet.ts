@@ -26,14 +26,12 @@ export const launchSelectImageActionSheet = (
     })
   }
 
-  // When freeStyleCropEnabled is used, we must disable includeBase64 to avoid "Cannot find image data" error
   const hasFreeStyleCrop =
     options && 'freeStyleCropEnabled' in options && options.freeStyleCropEnabled
 
   const baseOptions: Options = {
     cropping: true,
     mediaType: 'photo',
-    // Disable includeBase64 when freeStyleCropEnabled is used (it causes "Cannot find image data" error)
     includeBase64: !hasFreeStyleCrop,
     cropperActiveWidgetColor: secondary,
     cropperStatusBarColor: secondary,
@@ -64,7 +62,6 @@ export const launchSelectImageActionSheet = (
   }
 
   if (Platform.OS === 'ios') {
-    // iOS ActionSheet
     ActionSheetIOS.showActionSheetWithOptions(
       {
         options: ['Cancel', 'Photo Library', 'Take Photo'],
@@ -80,7 +77,6 @@ export const launchSelectImageActionSheet = (
       }
     )
   } else {
-    // Android Alert
     Alert.alert(
       'Select Photo',
       '',

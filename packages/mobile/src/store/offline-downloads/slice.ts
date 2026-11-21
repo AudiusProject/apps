@@ -130,18 +130,11 @@ export type SetDownloadNetworkPreferenceAction = PayloadAction<{
 }>
 
 export enum OfflineDownloadStatus {
-  // download is not initiated
   INACTIVE = 'INACTIVE',
-  // download is queued
   INIT = 'INIT',
-  // download is in progress
   LOADING = 'LOADING',
-  // download succeeded
   SUCCESS = 'SUCCESS',
-  // download errored
   ERROR = 'ERROR',
-  // download was abandoned (usually after error).
-  // downloads in the error state can be retried
   ABANDONED = 'ABANDONED'
 }
 
@@ -337,7 +330,6 @@ const slice = createSlice({
         state.collectionStatus[id] = OfflineDownloadStatus.ERROR
       } else if (type === 'track') {
         state.trackStatus[id] = OfflineDownloadStatus.ERROR
-        // re-queue the track
         state.offlineQueue.push({
           ...action.payload,
           requeueCount: (action.payload.requeueCount ?? 0) + 1
@@ -397,7 +389,6 @@ const slice = createSlice({
       state.offlineTrackMetadata = initialState.offlineTrackMetadata
       state.offlineCollectionMetadata = initialState.offlineCollectionMetadata
     },
-    // Network settings + changes
     setCurrentNetworkType: (state, action: SetCurrentNetworkTypeAction) => {
       const { currentNetworkType } = action.payload
       state.currentNetworkType = currentNetworkType
@@ -409,7 +400,6 @@ const slice = createSlice({
       const { downloadNetworkPreference } = action.payload
       state.preferredDownloadNetworkType = downloadNetworkPreference
     },
-    // Lifecycle actions that trigger complex saga flows
     requestDownloadAllFavorites: () => {},
     requestRemoveAllDownloadedFavorites: () => {},
     requestDownloadCollection: (_state, _action: CollectionAction) => {},
@@ -461,8 +451,6 @@ const offlineDownloadsPersistConfig = {
     'queueStatus',
     'currentNetworkStateType'
   ],
-  // Each job update otherwise re-serializes and rewrites the whole slice,
-  // which adds up during large batch downloads
   throttle: 1000
 }
 

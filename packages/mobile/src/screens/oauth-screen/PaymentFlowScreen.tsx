@@ -164,7 +164,6 @@ export const PaymentFlowScreen = ({ params }: Props) => {
     closeScreen()
   }, [redirectUri, state, responseMode, closeScreen])
 
-  // Auto-close success screen after 1.5s
   useEffect(() => {
     if (!transactionSignature) return
     const timer = setTimeout(() => handleSuccessClose(), 1500)

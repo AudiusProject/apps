@@ -34,7 +34,6 @@ export function* syncOfflineDataSaga() {
     parseInt(id, 10)
   )
 
-  // Remove
   const collectionIdsToRemove = difference(
     offlineCollectionIds,
     accountCollectionIds
@@ -59,7 +58,6 @@ export function* syncOfflineDataSaga() {
 
   const offlineItemsToAdd: OfflineEntry[] = []
 
-  // Sync
   const collectionIdsToSync: CollectionId[] = intersection(
     offlineCollectionIds,
     accountCollectionIds
@@ -76,7 +74,6 @@ export function* syncOfflineDataSaga() {
 
   offlineItemsToAdd.push(...collectionsToSync)
 
-  // Add
   if (collectionStatus[DOWNLOAD_REASON_FAVORITES]) {
     const collectionIdsToAdd = difference(
       accountCollectionIds,

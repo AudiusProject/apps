@@ -4,7 +4,6 @@ export const findAncestor = (el: Element, selector: string) => {
   if (el.closest) {
     return el.closest(selector)
   }
-  // Fall back to just looping back through parents
   while (
     el.parentElement &&
     // @ts-ignore

@@ -106,12 +106,9 @@ export const AccountSettingsScreen = () => {
   } = accountData ?? {}
 
   const navigation = useNavigation<ProfileTabScreenParamList>()
-  // Email, password and verification belong to the signed-in user, so hide
-  // them while managing another account
   const isManagedAccount = useIsManagedAccount()
   const { isVerified } = useTierAndVerifiedForUser(accountUserId)
 
-  // Calculate badge size based on h2 font size (h2 is fontSize.medium = 16, so badge is 14)
   const badgeSize = 14
 
   const { mutate: resendRecoveryEmail } = useResendRecoveryEmail()

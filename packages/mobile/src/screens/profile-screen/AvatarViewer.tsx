@@ -21,12 +21,6 @@ type AvatarViewerProps = {
   onClose: () => void
 }
 
-/**
- * Full-screen viewer for the profile-screen avatar. The image is clipped to
- * a circle so the on-tile shape carries through to the viewer; the
- * surrounding backdrop, fade, swipe-to-dismiss, and close button live in
- * the shared {@link FullscreenImageViewer}.
- */
 export const AvatarViewer = ({
   userId,
   isOpen,
@@ -34,15 +28,11 @@ export const AvatarViewer = ({
 }: AvatarViewerProps) => {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions()
 
-  // Use the largest cached size the image API serves so the full-screen
-  // render isn't a blurry upscale of the 150-px tile shown in the header.
   const { source } = useProfilePicture({
     userId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
 
-  // Circle fits the smaller of the two window dimensions (after a little
-  // padding so it doesn't touch the edges on landscape phones).
   const circleSize = Math.min(windowWidth, windowHeight) - CIRCLE_PADDING * 2
 
   return (

@@ -11,8 +11,8 @@ describe('utils', () => {
       decoded.digest,
       '0x74574595073a25aaac18f1089239a26f8bceaf76cc29973d2be13352d2abca4c'
     )
-    assert.strictEqual(decoded.hashFn, 18) // constant
-    assert.strictEqual(decoded.size, 32) // constant
+    assert.strictEqual(decoded.hashFn, 18)
+    assert.strictEqual(decoded.size, 32)
   })
 
   it('should encodeMethod correctly with 0x prefix', async () => {

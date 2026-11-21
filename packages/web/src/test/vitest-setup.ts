@@ -6,7 +6,6 @@ import { afterEach, vi } from 'vitest'
 
 import { queryClient } from 'services/query-client'
 
-// Mock console.error to filter out React prop warnings
 const originalError = console.error
 console.error = (...args) => {
   if (typeof args[0] === 'string') {
@@ -20,8 +19,6 @@ console.error = (...args) => {
   originalError.call(console, ...args)
 }
 
-// Some global mocks that most tests will need.
-// If you need to provide any form of mocked responses, you can replace them in your test with a hoisted implementation
 // @ts-ignore
 Element.prototype.scrollTo = vi.fn()
 document.addEventListener = vi.fn()
@@ -37,7 +34,6 @@ class MockImage {
 
   set src(url: string) {
     this._src = url
-    // simulate successful load
     setTimeout(() => {
       this.onload()
     }, 0)
@@ -47,7 +43,6 @@ class MockImage {
 vi.stubGlobal('Image', MockImage)
 
 vi.mock('@reown/appkit/react', () => {
-  // See https://github.com/orgs/WalletConnect/discussions/5729#discussioncomment-12770662
   return {
     createAppKit: vi.fn().mockReturnValue({
       getUniversalProvider: vi.fn(),
@@ -118,7 +113,6 @@ vi.mock('redux-first-history', async (importOriginal) => {
 })
 
 vi.mock('redux-saga', () => {
-  // Create a proper redux middleware function (store) => (next) => (action) => next(action)
   const createMockSagaMiddleware = (options?: any) => {
     const middleware = (store: any) => (next: any) => (action: any) => {
       return next(action)
@@ -157,6 +151,5 @@ window.matchMedia = vi.fn().mockReturnValue({
 
 afterEach(() => {
   cleanup()
-  // Clear the query cache after each test
   queryClient.clear()
 })

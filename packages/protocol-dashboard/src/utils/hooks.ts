@@ -14,11 +14,6 @@ export const useIsMobile = () =>
     return isMobile()
   }, [])
 
-/**
- * Returns { has: true, inc: incrementCount: () => void } when incrementCount
- * has been invoked `targetCount` times
- * @param targetCount target count
- */
 export const useHasCounted = (targetCount: number) => {
   const [currentCount, setCurrentCount] = useState(0)
   const incrementCount = useCallback(() => {

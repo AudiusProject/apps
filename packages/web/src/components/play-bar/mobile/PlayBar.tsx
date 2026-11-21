@@ -48,10 +48,6 @@ const messages = {
   preview: 'preview'
 }
 
-/**
- * Owns the progress state so the 200ms updates only re-render the bar,
- * not the whole PlayBar
- */
 const PlayBarTrackingBar = ({
   isPlaying,
   trackId: queueTrackId
@@ -61,8 +57,6 @@ const PlayBarTrackingBar = ({
 }) => {
   const [percentComplete, setPercentComplete] = useState(0)
 
-  // Sync right away whenever play state or the track changes, then poll.
-  // Polling while paused picks up seeks; an unchanged percent doesn't render.
   useEffect(() => {
     const updatePercentComplete = () => {
       if (!audioPlayer) {

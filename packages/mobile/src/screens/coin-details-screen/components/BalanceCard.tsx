@@ -191,14 +191,12 @@ const HasBalanceState = ({
                 </Flex>
               )}
               {isAudio
-                ? // For AUDIO, show associated wallets (both ETH and SOL)
-                  associatedAudioBalances.data.map((walletBalance, index) => {
+                ? associatedAudioBalances.data.map((walletBalance, index) => {
                     if (
                       !walletBalance.balance ||
                       walletBalance.balance === AUDIO(0).value
                     )
                       return null
-                    // Use AUDIO constructor to format bigint balance properly
                     const balanceFormatted = AUDIO(
                       walletBalance.balance
                     ).toLocaleString('en-US', {
@@ -228,8 +226,7 @@ const HasBalanceState = ({
                       </Flex>
                     )
                   })
-                : // For other coins, show SPL linked wallets
-                  linkedWallets.map((wallet, index) => (
+                : linkedWallets.map((wallet, index) => (
                     <Flex
                       key={wallet.owner}
                       direction='row'
@@ -307,7 +304,6 @@ export const BalanceCard = ({ mint }: { mint: string }) => {
   }, [dispatch, mint])
 
   if (coinsLoading || !coin) {
-    // TODO: Add skeleton state
     return null
   }
 

@@ -6,19 +6,10 @@ import { Flex, Text } from '@audius/harmony'
 import { UserLink } from './UserLink'
 
 type TrackArtistsProps = {
-  /** The track owner. */
   userId: ID
-  /** Accepted collaborator artists, as embedded on the track. */
   collaborators?: { user_id: ID }[] | null
 } & Omit<ComponentProps<typeof UserLink>, 'userId'>
 
-/**
- * A track's artist line: the owner plus accepted collaborators as a
- * comma-separated list on a single line that ellipsizes on overflow.
- *
- * With no collaborators this is equivalent to a single owner `<UserLink>` —
- * a safe drop-in replacement everywhere the owner is currently shown.
- */
 export const TrackArtists = ({
   userId,
   collaborators,

@@ -3,8 +3,6 @@ import { IconComponent } from '@audius/harmony'
 import { categories } from './categories'
 import { MoodInfo } from './moods'
 
-// NOTE: This is different from SearchCategory because
-// it uses `profiles` instead of `users`
 export enum CategoryView {
   ALL = 'all',
   PROFILES = 'profiles',

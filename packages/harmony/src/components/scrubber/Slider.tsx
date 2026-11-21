@@ -30,11 +30,8 @@ export const Slider = ({
   includeExpandedTargets = true,
   style
 }: ScrubberProps) => {
-  // Percentage of the complete scrubber being dragged to.
-  // e.g. 0.25 means the user has dragged the scrubber 1/4th of the way.
   const dragPercent = useRef<number | null>(0)
 
-  // Refs to handle event listeners
   const mouseMoveRef = useRef<((this: Document, ev: MouseEvent) => any) | null>(
     null
   )
@@ -44,7 +41,6 @@ export const Slider = ({
   const touchMoveRef = useRef<((e: TouchEvent) => any) | null>(null)
   const touchEndRef = useRef<((e: TouchEvent) => any) | null>(null)
 
-  // Div refs
   const railRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
@@ -203,7 +199,6 @@ export const Slider = ({
    * Attaches mouse-move and mouse-up event listeners and sets dragging state.
    */
   const onMouseDown = (e: React.MouseEvent) => {
-    // Cancel mouse down if touch was fired.
     if (e.button !== 0 || touchMoveRef.current) return
 
     mouseMoveRef.current = onMouseMove
@@ -228,7 +223,6 @@ export const Slider = ({
     setDragPercentTouch(e)
   }
 
-  // Detach any in-progress drag listeners if unmounted mid-drag
   useEffect(() => {
     return () => {
       if (mouseMoveRef.current) {
@@ -246,7 +240,6 @@ export const Slider = ({
     }
   }, [])
 
-  // Watch interactions to the scrubber and call to animate
   useEffect(() => {
     if (!dragPercent.current) {
       if (isPlaying) play()

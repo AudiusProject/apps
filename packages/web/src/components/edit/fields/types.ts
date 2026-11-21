@@ -9,8 +9,8 @@ import { Nullable } from '@audius/common/utils'
 
 type GateKeeperField = 'accessAndSale' | 'stemsAndDownloads'
 export type GateKeeper = {
-  access: GateKeeperField // who last changed the access gates
-  downloadable: GateKeeperField // who last changed the downloadability
+  access: GateKeeperField
+  downloadable: GateKeeperField
 }
 
 export const STREAM_AVAILABILITY_TYPE = 'stream_availability_type'
@@ -35,7 +35,6 @@ export const FIELD_VISIBILITY = 'field_visibility'
 export const IS_SCHEDULED_RELEASE = 'is_scheduled_release'
 export const IS_OWNED_BY_USER = 'is_owned_by_user'
 
-// whether Access & Sale or Stems & Downloads last set the stream / download conditions
 export const LAST_GATE_KEEPER = 'last_gate_keeper'
 
 export type AccessAndSaleFormValues = {

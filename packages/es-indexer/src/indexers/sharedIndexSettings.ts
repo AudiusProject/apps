@@ -37,9 +37,6 @@ export const sharedIndexSettings: IndicesIndexSettings = {
     number_of_shards: 1,
     number_of_replicas: 0,
     refresh_interval: '5s',
-    // get_feed_es uses terms lookup to get reposts by followers
-    // default limit is 65536, but there are users that follow >65k people.
-    // so set to a million
     max_terms_count: 1000000,
   },
 }

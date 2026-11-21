@@ -139,7 +139,7 @@ describe('CollectionCard', () => {
   it('premium collections owned by user are rendered correctly', async () => {
     renderCollectionCard({
       ...testCollection,
-      playlist_owner_id: 2 // Same as current user
+      playlist_owner_id: 2
     })
 
     expect(

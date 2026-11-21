@@ -160,8 +160,6 @@ export type TrackListItemProps = {
   uid?: UID
 }
 
-// Using `memo` because FlatList renders these items
-// And we want to avoid a full render when the props haven't changed
 export const TrackListItem = memo((props: TrackListItemProps) => {
   const { id, uid } = props
 
@@ -235,7 +233,6 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
       getPlaying(state)
   )
   const isPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
-  // Unlike other gated tracks, USDC purchase gated tracks are playable because they have previews
   const isPlayable = !isDeleted && (!isLocked || isPurchaseGated)
 
   const messages = getMessages({ isDeleted })

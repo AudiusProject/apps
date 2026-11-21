@@ -23,7 +23,6 @@ const events = [
   Event.PlaybackQueueEnded
 ]
 
-// Matches AudioPlayer.tsx's threshold for considering a track "ended".
 const TRACK_END_BUFFER = 2
 
 export const useSavePodcastProgress = () => {
@@ -45,9 +44,6 @@ export const useSavePodcastProgress = () => {
       if (!isTrackLongFormContent || !userId || !trackId) return
       const position =
         overridePosition ?? (await TrackPlayer.getProgress()).position
-      // Don't dispatch IN_PROGRESS for a track that's effectively over —
-      // AudioPlayer marks those COMPLETED in the same event tick and we'd
-      // race that dispatch.
       if (trackDuration && position >= trackDuration - TRACK_END_BUFFER) return
       dispatch(
         setTrackPosition({
@@ -66,9 +62,6 @@ export const useSavePodcastProgress = () => {
         await savePosition()
       }
     } else if (event.type === Event.PlaybackActiveTrackChanged) {
-      // event.lastPosition is the outgoing track's final position; the
-      // outgoing trackId is captured in the closure since Redux hasn't been
-      // updated yet at this point in the event tick.
       if (event.lastPosition !== undefined) {
         await savePosition(event.lastPosition)
       }

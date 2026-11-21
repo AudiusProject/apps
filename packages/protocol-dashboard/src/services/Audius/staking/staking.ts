@@ -15,8 +15,6 @@ export default class Staking {
     return this.aud.libs.ethContracts.StakingProxyClient
   }
 
-  /* -------------------- Staking Proxy Client Read -------------------- */
-
   async token(): Promise<Address> {
     await this.aud.hasPermissions()
     const info = await this.getContract().token()

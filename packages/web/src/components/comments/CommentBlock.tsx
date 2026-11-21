@@ -261,8 +261,6 @@ const CommentBlockInternal = (
   )
 }
 
-// This is an extra component wrapper because the comment data coming back from tan-query could be undefined
-// There's no way to return early in the above component due to rules of hooks ordering
 export const CommentBlock = (props: CommentBlockProps) => {
   const { data: comment } = useComment(props.commentId)
   if (!comment || !('id' in comment)) return null

@@ -27,10 +27,8 @@ export const ArtistRecommendationsPopup = (props: Props) => {
   const { anchorRef, artistId, isVisible, onClose } = props
   const mainContentRef = useMainContentRef()
 
-  // Get the artist
   const { data: user } = useUser(artistId)
 
-  // Get the related artists which should be available in the query cache
   const queryClient = useQueryClient()
   const relatedArtists = queryClient.getQueryData(
     getRelatedArtistsQueryKey({
@@ -39,7 +37,6 @@ export const ArtistRecommendationsPopup = (props: Props) => {
     })
   )
 
-  // Query for suggested artists only if there are related artists in the first place
   const { data: suggestedArtists = [], isLoading } = useRelatedArtistsUsers(
     {
       artistId,
@@ -52,7 +49,6 @@ export const ArtistRecommendationsPopup = (props: Props) => {
     }
   )
 
-  // Only show popup if we have artists to recommend
   const shouldShowPopup = isVisible && !isLoading && suggestedArtists.length > 0
 
   if (!user) return null

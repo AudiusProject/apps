@@ -48,7 +48,6 @@ export const ExpandableContent = ({
   const toggleButtonRef = useRef<View>(null)
   const [isButtonLayoutReady, setIsButtonLayoutReady] = useState(false)
 
-  // Track height of content for animation
   const [contentHeight, setContentHeight] = useState<number | null>(null)
   const containerHeight = useSharedValue<number | null>(null)
 
@@ -64,13 +63,11 @@ export const ExpandableContent = ({
     (pageY: number, height: number) => {
       if (scrollRef?.current) {
         if ('scrollTo' in scrollRef.current) {
-          // ScrollView
           scrollRef.current.scrollTo({
             y: pageY - height / 2,
             animated: true
           })
         } else if ('scrollToOffset' in scrollRef.current) {
-          // FlatList
           scrollRef.current.scrollToOffset({
             offset: pageY,
             animated: true
@@ -89,7 +86,6 @@ export const ExpandableContent = ({
         if (typeof y === 'number' && typeof height === 'number') {
           scrollToButton(y, height)
         } else if (retryCount < 3) {
-          // Try again with increasing delays
           setTimeout(
             () => {
               requestAnimationFrame(() => {
@@ -108,12 +104,10 @@ export const ExpandableContent = ({
     if (!toggleButtonRef.current) return
 
     if (Platform.OS === 'android') {
-      // On Android, use measureInWindow with retry logic
       requestAnimationFrame(() => {
         tryMeasureAndroid()
       })
     } else {
-      // On iOS, use measure which provides page-relative coordinates
       toggleButtonRef.current.measure(
         (
           x: number,
@@ -135,7 +129,6 @@ export const ExpandableContent = ({
     setIsExpanded((prev) => {
       const newIsExpanded = !prev
 
-      // If we're collapsing, scroll to center the toggle button
       if (!newIsExpanded) {
         measureAndScroll()
       }
@@ -144,23 +137,19 @@ export const ExpandableContent = ({
     })
   }, [measureAndScroll])
 
-  // Handle layout measurement
   const handleContentLayout = useCallback(
     (e: LayoutChangeEvent) => {
       const height = e.nativeEvent.layout.height
 
-      // Store content height for calculations
       if (contentHeight === null || height > contentHeight) {
         setContentHeight(height)
 
-        // If first measure, set container height
         if (containerHeight.value === null) {
           const initialHeight = Math.min(height, lineHeight * maxLines)
           containerHeight.value = initialHeight
         }
       }
 
-      // Show toggle if content exceeds max lines
       if (height > lineHeight * maxLines) {
         setShowToggle(true)
       }
@@ -168,20 +157,16 @@ export const ExpandableContent = ({
     [contentHeight, containerHeight, lineHeight, maxLines]
   )
 
-  // Wait for the button to be laid out before measuring - needed for Android
   const handleButtonLayout = useCallback((e: LayoutChangeEvent) => {
     setIsButtonLayoutReady(true)
   }, [])
 
-  // Update height when expanded state changes
   useEffect(() => {
     if (contentHeight === null) return
 
     if (isExpanded) {
-      // Expand to full content height
       containerHeight.value = withTiming(contentHeight, motion.expressive)
     } else {
-      // Collapse to max lines height
       containerHeight.value = withTiming(
         Math.min(contentHeight, lineHeight * maxLines),
         motion.expressive

@@ -4,10 +4,6 @@ import styles from './LoadingSpinner.module.css'
 
 type LoadingSpinnerProps = { className?: string }
 
-/**
- * CSS spinner. Keep the svg > g > path structure: stylesheets recolour it via
- * `g path` selectors.
- */
 const LoadingSpinner = (props: LoadingSpinnerProps) => {
   const { className } = props
 

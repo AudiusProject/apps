@@ -52,7 +52,6 @@ const useStyles = makeStyles(({ palette }) => ({
 
 type ArtworkProps = {
   track: Nullable<Track>
-  /** Whether the Now Playing drawer is open, so the artwork is visible */
   isOpen: boolean
 }
 
@@ -65,8 +64,6 @@ export const Artwork = ({ track, isOpen }: ArtworkProps) => {
     })
   )
 
-  // With the artwork's colors, a wide soft glow in its most colorful one;
-  // without, the plain drop shadow.
   let shadowStyle = { shadowColor: 'rgb(0,0,0)' }
   if (dominantColors?.length) {
     const { r, g, b } = mostSaturated(dominantColors)
@@ -94,8 +91,6 @@ export const Artwork = ({ track, isOpen }: ArtworkProps) => {
         key={track?.track_id}
         trackId={track?.track_id}
         style={styles.image}
-        // The collapsed drawer hides the artwork, so don't load the full
-        // size for every track until the drawer opens
         size={
           isOpen ? SquareSizes.SIZE_1000_BY_1000 : SquareSizes.SIZE_480_BY_480
         }

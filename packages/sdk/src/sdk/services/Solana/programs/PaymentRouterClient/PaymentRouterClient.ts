@@ -195,7 +195,6 @@ export class PaymentRouterClient {
 
     const mint = parseMint(args.mint, this.mints)
 
-    // Check for cached account
     const existingTokenAccount = this.existingTokenAccounts[mint.toBase58()]
     if (existingTokenAccount) {
       return existingTokenAccount
@@ -214,7 +213,6 @@ export class PaymentRouterClient {
       this.existingTokenAccounts[mint.toBase58()] = account
     } catch (error: unknown) {
       if (error instanceof TokenAccountNotFoundError) {
-        // As this isn't atomic, it's possible others can create associated accounts meanwhile.
         try {
           const instruction = createAssociatedTokenAccountIdempotentInstruction(
             await this.client.getFeePayer(),
@@ -240,7 +238,6 @@ export class PaymentRouterClient {
           // instruction error if the associated account exists already.
         }
 
-        // Now this should always succeed
         account = await getAccount(connection, associatedTokenAdddress)
       } else {
         throw error

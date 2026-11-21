@@ -292,7 +292,6 @@ export const TokenAmountSection = ({
       )
     }
 
-    // For convert flow, show the amount with token selection on the right
     if (!isDefault && availableTokens && onTokenChange) {
       return (
         <Flex p='l' alignItems='center' gap='s' justifyContent='space-between'>
@@ -343,7 +342,6 @@ export const TokenAmountSection = ({
       )
     }
 
-    // Add transaction icon for "You Receive" title in convert flow only
     if (!isInput && title === messages.youReceive && tab === 'convert') {
       return (
         <Flex alignItems='center' gap='s'>

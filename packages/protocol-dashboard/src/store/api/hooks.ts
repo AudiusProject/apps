@@ -8,11 +8,9 @@ import { AppState } from 'store/types'
 
 import { setDidError } from './slice'
 
-// -------------------------------- Selectors  --------------------------------
 export const getGraphAPI = (state: AppState) => state.api
 export const getDidGraphError = (state: AppState) => state.api.didError
 
-// -------------------------------- Hooks  --------------------------------
 export const useGraphQuery: typeof useQuery = (...args) => {
   const result = useQuery(...args)
   const didError = useSelector(getDidGraphError)

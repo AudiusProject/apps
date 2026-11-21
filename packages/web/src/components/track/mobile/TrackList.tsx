@@ -76,7 +76,6 @@ const TrackList = ({
     [onReorder]
   )
 
-  // The dividers above and belove the active track should be hidden
   const activeIndex = tracks.findIndex((track) => track.isActive)
   const hideDivider = (idx: number) =>
     activeIndex >= 0 && (activeIndex === idx || activeIndex === idx - 1)

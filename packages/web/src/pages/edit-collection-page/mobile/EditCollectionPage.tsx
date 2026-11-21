@@ -98,16 +98,13 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
   const [showRemoveTrackDrawer, setShowRemoveTrackDrawer] = useState(false)
   const onDrawerClose = useCallback(() => setShowRemoveTrackDrawer(false), [])
 
-  // Holds all tracks to be removed on save
   const [removedTracks, setRemovedTracks] = useState<
     { timestamp: number; trackId: ID }[]
   >([])
 
-  // Holds track to be removed if confirmed
   const [confirmRemoveTrack, setConfirmRemoveTrack] =
     useState<Nullable<{ title: string; trackId: ID; timestamp: number }>>(null)
 
-  // State to keep track of reordering
   const [reorderedTracks, setReorderedTracks] = useState<number[]>([])
   const [hasReordered, setHasReordered] = useState(false)
   useEffect(() => {
@@ -201,12 +198,9 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
   }
 
   const onSave = useCallback(() => {
-    // Sanitize description field. Description is required to be present, but can be null
     if (formFields.description === undefined) {
       formFields.description = null
     }
-    // Copy the metadata playlist contents so that a reference is not changed between
-    // removing tracks, updating track order, and edit playlist
     const playlistTrackIds = [
       ...(collection?.playlist_contents?.track_ids ?? [])
     ]
@@ -217,16 +211,11 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
     }
 
     if (collection && formFields.playlist_id) {
-      // Edit playlist
       if (hasReordered) {
-        // Reorder the playlist and refresh the lineup just in case it's
-        // in the view behind the edit playlist page.
         orderPlaylist(
           collection.playlist_id,
           formatReorder(playlistTrackIds, reorderedTracks)
         )
-        // Update the playlist content track_ids so that the editPlaylist
-        // optimistically update the cached collection trackIds
         formFields.playlist_contents.track_ids = reorderedTracks.map(
           (idx) => playlistTrackIds[idx]
         )
@@ -249,10 +238,6 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
     permalink
   ])
 
-  /**
-   * Stores the track to be removed if confirmed
-   * Opens the drawer to confirm removal of the track
-   */
   const onRemoveTrack = useCallback(
     (index: number) => {
       if ((collection?.playlist_contents?.track_ids.length ?? 0) <= index)
@@ -279,10 +264,6 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
     ]
   )
 
-  /**
-   * Moves the track to be removed to the removedTracks array
-   * Closes the drawer to confirm removal of the track
-   */
   const onConfirmRemove = useCallback(() => {
     if (!confirmRemoveTrack) return
     const removeIdx = collection?.playlist_contents.track_ids.findIndex(
@@ -333,7 +314,6 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
 
   const trackAccessMap = useGatedContentAccessMap(tracks ?? [])
 
-  // Put together track list if necessary
   let trackList = null
   if (tracks && reorderedTracks.length > 0) {
     trackList = reorderedTracks.map((i) => {

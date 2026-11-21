@@ -34,7 +34,6 @@ const VoteMeter: React.FC<VoteMeterProps> = ({
   const votesForStyle: CSSProperties = {}
   const votesAgainstStyle: CSSProperties = {}
   if (!votesFor.isZero() || !votesAgainst.isZero()) {
-    // If there are some votes, set the width of the bars
     votesForStyle.width = `${percentFor}%`
     votesAgainstStyle.width = `${100 - percentFor}%`
   }

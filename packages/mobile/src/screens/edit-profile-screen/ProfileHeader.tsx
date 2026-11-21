@@ -6,10 +6,8 @@ import { ImageField } from 'app/components/fields'
 const COVER_HEIGHT = 116
 const AVATAR_SIZE = 84
 const AVATAR_RING = 4
-/** How far the avatar hangs below the cover. */
 const AVATAR_OVERHANG = 36
 
-/** Cover photo with the profile picture overlapping its bottom-left corner. */
 export const ProfileHeader = () => {
   const { color, cornerRadius, spacing } = useTheme()
   const avatarOuter = AVATAR_SIZE + AVATAR_RING * 2

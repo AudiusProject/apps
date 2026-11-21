@@ -17,8 +17,6 @@ export const useSocialMediaLoader = ({
   const [isWaitingForSocialLogin, setIsWaitingForSocialLogin] = useState(false)
 
   useEffect(() => {
-    // If the user goes back to this page in the middle of the flow after they linked
-    // their social on this page previously, clear the sign on state.
     if (linkedSocialOnThisPagePreviously && resetAction) {
       dispatch(resetAction())
     }

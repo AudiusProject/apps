@@ -35,7 +35,6 @@ export const ConvertTab = ({
 }: ConvertTabProps) => {
   const { baseToken, quoteToken } = tokenPair
 
-  // State for token selection
   const [selectedInputToken, setSelectedInputToken] = useState(baseToken)
   const [selectedOutputToken, setSelectedOutputToken] = useState(quoteToken)
 
@@ -81,17 +80,15 @@ export const ConvertTab = ({
     return [...(availableOutputTokens ?? []), ...fanClubs].filter(
       (token, index, arr) =>
         arr.findIndex((t) => t.symbol === token.symbol) === index
-    ) // Remove duplicates
+    )
   }, [availableOutputTokens, fanClubs])
 
-  // Filter out the currently selected input token from available output tokens
   const filteredAvailableOutputTokens = useMemo(() => {
     return totalAvailableTokens.filter(
       (token) => token.symbol !== selectedInputToken.symbol
     )
   }, [totalAvailableTokens, selectedInputToken.symbol])
 
-  // Generic token change handler with automatic swapping when only 2 tokens are available
   const createTokenChangeHandler = useCallback(
     (
       primaryCallback: (token: CoinInfo) => void,
@@ -100,7 +97,6 @@ export const ConvertTab = ({
       (token: CoinInfo) => {
         primaryCallback(token)
 
-        // If there are only 2 total available tokens, automatically set the other token
         if (totalAvailableTokens.length === 2) {
           const otherToken = totalAvailableTokens.find(
             (t) => t.symbol !== token.symbol
@@ -143,7 +139,6 @@ export const ConvertTab = ({
     [createTokenChangeHandler, onInputTokenChange, onOutputTokenChange]
   )
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   if (currentExchangeRate !== null) {
     hasRateEverBeenFetched.current = true
@@ -151,8 +146,6 @@ export const ConvertTab = ({
 
   if (!tokenPair) return null
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     isBalanceLoading ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)

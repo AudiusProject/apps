@@ -86,20 +86,16 @@ export const UserSearchAutocomplete = ({
     [query]
   )
 
-  // Calculate menu width to match input and check if we should position above
   useEffect(() => {
     const updateWidthAndPosition = () => {
       if (anchorRef.current) {
         const rect = anchorRef.current.getBoundingClientRect()
         setMenuWidth(rect.width)
 
-        // Estimate menu height (approximately 52px per item + padding)
-        // We'll use a conservative estimate of 3 items max based on the search limit
-        const estimatedMenuHeight = 3 * 52 + 32 // 3 items + padding
+        const estimatedMenuHeight = 3 * 52 + 32
         const spaceBelow = window.innerHeight - rect.bottom
         const spaceAbove = rect.top
 
-        // Position above if there's not enough space below but there is space above
         if (
           spaceBelow < estimatedMenuHeight &&
           spaceAbove > estimatedMenuHeight
@@ -112,7 +108,6 @@ export const UserSearchAutocomplete = ({
     }
 
     if (isOpen && query.trim()) {
-      // Calculate immediately and after a brief delay to ensure input is rendered
       updateWidthAndPosition()
       const timeoutId = setTimeout(updateWidthAndPosition, 0)
 
@@ -129,7 +124,6 @@ export const UserSearchAutocomplete = ({
       const newQuery = e.target.value
       setQuery(newQuery)
       setIsOpen(true)
-      // Clear the selected value when user starts typing a different value
       if (value) {
         const currentDisplayValue = `${value.name} (@${value.handle})`
         if (newQuery !== currentDisplayValue) {
@@ -145,7 +139,6 @@ export const UserSearchAutocomplete = ({
       const user = filteredUsers.find((u) => u.user_id === Number(userId))
       if (user) {
         onChange(user)
-        // Keep the formatted string in query as a fallback until value prop is updated
         setQuery(`${user.name} (@${user.handle})`)
         setIsOpen(false)
       }
@@ -161,11 +154,9 @@ export const UserSearchAutocomplete = ({
   }, [onChange, onClear])
 
   const displayValue = useMemo(() => {
-    // Show the selected user's formatted name if a user is selected
     if (value) {
       return `${value.name} (@${value.handle})`
     }
-    // Otherwise show the search query
     return query
   }, [value, query])
 
@@ -213,7 +204,6 @@ export const UserSearchAutocomplete = ({
                 value={value}
                 onChange={handleSelectUser}
                 onClick={(e) => {
-                  // Ensure selection happens on click
                   e.stopPropagation()
                   handleSelectUser(value)
                 }}
@@ -258,7 +248,6 @@ export const UserSearchAutocomplete = ({
           value={displayValue}
           onChange={handleChange}
           onFocus={() => {
-            // Only open dropdown if there's no selected user or if user starts typing
             if (!value || query.trim()) {
               setIsOpen(true)
             }

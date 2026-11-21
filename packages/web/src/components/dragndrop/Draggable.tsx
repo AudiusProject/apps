@@ -21,7 +21,7 @@ export type DraggableProps = {
   text?: string
   link?: string
   kind: DragDropKind
-  id: ID | string // Entity id or folder id
+  id: ID | string
   index?: number
   children: ReactNode
   onDrag?: () => void
@@ -55,9 +55,6 @@ export const Draggable = (props: DraggableProps) => {
       const dt = e.dataTransfer
       dt.effectAllowed = 'copy'
 
-      // If we set the URL on firefox,
-      // it forces a site refresh
-      // on drop
       if (!isFirefox()) {
         dt.setData('text/uri-list', link)
         dt.setData('text/plain', link)

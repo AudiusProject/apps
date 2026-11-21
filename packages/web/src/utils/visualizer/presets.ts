@@ -1,10 +1,7 @@
-// Presets: dynamic `import('butterchurn-presets')` (main export only).
-
 type PresetMap = Record<string, object>
 
 let cachedPresets: PresetMap | null = null
 
-/** Favorites shown first in the cycle list when those keys exist in the pack. */
 const CURATED_PRESET_NAMES = [
   'Flexi - mindblob [shiny mix]',
   'martin - liquid crystal spiral',
@@ -22,10 +19,11 @@ function mergePresetModule(m: Record<string, unknown>): PresetMap {
   const raw =
     typeof m.getPresets === 'function'
       ? (m.getPresets as () => PresetMap)()
-      : (m as { default?: { getPresets?: () => PresetMap } }).default
-          ?.getPresets?.() ??
+      : ((
+          m as { default?: { getPresets?: () => PresetMap } }
+        ).default?.getPresets?.() ??
         (m as { default?: PresetMap }).default ??
-        m
+        m)
   return raw as PresetMap
 }
 

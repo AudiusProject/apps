@@ -2,14 +2,6 @@ import { Utils } from '../../utils'
 import { GovernedContractClient } from '../contracts/GovernedContractClient'
 
 export class ServiceTypeManagerClient extends GovernedContractClient {
-  /**
-   *
-   * @param serviceType Type of service to set the version, either `discovery-node` or `content-node`
-   * @param serviceVersion Version string to set on chain
-   * @param privateKey Optional privateKey to pass along to web3Manager sendTransaction
-   * @param dryRun Optional parameter to return the generated parameters without sending tx
-   * @returns comma-separated String of serviceType and serviceVersion if dryRun; else response from web3Manager.sendTransaction
-   */
   async setServiceVersion(
     serviceType: string,
     serviceVersion: string,
@@ -89,14 +81,6 @@ export class ServiceTypeManagerClient extends GovernedContractClient {
     return parseInt(await method.call())
   }
 
-  /**
-   * @notice Add a new service type
-   * @returns {
-   *  isValid: Is the types type is isValid
-   *  minStake: minimum stake for service type
-   *  maxStake: minimum stake for service type
-   * }
-   */
   async getServiceTypeInfo(serviceType: string) {
     const method = await this.getMethod(
       'getServiceTypeInfo',

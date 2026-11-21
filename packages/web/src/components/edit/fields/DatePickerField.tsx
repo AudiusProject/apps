@@ -10,13 +10,9 @@ import lazyWithPreload from 'utils/lazyWithPreload'
 import styles from './DatePickerField.module.css'
 import { isDateOnOrBeforeToday } from './datePickerUtils'
 
-// Lazy load react-datepicker since it's only used when the popup is open
-// Preload when the date field is focused to minimize delay (200ms auto-preload)
-// CSS is imported dynamically as part of the lazy load to avoid linter errors
 const ReactDatePicker = lazyWithPreload(
   () =>
     import('react-datepicker').then((module) => {
-      // Dynamically import CSS to avoid linter errors about package exports
       import('react-datepicker/dist/react-datepicker.css')
       return module
     }),
@@ -34,9 +30,6 @@ type DatePickerFieldProps = {
   minDate?: Date
 }
 
-/**
- * Wrapper component for the DatePicker component that integrates with Formik.
- */
 export const DatePickerField = (props: DatePickerFieldProps) => {
   const { submitCount } = useFormikContext()
   const [{ value }, { touched, error }, helpers] = useField<string | undefined>(
@@ -94,7 +87,6 @@ export const DatePicker = (props: DatePickerProps) => {
 
   useEffect(() => setIsFocused(shouldFocus ?? false), [shouldFocus])
 
-  // Preload the date picker when user focuses on the field
   useEffect(() => {
     if (isFocused) {
       ReactDatePicker.preload()

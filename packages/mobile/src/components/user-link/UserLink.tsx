@@ -54,12 +54,6 @@ export const UserLink = (props: UserLinkProps) => {
     }
   })
 
-  // The outer Pressable used to also dispatch `navigation.push('Profile')`,
-  // which fired in addition to the inner TextLink's own push. On iOS the
-  // tap reached both responders, so a single tap in the contest "Hosted by"
-  // row would push two Profile screens — the second one landing back over
-  // the contest as the user backed out. Drop the duplicate navigation here
-  // and let TextLink (which has proper Link semantics + a11y) own the push.
   return (
     <Pressable
       disabled={disabled}

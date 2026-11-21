@@ -9,7 +9,6 @@ import { ActionDrawerContent } from './ActionDrawer'
 type ActionDrawerWithoutReduxProps = ActionDrawerContentProps &
   SetOptional<DrawerProps, 'children'>
 
-/** ActionDrawer that isn't coupled to redux */
 export const ActionDrawerWithoutRedux = (
   props: ActionDrawerWithoutReduxProps
 ) => {

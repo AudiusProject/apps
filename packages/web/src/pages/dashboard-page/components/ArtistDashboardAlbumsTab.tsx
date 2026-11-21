@@ -53,7 +53,6 @@ export const ArtistDashboardAlbumsTab = ({
     filterText
   })
 
-  // Open albums in edit mode so their tracks can be selected and edited.
   const albumLinkState = useMemo(
     () => (isBulkEditEnabled ? { editMode: true } : undefined),
     [isBulkEditEnabled]

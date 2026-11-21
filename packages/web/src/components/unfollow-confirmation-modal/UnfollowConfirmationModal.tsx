@@ -12,7 +12,6 @@ import { getIsOpen, getUserId } from './store/selectors'
 type UnfollowConfirmationModalProps = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>
 
-// A modal that asks the user to confirm an unfollow.
 const ConnectedUnfollowConfirmationModal = ({
   isOpen,
   userId,

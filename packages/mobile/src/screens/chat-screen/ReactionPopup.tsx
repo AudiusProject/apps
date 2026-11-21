@@ -117,8 +117,6 @@ export const ReactionPopup = ({
   )?.reaction
 
   const handleClose = useCallback(() => {
-    // If the user selected a new reaction, dispatch with that reaction before closing
-    // Prevents jitters
     if (userId && message && newReaction.current) {
       dispatch(
         setMessageReaction({
@@ -146,7 +144,6 @@ export const ReactionPopup = ({
   const handleReactionSelected = useCallback(
     (message: Nullable<ChatMessageWithExtras>, reaction: ReactionTypes) => {
       if (userId && message) {
-        // Wait until after unmount animation to dispatch the new reaction
         newReaction.current = reaction
       }
       handleClosePopup()

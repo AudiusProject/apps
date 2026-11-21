@@ -34,14 +34,12 @@ export const UserSearchAutocomplete = ({
   helperText,
   onBeforeNavigate
 }: UserSearchAutocompleteProps) => {
-  // Use React Navigation's useNavigation directly to ensure it works from drawer context
   const navigation = useNavigation<any>()
   const callbackIdRef = useRef<string | null>(null)
   const { data: currentUserId } = useCurrentUserId()
   const { onOpen: openSendTokensDrawer } = useSendTokensModal()
 
   const displayValue = useMemo(() => {
-    // Show the selected user's formatted name if a user is selected
     if (value) {
       return `${value.name} (@${value.handle})`
     }
@@ -49,27 +47,20 @@ export const UserSearchAutocomplete = ({
   }, [value])
 
   const openUserSelection = useCallback(() => {
-    // Close the drawer before navigating to avoid nested bottom sheets
     onBeforeNavigate?.()
 
-    // Generate a unique ID for this callback
     const callbackId = `user-selection-${Date.now()}-${Math.random()}`
     callbackIdRef.current = callbackId
 
-    // Store the callback
     userSelectionCallbacks.set(callbackId, (user: User) => {
       onChange(user)
       userSelectionCallbacks.delete(callbackId)
       callbackIdRef.current = null
-      // Reopen the drawer after user selection so they can see the selected user
-      // Use setTimeout to ensure navigation.goBack() completes first
       setTimeout(() => {
         openSendTokensDrawer()
       }, 100)
     })
 
-    // Navigate to user selection screen with callback ID
-    // Use navigate instead of push to work from within drawer
     navigation.navigate('SendTokensUserSelection', {
       excludedUserIds: currentUserId
         ? [...(excludedUserIds ?? []), currentUserId]
@@ -87,7 +78,6 @@ export const UserSearchAutocomplete = ({
 
   const handleClear = useCallback(
     (e?: any) => {
-      // Stop event propagation to prevent triggering navigation
       e?.stopPropagation?.()
       onChange(null)
       onClear?.()

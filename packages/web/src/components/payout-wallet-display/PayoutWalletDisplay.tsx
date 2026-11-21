@@ -26,7 +26,7 @@ const PayoutWalletDisplaySkeleton = () => {
       pl='xs'
       pr='s'
       gap='xs'
-      css={{ minWidth: 140 }} // Approx width to prevent layout shift
+      css={{ minWidth: 140 }}
     >
       <Skeleton h={24} w={24} css={{ borderRadius: '50%' }} />
       <Skeleton h={16} w={90} />
@@ -65,7 +65,7 @@ export const PayoutWalletDisplay = () => {
   const displayAddress = externalWalletOwner ?? payoutWallet
 
   const displayText = isExternalWallet
-    ? shortenSPLAddress(displayAddress ?? '') // shorten the owner address or the stored address
+    ? shortenSPLAddress(displayAddress ?? '')
     : messages.builtInWallet
 
   return (

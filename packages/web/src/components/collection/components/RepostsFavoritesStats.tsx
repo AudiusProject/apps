@@ -24,8 +24,6 @@ const messages = {
   favorites: 'Favorite'
 }
 
-// NOTE: this is a newer version of the other RepostsFavoritesStats component;
-// unclear if designers want to deprecate the old one just yet so this is a standalone component for CollectionHeader
 export const RepostsFavoritesStats = ({
   repostCount,
   saveCount,

@@ -5,17 +5,9 @@ import { describe, expect, vi, beforeEach } from 'vitest'
 
 import { render, screen, it } from 'test/test-utils'
 
-// Import the page AFTER all the mocks are registered.
 import ContestPage from './ContestPage'
 
-// We mock the `@audius/common/api` surface for ContestPage because the page
-// reads from 9 hooks whose combined state would be painful to prime through
-// the React Query cache. The test here is focused on the page's RENDERING
-// logic given the hook return values — follow/unfollow behaviour through
-// useRequiresAccountCallback is exercised by its own dedicated tests.
-
 const mocks = vi.hoisted(() => ({
-  // Data the test will override per-test
   useTrackByPermalink: vi.fn(),
   useUser: vi.fn(),
   useRemixContest: vi.fn(),
@@ -51,23 +43,16 @@ vi.mock('@audius/common/api', async (importOriginal) => {
   }
 })
 
-// The header decorator renders a Link using useRequiresAccountCallback,
-// which depends on account-status queries. Stub the hook out entirely — the
-// follow flow's real behaviour is covered upstream in Phase 2 Go/Python tests.
 vi.mock('hooks/useRequiresAccount', async () => {
   return {
     useRequiresAccountCallback: (cb: (...args: any) => any) => cb
   }
 })
 
-// TanQueryLineup pulls in a giant subtree of player state and lineup sagas
-// that we don't care about here — stub it with a tiny marker component.
 vi.mock('components/lineup/TanQueryLineup', () => ({
   TanQueryLineup: () => <div data-testid='tan-query-lineup' />
 }))
 
-// The comments feed is its own universe — stub with a marker. (Phase 4/5
-// tests cover the feed directly.)
 vi.mock('./components/ContestCommentsTile', () => ({
   ContestCommentsTile: () => <div data-testid='contest-comments-section' />
 }))
@@ -122,7 +107,6 @@ const renderContestPage = () => {
 
 describe('ContestPage', () => {
   beforeEach(() => {
-    // Sensible defaults every test can override.
     mocks.useTrackByPermalink.mockReturnValue({ data: track })
     mocks.useUser.mockReturnValue({ data: user })
     mocks.useRemixContest.mockReturnValue({ data: contest })
@@ -169,8 +153,6 @@ describe('ContestPage', () => {
     mocks.useTrackByPermalink.mockReturnValue({ data: undefined })
     mocks.useUser.mockReturnValue({ data: undefined })
     const { container } = renderContestPage()
-    // The page bails out with `return null` when the track or user hasn't
-    // resolved yet, so the router outlet is effectively empty.
     expect(container.querySelector('[data-testid="details-tab"]')).toBeNull()
     expect(container.querySelector('[data-testid="prizes-tab"]')).toBeNull()
   })
@@ -178,11 +160,7 @@ describe('ContestPage', () => {
   it('renders the skeleton fallback when the track has no remix contest', () => {
     mocks.useRemixContest.mockReturnValue({ data: null })
     const { container } = renderContestPage()
-    // The page now renders a layout-shaped Skeleton instead of the old
-    // "no contest is currently running" copy. Skeleton renders an
-    // element with `aria-busy`, which is unique to that fallback branch.
     expect(container.querySelector('[aria-busy]')).not.toBeNull()
-    // The main layout sections should NOT render in the fallback branch.
     expect(screen.queryByText(/^about this contest$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/^prizes$/i)).not.toBeInTheDocument()
     expect(
@@ -191,10 +169,6 @@ describe('ContestPage', () => {
   })
 
   it('renders the details / prizes / submissions / feed sections when a contest exists', () => {
-    // Provide a non-empty lineup so the Submissions pill renders. The
-    // lineup is [original, ...winners, ...remixes], and submissionsCount
-    // subtracts the original + winners, so we need at least 2 entries
-    // (the original plus one actual submission) for the pill to show.
     mocks.useRemixesLineup.mockReturnValue({
       data: [{ id: 1 }, { id: 2 }],
       isFetching: false,
@@ -207,29 +181,17 @@ describe('ContestPage', () => {
       isPlaying: false,
       lineup: { entries: [], order: {} }
     })
-    // Submissions pill reads from the count-only API query, not the
-    // lineup length — so the test needs a non-zero count for the pill
-    // to render.
     mocks.useRemixesCount.mockReturnValue({ data: 1 })
     renderContestPage()
 
-    // About + Prizes are now rendered as uppercase label-style section
-    // headings, not <h*> headings. Match by visible text instead.
     expect(screen.getByText(/^about this contest$/i)).toBeInTheDocument()
     expect(screen.getByText(/^prizes$/i)).toBeInTheDocument()
 
-    // Submissions is surfaced as a SelectablePill toggle.
     expect(
       screen.getByRole('button', { name: /^submissions( \(\d+\))?$/i })
     ).toBeInTheDocument()
 
-    // Contest details internals differ across desktop/mobile layouts.
-    // The redesigned layout renders TWO ContestCommentsTile instances:
-    // one in mode='updates' (left column, Updates feed) and one for the
-    // regular comments feed (right column).
     expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(2)
-    // The submissions lineup lives under the Submissions tab, not the
-    // Details tab; it renders after flipping the pill.
     expect(screen.queryByTestId('tan-query-lineup')).not.toBeInTheDocument()
   })
 
@@ -239,8 +201,6 @@ describe('ContestPage', () => {
     })
     renderContestPage()
 
-    // The Figma-aligned public header surfaces a notification-style
-    // Follow pill (bell icon). Copy is just "Follow" / "Following".
     expect(
       screen.getByRole('button', { name: /^follow$/i })
     ).toBeInTheDocument()
@@ -264,9 +224,6 @@ describe('ContestPage', () => {
   })
 
   it('does not flash "Follow" while the follow state is still loading', () => {
-    // Mid-flight: no data yet. The button must not render the unfollowed
-    // "Follow" label, otherwise it flashes before snapping to "Following"
-    // for users who already follow the contest.
     mocks.useEventFollowState.mockReturnValue({
       data: undefined,
       isPending: true
@@ -283,9 +240,6 @@ describe('ContestPage', () => {
 
   it('includes the track title in the page header when the contest is attached to a track', () => {
     renderContestPage()
-    // The redesigned hero composes the display title as
-    // "<track title> Remix Contest" (track title first, then the label),
-    // rather than the old "Remix Contest: <title>" form.
     expect(
       screen.getByText(/Ready To Love\s+Remix Contest/i)
     ).toBeInTheDocument()

@@ -116,7 +116,6 @@ export const AudioControls = ({
         mode = RepeatMode.OFF
         break
       default:
-        // To appease ts - shouldn't actually hit this.
         mode = RepeatMode.ALL
     }
     dispatch(repeat({ mode }))

@@ -98,7 +98,6 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
   const { spacing } = useTheme()
 
   const { data: partialCollection } = useCollection(id, {
-    // ensure read only
     enabled: false,
     select: (collection) =>
       pick(collection, 'is_album', 'playlist_name', 'permalink', 'is_private')
@@ -233,7 +232,6 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
         <Draggable
           id={id}
           text={name}
-          // Draggables require full URL
           link={`${BASE_URL}${url}`}
           kind='library-playlist'
         >

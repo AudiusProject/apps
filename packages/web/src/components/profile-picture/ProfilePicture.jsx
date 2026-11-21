@@ -57,7 +57,6 @@ const ProfilePicture = ({
       return false
     }
 
-    // Don't show for wAUDIO
     if (ownedCoin.mint === env.WAUDIO_MINT_ADDRESS) {
       return false
     }
@@ -156,7 +155,6 @@ ProfilePicture.propTypes = {
   isMobile: PropTypes.bool,
   showEdit: PropTypes.bool,
   editMode: PropTypes.bool.isRequired,
-  // Whether or not the use has a non-default profile picture
   hasProfilePicture: PropTypes.bool.isRequired,
   includePopup: PropTypes.bool,
   loading: PropTypes.bool.isRequired,

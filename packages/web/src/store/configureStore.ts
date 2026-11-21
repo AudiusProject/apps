@@ -17,7 +17,6 @@ import { navigationMiddleware } from './navigationMiddleware'
 import { buildStoreContext } from './storeContext'
 import { AppState } from './types'
 
-// Lazy load Amplitude track function
 const amplitudeTrack = async (
   event: string,
   properties?: Record<string, any>
@@ -69,15 +68,12 @@ export const configureStore = ({
       route: window.location.pathname
     }
 
-    // Fire and forget - don't await to avoid blocking error handling
     amplitudeTrack(Name.ERROR_PAGE, additionalInfo).catch((err) => {
       console.error('Failed to track error in Amplitude:', err)
     })
   }
 
   const context = buildStoreContext({ isMobile, isTest })
-  // Shared with lazily loaded sagas so they can be handed actions that
-  // arrived before they started (see lazySagas)
   const sagaChannel = stdChannel<Action>()
   context.sagaChannel = sagaChannel
   const sagaMiddleware = createSagaMiddleware({
@@ -86,13 +82,11 @@ export const configureStore = ({
     channel: sagaChannel
   })
 
-  // For tests, only use basic middleware without sagas
   const middlewares = isTest
     ? applyMiddleware(navigationMiddleware, thunk, sagaMiddleware!)
     : applyMiddleware(
         navigationMiddleware,
         chatMiddleware(audiusSdk, queryClient),
-        // Don't run sagas serverside
         ...(typeof window !== 'undefined' ? [sagaMiddleware!] : []),
         thunk
       )
@@ -111,7 +105,6 @@ export const configureStore = ({
   )
   context.dispatch = store.dispatch
 
-  // Don't run sagas in tests - we just need the store
   if (typeof window !== 'undefined' && sagaMiddleware && !isTest) {
     sagaMiddleware.run(rootSaga)
   }

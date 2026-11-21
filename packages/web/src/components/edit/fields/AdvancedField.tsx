@@ -81,9 +81,6 @@ const derivativeWorksValues = [
   { key: null, text: messages.derivativeWorks.options.null }
 ]
 
-// Use standard ISRC and ISWC formats, but allow for optional periods and hyphens
-// ISRC: https://www.wikidata.org/wiki/Property:P1243
-// ISWC: https://www.wikidata.org/wiki/Property:P1827
 const isrcRegex = /^[A-Z]{2}-?[A-Z\d]{3}-?\d{2}-?\d{5}$/i
 const iswcRegex = /^T-?\d{3}.?\d{3}.?\d{3}.?-?\d$/i
 
@@ -174,7 +171,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
   )
 
   const isCover = useMemo(() => {
-    // If either is not null or undefined, then it is a cover
     return coverOriginalSongTitle != null || coverOriginalArtist != null
   }, [coverOriginalSongTitle, coverOriginalArtist])
 
@@ -219,7 +215,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
         setAllowedApiKeys(null)
       }
       if (get(values, IS_COVER)) {
-        // If values are not set, but the toggle is on, set to empty strings for reporting to publishers
         setCoverOriginalSongTitle(
           get(values, COVER_ORIGINAL_SONG_TITLE) ?? coverOriginalSongTitle ?? ''
         )
@@ -243,7 +238,6 @@ export const AdvancedField = ({ isUpload }: AdvancedFieldProps) => {
       const nextCommentsDisabled =
         get(values, COMMENTS_DISABLED) ?? commentsDisabled
       setIsCommentsDisabled(nextCommentsDisabled)
-      // Feedback comes in as comments, so it can't stay on without them.
       const nextFeedbackRequested =
         !nextCommentsDisabled && (get(values, FEEDBACK_REQUESTED) ?? false)
       if (nextFeedbackRequested !== !!feedbackRequested) {

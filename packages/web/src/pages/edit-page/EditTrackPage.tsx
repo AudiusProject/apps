@@ -45,9 +45,6 @@ export const EditTrackPage = (props: EditPageProps) => {
   const { handle } = params
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  // When the user lands here from the host-contest page, we honour the
-  // `returnTo` param so Save / Back lead them back to the in-flight contest
-  // form (which restores from sessionStorage).
   const returnTo = searchParams.get('returnTo')
   useRequiresAccount()
   useIsUnauthorizedForHandleRedirect(handle ?? '')
@@ -61,16 +58,10 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const { data: track, status: trackStatus } = useTrackByParams(params)
 
-  // The form must not initialize until the stems query has settled. Its stem
-  // list is the source of truth for the reconcile on save, so rendering early
-  // would seed the form with an empty list and delete every published stem on
-  // the first submit.
   const { data: stemTracks = [], isPending: isStemsPending } = useStems(
     track?.track_id
   )
 
-  // Same for collaborators: the cached track can be missing pending invites,
-  // and saving without them would delete those invites.
   const { data: collaboratorsForEdit, isPending: isCollaboratorsPending } =
     useTrackCollaboratorsForEdit(track?.track_id)
 
@@ -82,11 +73,9 @@ export const EditTrackPage = (props: EditPageProps) => {
       return
     }
 
-    // Extract the audio file if present
     const audioFile =
       'file' in formValues.tracks[0] ? formValues.tracks[0].file : undefined
 
-    // Extract the cover art file if present
     const imageFile =
       metadata.artwork && 'file' in metadata.artwork && metadata.artwork.file
         ? fileToSdk(metadata.artwork.file, 'cover_art')

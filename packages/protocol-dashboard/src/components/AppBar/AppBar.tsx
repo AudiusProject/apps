@@ -228,7 +228,7 @@ type AppBarProps = {}
 const AppBar: React.FC<AppBarProps> = () => {
   const isMobile = useIsMobile()
   const { isLoggedIn, wallet } = useAccount()
-  const { spacing, color } = useTheme() as HarmonyTheme // Need to cast because the type from import is incorrect
+  const { spacing, color } = useTheme() as HarmonyTheme
   const [isAudiusClientSetup, setIsAudiusClientSetup] = useState(false)
   const [isMisconfigured, setIsMisconfigured] = useState(false)
 

@@ -25,7 +25,6 @@ type NotificationShareCardButtonProps = {
   stat: ShareMilestoneStat
 }
 
-/** Opens the share drawer with a stat card for a track milestone */
 export const NotificationShareCardButton = ({
   trackId,
   stat

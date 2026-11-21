@@ -15,7 +15,6 @@ import { buildUrl, serializeKeyPair } from 'app/store/wallet-connect/utils'
 import { WalletConnectOption } from './WalletConnectOption'
 
 const messages = {
-  // Without the app, the Phantom link opens phantom.app in the browser
   requiresApp: 'Requires the Phantom app'
 }
 

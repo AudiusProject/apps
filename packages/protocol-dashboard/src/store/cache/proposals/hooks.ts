@@ -25,7 +25,6 @@ import {
   setVotingPeriod
 } from './slice'
 
-// -------------------------------- Selectors  --------------------------------
 export const getActiveProposals = (state: AppState) =>
   state.cache.proposals.activeProposals
 export const getRecentProposals = (state: AppState) =>
@@ -50,13 +49,9 @@ export const getVotingPeriod = (state: AppState) =>
 export const getExecutionDelay = (state: AppState) =>
   state.cache.proposals.executionDelay
 
-// -------------------------------- Thunk Actions  --------------------------------
-
-// Filter proposals impacted by
-// https://blog.audius.co/article/audius-governance-takeover-post-mortem-7-23-22
 const filteredProposals = new Set([82, 83, 84, 85])
-filteredProposals.add(130) // Incorrect slash amount applied via sla-auditor
-filteredProposals.add(131) // Incorrect slash amount applied via sla-auditor
+filteredProposals.add(130)
+filteredProposals.add(131)
 
 export function fetchActiveProposals(): ThunkAction<
   void,
@@ -80,13 +75,12 @@ export function fetchActiveProposals(): ThunkAction<
           return proposal
         })
       )
-    ).reverse() // Reverse chronological
+    ).reverse()
 
     dispatch(setActiveProposals({ proposals }))
   }
 }
 
-// A block update can arrive before the previous history request has finished.
 const proposalHistoryRequests = new WeakMap<Audius, Promise<void>>()
 
 export function fetchAllProposals(): ThunkAction<
@@ -109,7 +103,6 @@ export function fetchAllProposals(): ThunkAction<
         .sort((a, b) => b.proposalId - a.proposalId)
         .filter((event) => {
           const proposal = cached[event.proposalId]
-          // Evaluating is transitional; only reuse completed, dated proposals.
           if (
             proposal &&
             proposal.outcome !== Outcome.InProgress &&
@@ -133,8 +126,6 @@ export function fetchAllProposals(): ThunkAction<
 
       if (proposals.length || !pendingEvents.length) publish()
 
-      // Render the newest proposals first, without flooding the RPC provider
-      // or making the entire list wait for the oldest historical request.
       for (let i = 0; i < pendingEvents.length; i += 5) {
         const batch = await Promise.allSettled(
           pendingEvents.slice(i, i + 5).map(async (event) => {
@@ -161,7 +152,6 @@ export function fetchAllProposals(): ThunkAction<
           else
             console.error('Unable to load governance proposal', result.reason)
         }
-        // Failed proposals remain uncached and are retried on the next refresh.
         if (proposals.length) publish()
       }
     })()
@@ -181,7 +171,7 @@ export function fetchRecentProposals(): ThunkAction<
   Action<string>
 > {
   return async (dispatch, getState, aud) => {
-    const proposalEvents = (await aud.Governance.getProposals()).slice(-5) // Get the last 5 proposals
+    const proposalEvents = (await aud.Governance.getProposals()).slice(-5)
     const allProposals: (Proposal | null)[] = await Promise.all(
       proposalEvents.map(async (p: ProposalEvent) => {
         const { proposalId, description, name } = p
@@ -207,12 +197,10 @@ export function fetchRecentProposals(): ThunkAction<
 
     const proposals = allProposals.filter(Boolean) as Proposal[]
 
-    // Sort the 5 recent proposals by evaluatedBlock timestamp (executed date) in descending order (newest first)
-    // For in-progress proposals or those without evaluatedBlock, use submissionBlockNumber as fallback
     const sortedProposals = proposals.sort((a, b) => {
       const timestampA = a.evaluatedBlock?.timestamp || a.submissionBlockNumber
       const timestampB = b.evaluatedBlock?.timestamp || b.submissionBlockNumber
-      return timestampB - timestampA // Descending order (newest first)
+      return timestampB - timestampA
     })
 
     dispatch(setRecentProposals({ proposals: sortedProposals }))
@@ -267,8 +255,6 @@ export function fetchExecutionDelay(): ThunkAction<
   }
 }
 
-// -------------------------------- Hooks  --------------------------------
-
 export const useActiveProposals = () => {
   const activeProposals = useSelector(getActiveProposals)
   const dispatch: ThunkDispatch<AppState, Audius, AnyAction> = useDispatch()
@@ -302,7 +288,6 @@ export const useProposals = () => {
   const recentProposals = useSelector(getRecentProposals)
   const dispatch: ThunkDispatch<AppState, Audius, AnyAction> = useDispatch()
 
-  // Get all proposals
   useEffectOnce(() => {
     if (recentProposals === null) {
       dispatch(fetchRecentProposals())
@@ -380,13 +365,6 @@ export const useAmountAbstained = (proposal: Proposal) => {
   return totalStaked.sub(voteMagnitude)
 }
 
-/**
- * Although a proposal can be InProgress, there's several substates like:
- * InProgress - can be voted on
- * InProgressExecutionDelay - cannot be voted on, but not yet ready for execution
- * InProgressAwaitingExecution - can be executed
- * @param proposal Proposal object
- */
 export const useGetInProgressProposalSubstate = (proposal: Proposal) => {
   const { votingPeriod } = useVotingPeriod()
   const { executionDelay } = useExecutionDelay()
@@ -419,13 +397,6 @@ export const useGetInProgressProposalSubstate = (proposal: Proposal) => {
   return Outcome.InProgress
 }
 
-/**
- * Calculate the block numbers for major milestones along a proposal's lifetime
- * submissionBlock - block where the submission occurred
- * votingDeadlineBlock - block before which all voting must occure
- * executionDeadlineBlock - block after which a proposal can be executed
- * @param proposal Proposal object
- */
 export const useProposalMilestoneBlocks = (proposal: Proposal) => {
   const { votingPeriod } = useVotingPeriod()
   const { executionDelay } = useExecutionDelay()

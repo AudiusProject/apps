@@ -18,23 +18,12 @@ const isDevEnvironment =
   env.ENVIRONMENT === 'development' ||
   window.localStorage.getItem('FORCE_DEV') === 'true'
 
-/**
- * Opening the welcome modal must not run synchronously inside
- * `determineAllowedRoute` — that function is invoked from `SignUpRoute` during
- * render. Updating modal state while rendering violates React's rules and can
- * crash the app or hit the global error boundary after sign-up completes.
- */
 const openWelcomeModalAfterRender = (setOpen: (open: boolean) => void) => {
   queueMicrotask(() => {
     setOpen(true)
   })
 }
 
-/**
- * Checks against existing sign up redux state,
- * then determines if the requested path should be allowed or not
- * if not allowed, also returns furthest step possible based on existing state
- */
 export const useDetermineAllowedRoute = () => {
   const [, setIsWelcomeModalOpen] = useModalState('Welcome')
   const signUpState = useSelector(getSignOn)
@@ -50,7 +39,6 @@ export const useDetermineAllowedRoute = () => {
 
   const pastAccountPhase = signUpState.finishedPhase1 || isAccountComplete
 
-  // this requestedRoute string should have already trimmed out /signup/
   return (
     requestedRoute: string | typeof SignUpPath
   ): {
@@ -66,12 +54,10 @@ export const useDetermineAllowedRoute = () => {
         correctedRoute: FEED_PAGE
       }
     }
-    // Normalize path: strip /signup/ or signup/ prefix and trailing slash so "select-genres" always matches
     const attemptedPath = requestedRoute
       .toString()
       .replace(/^\/?signup\/?/, '')
       .replace(/^\/|\/$/g, '')
-    // Have to type as string[] to avoid too narrow of a type for comparing against
     let allowedRoutes: string[] = [SignUpPath.createEmail]
 
     if (signUpState.linkedSocialOnFirstPage) {
@@ -80,10 +66,7 @@ export const useDetermineAllowedRoute = () => {
     }
 
     if (pastAccountPhase) {
-      // At this point their identity account is either fully created or being created in the background
-      // Either way the user can't go back any more
       allowedRoutes = [SignUpPath.selectGenres]
-      // Always allow loading step as users can skip genres and artists
       allowedRoutes.push(SignUpPath.loading)
 
       if (isFastReferral) {
@@ -93,11 +76,8 @@ export const useDetermineAllowedRoute = () => {
         allowedRoutes.push(SignUpPath.completedReferrerRedirect)
       }
 
-      // TODO: These checks below here may need to fall under a different route umbrella separate from sign up
-      // Always allow SelectArtistsPage after SelectGenresPage (even if no genres selected)
       allowedRoutes.push(SignUpPath.selectArtists)
 
-      // Allow completion pages if user has selected artists, OR account creation has started/completed
       const hasCompletedSelection =
         (signUpState.genres && signUpState.genres.length > 0) ||
         (signUpState.selectedUserIds &&
@@ -109,30 +89,23 @@ export const useDetermineAllowedRoute = () => {
         signUpState.status === EditingStatus.SUCCESS
 
       if (hasCompletedSelection || accountCreationStarted) {
-        // User has either made selections or account creation has started/completed
         allowedRoutes.push(SignUpPath.appCta)
-        // Allow completed redirect route once account creation has started
-        // The redirect page will wait for account to be ready
         allowedRoutes.push(SignUpPath.completedRedirect)
       }
     } else {
-      // Still before the "has account" phase
       if (signUpState.email.value) {
-        // Already have email
         allowedRoutes.push(SignUpPath.createPassword)
 
         if (
           signUpState.password.value ||
           signUpState.usingExternalWallet ||
-          (!signUpState.isGuest && attemptedPath === SignUpPath.createPassword) // force redirect to create password
+          (!signUpState.isGuest && attemptedPath === SignUpPath.createPassword)
         ) {
-          // Already have password
           if (!signUpState.linkedSocialOnFirstPage) {
             allowedRoutes.push(SignUpPath.pickHandle)
           }
 
           if (signUpState.handle.value) {
-            // Already have handle or it needs review
             allowedRoutes.push(SignUpPath.reviewHandle)
             allowedRoutes.push(SignUpPath.finishProfile)
           }
@@ -141,7 +114,6 @@ export const useDetermineAllowedRoute = () => {
     }
 
     let isAllowedRoute = allowedRoutes.includes(attemptedPath)
-    // When past account phase, ensure select-genres is always allowed so we never redirect to a later step
     if (
       pastAccountPhase &&
       attemptedPath === SignUpPath.selectGenres &&
@@ -149,7 +121,6 @@ export const useDetermineAllowedRoute = () => {
     ) {
       isAllowedRoute = true
     }
-    // If requested route is allowed return that, otherwise return the appropriate step
     let correctedPath =
       attemptedPath === '/signup' && hasAlreadySignedUp
         ? allowedRoutes[allowedRoutes.length - 1]
@@ -159,8 +130,6 @@ export const useDetermineAllowedRoute = () => {
             ? allowedRoutes[0]
             : allowedRoutes[allowedRoutes.length - 1]
 
-    // After finish-profile we must show select-genres before select-artists: if we're past account phase
-    // and would redirect to select-artists but user hasn't done genres yet, send them to select-genres
     if (
       pastAccountPhase &&
       !isAllowedRoute &&
@@ -169,9 +138,6 @@ export const useDetermineAllowedRoute = () => {
     ) {
       correctedPath = SignUpPath.selectGenres
     }
-
-    // Welcome modal after sign-up success is opened from `SignOnPage` (see
-    // `useLayoutEffect` there): the success path never renders this tree.
 
     return {
       allowedRoutes,

@@ -14,47 +14,26 @@ import { useIsMobile } from 'hooks/useIsMobile'
 
 export type ResponsiveModalProps = {
   className?: string
-  // Core props
   isOpen: boolean
   onClose: () => void
   onClosed?: () => void
   children: ReactNode
 
-  // Content props
   title?: string
   Icon?: IconComponent
   subtitle?: string
 
-  // Layout props
   size?: 's' | 'm' | 'l' | 'xl'
-  isFullscreen?: boolean // Only applies to mobile drawer
+  isFullscreen?: boolean
 
-  // Behavior props
   showDismissButton?: boolean
   dismissOnClickOutside?: boolean
   zIndex?: number
 
-  // Optional overrides
-  renderAsDrawer?: boolean // Force drawer on desktop
-  renderAsModal?: boolean // Force modal on mobile
+  renderAsDrawer?: boolean
+  renderAsModal?: boolean
 }
 
-/**
- * A responsive modal component that automatically renders as a drawer on mobile
- * and a modal on desktop. It provides a unified API for both experiences.
- *
- * @example
- * ```tsx
- * <ResponsiveModal
- *   isOpen={isOpen}
- *   onClose={handleClose}
- *   title="My Modal"
- *   icon={<IconInfo />}
- * >
- *   <p>Modal content here</p>
- * </ResponsiveModal>
- * ```
- */
 const ResponsiveModal = ({
   isOpen,
   onClose,
@@ -75,7 +54,6 @@ const ResponsiveModal = ({
   const isMobile = useIsMobile()
   const shouldRenderAsDrawer = renderAsDrawer ?? (isMobile && !renderAsModal)
 
-  // Map size prop to Modal component's expected values
   const getModalSize = (size: string) => {
     switch (size) {
       case 's':

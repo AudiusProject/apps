@@ -6,7 +6,6 @@ const HASH_SALT = 'azowernasdfoia'
 const MIN_LENGTH = 5
 const hashids = new Hashids(HASH_SALT, MIN_LENGTH)
 
-/** Decodes a string id into an int. Returns null if an invalid ID. */
 export const decodeHashId = (id) => {
   try {
     const ids = hashids.decode(id)

@@ -38,9 +38,7 @@ function getAuthorizationFromAuthorizationResult(
 ): Authorization {
   let selectedAccount: Account
   if (
-    // We have yet to select an account.
     previouslySelectedAccount == null ||
-    // The previously selected account is no longer in the set of authorized addresses.
     !authorizationResult.accounts.some(
       ({ address }) => address === previouslySelectedAccount.address
     )

@@ -41,9 +41,6 @@ const GetSenderAttestationError = Object.freeze({
   REQUEST_FOR_ATTESTATION_FAILED: 'REQUEST_FOR_ATTESTATION_FAILED'
 })
 
-/**
- * Combined error type for `SubmitAndEvaluate`
- */
 export const SubmitAndEvaluateError = Object.freeze({
   ...GetAttestationError,
   ...AggregateAttestationError,
@@ -120,15 +117,10 @@ type SendAttestationResultConfig = {
 }
 
 type CreateSenderPublicConfig = {
-  // the new sender eth address to add. The delegate wallet.
   senderEthAddress: string
-  // the unique address of the operator that runs this service
   operatorEthAddress: string
-  // optional endpoints from other nodes. If not provided, nodes are selected from chain.
   endpoints?: string[]
-  // optional number of attestations to get from other nodes, default 3
   numAttestations?: number
-  // optional override feepayer
   feePayerOverride?: string
 }
 
@@ -142,9 +134,6 @@ export class Rewards extends Base {
     this.ServiceProvider = ServiceProvider
   }
 
-  /**
-   * Top level method to aggregate attestations, submit them to RewardsManager, and evalute the result.
-   */
   async submitAndEvaluate({
     challengeId,
     encodedUserId,
@@ -167,12 +156,9 @@ export class Rewards extends Base {
     try {
       phase = AttestationPhases.SANITY_CHECKS
 
-      // fail if amount is a decimal
       if (Number(amount) !== amount || amount % 1 !== 0) {
         throw new Error('Invalid amount')
       }
-
-      // Aggregate
 
       logger.info(
         `submitAndEvaluate: aggregating attestations for userId [${decodeHashId(
@@ -205,8 +191,6 @@ export class Rewards extends Base {
         throw new Error(aggregateError)
       }
 
-      // Submit
-
       logger.info(
         `submitAndEvaluate: submitting for challenge [${challengeId}], userId: [${decodeHashId(
           encodedUserId
@@ -230,18 +214,11 @@ export class Rewards extends Base {
           feePayerOverride
         })
 
-      // In the case of an unparseable error,
-      // we'll only have the error, not the code.
       if (submitErrorCode || submitError) {
         const shouldRetryInSeperateTransactions =
           submitErrorCode === RewardsManagerError.REPEATED_SENDERS ||
           submitErrorCode === RewardsManagerError.SIGN_COLLISION ||
           submitErrorCode === RewardsManagerError.OPERATOR_COLLISION
-        // If we have sender collisions, we should
-        // submit one attestation per transaction and try to get
-        // into a good state.
-        // TODO: in the case this retry fails, we still proceed
-        // to evaluate phase and will error there (not ideal)
         if (shouldRetryInSeperateTransactions) {
           logger.warn(
             `submitAndEvaluate: saw repeat senders for userId [${decodeHashId(
@@ -263,8 +240,6 @@ export class Rewards extends Base {
           throw new Error(submitErrorCode || submitError)
         }
       }
-
-      // Evaluate
 
       logger.info(
         `submitAndEvaluate: evaluating for challenge [${challengeId}], userId: [${decodeHashId(
@@ -318,9 +293,6 @@ export class Rewards extends Base {
     }
   }
 
-  /**
-   * Aggregates attestations from Discovery Nodes and AAO.
-   */
   async aggregateAttestations({
     challengeId,
     encodedUserId,
@@ -339,7 +311,6 @@ export class Rewards extends Base {
     if (endpoints) {
       endpoints = sampleSize(endpoints, quorumSize)
     } else {
-      // If no endpoints array provided, select here
       endpoints = await this.ServiceProvider.getUniquelyOwnedDiscoveryNodes({
         quorumSize
       })
@@ -358,8 +329,6 @@ export class Rewards extends Base {
         erroringNodes: null
       }
     }
-
-    // First attempt AAO
 
     let aaoAttestation: Nullable<AttestationMeta> = null
 
@@ -403,8 +372,6 @@ export class Rewards extends Base {
       }
     }
 
-    // Then attempt DNs
-
     try {
       const discoveryNodeAttestationResults =
         await this._getDiscoveryAttestationsWithRetries({
@@ -425,7 +392,6 @@ export class Rewards extends Base {
       )
       const error = discoveryNodeErrors.find(Boolean)
       if (error) {
-        // Propagate out the specific nodes that errored
         const erroringNodes = discoveryNodeAttestationResults
           .filter((r) => r.error)
           .map((r) => r.endpoint)
@@ -461,9 +427,6 @@ export class Rewards extends Base {
     }
   }
 
-  /**
-   * Retrieves a Discovery Node attestation for a given userId.
-   */
   async getChallengeAttestation({
     challengeId,
     encodedUserId,
@@ -547,9 +510,6 @@ export class Rewards extends Base {
     }
   }
 
-  /**
-   * Retrieves an AAO attestation for a given user handle.
-   */
   async getAAOAttestation({
     challengeId,
     specifier,
@@ -575,10 +535,6 @@ export class Rewards extends Base {
         result: string
         errorCode?: number
       }> = await axios(request)
-      // if attestation is successful, 'result' represents a signature
-      // otherwise, 'result' is false
-      // - there may or may not be a value for `needs` if the attestation fails
-      // - depending on whether the user can take an action to attempt remediation
       const { result, errorCode } = response.data
 
       if (!result) {
@@ -659,7 +615,6 @@ export class Rewards extends Base {
 
       needsAttestations = []
       attestations.forEach((a) => {
-        // If it's a retryable error
         const isRetryable =
           a.res.error === GetAttestationError.CHALLENGE_INCOMPLETE ||
           a.res.error === GetAttestationError.MISSING_CHALLENGES
@@ -669,7 +624,6 @@ export class Rewards extends Base {
           logger.info(
             `Node ${a.endpoint} challenge still incomplete for challenge [${challengeId}], userId: ${encodedUserId}`
           )
-          // If final attempt, make sure we return the result
           if (retryCount === maxAttempts) {
             completedAttestations.push({ ...a.res, endpoint: a.endpoint })
           }
@@ -700,14 +654,6 @@ export class Rewards extends Base {
     return completedAttestations
   }
 
-  /**
-   * Creates a new discovery node sender for rewards. A sender may
-   * attest in user challenge completion to issue rewards.
-   *
-   * This method queries other discovery nodes asking for attestation of
-   * a given new senderEthAddress (delegate wallet) and operatorEthAddress (owner wallet).
-   * Those attestations are bundled
-   */
   async createSenderPublic({
     senderEthAddress,
     operatorEthAddress,
@@ -768,7 +714,6 @@ export class Rewards extends Base {
       }
     }
 
-    // Register the server as a sender on the rewards manager
     const receipt = await this.solanaWeb3Manager.createSender({
       senderEthAddress,
       operatorEthAddress,
@@ -778,9 +723,6 @@ export class Rewards extends Base {
     return receipt
   }
 
-  /**
-   * Logs results of an attestation to identity.
-   */
   async sendAttestationResult({
     status,
     userId,

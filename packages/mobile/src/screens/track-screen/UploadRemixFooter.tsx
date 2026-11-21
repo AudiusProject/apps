@@ -15,9 +15,6 @@ type UploadRemixFooterProps = {
   trackId: ID
 }
 
-/**
- * Footer component for uploading remixes in the remix contest section
- */
 export const UploadRemixFooter = ({ trackId }: UploadRemixFooterProps) => {
   const handlePressSubmitRemix = useEnterContest(trackId)
 

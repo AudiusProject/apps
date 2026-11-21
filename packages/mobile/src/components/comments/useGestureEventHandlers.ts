@@ -49,12 +49,6 @@ const INITIAL_CONTEXT: GestureEventContextType = {
 
 const dismissKeyboard = Keyboard.dismiss
 
-/**
- *
- * Custom gesture event handlers hook for @gorhom/bottom-sheet.
- * This is needed to enable scrolling at every snapPoint.
- * The changes to the default hook are marked with a comment.
- */
 export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
   // #region variables
   const {
@@ -80,10 +74,8 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
   const handleOnStart: GestureEventHandlerCallbackType = useCallback(
     function handleOnStart(__, _) {
       'worklet'
-      // cancel current animation
       stopAnimation()
 
-      // store current animated position
       const initialKeyboardStatus = animatedKeyboardState.get().status
       context.value = {
         ...context.value,
@@ -91,10 +83,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         initialKeyboardStatus
       }
 
-      /**
-       * if the scrollable content is scrolled, then
-       * we lock the position.
-       */
       if (animatedScrollableState.get().contentOffsetY > 0) {
         context.value = {
           ...context.value,
@@ -125,10 +113,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
 
       let highestSnapPoint = highestDetentPosition
 
-      /**
-       * if keyboard is shown, then we set the highest point to the current
-       * position which includes the keyboard height.
-       */
       if (
         isInTemporaryPosition.value &&
         context.value.initialKeyboardStatus === KEYBOARD_STATUS.SHOWN
@@ -136,10 +120,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         highestSnapPoint = context.value.initialPosition
       }
 
-      /**
-       * if current position is out of provided `snapPoints` and smaller then
-       * highest snap pont, then we set the highest point to the current position.
-       */
       if (
         isInTemporaryPosition.value &&
         context.value.initialPosition < highestSnapPoint
@@ -154,10 +134,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
 
       const atSnapPoint = detents.some((v) => animatedPosition.value === v)
 
-      /**
-       * if scrollable is refreshable and sheet position at the highest
-       * point, then do not interact with current gesture.
-       */
       if (
         source === GESTURE_SOURCE.CONTENT &&
         animatedScrollableState.get().refreshable &&
@@ -166,11 +142,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         return
       }
 
-      /**
-       * NOTE: this is the change to the default hook.
-       * If the drawer is at a a snap point and the scrollable is scrolled,
-       * do not handle the gesture
-       */
       if (
         source === GESTURE_SOURCE.CONTENT &&
         atSnapPoint &&
@@ -179,12 +150,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         return
       }
 
-      /**
-       * a negative scrollable content offset to be subtracted from accumulated
-       * current position and gesture translation Y to allow user to drag the sheet,
-       * when scrollable position at the top.
-       * a negative scrollable content offset when the scrollable is not locked.
-       */
       const negativeScrollableContentOffset =
         (context.value.initialPosition === highestSnapPoint &&
           source === GESTURE_SOURCE.CONTENT) ||
@@ -192,33 +157,17 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
           ? animatedScrollableState.get().contentOffsetY * -1
           : 0
 
-      /**
-       * an accumulated value of starting position with gesture translation y.
-       */
       const draggedPosition = context.value.initialPosition + translationY
 
-      /**
-       * an accumulated value of dragged position and negative scrollable content offset,
-       * this will insure locking sheet position when user is scrolling the scrollable until,
-       * they reach to the top of the scrollable.
-       */
       const accumulatedDraggedPosition =
         draggedPosition + negativeScrollableContentOffset
 
-      /**
-       * a clamped value of the accumulated dragged position, to insure keeping the dragged
-       * position between the highest and lowest snap points.
-       */
       const clampedPosition = clamp(
         accumulatedDraggedPosition,
         highestSnapPoint,
         lowestSnapPoint
       )
 
-      /**
-       * if scrollable position is locked and the animated position
-       * reaches the highest point, then we unlock the scrollable position.
-       */
       if (
         context.value.isScrollablePositionLocked &&
         source === GESTURE_SOURCE.CONTENT &&
@@ -230,9 +179,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         }
       }
 
-      /**
-       * over-drag implementation.
-       */
       if (enableOverDrag) {
         if (
           (source === GESTURE_SOURCE.HANDLE ||
@@ -314,10 +260,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         type: scrollableType
       } = animatedScrollableState.get()
 
-      /**
-       * if scrollable is refreshable and sheet position at the highest
-       * point, then do not interact with current gesture.
-       */
       if (
         source === GESTURE_SOURCE.CONTENT &&
         scrollableIsRefreshable &&
@@ -328,11 +270,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
 
       const atSnapPoint = detents.some((v) => animatedPosition.value === v)
 
-      /**
-       * NOTE: this is the change to the default hook.
-       * If the drawer is at a a snap point and the scrollable is scrolled,
-       * do not handle the gesture if the scroll is downwards
-       */
       if (
         source === GESTURE_SOURCE.CONTENT &&
         atSnapPoint &&
@@ -341,10 +278,6 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         return
       }
 
-      /**
-       * if the sheet is in a temporary position and the gesture ended above
-       * the current position, then we snap back to the temporary position.
-       */
       if (
         isInTemporaryPosition.value &&
         context.value.initialPosition >= animatedPosition.value
@@ -359,29 +292,14 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         return
       }
 
-      /**
-       * close keyboard if current position is below the recorded
-       * start position and keyboard still shown.
-       */
       const isScrollable =
         scrollableType !== SCROLLABLE_TYPE.UNDETERMINED &&
         scrollableType !== SCROLLABLE_TYPE.VIEW
 
-      /**
-       * if keyboard is shown and the sheet is dragged down,
-       * then we dismiss the keyboard.
-       */
       if (
         context.value.initialKeyboardStatus === KEYBOARD_STATUS.SHOWN &&
         animatedPosition.value > context.value.initialPosition
       ) {
-        /**
-         * if the platform is ios, current content is scrollable and
-         * the end touch point is below the keyboard position then
-         * we exit the method.
-         *
-         * because the the keyboard dismiss is interactive in iOS.
-         */
         const { window } = animatedLayoutState.get()
         if (
           !(
@@ -395,44 +313,27 @@ export const useGestureEventsHandlers: GestureEventsHandlersHookType = () => {
         }
       }
 
-      /**
-       * reset isInTemporaryPosition value
-       */
       if (isInTemporaryPosition.value) {
         isInTemporaryPosition.value = false
       }
 
-      /**
-       * clone snap points array, and insert the container height
-       * if pan down to close is enabled.
-       */
       const snapPoints = detents.slice()
       if (enablePanDownToClose) {
         snapPoints.unshift(closedDetentPosition)
       }
 
-      /**
-       * calculate the destination point, using redash.
-       */
       const destinationPoint = snapPoint(
         translationY + context.value.initialPosition,
         velocityY,
         snapPoints
       )
 
-      /**
-       * if destination point is the same as the current position,
-       * then no need to perform animation.
-       */
       if (destinationPoint === animatedPosition.value) {
         return
       }
 
       const wasGestureHandledByScrollView =
         source === GESTURE_SOURCE.CONTENT && scrollableContentOffsetY > 0
-      /**
-       * prevents snapping from top to middle / bottom with repeated interrupted scrolls
-       */
       if (wasGestureHandledByScrollView && isSheetAtHighestSnapPoint) {
         return
       }

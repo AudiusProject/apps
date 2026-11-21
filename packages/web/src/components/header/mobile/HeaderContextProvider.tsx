@@ -51,10 +51,6 @@ export const HeaderContextConsumer = (): ReactElement | null => {
   const [getPreviousPathname, setPreviousPathname] = useInstanceVar(pathname)
   const { header, setHeader } = useContext(HeaderContext)
 
-  // Reset the header on location changes since they shouldn't ever
-  // apply to more than one page.
-  // This way, users of the HeaderContext need only to set it and not
-  // worry about cleanup (the header goes away when the user goes to another page).
   useEffect(() => {
     if (getPreviousPathname() !== pathname) {
       setHeader(null)
@@ -62,6 +58,5 @@ export const HeaderContextConsumer = (): ReactElement | null => {
     setPreviousPathname(pathname)
   }, [pathname, setHeader, getPreviousPathname, setPreviousPathname])
 
-  // Use React's built-in type guard to check if header is a valid React element
   return isValidElement(header) ? header : null
 }

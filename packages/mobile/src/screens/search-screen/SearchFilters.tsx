@@ -40,7 +40,6 @@ export const GenreFilter = () => {
   const [, setBpm] = useSearchFilter('bpm')
 
   const handleGenreChange = (value: Genre | undefined) => {
-    // Clear key and bpm filters when Podcasts is selected
     if (value === 'Podcasts') {
       setKey(undefined)
       setBpm(undefined)
@@ -49,11 +48,6 @@ export const GenreFilter = () => {
   }
 
   const options = useMemo(() => {
-    // Freeform/custom genres (e.g. "Hyperpop Fusion") aren't in the predefined
-    // GENRES list. Without a matching option the FilterButton can't resolve a
-    // label and the active chip falls back to the generic "Genre" text, leaving
-    // no indication of what's actually being filtered. Add the current genre as
-    // an option so it renders as a selected chip.
     if (genre && !genreOptions.some((option) => option.value === genre)) {
       return [{ label: genre, value: genre }, ...genreOptions]
     }
@@ -107,7 +101,6 @@ const FilterKeyScreen = (props) => {
   const [scale, setScale] = useState(value?.split(' ')[1] ?? 'Major')
   const [selectedKey, setSelectedKey] = useState(value?.split(' ')[0] ?? '')
 
-  // Update the scale state when value changes
   useEffect(() => {
     if (value) {
       const [keyPart, scalePart] = value.split(' ')
@@ -118,7 +111,6 @@ const FilterKeyScreen = (props) => {
 
   const handleScaleChange = (newScale: string) => {
     setScale(newScale)
-    // If we have a selected key, update the value with the new scale
     if (selectedKey) {
       const newValue = `${selectedKey} ${newScale}`
       onChange?.(newValue)

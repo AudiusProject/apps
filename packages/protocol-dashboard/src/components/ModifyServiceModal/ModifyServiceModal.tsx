@@ -81,14 +81,11 @@ const ModifyServiceModal: React.FC<ModifyServiceModalProps> = ({
   } = useModalControls()
 
   const onRegister = useCallback(() => {
-    // TODO: validate each field
-
     onOpenConfirmation()
   }, [onOpenConfirmation])
 
   const { status, modifyService, error } = useModifyService(!isConfirmModalOpen)
 
-  // Close All modals on success status
   useEffect(() => {
     if (status === Status.Success) {
       onCloseConfirm()
@@ -96,7 +93,6 @@ const ModifyServiceModal: React.FC<ModifyServiceModalProps> = ({
     }
   }, [status, onClose, onCloseConfirm])
 
-  // Close All modals on success status
   const onDeregister = useCallback(() => {
     onClose()
     onCloseDeregister()

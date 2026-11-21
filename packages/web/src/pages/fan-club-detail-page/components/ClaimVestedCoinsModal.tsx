@@ -55,7 +55,6 @@ export const ClaimVestedCoinsModal = NiceModal.create(() => {
   })
 
   const handlePercentageChange = (value: string) => {
-    // Remove % symbol if present and any non-digit characters
     const cleanValue = value.replace(/[^\d]/g, '')
 
     if (cleanValue === '') {
@@ -64,7 +63,6 @@ export const ClaimVestedCoinsModal = NiceModal.create(() => {
     }
 
     const numValue = parseInt(cleanValue, 10)
-    // Clamp between 0 and 100
     const clampedValue = Math.max(0, Math.min(100, numValue))
     setRewardsPoolPercentage(clampedValue)
   }

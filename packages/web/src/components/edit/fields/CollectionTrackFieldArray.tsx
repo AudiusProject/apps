@@ -14,7 +14,6 @@ import { FieldArray, useField } from 'formik'
 
 import { CollectionTrackField } from './CollectionTrackField'
 
-// Types matching react-beautiful-dnd API
 type DropResult = {
   draggableId: string
   type: string

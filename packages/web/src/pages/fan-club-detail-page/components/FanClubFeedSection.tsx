@@ -39,7 +39,6 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
     FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
   )
 
-  // Single chronological feed for both tracks and text posts
   const {
     data: feedItems,
     isPending: isFeedPending,
@@ -59,7 +58,6 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const playingTrackId = currentQueueItem?.trackId ?? null
   const playingSource = currentQueueItem?.source ?? null
 
-  // Build the play queue from track items (text posts aren't playable).
   const tracksForPlayback: PlaybackTrack[] = useMemo(() => {
     return (feedItems ?? [])
       .filter(

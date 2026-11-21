@@ -43,7 +43,6 @@ const MOBILE_WIDTH_MEDIA_QUERY = window.matchMedia(
   `(max-width: ${MOBILE_MAX_WIDTH}px)`
 )
 
-// Component to handle external URL redirects
 const ExternalRedirect = ({ to }: { to: string }) => {
   useEffect(() => {
     window.location.href = to
@@ -118,8 +117,6 @@ export const PublicSite = (props: PublicSiteProps) => {
                   ? HashRouter
                   : BrowserRouter
                 const basename = env.BASENAME || undefined
-                // In React Router v7, future flags are enabled by default for declarative routers
-                // The future prop is only available for data routers (createBrowserRouter)
                 return (
                   <RouterComponent basename={basename}>
                     <NavScreen

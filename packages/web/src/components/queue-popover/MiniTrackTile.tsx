@@ -27,11 +27,6 @@ type MiniTrackTileProps = {
   onMore?: (anchorEl: HTMLElement) => void
   onTitleClick?: () => void
   showHoverActions?: boolean
-  /**
-   * Renders a decorative grip icon on the left of the row to indicate the
-   * row is draggable. The actual drag handler is bound by the parent on the
-   * outer wrapper, not the grip itself.
-   */
   showGrip?: boolean
 }
 

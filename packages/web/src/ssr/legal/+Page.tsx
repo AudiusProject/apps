@@ -3,7 +3,6 @@ type LegalPageProps = {
   documentUrl: string
 }
 
-// Expose the existing policy document without requiring client-side JavaScript.
 export default function LegalPage({ title, documentUrl }: LegalPageProps) {
   return (
     <main>

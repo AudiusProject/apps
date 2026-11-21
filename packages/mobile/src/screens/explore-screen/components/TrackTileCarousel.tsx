@@ -80,7 +80,6 @@ export const TrackTileCarousel = ({
     )
   }
 
-  // Chunk tracks into pairs for 2-track columns
   const trackPairs: number[][] = []
   for (let i = 0; i < tracks.length; i += 2) {
     trackPairs.push(tracks.slice(i, i + 2))

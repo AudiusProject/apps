@@ -162,8 +162,6 @@ const TrackMenu = ({
       ])
   })
 
-  // Whether the current user is an accepted collaborator (not the owner), and
-  // can therefore remove themselves from the track.
   const isCollaborator =
     !!currentUserId &&
     (partialTrack?.collaborators ?? []).some(
@@ -226,7 +224,6 @@ const TrackMenu = ({
 
     const repostMenuItem = {
       text: props.isReposted ? messages.undoRepost : messages.repost,
-      // Set timeout so the menu has time to close before we propagate the change.
       onClick: () =>
         setTimeout(() => {
           props.isReposted ? undoRepostTrack(trackId) : repostTrack(trackId)
@@ -236,7 +233,6 @@ const TrackMenu = ({
 
     const favoriteMenuItem = {
       text: isFavorited ? messages.unfavorite : messages.favorite,
-      // Set timeout so the menu has time to close before we propagate the change.
       onClick: () =>
         setTimeout(() => {
           toggleSaveTrack()
@@ -344,8 +340,6 @@ const TrackMenu = ({
         if (permalink) {
           goToRoute(hostRemixContestPage(permalink))
         } else {
-          // Fallback for call sites that don't pass a permalink — keep the
-          // modal as a safety net until every entry point is migrated.
           openHostRemixContest({ trackId })
         }
       }

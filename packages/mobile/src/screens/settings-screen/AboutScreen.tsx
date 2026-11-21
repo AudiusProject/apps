@@ -31,7 +31,6 @@ const messages = {
   title: 'About',
   appName: 'Audius Music',
   version: 'Audius Version',
-  /** Shown after app version when a CodePush OTA bundle is running (e.g. " · OTA v3"). */
   ota: 'OTA',
   copyright: COPYRIGHT_TEXT,
   discord: 'Join our community on Discord',

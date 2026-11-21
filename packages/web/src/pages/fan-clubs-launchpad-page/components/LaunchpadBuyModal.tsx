@@ -71,7 +71,7 @@ const OUTPUT_TOKEN: CoinInfo = {
   isStablecoin: false
 }
 
-const FORM_INPUT_DECIMALS = 8 // This is the number of decimals that are allowed to be entered in the text input
+const FORM_INPUT_DECIMALS = 8
 
 type FormikValues = {
   inputAmount: string
@@ -374,7 +374,7 @@ enum BuyModalStep {
   Loading = 'loading'
 }
 
-const AUDIO_BALANCE_POLL_INTERVAL = 1000 // short 1s poll interval to check for balance changes
+const AUDIO_BALANCE_POLL_INTERVAL = 1000
 
 export const LaunchpadBuyModal = ({
   isOpen,
@@ -409,8 +409,6 @@ export const LaunchpadBuyModal = ({
   )
   const prevAudioBalance = usePrevious(audioBalance)
 
-  // Due to RPC drift, we have to wait for the audio balance hook to show our changes
-  // This is because the audio balance hook is polling, so an optimistic change here is not sufficient
   const hasAudioBalanceChanged = useMemo(() => {
     return (
       prevAudioBalance !== undefined &&
@@ -515,7 +513,6 @@ export const LaunchpadBuyModal = ({
         />
       )
     }
-    // Default to the form input step
     return (
       <FormInputStep
         onClose={onClose}

@@ -17,10 +17,6 @@ const messages = {
   pill: 'New'
 }
 
-/**
- * Displays a CTA Banner encouraging the user to downlaod web and mobile apps
- * if the user is not logged in on desktop web (as logged in users see the Direct Messaging banner)
- */
 export const DownloadAppBanner = () => {
   const dispatch = useDispatch()
   const hasAccount = useHasAccount()

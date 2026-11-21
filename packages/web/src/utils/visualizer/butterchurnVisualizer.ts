@@ -1,9 +1,7 @@
-// Milkdrop (butterchurn): singleton canvas, lazy `import()` until bind/show.
-
 import { loadPresets, getPresetKeys, getRandomPresetKey } from './presets'
 
-const BLEND_TIME = 2.7 // seconds for smooth preset transitions
-const AUTO_CYCLE_MS = 45000 // auto-advance interval
+const BLEND_TIME = 2.7
+const AUTO_CYCLE_MS = 45000
 const PRESET_HISTORY_MAX = 10
 
 type AudioPlayerLike = {
@@ -21,12 +19,13 @@ let libLoadPromise: Promise<boolean> | null = null
 function resolveButterchurnDefault(
   bcMod: typeof import('butterchurn')
 ): ButterchurnDefault | null {
-  const mod = bcMod as { default?: ButterchurnDefault } & Partial<ButterchurnDefault>
+  const mod = bcMod as {
+    default?: ButterchurnDefault
+  } & Partial<ButterchurnDefault>
   const ctor = mod.default ?? (mod as unknown as ButterchurnDefault)
   return typeof ctor?.createVisualizer === 'function' ? ctor : null
 }
 
-/** Singleflight load; resolves false if import fails or `isSupported` is false */
 function loadButterchurnLib(): Promise<boolean> {
   if (typeof window === 'undefined') return Promise.resolve(false)
   if (libLoadPromise) return libLoadPromise
@@ -61,13 +60,11 @@ let presetKeys: string[] = []
 let currentPresetIndex = -1
 let currentPresetName: string | null = null
 let connectedAudioNode: AudioNode | null = null
-/** Recreate the visualizer when this diverges from `audioPlayer.audioCtx` */
 let boundAudioContext: AudioContext | null = null
 let presetHistoryPast: string[] = []
 let presetHistoryFuture: string[] = []
 let onHistoryChange: (() => void) | null = null
 
-/** Invalidates in-flight `bind` continuations after `loadButterchurnLib` (shared promise). */
 let bindGeneration = 0
 
 function sourceBelongsToContext(
@@ -253,10 +250,7 @@ function hide() {
   }
 }
 
-function bindAfterLibLoaded(
-  audioPlayer: AudioPlayerLike,
-  generation: number
-) {
+function bindAfterLibLoaded(audioPlayer: AudioPlayerLike, generation: number) {
   if (generation !== bindGeneration) return
   if (!ButterchurnClass) return
   const ctx = audioPlayer.audioCtx
@@ -279,11 +273,7 @@ function bindAfterLibLoaded(
     connectedAudioNode = null
   }
 
-  if (
-    visualizer &&
-    connectedAudioNode &&
-    connectedAudioNode !== nextSource
-  ) {
+  if (visualizer && connectedAudioNode && connectedAudioNode !== nextSource) {
     try {
       visualizer.disconnectAudio(connectedAudioNode)
     } catch {

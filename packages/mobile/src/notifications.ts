@@ -27,13 +27,6 @@ import { EventNames } from 'app/types/analytics'
 
 import { DEVICE_TOKEN } from './constants/storage-keys'
 
-/**
- * On Android, FCM delivers all `data` payload values as strings.
- * This means numeric IDs like `initiator` and `entityId` arrive as "123"
- * instead of 123, and nested objects/arrays arrive as stringified JSON.
- * This function restores the original types so notification handlers
- * can navigate correctly.
- */
 function parseAndroidNotificationData(data: Record<string, any>): any {
   const parsed: Record<string, any> = {}
   for (const [key, value] of Object.entries(data)) {
@@ -41,7 +34,6 @@ function parseAndroidNotificationData(data: Record<string, any>): any {
       parsed[key] = value
       continue
     }
-    // Try parsing stringified JSON (for nested objects/arrays like actions, metadata)
     if (
       (value.startsWith('{') && value.endsWith('}')) ||
       (value.startsWith('[') && value.endsWith(']'))
@@ -53,7 +45,6 @@ function parseAndroidNotificationData(data: Record<string, any>): any {
         // Not valid JSON, keep as string
       }
     }
-    // Convert pure numeric strings to numbers (for IDs like initiator, entityId)
     if (/^\d+$/.test(value)) {
       parsed[key] = Number(value)
       continue
@@ -80,7 +71,6 @@ type Token = {
 
 type NotificationNavigation = { navigate: (notification: any) => void }
 
-/** Reports a first-party campaign open to the API — mobile remote push opens only. */
 async function reportNotificationCampaignPushOpen(
   campaignId: string
 ): Promise<void> {
@@ -99,9 +89,6 @@ async function reportNotificationCampaignPushOpen(
   })
 }
 
-// A tapped push, normalized across platforms. `payload` matches what
-// react-native-notifications used to hand us: the APNs userInfo minus `aps` on
-// iOS, the FCM data map on Android.
 type OpenedNotification = {
   title?: string
   body?: string
@@ -116,9 +103,6 @@ const fromRemoteMessage = (
   payload: message.data ?? {}
 })
 
-// Our iOS pushes go straight to APNs through SNS, not through FCM, so
-// @react-native-firebase/messaging ignores taps on them. Notifee reports them
-// as PRESS events instead (AppDelegate makes sure it sees them).
 const fromNotifeeEvent = ({
   type,
   detail
@@ -131,11 +115,9 @@ const fromNotifeeEvent = ({
   }
 }
 
-// Singleton class
 class PushNotifications {
   token: Token | null
   navigation: NotificationNavigation | null
-  // A tap that arrived before navigation was ready (cold start)
   private pendingOpen: OpenedNotification | null
   private isNavigationReady: boolean
 
@@ -166,8 +148,6 @@ class PushNotifications {
     const notificationCampaignId =
       extractNotificationCampaignIdFromPayload(payload)
     let data = payload?.data?.data ?? payload?.data ?? payload
-    // On Android, FCM delivers all data values as strings, breaking
-    // numeric ID fields and nested objects. Parse them back.
     if (Platform.OS === MobileOS.ANDROID && data && typeof data === 'object') {
       data = parseAndroidNotificationData(data)
     }
@@ -189,8 +169,6 @@ class PushNotifications {
     this.navigation?.navigate(data)
   }
 
-  // Called once navigation is ready. Opens the push the user tapped to launch
-  // the app, if any.
   openInitialNotification = async () => {
     this.isNavigationReady = true
     if (Platform.OS === MobileOS.ANDROID) {
@@ -213,9 +191,6 @@ class PushNotifications {
     return token
   }
 
-  // identity-service registers iOS tokens with an SNS APNs platform app, so iOS
-  // must send the raw APNs token, not an FCM token. Lowercase hex matches what
-  // react-native-notifications sent, so existing rows and endpoints are reused.
   private async fetchDeviceToken() {
     if (Platform.OS === MobileOS.IOS) {
       const messaging = getMessaging()
@@ -264,8 +239,6 @@ class PushNotifications {
 
   async requestPermission() {
     if (Platform.OS === MobileOS.ANDROID) {
-      // Android 13+ needs POST_NOTIFICATIONS. Use requestNotifications — PERMISSIONS.ANDROID
-      // does not expose POST_NOTIFICATIONS in react-native-permissions v5, so request(undefined) crashed native code.
       await requestNotifications()
     } else {
       await requestPermission(getMessaging())

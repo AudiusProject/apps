@@ -13,7 +13,7 @@ export type ExploreCollection = {
   shadowColor: string
   shadowOpacity: number
   icon?: ComponentType<SvgProps>
-  incentivized?: boolean // Whether we reward winners with $AUDIO
+  incentivized?: boolean
 }
 
 export type ExploreMoodCollection = ExploreCollection & {
@@ -21,7 +21,6 @@ export type ExploreMoodCollection = ExploreCollection & {
   moods: string[]
 }
 
-// Just For You Collections
 export const PREMIUM_TRACKS: ExploreCollection = {
   title: 'Premium Tracks',
   description: 'Explore premium music available to purchase.',

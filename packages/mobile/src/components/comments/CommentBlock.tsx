@@ -37,16 +37,6 @@ export const CommentBlockInternal = (
   const { comment, isPreview, parentCommentId, highlightedCommentId } = props
   const { artistId, track, navigation, closeAndExitNowPlaying } =
     useCurrentCommentSection()
-  // Use this for in-drawer navigation (profile pic, user link, mentions)
-  // so the destination screen is visible once we navigate. The section
-  // context's `closeDrawer` would only close the comment drawer and leave
-  // the now-playing drawer covering the destination.
-  //
-  // closeAndExitNowPlaying is threaded through CommentSectionContext rather
-  // than read directly from useCommentDrawer() because @gorhom/portal renders
-  // BottomSheetModal content at a PortalHost that sits *outside* the
-  // CommentDrawerContext.Provider in the React tree — calling useCommentDrawer()
-  // here would throw every time a comment renders.
   const trackIdForCloseAll = track.track_id
   const handleNavigateAway = useCallback(() => {
     closeAndExitNowPlaying?.(trackIdForCloseAll)
@@ -218,8 +208,6 @@ export const CommentBlockInternal = (
   )
 }
 
-// This is an extra component wrapper because the comment data coming back from aquery could be undefined
-// There's no way to return early in the above component due to rules of hooks ordering
 export const CommentBlock = (props: CommentBlockProps) => {
   const { data: comment } = useComment(props.commentId)
   if (!comment || !('id' in comment)) return null

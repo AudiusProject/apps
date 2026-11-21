@@ -18,17 +18,10 @@ export type CardListProps<ItemT> = Omit<FlatListProps<ItemT>, 'data'> & {
   isLoading?: boolean
   isLoadingMore?: boolean
   LoadingCardComponent?: ComponentType<{ noShimmer?: boolean }>
-  // If total count is known, use this to aid in rendering the right number
-  // of skeletons
   totalCount?: number
 
-  // Use carousel spacing to override the parent's margins
-  // e.g. make carousel start and end at edge of the screen
   carouselSpacing?: number
 
-  // Override the per-item slot width in horizontal mode. Defaults to
-  // `spacing(43)` (172px), which is right for small thumbnail-style cards
-  // (tracks, playlists) but too narrow for the redesigned contest card.
   horizontalCardWidth?: number | `${number}%`
 }
 

@@ -54,7 +54,6 @@ describe('UserCard', () => {
   it('renders with a label comprising the display name, handle, and follower count', async () => {
     renderUserCard(artistUser)
 
-    // Check for the individual elements instead of trying to match the full button label
     expect(await screen.findByText(artistUser.name)).toBeInTheDocument()
     expect(await screen.findByText(`@${artistUser.handle}`)).toBeInTheDocument()
 

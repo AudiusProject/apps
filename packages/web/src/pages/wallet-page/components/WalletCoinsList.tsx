@@ -373,17 +373,14 @@ export const WalletCoinsList = () => {
       coin?.mint !== artistOwnedCoin?.mint &&
       coin?.balance > 0
   )
-  // Ensure that the artist owned coin appears first in the list
   const orderedCoins = [
     audioCoin,
     artistOwnedCoin,
     ...(otherCoins ?? [])
   ].filter(removeNullable)
 
-  // Show audio coin card when no coins are available
   const coins =
     orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
-  // Add discover fan clubs card at the end
   const allCoins = [...coins, 'discover-fan-clubs' as const]
 
   const handleDiscoverFanClubs = useCallback(() => {

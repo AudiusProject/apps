@@ -114,7 +114,6 @@ export const ArtistRecommendations = forwardRef<
     pageSize: 7
   })
 
-  // Follow/Unfollow listeners
   const handleFollowAll = useCallback(() => {
     suggestedArtists.forEach((a) => {
       dispatch(socialActions.followUser(a.user_id, FollowSource.USER_LIST))
@@ -129,7 +128,6 @@ export const ArtistRecommendations = forwardRef<
     setHasFollowedAll(false)
   }, [dispatch, suggestedArtists])
 
-  // Navigate to profile pages on artist links
   const onArtistNameClicked = useCallback(
     (handle: string) => {
       dispatch(push(profilePage(handle)))

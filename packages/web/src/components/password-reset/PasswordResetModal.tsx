@@ -138,7 +138,6 @@ export const PasswordResetModal = () => {
     setIsLoading(true)
   }
 
-  // When the component mounts, show the modal if the reset key exists
   useEffect(() => {
     const rawResetData = window.localStorage.getItem(RESET_REQUIRED_KEY)
     if (rawResetData) {
@@ -153,7 +152,6 @@ export const PasswordResetModal = () => {
       }
     }
 
-    // Clean up the required set key when the user leaves
     const onBeforeUnload = () => {
       window.localStorage.removeItem(RESET_REQUIRED_KEY)
     }
@@ -163,7 +161,6 @@ export const PasswordResetModal = () => {
     }
   }, [])
 
-  // Cleanup RESET_REQUIRED_KEY on unmount
   useEffect(
     () => () => {
       window.localStorage.removeItem(RESET_REQUIRED_KEY)
@@ -171,8 +168,6 @@ export const PasswordResetModal = () => {
     []
   )
 
-  // When the status changes, if success clear the key and close the modal.
-  // Otherwise, let the user try again or close the modal.
   useEffect(() => {
     if (status === Status.SUCCESS) {
       window.localStorage.removeItem(RESET_REQUIRED_KEY)

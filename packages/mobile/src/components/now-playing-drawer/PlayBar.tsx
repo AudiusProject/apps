@@ -45,8 +45,6 @@ import { TrackingBar } from './TrackingBar'
 import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
 const { getPreviewing } = playbackSelectors
 
-// Queue button (24px icon plus its padding). Collapses to nothing while the
-// play bar sits between the collapsed tab bar's buttons.
 const QUEUE_BUTTON_WIDTH = 32
 
 const messages = {
@@ -70,7 +68,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     borderRadius: PLAY_BAR_HEIGHT / 2,
     overflow: 'hidden'
   },
-  // Group: Track Content, Queue Button, Play Button
   container: {
     height: '100%',
     width: '100%',
@@ -80,7 +77,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     flexDirection: 'row',
     alignItems: 'center'
   },
-  // Keep the artwork and play button clear of the pill's rounded ends.
   floatingContainer: {
     paddingLeft: spacing(3),
     paddingRight: spacing(3)
@@ -111,7 +107,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     width: spacing(10),
     height: spacing(10)
   },
-  // Group: Artwork, Text
   artworkContainer: {
     borderRadius: 8,
     overflow: 'hidden'
@@ -121,7 +116,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     flexShrink: 1,
     justifyContent: 'center'
   },
-  // Group: Title over artist
   title: {
     color: palette.neutral,
     fontSize: 14,
@@ -132,7 +126,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     fontSize: 12,
     lineHeight: 16
   },
-  // Artwork interior
   artwork: {
     height: 40,
     width: 40,
@@ -160,7 +153,6 @@ type PlayBarProps = {
   onPress: () => void
   translationAnim: Animated.Value
   mediaKey: string
-  /** Render as a glass pill above the floating tab bar. */
   floating?: boolean
 }
 
@@ -199,8 +191,6 @@ export const PlayBar = (props: PlayBarProps) => {
     openQueue()
   }, [showQueueNewFeatureBadge, dismissQueueNewFeatureBadge, openQueue])
 
-  // Narrows to fit between the collapsed tab bar's buttons, dropping the queue
-  // button to make room for the title.
   const hidden = useTabBarHiddenProgress()
   const isCollapsed = useIsTabBarCollapsed()
   const pillFrameStyle = useAnimatedStyle(() => ({
@@ -221,14 +211,11 @@ export const PlayBar = (props: PlayBarProps) => {
     return {
       opacity: interpolate(hidden.value, [0, 0.3], [1, 0], 'clamp'),
       width: QUEUE_BUTTON_WIDTH * (1 - shrink),
-      // Fold the row gap in with the button so no extra space is left behind.
       marginLeft: -spacing.s * shrink
     }
   })
 
   const rootOpacityAnimation = translationAnim.interpolate({
-    // Interpolate the animation such that the play bar fades out
-    // at 25% up the screen.
     inputRange: [
       0,
       0.75 * (NOW_PLAYING_HEIGHT - PLAY_BAR_HEIGHT),

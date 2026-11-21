@@ -480,9 +480,6 @@ export const getLibraryTracks = (
   }
 }
 
-/**
- * Return user collections (saved & uploaded) along w/ users for those collections
- */
 export const getUserAccount = (wallet: string) => {
   if (wallet === undefined) {
     throw new Error('Expected wallet to get user account')

@@ -106,7 +106,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const handleDownload = useRequiresAccountCallback(
     ({ trackIds, parentTrackId }: { trackIds: ID[]; parentTrackId?: ID }) => {
       if (isMobile && shouldDisplayDownloadFollowGated) {
-        // On mobile, show a toast instead of a tooltip
         dispatch(toast({ content: messages.followToDownload }))
       } else if (partialTrack && partialTrack.access.download) {
         openWaitForDownloadModal({
@@ -130,7 +129,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
     (e) => {
       e.stopPropagation()
       if (isMobile && shouldDisplayDownloadFollowGated) {
-        // On mobile, show a toast instead of a tooltip
         dispatch(toast({ content: messages.followToDownload }))
         return
       }

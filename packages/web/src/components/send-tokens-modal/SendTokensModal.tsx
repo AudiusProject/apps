@@ -35,7 +35,6 @@ const SendTokensModal = NiceModal.create(() => {
   const { mint, user: prePopulatedUser } = data ?? {}
   const isAppKitModalOpenRef = useRef(false)
 
-  // Monitor for AppKit modal opening/closing
   useEffect(() => {
     if (!isOpen) return
 
@@ -50,7 +49,6 @@ const SendTokensModal = NiceModal.create(() => {
       )
     }
 
-    // Use MutationObserver to detect when AppKit modal appears/disappears
     const observer = new MutationObserver(() => {
       isAppKitModalOpenRef.current = checkIfAppKitOpen()
     })
@@ -62,15 +60,12 @@ const SendTokensModal = NiceModal.create(() => {
       attributeFilter: ['style', 'class']
     })
 
-    // Check initial state
     isAppKitModalOpenRef.current = checkIfAppKitOpen()
 
-    // Listen for clicks on connect links to prevent immediate close
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       const connectLink = target.closest('a[href="#"]')
       if (connectLink && connectLink.textContent?.includes('Connect')) {
-        // Prevent closing for 1 second to allow AppKit modal to open
         isAppKitModalOpenRef.current = true
         setTimeout(() => {
           isAppKitModalOpenRef.current = checkIfAppKitOpen()
@@ -103,7 +98,6 @@ const SendTokensModal = NiceModal.create(() => {
     mint: state.selectedMint || (mint ?? '')
   })
 
-  // Reset state when modal opens with new data (including pre-populated user)
   useEffect(() => {
     if (isOpen && state.step === 'input') {
       setState((prev) => ({
@@ -139,14 +133,12 @@ const SendTokensModal = NiceModal.create(() => {
 
   const handleConfirm = async () => {
     setState((prev) => ({ ...prev, step: 'progress' }))
-    setError('') // Clear any previous errors
+    setError('')
 
     try {
       const { signature } = await sendTokensMutation.mutateAsync({
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
         amount: state.amount,
-        // When sending to a user, pass their Ethereum address to derive user-bank ATA
-        // Use erc_wallet first, fallback to wallet field
         recipientEthAddress:
           state.selectedUser?.erc_wallet ?? state.selectedUser?.wallet,
         source: 'send_tokens_modal',
@@ -162,7 +154,6 @@ const SendTokensModal = NiceModal.create(() => {
       let errorMessage =
         error instanceof Error ? error.message : 'An unknown error occurred'
 
-      // Check for specific Solana token account errors
       const errorString =
         error instanceof Error ? error.toString() : String(error)
       if (
@@ -171,9 +162,6 @@ const SendTokensModal = NiceModal.create(() => {
         errorString.includes('0x3') ||
         errorString.includes('custom program error: 0x3')
       ) {
-        // This error should no longer occur as we now automatically create
-        // user-bank accounts in the transaction. If it still occurs, it's likely
-        // a different issue or the account creation failed.
         errorMessage =
           'Failed to create recipient token account. Please try again.'
       }
@@ -194,7 +182,6 @@ const SendTokensModal = NiceModal.create(() => {
   }
 
   const handleClose = () => {
-    // Don't close if AppKit modal is open (wallet connection in progress)
     if (isAppKitModalOpenRef.current) {
       return
     }

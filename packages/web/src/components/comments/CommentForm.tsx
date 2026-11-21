@@ -52,7 +52,7 @@ export const CommentForm = ({
   const { currentUserId, entityId, entityType } = useCurrentCommentSection()
   const isMobile = useIsMobile()
 
-  const [messageId, setMessageId] = useState(0) // Message id is used to reset the composer input
+  const [messageId, setMessageId] = useState(0)
   const currentlyPlayingTrackId = useSelector(playbackSelectors.getTrackId)
   const [postComment] = usePostComment()
   const [editComment] = useEditComment()
@@ -63,7 +63,6 @@ export const CommentForm = ({
     previousLocation && previousLocation.pathname !== location.pathname
   useEffect(() => {
     if (hasLocationChanged) {
-      // Reset input text when the location changes
       setMessageId((prev) => prev + 1)
     }
   }, [hasLocationChanged])
@@ -105,8 +104,6 @@ export const CommentForm = ({
     }
 
     onSubmit?.({ commentMessage })
-    // Each instance of form state is tracked with a message id
-    // Incrementing the message id "clears" the input value
     setMessageId((prev) => prev + 1)
   }
 
@@ -116,7 +113,7 @@ export const CommentForm = ({
         {!hideAvatar ? (
           <Avatar
             size='auto'
-            isLoading={false} // loading is not working correctly?
+            isLoading={false}
             src={profileImage}
             css={{ width: 44, height: 44, flexShrink: 0 }}
           />

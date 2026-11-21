@@ -137,7 +137,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
         ? ThemeMode.DARK
         : ThemeMode.AUTO)
 
-  // Check for verification query param and show appropriate modal
   const verificationStatus = searchParams.get('verification')
   const [isVerificationSuccessModalOpen, setIsVerificationSuccessModalOpen] =
     useState(false)
@@ -147,12 +146,10 @@ export const SettingsPage = (props: SettingsPageProps) => {
   useEffect(() => {
     if (verificationStatus === 'success') {
       setIsVerificationSuccessModalOpen(true)
-      // Remove query param from URL
       searchParams.delete('verification')
       setSearchParams(searchParams, { replace: true })
     } else if (verificationStatus === 'error') {
       setIsVerificationErrorModalOpen(true)
-      // Remove query param from URL
       searchParams.delete('verification')
       setSearchParams(searchParams, { replace: true })
     }
@@ -174,7 +171,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
     dispatch(getNotificationSettingsAction())
   }, [dispatch])
 
-  // Set Nav-Bar Menu
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
     setLeft(subPage ? LeftPreset.BACK : LeftPreset.CLOSE_NO_ANIMATION)
@@ -230,7 +226,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
     { key: ThemeMode.DARK, text: settingsMessages.darkMode }
   ]
 
-  // Render out subPage if we're on one.
   if (subPage && subPage in SubPages) {
     const SubPageComponent = SubPages[subPage]
     return <SubPageComponent {...props} />

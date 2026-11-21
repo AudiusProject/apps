@@ -25,12 +25,6 @@ const messages = {
   defaultName: 'My Playlist'
 }
 
-/**
- * Entry point for the inline "create playlist" flow. Generates a playlist id,
- * primes an unsaved draft collection into the query cache (nothing is written
- * to the backend), registers it as a draft, then redirects to the standard
- * collection page which renders the draft in edit/create mode.
- */
 export const CreatePlaylistPage = () => {
   useRequiresAccount()
   const { audiusSdk } = useQueryContext()
@@ -75,8 +69,6 @@ export const CreatePlaylistPage = () => {
         permalink
       }) as CollectionMetadata
 
-      // forceReplace writes the draft into the cache; entityCacheOptions
-      // (staleTime/gcTime Infinity) keep it from being refetched/clobbered.
       primeCollectionData({
         collections: [draft],
         queryClient,

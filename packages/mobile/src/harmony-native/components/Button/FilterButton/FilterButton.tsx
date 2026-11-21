@@ -42,7 +42,6 @@ export const FilterButton = <Value extends string>(
   const { color, cornerRadius, spacing, typography } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
 
-  // Size Styles
   const defaultStyles: ReactNativeStyle = {
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s
@@ -53,8 +52,6 @@ export const FilterButton = <Value extends string>(
     height: spacing.unit8
   }
 
-  // TODO: Update these are the button styles to use animated styles for the background, border, text, and icon
-  // State Styles
   const fillContainerStyles: ReactNativeStyle = {
     backgroundColor: color.secondary.s400,
     borderWidth: 1,
@@ -72,7 +69,6 @@ export const FilterButton = <Value extends string>(
         }
       : {}
 
-  // Button Styles
   const buttonStyles: ReactNativeStyle = {
     backgroundColor: color.background.white,
     borderWidth: 1,

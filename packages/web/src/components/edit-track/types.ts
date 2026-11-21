@@ -10,9 +10,6 @@ export type SingleTrackEditValues = Omit<TrackMetadataForUpload, 'remixOf'> & {
   } | null
 }
 
-/**
- * Represents a track file, its metadata prior to upload, and a preview.
- */
 export type TrackEditFormValues = {
   tracks: (TrackForUpload | TrackForEdit)[]
   trackMetadatas: SingleTrackEditValues[]

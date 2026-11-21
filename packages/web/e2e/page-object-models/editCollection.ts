@@ -36,7 +36,6 @@ export class EditAlbumPage {
   }
 
   async setArtwork(file: string) {
-    // Remove existing artwork first if applicable
     await expect(this.artworkButton).toBeVisible()
     if (await this.artworkButton.filter({ hasText: 'remove' }).isVisible()) {
       await this.artworkButton.click()
@@ -46,7 +45,6 @@ export class EditAlbumPage {
       path.join(__dirname, '..', 'files', file)
     )
     await this.dropzoneFileInput.page().getByLabel('close popup').click()
-    // Wait until finished loading
     await this.artwork
       .getByRole('progressbar')
       .waitFor({ state: 'hidden', timeout: 30_000 })

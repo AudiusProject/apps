@@ -47,8 +47,6 @@ export default class ServiceProviderClient {
     return this.aud.libs.ethContracts.ServiceProviderFactoryClient
   }
 
-  /* -------------------- Service Provider Read -------------------- */
-
   async getTotalServiceTypeProviders(
     serviceType: ServiceType
   ): Promise<number> {
@@ -293,8 +291,6 @@ export default class ServiceProviderClient {
     }))
   }
 
-  /* -------------------- Service Provider Write -------------------- */
-
   async registerWithDelegate(
     serviceType: ServiceType,
     endpoint: string,
@@ -307,7 +303,7 @@ export default class ServiceProviderClient {
       endpoint,
       amount,
       delegateOwnerWallet,
-      false // performHealthCheck
+      false
     )
     return registeredService
   }
@@ -322,7 +318,7 @@ export default class ServiceProviderClient {
       serviceType,
       endpoint,
       amount,
-      false // performHealthCheck
+      false
     )
     return registeredService
   }

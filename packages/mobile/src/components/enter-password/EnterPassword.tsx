@@ -40,7 +40,6 @@ const getMatchRequirement = (
 
 const COMMON_CHECK_DEBOUNCE_MS = 300
 
-/** Checks the password against Have I Been Pwned after typing pauses. */
 const useCommonRequirement = (password: string): CheckState => {
   const [result, setResult] = useState<{
     password: string
@@ -150,7 +149,6 @@ export const EnterPassword = (props: EnterPasswordProps) => {
   }
 
   const handlePasswordBlur = () => {
-    // Check for password errors here
     if (password) {
       setRequirements({
         ...checkedRequirements,

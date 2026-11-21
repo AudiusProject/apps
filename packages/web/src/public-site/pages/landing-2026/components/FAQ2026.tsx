@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet'
 
 import styles from './FAQ2026.module.css'
 
-/** Inline chevron so we control color (white default, purple on hover) without Harmony theme override */
 function ChevronDown({ className }: { className?: string }) {
   return (
     <span className={className} aria-hidden>

@@ -54,10 +54,8 @@ import {
 
 import { MAX_IMAGE_SIZE } from '../fan-clubs-launchpad-page/constants'
 
-// Local scroll context for the coin details form
 const EditFormScrollContext = createContext(() => {})
 
-// Helper function to detect platform from URL
 const detectPlatform = (
   url: string
 ): 'x' | 'instagram' | 'tiktok' | 'website' => {
@@ -76,7 +74,6 @@ const detectPlatform = (
   return 'website'
 }
 
-// Get platform icon
 const getPlatformIcon = (platform: string) => {
   switch (platform) {
     case 'x':
@@ -357,10 +354,8 @@ export const EditCoinDetailsPage = () => {
 
   const handleSubmit = async (values: any) => {
     if (!coin) return
-    // Clear any previous errors
     setSubmitError(undefined)
 
-    // Transform social links array for API - include empty strings to indicate deletion
     const links = values.socialLinks.filter(
       (link: string) => link !== null && link !== undefined
     )
@@ -389,11 +384,10 @@ export const EditCoinDetailsPage = () => {
           : 'Failed to update coin details. Please try again.'
       setSubmitError(errorMessage)
       await console.error('EditCoinDetails', e instanceof Error)
-      throw e // Re-throw to let Formik handle the error
+      throw e
     }
   }
 
-  // Populate initial social links from existing coin data
   const initialSocialLinks = [
     coin?.link1,
     coin?.link2,

@@ -104,9 +104,7 @@ function fireHotkey(
         cb(e)
       }
     } else {
-      // If no modifier keys are required, abort if any are pressed.
       if (isAnyModifierPressed(e)) return
-      // Otherwise, fire the hotkey.
       if (preventDefault) e.preventDefault()
       ;(mapping[e.keyCode] as Handler)(e)
     }

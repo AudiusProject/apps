@@ -39,7 +39,6 @@ interface PlayingTrackInfoProps {
   artistHandle: string
   hasShadow: boolean
   dominantColor?: Color
-  /** When true, title and artist wrap instead of single-line ellipsis (e.g. visualizer overlay). */
   fullTrackText?: boolean
   hideArt?: boolean
   onClickTrackTitle: () => void

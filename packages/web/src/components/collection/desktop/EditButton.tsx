@@ -40,9 +40,6 @@ export const EditButton = (props: EditButtonProps) => {
 
   const { is_album, permalink } = partialCollection
 
-  // If we have a real provider context, switch the button into an inline
-  // edit-mode toggle. Otherwise, fall back to the legacy /edit link so other
-  // call sites keep working.
   if (editMode.collectionId !== undefined) {
     return (
       <Tooltip

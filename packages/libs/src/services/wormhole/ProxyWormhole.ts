@@ -10,7 +10,6 @@ import type { SolanaWeb3Manager } from '../solana'
 
 export type ProxyWormholeConfig = {}
 
-/** Singleton state-manager for audius proxy wormhole interaction */
 export class ProxyWormhole {
   hedgehog: Nullable<Hedgehog>
   ethWeb3Manager: EthWeb3Manager
@@ -25,7 +24,6 @@ export class ProxyWormhole {
     identityService: IdentityService | null,
     solanaWeb3Manager: SolanaWeb3Manager
   ) {
-    // Wormhole service dependecies
     this.hedgehog = hedgehog
     this.ethWeb3Manager = ethWeb3Manager
     this.ethContracts = ethContracts
@@ -33,10 +31,6 @@ export class ProxyWormhole {
     this.solanaWeb3Manager = solanaWeb3Manager
   }
 
-  /**
-   * Locks assets owned by `fromAccount` into the Solana wormhole with a target
-   * solanaAccount destination via the provided relayer wallet.
-   */
   async _getTransferTokensToEthWormholeParams(
     fromAccount: string,
     amount: BN,
@@ -56,7 +50,6 @@ export class ProxyWormhole {
     const currentBlockNumber = await web3.eth.getBlockNumber()
     const currentBlock = await web3.eth.getBlock(currentBlockNumber)
 
-    // 1 hour, sufficiently far in future
     const deadline = (currentBlock.timestamp as unknown as number) + 60 * 60 * 1
     const solanaB58 = bs58.decode(solanaAccount).toString('hex')
     const recipient = toBuffer(`0x${solanaB58}`)

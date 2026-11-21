@@ -45,7 +45,6 @@ export const useBuySellFlow = ({
   const { onOpen: openAddCashModal } = useAddCashModal()
   const { trackSwapRequested, trackAddFundsClicked } = useBuySellAnalytics()
 
-  // Get token pair for the initial coin, fallback to AUDIO/USDC
   const { data: selectedPair } = useCoinPair({
     baseSymbol: coinTicker,
     quoteSymbol: 'USDC'
@@ -70,13 +69,11 @@ export const useBuySellFlow = ({
 
   const handleTabChange = (newTab: BuySellTab) => {
     handleActiveTabChange(newTab)
-    // Dismiss keyboard in case we were focused on an input
     InteractionManager.runAfterInteractions(() => {
       Keyboard.dismiss()
     })
   }
 
-  // Use custom hooks for token state management
   const {
     getCurrentTabTokens,
     handleInputTokenChange: handleInputTokenChangeInternal,
@@ -84,59 +81,48 @@ export const useBuySellFlow = ({
     handleSwapDirection
   } = useCoinStates(selectedPair)
 
-  // Get current tab's token symbols
   const currentTabTokens = getCurrentTabTokens(activeTab)
   const baseTokenSymbol = currentTabTokens.baseToken
   const quoteTokenSymbol = currentTabTokens.quoteToken
 
-  // Get all available tokens without filtering
   const { coins, isLoading: coinsLoading } = useTradeableCoins()
 
   const availableCoins = useMemo(() => {
     return coinsLoading ? [] : Object.values(coins)
   }, [coins, coinsLoading])
 
-  // Get tokens that user owns (includes USDC if user has balance)
   const { ownedCoins } = useOwnedCoins(availableCoins)
 
-  // Create owned addresses set for filtering
   const ownedAddresses = useMemo(() => {
     return new Set(ownedCoins.map((coin) => coin.address))
   }, [ownedCoins])
 
-  // Get filtered tokens for sell tab (owned coins, excluding current base token and USDC)
   const { coinsArray: availableInputTokensForSell } = useTradeableCoins({
     context: 'pay',
     excludeSymbols: [baseTokenSymbol],
     ownedAddresses
   })
 
-  // Get filtered tokens for convert tab input (owned coins, excluding both base and quote)
   const { coinsArray: availableInputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol, quoteTokenSymbol],
     ownedAddresses
   })
 
-  // Get filtered tokens for convert tab output (all coins except base token)
   const { coinsArray: availableOutputTokensForConvert } = useTradeableCoins({
     excludeSymbols: [baseTokenSymbol]
   })
 
-  // Get filtered tokens for buy tab output (all coins except quote token and USDC)
   const { coinsArray: availableOutputTokensForBuy } = useTradeableCoins({
     context: 'receive',
     excludeSymbols: [quoteTokenSymbol, 'USDC']
   })
 
-  // Reset screen state to 'input' when this screen comes into focus
-  // This handles the case where we navigate back from ConfirmSwapScreen
   useFocusEffect(
     useCallback(() => {
       setCurrentScreen('input')
     }, [setCurrentScreen])
   )
 
-  // Persistent state for each tab's input values
   const [tabInputValues, setTabInputValues] = useState<
     Record<BuySellTab, string>
   >({
@@ -145,7 +131,6 @@ export const useBuySellFlow = ({
     convert: ''
   })
 
-  // Update input value for buy tab
   const handleBuyInputValueChange = (value: string) => {
     setTabInputValues((prev) => ({
       ...prev,
@@ -153,7 +138,6 @@ export const useBuySellFlow = ({
     }))
   }
 
-  // Update input value for sell tab
   const handleSellInputValueChange = (value: string) => {
     setTabInputValues((prev) => ({
       ...prev,
@@ -161,7 +145,6 @@ export const useBuySellFlow = ({
     }))
   }
 
-  // Update input value for convert tab
   const handleConvertInputValueChange = (value: string) => {
     setTabInputValues((prev) => ({
       ...prev,
@@ -169,7 +152,6 @@ export const useBuySellFlow = ({
     }))
   }
 
-  // Handle token changes with transaction reset
   const handleInputTokenChange = useCallback(
     (symbol: string) => {
       handleInputTokenChangeInternal(symbol, activeTab)
@@ -186,13 +168,11 @@ export const useBuySellFlow = ({
     [handleOutputTokenChangeInternal, activeTab, resetTransactionData]
   )
 
-  // Handle swap direction change for convert tab
   const handleChangeSwapDirection = useCallback(() => {
     handleSwapDirection(activeTab)
     resetTransactionData()
   }, [handleSwapDirection, activeTab, resetTransactionData])
 
-  // Get token pair for the current tab's coins using the same approach as web
   const currentTabTokenPair = useCurrentCoinPair({
     baseTokenSymbol,
     quoteTokenSymbol,
@@ -200,7 +180,6 @@ export const useBuySellFlow = ({
     selectedPair
   })
 
-  // Use shared safe token pair logic
   const safeSelectedPair = useSafeTokenPair(currentTabTokenPair)
   const { mutate: performSwap, ...swapHookState } = useSwapCoins()
 
@@ -214,7 +193,6 @@ export const useBuySellFlow = ({
     handleSwap: performSwap
   })
 
-  // Track if user has attempted to submit the form
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
 
   const swapTokens = useMemo(
@@ -261,7 +239,6 @@ export const useBuySellFlow = ({
 
       handleShowConfirmation()
 
-      // Navigate to confirmation screen with the data
       if (confirmationScreenData) {
         navigation.navigate('ConfirmSwapScreen', {
           confirmationData: confirmationScreenData,
@@ -296,7 +273,6 @@ export const useBuySellFlow = ({
   const isTransactionInvalid = !transactionData?.isValid
 
   const displayErrorMessage = useMemo(() => {
-    // Show exchange rate errors immediately as they prevent transactions
     if (transactionData?.exchangeRateError) {
       return messages.unableToFetchExchangeRate
     }
@@ -307,11 +283,9 @@ export const useBuySellFlow = ({
     ) {
       return messages.insufficientAUDIOForSale
     }
-    // Prioritize the specific validation error from the form
     if (hasAttemptedSubmit && transactionData?.error) {
       return transactionData.error
     }
-    // Fallback for empty input
     if (
       hasAttemptedSubmit &&
       isTransactionInvalid &&

@@ -7,12 +7,6 @@ import { getLocationPathname } from 'store/routing/selectors'
 
 import { isElectron } from './clientUtil'
 
-/**
- * Starts a polling daemon that triggers an action once every delay period if the tab/app is in the foreground/focus
- * @param action The action to "fire" when poll triggers
- * @param defaultDelayTimeMs the default time to wait between polls
- * @param customDelayTimeConfig a config that maps pathnames to delay times for custom delays depending on what page the user is on
- */
 export function* foregroundPollingDaemon(
   action: Action,
   defaultDelayTimeMs: number,
@@ -69,10 +63,6 @@ function createVisibilityChangeChannel() {
   })
 }
 
-/**
- * A polling daemon that triggers an action every time the tab/app is brought back into focus
- * @param action The action to "fire" when triggered
- */
 export function* visibilityPollingDaemon(action: Action) {
   const visibilityChannel = createVisibilityChangeChannel()
   while (true) {

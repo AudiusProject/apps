@@ -46,12 +46,6 @@ export const ChatMessageTrack = ({
   })
   const trackExists = !!partialTrack
 
-  // Subscribe to the permalink-lookup query directly. `useTrackByPermalink`
-  // chains permalink → track and returns the inner `useTrack(trackId)`'s
-  // pending state, which stays `true` forever when the permalink resolves
-  // to no track (the inner query is just disabled). Reading the permalink
-  // query state directly lets us distinguish "still resolving" from
-  // "resolved with no track" so the skeleton terminates correctly.
   const { data: trackIdFromPermalink, isPending: isPermalinkPending } =
     useQuery<number | null | undefined>({
       queryKey: getTrackByPermalinkQueryKey(permalink),
@@ -88,15 +82,10 @@ export const ChatMessageTrack = ({
   const hasResolvedTrack = !isPending && trackExists && !is_delete
 
   useEffect(() => {
-    // Defer firing parent callbacks while the permalink query is still
-    // resolving so the URL text doesn't flash before the tile or empty state.
     if (isPending) return
     if (hasResolvedTrack) {
       onSuccess?.()
     } else {
-      // Track URL resolved to nothing playable (deleted or missing) —
-      // signal empty so the bubble falls back to bare URL text rather than
-      // showing a misleading or generic preview.
       onEmpty?.()
     }
   }, [isPending, hasResolvedTrack, onSuccess, onEmpty])
@@ -106,8 +95,6 @@ export const ChatMessageTrack = ({
   }
 
   if (hasResolvedTrack && track_id) {
-    // You may wonder why we use the mobile web track tile here.
-    // It's simply because the chat track tile uses the same design as mobile web.
     return (
       <TrackTile
         containerClassName={className}

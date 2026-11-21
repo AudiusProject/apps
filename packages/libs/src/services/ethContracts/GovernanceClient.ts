@@ -22,19 +22,10 @@ type ProposalTxn = {
   voteMagnitudeNo: string
 }
 
-/**
- * Transform a method name and its argument types into a string-composed
- * signature, e.g. someMethod(bytes32, int32)
- * @param methodName
- * @param argumentTypes
- */
 const createMethodSignature = (methodName: string, argumentTypes: string[]) => {
   return `${methodName}(${argumentTypes.join(',')})`
 }
 
-/**
- * Represent an instance of a proposal vote.
- */
 export const Vote = Object.freeze({
   no: 1,
   yes: 2
@@ -70,13 +61,6 @@ export class GovernanceClient extends ContractClient {
     this.abiEncode = this.abiEncode.bind(this)
   }
 
-  /**
-   * Gets the function signature and call data for a contract method.
-   * The signature and call data are passed to other contracts (like governance)
-   * as arguments.
-   * @param methodName
-   * @param contractMethod
-   */
   getSignatureAndCallData(methodName: string, contractMethod: ContractMethod) {
     const argumentTypes = contractMethod._method.inputs.map((i) => i.type)
     const argumentValues = contractMethod.arguments
@@ -92,8 +76,6 @@ export class GovernanceClient extends ContractClient {
     functionSignature: string,
     callData: string
   ): Promise<ContractMethod> {
-    // 0 eth valued transaction. We don't anticipate needed to attach
-    // value to this txn, so default to 0.
     const callValue0 = this.toBN('0')
 
     const method = await this.getMethod(
@@ -219,7 +201,7 @@ export class GovernanceClient extends ContractClient {
     targetContractRegistryKey: string
     callValue: string
     functionSignature: string
-    callData: string[] // array of args, e.g. [slashAmount, targetAddress]
+    callData: string[]
     name: string
     description: string
   }) {
@@ -356,11 +338,6 @@ export class GovernanceClient extends ContractClient {
     return parseInt(result.vote)
   }
 
-  // Helpers
-
-  /**
-   * ABI encodes argument types and values together into one encoded string
-   */
   abiEncode(types: string[], values: string[]) {
     return this.web3Manager.getWeb3().eth.abi.encodeParameters(types, values)
   }
@@ -369,9 +346,6 @@ export class GovernanceClient extends ContractClient {
     return this.web3Manager.getWeb3().utils.toBN(val)
   }
 
-  /**
-   * Prune off extraneous fields from proposal returned by txn
-   */
   formatProposal(proposal: ProposalTxn) {
     return {
       proposalId: parseInt(proposal.proposalId),
@@ -389,9 +363,6 @@ export class GovernanceClient extends ContractClient {
     }
   }
 
-  /**
-   * Formats a proposal event
-   */
   formatProposalEvent(proposalEvent: EventLog) {
     const event = proposalEvent.returnValues
     return {
@@ -403,9 +374,6 @@ export class GovernanceClient extends ContractClient {
     }
   }
 
-  /**
-   * Prune off extraneous fields from vote event
-   */
   formatVote(voteEvent: EventLog) {
     const event = voteEvent.returnValues
     return {
@@ -417,25 +385,15 @@ export class GovernanceClient extends ContractClient {
     }
   }
 
-  /**
-   *
-   * @param {Number} proposalId id of the governance proposal
-   * @returns {BN} amount of tokens in wei required to reach quorum
-   */
   async calculateQuorum(proposalId: number) {
     const { submissionBlockNumber } = await this.getProposalById(proposalId)
 
-    // represented as a value > 0, eg 5% is 5
     const quoroumPercent = await this.getVotingQuorumPercent()
 
-    // retrieve stake at the time of proposal from Staking client
     const totalStakeAtProposal = await this.stakingProxyClient.totalStakedAt(
       submissionBlockNumber
     )
 
-    // quorum = (total staked at proposal * quorum percent) / 100
-    // the divmod function returns an object with both the quotient (div) and the remainder (mod)
-    // { div, mod }
     const quorumStakeDivMod = totalStakeAtProposal
       .mul(Utils.toBN(quoroumPercent))
       // @ts-expect-error divmod not in types for some reason
@@ -443,7 +401,6 @@ export class GovernanceClient extends ContractClient {
 
     let quorumStake = quorumStakeDivMod.div
 
-    // if there's a non-zero remainder, round up
     if (!quorumStakeDivMod.mod.isZero()) {
       quorumStake = quorumStakeDivMod.div.add(Utils.toBN(1))
     }

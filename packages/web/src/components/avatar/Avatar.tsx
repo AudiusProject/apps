@@ -25,7 +25,7 @@ export type AvatarProps = Omit<HarmonyAvatarProps, 'src' | 'popover'> & {
   onClick?: () => void
   imageSize?: SquareSizes
   popover?: boolean
-  disableLink?: boolean // Prevents Avatar from wrapping with UserLink when already inside a link
+  disableLink?: boolean
 }
 
 export const AvatarContent = (props: AvatarProps) => {
@@ -39,8 +39,6 @@ export const AvatarContent = (props: AvatarProps) => {
     ...other
   } = props
 
-  // The src that last failed. Stored as a url, not a boolean, so a later
-  // mirror url from useImageSize can still render.
   const [failedSrc, setFailedSrc] = useState<Nullable<string>>(null)
 
   useEffect(() => {
@@ -57,8 +55,6 @@ export const AvatarContent = (props: AvatarProps) => {
     (event: SyntheticEvent<HTMLImageElement>) => {
       const src = event.currentTarget.src
       setFailedSrc(src)
-      // Let useImageSize try the next mirror. Once all fail, the data-uri
-      // placeholder below sticks.
       onImageError?.(src)
     },
     [onImageError]

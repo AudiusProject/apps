@@ -18,9 +18,6 @@ export class Notifications extends Base {
     this.viewPlaylist = this.viewPlaylist.bind(this)
   }
 
-  /**
-   * Submit a user's view of notification event
-   */
   async viewNotification({
     logger = console,
     userId
@@ -51,10 +48,6 @@ export class Notifications extends Base {
     }
   }
 
-  /**
-   * Creates a new notification
-   * NOTE: currently only used for announcements and permissioned to a single wallet signer
-   */
   async createNotification({
     logger = console,
     data

@@ -184,22 +184,8 @@ type TracksTableProps = {
   showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
   trackActionsHeader?: ReactNode
-  /**
-   * Optional content for the Track column header, replacing the default
-   * 'Track' label. Used by selection mode to render a select-all checkbox.
-   */
   trackNameHeader?: ReactNode
-  /**
-   * Optional content rendered at the leading edge of the Track-name cell
-   * (before the inline artwork). Used by selection mode to render the
-   * per-row selection checkbox.
-   */
   renderTrackPrefix?: (track: any, rowIndex: number) => ReactNode
-  /**
-   * Optional additional className applied per row. The result is appended
-   * to the table's own per-row className. Use this for things like a
-   * selected-row highlight while the page is in edit mode.
-   */
   rowClassNameAddition?: (track: any, rowIndex: number) => string | undefined
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
@@ -290,7 +276,6 @@ export const TracksTable = ({
     [shouldSkipTrackActivation]
   )
 
-  // Cell Render Functions
   const renderPlayButtonCell = useCallback((cellInfo: TrackCell) => {
     const index = cellInfo.row.index
     const active = index === activeIndexRef.current
@@ -668,8 +653,6 @@ export const TracksTable = ({
       const isDdex = !!track.ddex_app
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
-      // For owners, we want to show the type of gating on the track. For fans,
-      // we want to show whether or not they have access.
       let Icon
       if (shouldShowGatedType) {
         Icon = track.is_unlisted
@@ -832,7 +815,6 @@ export const TracksTable = ({
     ]
   )
 
-  // Columns
   const tableColumnMap = useMemo(
     () => ({
       addedDate: {
@@ -1006,9 +988,6 @@ export const TracksTable = ({
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
-        // When a custom header is supplied (e.g. select-all checkbox),
-        // suppress column sorting so the header's controls receive clicks
-        // instead of toggling sort order.
         disableSortBy: Boolean(trackNameHeader),
         align: 'left'
       },
@@ -1105,8 +1084,6 @@ export const TracksTable = ({
   return (
     <Table
       {...tableProps}
-      // Table's own .dense class is scoped to its module; this one lets the
-      // rules in TracksTable.module.css match.
       wrapperClassName={cn(tableProps.wrapperClassName, {
         [styles.dense]: tableProps.isDense
       })}

@@ -48,7 +48,6 @@ const messages = {
   claim: 'Claim',
   claiming: 'Claiming',
 
-  // Error messages
   error: {
     ended: 'Rewards have ended.',
     invalid: 'Reward code is invalid.',
@@ -85,7 +84,6 @@ const PageContent = ({
   const mint = coin?.mint
 
   const onSuccess = useCallback(() => {
-    // Show toast and navigate to the coin detail page
     dispatch(toast({ content: 'Reward claimed successfully' }))
     if (coin?.ticker) navigate(coinPage(coin.ticker))
   }, [coin?.ticker, dispatch, navigate])

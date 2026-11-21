@@ -1,7 +1,5 @@
 import { addTracksAroundCurrent } from './addTracksAroundCurrent'
 
-// Mirrors SwiftAudioEx 1.x QueueManager: an insert in front of the current
-// item only shifts currentIndex when the queue already has more than one item.
 const makeSwiftAudioExQueue = (current: string) => {
   const queue = { items: [current], currentIndex: 0 }
   const player = {

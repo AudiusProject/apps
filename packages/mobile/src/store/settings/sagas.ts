@@ -38,8 +38,6 @@ function* getIsMobilePushEnabled() {
   return isMobilePushEnabled
 }
 
-// Re-register at least this often even when nothing changed, in case identity
-// dropped the token on its side.
 const DEVICE_TOKEN_REFRESH_MS = 7 * 24 * 60 * 60 * 1000
 
 type DeviceTokenRegistration = {
@@ -111,9 +109,6 @@ function* reregisterDeviceTokenOnStartup() {
   const isGranted = status === RESULTS.GRANTED || status === RESULTS.LIMITED
   if (!isGranted) return
 
-  // Skip the settings fetch and signed registration when this user already
-  // registered this token recently. A new install, another user signing in,
-  // or a rotated token all miss the cache and register again.
   const userId = yield* call(queryCurrentUserId)
   const registration = yield* call(getDeviceTokenRegistration)
   if (
@@ -138,12 +133,9 @@ function* enablePushNotifications() {
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const sdk = yield* getSDK()
 
-  // Enabling push notifications should enable all of the notification types
   const newSettings = { ...initialState.pushNotifications }
   yield* put(settingsPageActions.setPushNotificationSettings(newSettings))
 
-  // We need a user for this to work (and in the case of sign up, we might not
-  // have one right away when this function is called)
   yield* call(queryAccountUser)
   yield* call(audiusBackendInstance.updatePushNotificationSettings, {
     sdk,

@@ -4,7 +4,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  interpolate,
+  interpolate
 } from 'react-native-reanimated'
 
 import { IndicatorProps } from './types'
@@ -14,7 +14,7 @@ const Indicator: React.FC<IndicatorProps> = ({
   indexDecimal,
   itemsLayout,
   style,
-  fadeIn = false,
+  fadeIn = false
 }) => {
   const opacity = useSharedValue(fadeIn ? 0 : 1)
 
@@ -28,13 +28,12 @@ const Indicator: React.FC<IndicatorProps> = ({
             ? interpolate(
                 indexDecimal.value,
                 itemsLayout.map((_, i) => i),
-                // when in RTL mode, the X value should be inverted
                 itemsLayout.map((v) => (isRTL ? -1 * v.x : v.x))
               )
             : isRTL
               ? -1 * firstItemX
-              : firstItemX,
-      },
+              : firstItemX
+      }
     ]
 
     const width =
@@ -49,7 +48,7 @@ const Indicator: React.FC<IndicatorProps> = ({
     return {
       transform,
       width,
-      opacity: withTiming(opacity.value),
+      opacity: withTiming(opacity.value)
     }
   }, [indexDecimal, itemsLayout])
 
@@ -68,8 +67,8 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#2196f3',
     position: 'absolute',
-    bottom: 0,
-  },
+    bottom: 0
+  }
 })
 
 export { Indicator }

@@ -34,10 +34,6 @@ type UserListItemProps = {
   hideFollowsYou?: boolean
 }
 
-/**
- * One compact row: avatar, name, handle with "Follows you" or the follower
- * count, follow button.
- */
 export const UserListItem = (props: UserListItemProps) => {
   const { userId, showRank, rank, renderRightContent, hideFollowsYou } = props
   const { data: user } = useUser(userId, {

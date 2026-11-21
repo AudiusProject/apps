@@ -11,8 +11,8 @@ import styles from './Header.module.css'
 
 export type HeaderProps = {
   primary: ReactNode
-  topLeftElement?: ReactNode // e.g. searchbar
-  bottomBar?: ReactNode // e.g. tabs
+  topLeftElement?: ReactNode
+  bottomBar?: ReactNode
   secondary?: ReactNode
   rightDecorator?: ReactNode
   containerStyles?: string

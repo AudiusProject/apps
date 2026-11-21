@@ -51,11 +51,9 @@ export class TrackIndexer extends BaseIndexer<TrackDoc> {
         musical_key: { type: 'keyword' },
         play_count: { type: 'integer' },
 
-        // saves
         saved_by: { type: 'keyword' },
         save_count: { type: 'integer' },
 
-        // reposts
         reposted_by: { type: 'keyword' },
         repost_count: { type: 'integer' },
 
@@ -194,17 +192,8 @@ export class TrackIndexer extends BaseIndexer<TrackDoc> {
     row.save_count = row.saved_by.length
     row.favorite_count = row.saved_by.length
 
-    // get_feed_es uses `created_at` for tracks + playlists + reposts to sequence events
-    // and has additional logic to compute the "earliest" created_at for an item
-    // that can be either a track or a repost.
-    //
-    // while it would be possible to go adjust all this logic to conditionally use release_date for tracks
-    // it's much easier to set the `created_at` to be `release_date` for tracks.
-    //
-    // my hope is to revisit the action_log concept which will simplify this complex feed logic.
     row.created_at = row.release_date || row.created_at
 
-    // permalink
     const currentRoute = row.routes[row.routes.length - 1]
     row.permalink = `/${row.user.handle}/${currentRoute}`
 

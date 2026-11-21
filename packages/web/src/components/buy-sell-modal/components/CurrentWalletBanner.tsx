@@ -41,14 +41,13 @@ type WalletIconComponent =
   | typeof IconSolana
 
 const getWalletIcon = (): WalletIconComponent => {
-  // Check if Phantom is available
   if (typeof window !== 'undefined' && window.phantom) {
     return IconPhantom
   }
   if (typeof window !== 'undefined' && window.ethereum) {
     return IconMetamask
   }
-  return IconSolana // Fallback
+  return IconSolana
 }
 
 export const CurrentWalletBanner = ({
@@ -84,10 +83,8 @@ export const CurrentWalletBanner = ({
     { enabled: isUsingExternalWallet }
   )
 
-  // For AUDIO, we need to fetch only SPL balance (not combined ERC + SPL)
   const isAudio = inputToken.mint === env.WAUDIO_MINT_ADDRESS
 
-  // Fetch SPL AUDIO balance directly for internal wallet
   const {
     data: internalWalletAudioBalance,
     isPending: isInternalWalletAudioBalanceLoading
@@ -102,7 +99,6 @@ export const CurrentWalletBanner = ({
     }
   )
 
-  // Fetch other coin balances
   const {
     data: internalWalletTokenBalanceData,
     isPending: isInternalWalletTokenBalanceLoading
@@ -131,7 +127,6 @@ export const CurrentWalletBanner = ({
   }
   const isUSDC = inputToken.mint === env.USDC_MINT_ADDRESS
 
-  // Format token balance with proper handling of loading and error states
   let tokenBalanceString = '0.00'
   const isTokenBalanceLoading = isUsingExternalWallet
     ? isExternalWalletTokenBalanceLoading
@@ -146,7 +141,6 @@ export const CurrentWalletBanner = ({
         ? internalWalletAudioBalance
         : internalWalletTokenBalanceData?.balance
 
-    // Convert AudioWei to FixedDecimal for AUDIO
     if (
       isAudio &&
       !isUsingExternalWallet &&

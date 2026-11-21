@@ -5,7 +5,6 @@ import type { CornerRadiusOptions } from '../../../foundations/corner-radius'
 import type { ShadowOptions } from '../../../foundations/shadows'
 import type { SpacingOptions } from '../../../foundations/spacing'
 
-// Custom box props without HTML <div> properties
 export type BaseBoxProps = {
   /** Height */
   h?: SpacingOptions | CSSProperties['height']

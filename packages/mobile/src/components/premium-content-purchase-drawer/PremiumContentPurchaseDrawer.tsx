@@ -129,7 +129,6 @@ const useStyles = makeStyles(({ spacing, typography, palette }) => ({
     flexDirection: 'row',
     flex: 1,
     justifyContent: 'center',
-    // Matches close icon width
     paddingRight: spacing(6)
   },
   trackTileContainer: {
@@ -214,9 +213,6 @@ const getButtonText = (isUnlocking: boolean, amountDue: number) =>
       ? `${messages.buy} $${USDC(amountDue / 100).toLocaleString()}`
       : messages.buy
 
-// The bulk of the form rendering is in a nested component because we want access
-// to the FormikContext, which can only be used in a component which is a descendant
-// of the `<Formik />` component
 const RenderForm = ({
   onClose,
   content,
@@ -248,8 +244,6 @@ const RenderForm = ({
     resetForm()
   }, [contentId, resetForm])
 
-  // Pre-create user bank if needed so it's ready by purchase time, and check
-  // for USDC stuck in the root wallet from an interrupted onramp
   useEffect(() => {
     dispatch(eagerCreateUserBank())
     dispatch(buyUSDCActions.startRecoveryIfNecessary())
@@ -296,7 +290,6 @@ const RenderForm = ({
 
   const isPurchaseSuccessful = stage === PurchaseContentStage.FINISH
 
-  // Navigate to track or album screen in the background if purchase is successful
   useEffect(() => {
     if (isPurchaseSuccessful) {
       navigation.navigate(

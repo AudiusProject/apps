@@ -62,25 +62,6 @@ type ContestStemsCardProps = {
   trackId: ID
 }
 
-/**
- * Figma-aligned Stems & Downloads card for the contest page.
- *
- * References:
- * - Collapsed + expanded: 2857-95763
- * - Stems count pill: 2857-95741 (outlined, subdued — NOT a filled
- *   surface2 chip; sits on the same background as the card)
- * - Mobile: 2888-128802 (same layout, narrower)
- *
- * Why a custom card instead of reusing the track-page
- * `DownloadSection`: the track-page surface has its own "Stems &
- * Downloads" header chrome, expand caret, and download-all button
- * that collide with the contest card chrome the Figma calls for.
- * Nesting the two added a stray outer title, duplicated carets, and
- * fought the visual hierarchy. The download data itself (stems,
- * file sizes, quality, gating) is shared — we call the same
- * `useStems` / `useFileSizes` / `useWaitForDownloadModal` hooks here
- * so per-stem downloads behave identically to the track page.
- */
 export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const { color } = useTheme()
   const { data: track } = useTrack(trackId)
@@ -99,12 +80,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const downloadStemsZip = useDownloadTrackStemsZip(trackId)
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
-  // Auto-follow the contest when a signed-in user kicks off a stem
-  // download — downloading a stem is a strong engagement signal that
-  // the user wants to participate. Fires on tap (rather than on
-  // download completion) because the download saga doesn't expose a
-  // success hook to the caller; the follow mutation is optimistic so
-  // the UI updates instantly, and the user can unfollow at any time.
   const { data: contest } = useRemixContest(trackId)
   const contestEventId = contest?.eventId
   const { data: currentUserId } = useCurrentUserId()
@@ -119,11 +94,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const stemsCount = stems.length
   const hasStems = stemsCount > 0
-  // Default to expanded for short lists so users can see the stems
-  // without an extra click; collapse when there are more than
-  // STEMS_COLLAPSE_THRESHOLD entries so a long list doesn't push the
-  // followers + comments tiles way down the page. The user's explicit
-  // toggle (override) wins over the heuristic.
   const STEMS_COLLAPSE_THRESHOLD = 5
   const stemsBelowThreshold = stemsCount <= STEMS_COLLAPSE_THRESHOLD
   const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null)
@@ -136,10 +106,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     })
   }
 
-  // Same file-size query the track page runs. `stemTracks.map(...)` is
-  // what feeds per-stem row sizes; adding the parent trackId means
-  // "Full Track" row shows its own size even when the parent isn't a
-  // stem.
   const { data: fileSizes } = useFileSizes(
     {
       trackIds: [trackId, ...stems.map((s) => s.track_id)],
@@ -148,7 +114,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     { enabled: stems.length > 0 || !!track?.is_downloadable }
   )
 
-  // Action: Download All as one zip (parent + stems).
   const handleDownloadAll = useRequiresAccountCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
@@ -170,16 +135,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     [openPremiumContentPurchaseModal, trackId]
   )
 
-  // Action: per-row download. Mirrors the `handleDownload` path on
-  // DownloadSection — opens the wait-for-download modal with the
-  // specific trackId the user clicked.
-  //
-  // Deliberately does NOT pass `parentTrackId`: the download saga appends
-  // the parent to the file list (`[...trackIds, parentTrackId]`), so doing
-  // so would pull the full track down alongside every single-stem download.
-  // When the parent isn't downloadable its download URL 404s and takes the
-  // whole batch with it. `DownloadRow` on the track page has always called
-  // this with just the row's own id — match it.
   const handleDownloadOne = useRequiresAccountCallback(
     (downloadTrackId: ID) => {
       followContestIfNeeded()
@@ -191,9 +146,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     [followContestIfNeeded, openWaitForDownloadModal]
   )
 
-  // Click-through to the track page. Guarded: action buttons inside
-  // the row call stopPropagation to avoid hijacking clicks meant for
-  // download/expand affordances.
   const handleNavigate = useLinkClickHandler<HTMLDivElement>(
     track?.permalink ?? ''
   )
@@ -206,9 +158,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   if (!track || !artist) return null
 
-  // Numbered rows. First row is the parent "Full Track" when the
-  // track is downloadable, followed by each stem. Index numbers the
-  // user sees start at 1 — matches the Figma leading-column numerals.
   type StemRow = {
     trackId: ID
     title: string
@@ -373,13 +322,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   )
 }
 
-/**
- * Outlined "{N} Stems" pill. No filled background — the Figma shows
- * just the border, so both light and dark modes pick up the card
- * surface behind it and contrast comes entirely from the border +
- * text treatment. The previous surface2 fill was the source of the
- * dark-mode bug.
- */
 const StemCountPill = ({ count }: { count: number }) => (
   <Flex
     ph='m'

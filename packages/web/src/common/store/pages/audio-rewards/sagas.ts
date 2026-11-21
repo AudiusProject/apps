@@ -114,7 +114,6 @@ function* retryClaimChallengeReward({
   const claim = yield* select(getClaimToRetry)
   if (!claim) return
   if (claimStatus === ClaimStatus.WAITING_FOR_RETRY) {
-    // Restore the challenge rewards modal if necessary
     yield* put(
       setVisibility({ modal: CHALLENGE_REWARDS_MODAL_NAME, visible: true })
     )
@@ -367,8 +366,6 @@ function* watchClaimChallengeReward() {
   yield* takeLatest(
     claimChallengeReward.type,
     function* (args: ReturnType<typeof claimChallengeReward>) {
-      // Race the claim against the user clicking "close" on the modal,
-      // so that the claim saga gets canceled if the modal is closed
       yield* race({
         task: call(claimChallengeRewardAsync, args),
         cancel: take(resetAndCancelClaimReward.type)
@@ -398,13 +395,11 @@ function* fetchUserChallengesAsync() {
       }
     )
 
-    // Fetch monthly play counts from 2025
     const { data: monthlyPlays = {} } = yield* call(
       [sdk.users, sdk.users.getUserMonthlyTrackListens],
       {
         id: Id.parse(currentUserId),
         startTime: '2025-01-01',
-        // Making the end time one year from the current date since the challenge is technically never ending
         endTime: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
           .toISOString()
           .split('T')[0]
@@ -418,7 +413,6 @@ function* fetchUserChallengesAsync() {
 
     let userChallenges = challengesData.map(userChallengeFromSDK)
 
-    // Only update play count milestone challenges if they exist and there are plays
     if (
       userChallenges.some((challenge) =>
         isPlayCountChallenge(challenge.challenge_id)
@@ -472,7 +466,6 @@ function* checkForNewDisbursements(
       prevChallenges[challenge.challenge_id]?.[challenge.specifier]
     const challengeOverrides = challengesOverrides[challenge.challenge_id]
 
-    // Check for new disbursements
     const wasNotPreviouslyDisbursed =
       prevChallenge && !prevChallenge.is_disbursed
     const wasNotDisbursedThisSession =
@@ -486,7 +479,6 @@ function* checkForNewDisbursements(
     }
   }
   if (newDisbursement) {
-    // Trigger a refetch for all audio balances
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.audioBalance]
     })
@@ -512,10 +504,6 @@ function* watchFetchUserChallenges() {
   })
 }
 
-/**
- * Resets the listen streak override if current_step_count is fetched and non-zero
- * This handles the case where API can reset the user's listen streak
- */
 function* handleOptimisticListenStreakUpdate(
   challenge: UserChallenge,
   challengeOverrides?: Partial<UserChallenge>
@@ -532,9 +520,6 @@ function* handleOptimisticListenStreakUpdate(
   }
 }
 
-/**
- * Handles challenge override updates on user challenge updates
- */
 function* handleOptimisticChallengesOnUpdate(
   action: ReturnType<typeof fetchUserChallengesSucceeded>
 ) {
@@ -556,9 +541,6 @@ function* handleOptimisticChallengesOnUpdate(
   }
 }
 
-/**
- * Updates the listen streak optimistically if current_step_count is zero and a track is played
- */
 function* watchUpdateOptimisticListenStreak() {
   yield* takeEvery(updateOptimisticListenStreak.type, function* () {
     const listenStreakChallenge = yield* select(getUserChallenge, {
@@ -575,25 +557,17 @@ function* watchUpdateOptimisticListenStreak() {
   })
 }
 
-/**
- * Updates the play count challenges optimistically when a user plays their own track
- * All three play count challenges (p1, p2, p3) will show the same play count value
- */
 function* watchUpdateOptimisticPlayCount() {
   yield* takeEvery(updateOptimisticPlayCount.type, function* () {
-    // Define array of play count milestone challenge IDs
     const playCountChallengeIds = [
       ChallengeName.PlayCount250,
       ChallengeName.PlayCount1000,
       ChallengeName.PlayCount10000
     ]
 
-    // Iterate through each challenge ID
     for (const challengeId of playCountChallengeIds) {
-      // Get the challenge
       const challenge = yield* select(getUserChallenge, { challengeId })
 
-      // If the challenge exists, increment its step count
       if (challenge) {
         yield* put(
           setUserChallengeCurrentStepCount({
@@ -638,13 +612,9 @@ function* pollUserChallenges(frequency: number) {
   }
 }
 
-// Poll interval when nothing challenge-related is happening
 const CHALLENGE_IDLE_REFRESH_INTERVAL_MS = 5 * 60 * 1000
-// How long to keep polling at the fast interval after challenge activity
 const CHALLENGE_ACTIVE_WINDOW_MS = 2 * 60 * 1000
 
-// Actions that mean challenge state may change soon or is on screen: a
-// listen, a claim, or the rewards UI opening (it fetches on mount/focus).
 const challengeActivityActions = [
   fetchUserChallenges.type,
   setChallengeRewardsModalType.type,
@@ -664,16 +634,6 @@ function createDocumentVisibilityChannel() {
   })
 }
 
-/**
- * Refreshes user challenges so completions, new disbursements (confetti) and
- * the claimable badge stay current.
- * - Fast interval (CHALLENGE_REFRESH_INTERVAL_MS) on the web rewards page and
- *   for CHALLENGE_ACTIVE_WINDOW_MS after any challenge activity.
- * - CHALLENGE_IDLE_REFRESH_INTERVAL_MS otherwise (or the remote interval if
- *   that is longer).
- * - Paused while the tab is hidden or the native app is backgrounded; a poll
- *   that came due meanwhile runs on return.
- */
 function* userChallengePollingDaemon() {
   const remoteConfigInstance = yield* getContext('remoteConfigInstance')
 
@@ -683,8 +643,6 @@ function* userChallengePollingDaemon() {
   const activeInterval = remoteConfigInstance.getRemoteVar(
     IntKeys.CHALLENGE_REFRESH_INTERVAL_MS
   )!
-  // Never poll faster when idle than when active, if remote config raises
-  // the active interval past the idle default.
   const idleInterval = Math.max(
     activeInterval,
     CHALLENGE_IDLE_REFRESH_INTERVAL_MS

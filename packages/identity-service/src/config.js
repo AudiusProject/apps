@@ -1,7 +1,6 @@
 const convict = require('convict')
 const fs = require('fs')
 
-// custom array parsing for arrays passed in via string env vars
 convict.addFormat({
   name: 'string-array',
   validate: function (val) {
@@ -13,7 +12,6 @@ convict.addFormat({
   }
 })
 
-// Define a schema
 const config = convict({
   dbUrl: {
     doc: 'Database URL connection string',
@@ -290,7 +288,6 @@ const config = convict({
     env: 'bouncerEmailValidationKey',
     default: ''
   },
-  // loaded through contract-config.json, if an env variable declared, env var takes precendence
   registryAddress: {
     doc: 'Registry address of contracts deployed on web3Provider',
     format: String,
@@ -369,14 +366,12 @@ const config = convict({
     default: 25 * Math.pow(10, 9),
     env: 'highGasPrice'
   },
-  // ganache gas price is extremely high, so we hardcode a lower value (0x09184e72a0 from docs here)
   ganacheGasPrice: {
     doc: 'ganache gas price',
     format: 'nat',
     default: 39062500000,
     env: 'ganacheGasPrice'
   },
-  // 1011968 is used by default; 0xf7100 in hex
   defaultGasLimit: {
     doc: 'default gas limit',
     format: String,
@@ -420,7 +415,7 @@ const config = convict({
     `,
     format: 'nat',
     env: 'setTimeout',
-    default: 10 * 60 * 1000 // 10 minutes
+    default: 10 * 60 * 1000
   },
   timeout: {
     doc: `
@@ -429,7 +424,7 @@ const config = convict({
     `,
     format: 'nat',
     env: 'timeout',
-    default: 10 * 60 * 1000 // 10 minutes
+    default: 10 * 60 * 1000
   },
   keepAliveTimeout: {
     doc: `
@@ -438,7 +433,7 @@ const config = convict({
     `,
     format: 'nat',
     env: 'keepAliveTimeout',
-    default: 5000 // node.js default value
+    default: 5000
   },
   headersTimeout: {
     doc: `
@@ -447,7 +442,7 @@ const config = convict({
     `,
     format: 'nat',
     env: 'headersTimeout',
-    default: 60 * 1000 // 60s - node.js default value
+    default: 60 * 1000
   },
   defiPulseApiKey: {
     doc: 'API Key used to query eth gas station info',
@@ -698,11 +693,6 @@ const config = convict({
   }
 })
 
-// if you wanted to load a file
-// this is lower precendence than env variables, so if registryAddress or ownerWallet env
-// variables are defined, they take precendence
-
-// TODO(DM) - remove these defaults
 const defaultConfigExists = fs.existsSync('default-config.json')
 if (defaultConfigExists) config.loadFile('default-config.json')
 
@@ -711,7 +701,6 @@ if (relayRateLimit) config.loadFile('relay-rate-limit.json')
 
 if (fs.existsSync('eth-contract-config.json')) {
   // eslint isn't smart enought to know this is a conditional require, so this fails
-  // on CI where the file doesn't exist.
   // eslint-disable-next-line node/no-missing-require
   const ethContractConfig = require('../eth-contract-config.json')
   config.load({
@@ -730,12 +719,9 @@ if (fs.existsSync('aao-config.json')) {
   })
 }
 
-// the contract-config.json file is used to load registry address locally
-// during development
 const contractConfigExists = fs.existsSync('contract-config.json')
 if (contractConfigExists) config.loadFile('contract-config.json')
 
-// Perform validation and error any properties are not present on schema
 config.validate()
 
 module.exports = config

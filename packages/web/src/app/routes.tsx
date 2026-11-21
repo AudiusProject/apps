@@ -23,7 +23,6 @@ import { AudiusQueryProvider } from './AudiusQueryProvider'
 import { ThemeProvider } from './ThemeProvider'
 import WebPlayer from './web-player/WebPlayer'
 
-// Lazy so @coinflowlabs/react (and nsure-ai) stays out of the entry chunk.
 const CoinflowPurchaseProtection = lazy(() =>
   import('@coinflowlabs/react').then((m) => ({
     default: m.CoinflowPurchaseProtection
@@ -37,7 +36,6 @@ const {
   SIGN_UP_PAGE
 } = route
 
-// Lazy load pages for code splitting
 const SignOnPage = lazy(() => import('pages/sign-on-page'))
 const OAuthLoginPage = lazy(() => import('pages/oauth-login-page'))
 const OAuthSignUpPage = lazy(() =>
@@ -57,13 +55,6 @@ const AppModal = lazy(() => import('pages/modals/AppModal'))
 const MERCHANT_ID = env.COINFLOW_MERCHANT_ID
 const IS_PRODUCTION = env.ENVIRONMENT === 'production'
 
-/**
- * Coinflow's fraud protection only needs to be running before a checkout, so
- * mount it once the browser is idle, in its own Suspense boundary, rather
- * than having the page wait on its chunk. Signed-out visitors can't check
- * out, and its device fingerprinting costs seconds of CPU on mobile, so it
- * only mounts once there is an account.
- */
 const DeferredCoinflowPurchaseProtection = () => {
   const hasAccount = useHasAccount()
   const [ready, setReady] = useState(false)
@@ -88,7 +79,6 @@ const DeferredCoinflowPurchaseProtection = () => {
   )
 }
 
-// Component to set up navigation ref for middleware (must be inside router context)
 const NavigationSetup = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate()
 
@@ -102,7 +92,6 @@ const NavigationSetup = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
-// Root layout component that wraps all routes with providers
 const RootLayout = () => {
   return (
     <NavigationSetup>
@@ -142,18 +131,15 @@ const RootLayout = () => {
   )
 }
 
-// Create routes configuration
 export const createRoutes = (): RouteObject[] => {
   return [
     {
       element: <RootLayout />,
       children: [
-        // Sign-on alias redirects
         ...SIGN_ON_ALIASES.map((alias) => ({
           path: alias,
           element: <Navigate to={SIGN_IN_PAGE} replace />
         })),
-        // Sign in routes
         {
           path: `${SIGN_IN_PAGE}/*`,
           children: [
@@ -167,7 +153,6 @@ export const createRoutes = (): RouteObject[] => {
             }
           ]
         },
-        // Sign up routes
         {
           path: `${SIGN_UP_PAGE}/*`,
           children: [
@@ -181,7 +166,6 @@ export const createRoutes = (): RouteObject[] => {
             }
           ]
         },
-        // OAuth routes
         {
           path: '/oauth/auth/pay',
           element: <OAuthPayPage />
@@ -198,7 +182,6 @@ export const createRoutes = (): RouteObject[] => {
           path: '/oauth/auth/signup/*',
           element: <OAuthSignUpPage />
         },
-        // Private key exporter routes
         {
           path: PRIVATE_KEY_EXPORTER_SETTINGS_PAGE,
           children: [
@@ -230,7 +213,6 @@ export const createRoutes = (): RouteObject[] => {
             }
           ]
         },
-        // Catch-all route for WebPlayer
         {
           path: '*',
           element: (

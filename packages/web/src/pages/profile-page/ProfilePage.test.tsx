@@ -33,7 +33,6 @@ import {
 
 import ProfilePage from './ProfilePage'
 
-// Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
 vi.mock('app/ReownAppKitModal', () => ({
   appkitModal: {
     getAccount: vi.fn().mockReturnValue(undefined),
@@ -42,7 +41,6 @@ vi.mock('app/ReownAppKitModal', () => ({
   wagmiAdapter: {}
 }))
 
-// Need to mock the main content scroll element - otherwise things break
 const mockScrollElement = {
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
@@ -87,7 +85,6 @@ export function renderProfilePage(
 
 describe('ProfilePage', () => {
   beforeEach(() => {
-    // Mock document.getElementById
     document.getElementById = vi.fn().mockImplementation((id) => {
       if (id === 'mainContent') {
         return mockScrollElement
@@ -112,14 +109,12 @@ describe('ProfilePage', () => {
   it('should render the profile page for a non-artist', async () => {
     renderProfilePage(nonArtistUser)
 
-    // User header (name may have trailing space in mobile header)
     expect(
       await screen.findByRole('heading', {
         name: new RegExp(`^${nonArtistUser.name}\\s*$`)
       })
     ).toBeInTheDocument()
 
-    // Profile and cover photos
     const profilePhoto = await screen.findByRole('img', {
       name: /user profile picture/i
     })
@@ -130,60 +125,29 @@ describe('ProfilePage', () => {
       nonArtistUser.profile_picture[SquareSizes.SIZE_480_BY_480]
     )
 
-    // TODO: cover photo not rendering in test env for some reason
-    // await vi.waitFor(
-    //   async () => {
-    //     // debug()
-    //     const coverPhoto = await screen.findByRole('img', {
-    //       name: /user cover photo/i
-    //     })
-    //     expect(coverPhoto).toBeInTheDocument()
-    //     const coverDynamicImage = await within(coverPhoto).findByTestId(
-    //       'dynamic-image-second'
-    //     )
-    //     expect(coverDynamicImage).toBeInTheDocument()
-    //     console.log(
-    //       'coverDynamicImage',
-    //       coverDynamicImage.style.backgroundImage
-    //     )
-    //     expect(coverDynamicImage.style.backgroundImage).toContain(
-    //       `url("${testUser.cover_photo[WidthSizes.SIZE_2000]}")`
-    //     )
-    //   },
-    //   { interval: 1000, timeout: 5000 }
-    // )
-
-    // // Stat banner
     const statBanner = await screen.findByTestId('stat-banner')
     expect(statBanner).toBeInTheDocument()
 
-    // This should only show if we're an artist
     expect(within(statBanner).queryByText(/tracks/i)).not.toBeInTheDocument()
 
-    // Check playlists count
     const playlistsSection = await within(statBanner).findByText('playlists')
     expect(playlistsSection).toBeInTheDocument()
     expect(
       await within(playlistsSection.parentElement!).findByText('3')
     ).toBeInTheDocument()
 
-    // Check follower count
     const followerSection = await within(statBanner).findByText('follower')
     expect(followerSection).toBeInTheDocument()
     expect(
       await within(followerSection.parentElement!).findByText('1')
     ).toBeInTheDocument()
 
-    // Check following count
     const followingSection = await within(statBanner).findByText('following')
     expect(followingSection).toBeInTheDocument()
     expect(
       await within(followingSection.parentElement!).findByText('2')
     ).toBeInTheDocument()
 
-    // // render appropriate tabs with correct content
-
-    // // Tabs
     const navBanner = await screen.findByTestId('nav-banner')
     expect(await within(navBanner).getByText('Playlists')).toBeInTheDocument()
     expect(await within(navBanner).getByText('Reposts')).toBeInTheDocument()
@@ -207,7 +171,6 @@ describe('ProfilePage', () => {
   })
 
   it.skip('shows deactivated state if user is deactivated', async () => {
-    // TODO: set up this prop
     renderProfilePage({ ...nonArtistUser, is_deactivated: true })
     // TODO
   })
@@ -225,26 +188,23 @@ describe('ProfilePage', () => {
   it('shows fan club UI when the profile belongs to an artist with an owned coin', async () => {
     mswServer.use(mockUserCreatedCoin(artistUser.id, mockFanClub))
 
-    // Mock a different current user to simulate viewing another user's profile
     renderProfilePage(
       artistUser, // Use the artistUser who owns the coin
       {
         reduxState: {
           account: {
-            userId: 987 // Different from artistUser.id
+            userId: 987
           }
         }
       }
     )
 
-    // Wait for the profile to load (name may have trailing space in mobile header)
     expect(
       await screen.findByRole('heading', {
         name: new RegExp(`^${artistUser.name}\\s*$`)
       })
     ).toBeInTheDocument()
 
-    // Verify that coin-related elements are present when user has coins
     const viewFanClubButton = await screen.findByRole('button', {
       name: 'View Fan Club'
     })
@@ -258,19 +218,16 @@ describe('ProfilePage', () => {
       initialRoute: `/${artistUser.handle}/albums`
     })
 
-    // Wait for the profile to load
     expect(
       await screen.findByRole('heading', {
         name: new RegExp(`^${artistUser.name}\\s*$`)
       })
     ).toBeInTheDocument()
 
-    // Verify that the Albums tab is active (not the first tab)
     const navBanner = await screen.findByTestId('nav-banner')
     const albumsTab = await within(navBanner).findByText('Albums')
     expect(albumsTab).toBeInTheDocument()
 
-    // The active tab should have specific styling - check parent for active class
     const albumsTabParent = albumsTab.closest('[role="tab"]')
     expect(albumsTabParent).toBeInTheDocument()
   })

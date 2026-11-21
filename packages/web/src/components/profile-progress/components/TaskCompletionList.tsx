@@ -14,11 +14,6 @@ type TaskCompletionListProps = {
   variant?: 'inverted' | 'surface'
 }
 
-/**
- * `TaskCompletionList` renders a list of `TaskCompletionItems`.
- * It's used to power the lists inside of `ProfileCompletionTooltip`
- * and `ProfileCompletionHeroCard`.
- */
 export const TaskCompletionList = ({
   completionStages,
   variant = 'inverted'

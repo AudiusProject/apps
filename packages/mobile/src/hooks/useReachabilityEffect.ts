@@ -9,15 +9,9 @@ type OnBecomeUnreachable = () => any
 
 const { getIsReachable } = reachabilitySelectors
 
-/**
- * Invoke a function once based on initial reachability
- * and when reachability changes
- */
 export const useReachabilityEffect = (
   onBecomeReachable: OnBecomeReachable | null,
   onBecomeUnreachable: OnBecomeUnreachable | null,
-  // Determine if this effect should be called on first render
-  // in addition to reachability changes
   includeFirstRender = true
 ) => {
   const currentReachability = useSelector(getIsReachable)

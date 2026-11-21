@@ -51,7 +51,6 @@ const SendTokensFailure = ({
   onTryAgain,
   onClose
 }: SendTokensFailureProps) => {
-  // Get token data and balance using the same hooks as ReceiveTokensModal
   const { data: coin } = useFanClub(mint)
   const { data: tokenBalance } = useCoinBalance({
     mint,
@@ -88,7 +87,6 @@ const SendTokensFailure = ({
     )
   }
 
-  // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
     return <SendTokensFailureSkeleton />
   }

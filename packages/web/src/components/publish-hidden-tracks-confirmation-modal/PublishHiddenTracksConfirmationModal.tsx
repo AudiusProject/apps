@@ -43,9 +43,6 @@ export const PublishHiddenTracksConfirmationModal = NiceModal.create(() => {
 
   const messages = getMessages(contentType, hiddenTrackCount)
 
-  // Both paths publish the collection itself; they differ only in whether the
-  // hidden tracks come along. Dismissing (esc / overlay / X) takes the
-  // conservative path so tracks are never published by accident.
   const handleKeepPrivate = useCallback(() => {
     dispatch(keepHiddenTracksPrivate())
     modal.hide()

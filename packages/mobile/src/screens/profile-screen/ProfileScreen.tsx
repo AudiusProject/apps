@@ -99,9 +99,6 @@ export const ProfileScreen = () => {
 
   const renderHeader = useCallback(() => <ProfileHeader />, [])
 
-  // Shared value that tracks the current tab's scroll position. Written to
-  // from inside the collapsible header via `ProfileScrollBridge` and read by
-  // `ProfileNavOverlay` to animate its blur background and icon colors.
   const scrollY = useSharedValue(0)
   useProfileScrollStatusBar(scrollY)
 

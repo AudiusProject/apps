@@ -52,26 +52,19 @@ type MeteoraSwapParams = BaseSwapParams & {
 }
 
 const getDirectSwapTx = async (quote: QuoteResponse, walletAddress: string) => {
-  // Generate a jupiter swap TX
   const swapRequest: SwapRequest = {
     quoteResponse: quote,
     userPublicKey: walletAddress,
     dynamicSlippage: true, // Uses the slippage from the quote
-    useSharedAccounts: false // Shared accounts cant be used for AMM pool swaps
+    useSharedAccounts: false
   }
   return await jupiterInstance.swapPost({ swapRequest })
 }
 
-/**
- * Checks if a mint is a fan club (not in NON_FAN_CLUB_MINTS)
- */
 const isFanClubMint = (mint: string): boolean => {
   return !NON_FAN_CLUB_MINTS.includes(mint)
 }
 
-/**
- * Extracts decompiled instructions from a VersionedTransaction
- */
 const extractInstructionsFromVersionedTx = (
   tx: VersionedTransaction
 ): TransactionInstruction[] => {
@@ -97,10 +90,6 @@ const extractInstructionsFromVersionedTx = (
   })
 }
 
-/**
- * Combines two Meteora swap transactions into a single transaction
- * Used for fan-club ↔ fan-club swaps
- */
 const getCombinedMeteoraSwapTx = async ({
   inputMint,
   outputMint,
@@ -128,7 +117,6 @@ const getCombinedMeteoraSwapTx = async ({
   inputAmount: SwapAmount
   outputAmount: SwapAmount
 }> => {
-  // First swap: fan-club → AUDIO
   const rawInputAmount = BigInt(
     Math.floor(amountUi * Math.pow(10, inputDecimals))
   ).toString()
@@ -143,7 +131,6 @@ const getCombinedMeteoraSwapTx = async ({
 
   const audioOutputAmount = firstSwapResult.outputAmount
 
-  // Second swap: AUDIO → fan-club
   const secondSwapResult = await solanaRelay.swapCoin({
     inputAmount: audioOutputAmount,
     coinMint: outputMint,
@@ -152,7 +139,6 @@ const getCombinedMeteoraSwapTx = async ({
     isExternalWallet: true
   })
 
-  // Deserialize both transactions
   const firstTx = VersionedTransaction.deserialize(
     new Uint8Array(Buffer.from(firstSwapResult.transaction, 'base64'))
   )
@@ -160,17 +146,13 @@ const getCombinedMeteoraSwapTx = async ({
     new Uint8Array(Buffer.from(secondSwapResult.transaction, 'base64'))
   )
 
-  // Extract instructions from both transactions
   const firstInstructions = extractInstructionsFromVersionedTx(firstTx)
   const secondInstructions = extractInstructionsFromVersionedTx(secondTx)
 
-  // Combine all instructions
   const allInstructions = [...firstInstructions, ...secondInstructions]
 
-  // Get recent blockhash
   const { blockhash } = await solanaConnection.getLatestBlockhash()
 
-  // Build combined transaction
   const message = new TransactionMessage({
     payerKey: new PublicKey(walletAddress),
     recentBlockhash: blockhash,
@@ -194,10 +176,6 @@ const getCombinedMeteoraSwapTx = async ({
   }
 }
 
-/**
- * Executes an indirect swap using two separate transactions
- * Used for USDC/SOL ↔ fan-club swaps (Jupiter + Meteora)
- */
 const executeIndirectSwapWithTwoTransactions = async ({
   inputMint,
   outputMint,
@@ -229,11 +207,7 @@ const executeIndirectSwapWithTwoTransactions = async ({
 }> => {
   const isInputFanClub = isFanClubMint(inputMint)
 
-  // Determine which leg uses Jupiter and which uses Meteora
   if (isInputFanClub) {
-    // fan-club → AUDIO (Meteora), then AUDIO → USDC/SOL (Jupiter)
-
-    // First transaction: fan-club → AUDIO (Meteora)
     const firstLegResult = await getMeteoraSwapTx({
       inputMint,
       outputMint: audioMint,
@@ -259,7 +233,6 @@ const executeIndirectSwapWithTwoTransactions = async ({
       'confirmed'
     )
 
-    // Second transaction: AUDIO → USDC/SOL (Jupiter)
     const { quoteResult: secondQuote } = await getJupiterQuoteByMintWithRetry({
       inputMint: audioMint,
       outputMint,
@@ -298,9 +271,6 @@ const executeIndirectSwapWithTwoTransactions = async ({
       }
     }
   } else {
-    // USDC/SOL → AUDIO (Jupiter), then AUDIO → fan-club (Meteora)
-
-    // First transaction: USDC/SOL → AUDIO (Jupiter)
     const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
       inputMint,
       outputMint: audioMint,
@@ -329,7 +299,6 @@ const executeIndirectSwapWithTwoTransactions = async ({
       'confirmed'
     )
 
-    // Second transaction: AUDIO → fan-club (Meteora)
     const secondLegResult = await getMeteoraSwapTx({
       inputMint: audioMint,
       outputMint,
@@ -368,10 +337,6 @@ const executeIndirectSwapWithTwoTransactions = async ({
   }
 }
 
-/**
- * Gets a Meteora swap transaction for fan club swaps
- * Meteora only supports swaps between AUDIO and fan clubs
- */
 const getMeteoraSwapTx = async ({
   inputMint,
   outputMint,
@@ -389,7 +354,6 @@ const getMeteoraSwapTx = async ({
   inputAmount: SwapAmount
   outputAmount: SwapAmount
 }> => {
-  // Determine which mint is the fan club and which is AUDIO
   const isInputAudio = inputMint === audioMint
   const isOutputAudio = outputMint === audioMint
 
@@ -402,20 +366,16 @@ const getMeteoraSwapTx = async ({
   const fanClubMint = isInputAudio ? outputMint : inputMint
   const swapDirection = isInputAudio ? 'audioToCoin' : 'coinToAudio'
 
-  // Convert UI amount to raw amount (bigint string)
-  // For Meteora, we need the raw amount of the input token
   const rawInputAmount = BigInt(
     Math.floor(amountUi * Math.pow(10, inputDecimals))
   ).toString()
 
-  // Get quote first
   await solanaRelay.getSwapCoinQuote({
     inputAmount: rawInputAmount,
     coinMint: fanClubMint,
     swapDirection: swapDirection as 'audioToCoin' | 'coinToAudio'
   })
 
-  // Get swap transaction
   const swapResult = await solanaRelay.swapCoin({
     inputAmount: rawInputAmount,
     coinMint: fanClubMint,
@@ -424,11 +384,9 @@ const getMeteoraSwapTx = async ({
     isExternalWallet: true
   })
 
-  // Deserialize the base64-encoded transaction
   const decoded = Buffer.from(swapResult.transaction, 'base64')
   const transaction = VersionedTransaction.deserialize(new Uint8Array(decoded))
 
-  // Convert raw amounts back to UI amounts
   const rawInputAmountBigInt = BigInt(rawInputAmount)
   const rawOutputAmountBigInt = BigInt(swapResult.outputAmount)
 
@@ -487,13 +445,11 @@ export const useExternalWalletSwap = () => {
         let inputAmount: SwapAmount
         let outputAmount: SwapAmount
 
-        // Check if swap involves fan clubs
         const isInputFanClub = isFanClubMint(inputMint)
         const isOutputFanClub = isFanClubMint(outputMint)
         const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
         const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
 
-        // Determine swap type
         const isDirectMeteoraSwap =
           (isInputFanClub && isOutputAudio) || (isInputAudio && isOutputFanClub)
 
@@ -505,7 +461,6 @@ export const useExternalWalletSwap = () => {
           !isBothFanClubs
 
         if (isDirectMeteoraSwap) {
-          // Case 1: Direct Meteora swap: AUDIO ↔ fan-club (single transaction)
           const meteoraResult = await getMeteoraSwapTx({
             inputMint,
             outputMint,
@@ -525,7 +480,6 @@ export const useExternalWalletSwap = () => {
           inputAmount = meteoraResult.inputAmount
           outputAmount = meteoraResult.outputAmount
         } else if (isBothFanClubs) {
-          // Case 2: fan-club ↔ fan-club (ONE combined transaction with both Meteora swaps)
           const combinedResult = await getCombinedMeteoraSwapTx({
             inputMint,
             outputMint,
@@ -546,7 +500,6 @@ export const useExternalWalletSwap = () => {
           inputAmount = combinedResult.inputAmount
           outputAmount = combinedResult.outputAmount
         } else if (isMixedIndirectSwap) {
-          // Case 3: USDC/SOL ↔ fan-club (TWO separate transactions: Jupiter + Meteora)
           const intermediateAmount =
             await executeIndirectSwapWithTwoTransactions({
               inputMint,
@@ -562,7 +515,6 @@ export const useExternalWalletSwap = () => {
               hookProgress
             })
 
-          // Return early since we already executed both transactions
           return {
             status: SwapStatus.SUCCESS,
             signature: intermediateAmount.finalSignature,
@@ -570,7 +522,6 @@ export const useExternalWalletSwap = () => {
             outputAmount: intermediateAmount.outputAmount
           }
         } else {
-          // Case 4: Non-fan club swaps (Jupiter only)
           const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
             inputMint,
             outputMint,
@@ -625,7 +576,6 @@ export const useExternalWalletSwap = () => {
           error instanceof Error ? error.message : String(error)
         console.error('External wallet swap failed:', error, hookProgress)
 
-        // Determine error type based on progress
         let errorType = SwapErrorType.UNKNOWN
         let errorStage = 'UNKNOWN'
 
@@ -663,10 +613,7 @@ export const useExternalWalletSwap = () => {
       }
     },
     onSuccess: (result, params) => {
-      // NOTE: due to how we are catching errors in the function, this onSuccess will still run on a handled error
-      // (since we're still returning a result no matter what)
       if (result.status === SwapStatus.SUCCESS) {
-        // Update internal wallet balances & user info
         optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
 
         if (user?.user_id) {
@@ -678,12 +625,8 @@ export const useExternalWalletSwap = () => {
           })
         }
 
-        // Update external wallet balances
-        // NOTE: invalidate queries does not work here, need to manually update the balances
-
         const isSpendingAudio = params.inputMint === env.WAUDIO_MINT_ADDRESS
         const isReceivingAudio = params.outputMint === env.WAUDIO_MINT_ADDRESS
-        // Update input token balance (subtract the amount spent)
         if (result.inputAmount && !isSpendingAudio) {
           queryClient.setQueryData(
             getExternalWalletBalanceQueryKey({
@@ -694,13 +637,12 @@ export const useExternalWalletSwap = () => {
               if (!oldBalance) return oldBalance
               const currentAmount = Number(oldBalance.toString())
               const inputAmount = result.inputAmount!.uiAmount
-              const newAmount = Math.max(0, currentAmount - inputAmount) // Ensure non-negative
+              const newAmount = Math.max(0, currentAmount - inputAmount)
               return new FixedDecimal(newAmount, oldBalance.decimalPlaces)
             }
           )
         }
 
-        // Update output token balance (add the amount received)
         if (result.outputAmount && !isReceivingAudio) {
           queryClient.setQueryData(
             getExternalWalletBalanceQueryKey({
@@ -709,7 +651,6 @@ export const useExternalWalletSwap = () => {
             }),
             (oldBalance: FixedDecimal | undefined) => {
               if (!oldBalance) {
-                // If no previous balance, create a new FixedDecimal with the output amount
                 return new FixedDecimal(
                   result.outputAmount!.uiAmount,
                   params.outputDecimals
@@ -723,7 +664,6 @@ export const useExternalWalletSwap = () => {
           )
         }
 
-        // Invalidate fan club queries to refresh fee claiming and graduation progress
         if (params.inputMint && !isSpendingAudio) {
           queryClient.invalidateQueries({
             queryKey: getFanClubQueryKey(params.inputMint)

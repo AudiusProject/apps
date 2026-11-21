@@ -25,8 +25,6 @@ export class AudiusABIDecoder {
       throw new Error('No Audius ABI matches given data')
     }
 
-    // hack around abi-decoder's lack of contract-specific support (only one global
-    // namespace of functions)
     const abi = abiMap[contractName]
     if (!abi) {
       throw new Error(`Unrecognized contract name ${contractName}`)
@@ -73,7 +71,6 @@ export class AudiusABIDecoder {
     const decodedABI = AudiusABIDecoder.decodeMethod(contractName, encodedABI)
     const mapping = new Map()
 
-    // map without leading underscore in _userId
     decodedABI.params.forEach((param) => {
       mapping.set(param.name.substring(1), param.value)
     })

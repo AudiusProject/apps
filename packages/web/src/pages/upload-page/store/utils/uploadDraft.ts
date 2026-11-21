@@ -4,13 +4,6 @@ import localforage from 'localforage'
 
 import { TrackEditFormValues } from 'components/edit-track/types'
 
-/**
- * Upload drafts live in IndexedDB on this device, one per user. Files
- * (audio, stems, artwork) are stored once under their own keys; the form
- * values reference them, so autosaving a metadata change doesn't rewrite
- * gigabytes of stems.
- */
-
 const DRAFT_VERSION = 1
 const FILE_REF = '__uploadDraftFile'
 
@@ -45,12 +38,9 @@ const getStore = () => {
 const draftKey = (userId: number) => `draft:${userId}`
 const fileKey = (userId: number, fileId: string) => `file:${userId}:${fileId}`
 
-// Stable ids for blobs across saves, and which ones are already on disk.
 const blobIds = new WeakMap<Blob, string>()
 const savedFileKeys = new Set<string>()
 
-// Run storage operations one at a time so overlapping autosaves and a
-// clear can't interleave.
 let queue: Promise<unknown> = Promise.resolve()
 const enqueue = <T>(task: () => Promise<T>): Promise<T> => {
   const next = queue.then(task, task)
@@ -73,11 +63,6 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return proto === Object.prototype || proto === null
 }
 
-/**
- * Copies form values into something IndexedDB can hold: blobs become
- * references, and anything that isn't plain data (audio previews,
- * functions) is dropped.
- */
 export const serializeDraftValues = (
   value: unknown,
   blobs: Map<string, Blob>
@@ -105,10 +90,6 @@ export const serializeDraftValues = (
   return value
 }
 
-/**
- * Inverse of serializeDraftValues. Blob URLs from the previous session are
- * dead, so artwork urls are recreated and track previews rebuilt.
- */
 export const deserializeDraftValues = (
   value: unknown,
   files: Map<string, Blob>
@@ -172,7 +153,6 @@ const writeDraft = async (
   }
   await db.setItem(draftKey(userId), draft)
 
-  // Drop files that are no longer referenced (removed stems, swapped art).
   const stale = previous?.fileIds.filter((id) => !blobs.has(id)) ?? []
   for (const id of stale) {
     const key = fileKey(userId, id)
@@ -228,7 +208,6 @@ const removeDraft = async (userId: number) => {
   }
 }
 
-/** Rebuilds the upload page's form state from saved form values. */
 export const draftToFormState = (draft: UploadDraft): UploadFormState => {
   switch (draft.uploadType) {
     case UploadType.ALBUM:
@@ -253,7 +232,6 @@ export const draftToFormState = (draft: UploadDraft): UploadFormState => {
   }
 }
 
-/** Title to show for a draft: the collection or first track's name. */
 export const getDraftTitle = (draft: UploadDraft) => {
   if ('trackMetadatas' in draft.values) {
     return draft.values.trackMetadatas[0]?.title ?? ''

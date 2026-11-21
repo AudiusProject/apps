@@ -60,8 +60,6 @@ export const TrackSelectionProvider = ({
         }
         return next
       })
-      // Keep the anchor stable across a shift-click sequence (matches
-      // Finder / Gmail / Drive). A plain click resets the anchor.
       if (!isShiftRange) {
         lastIndexRef.current = index
       }
@@ -101,7 +99,6 @@ export const TrackSelectionProvider = ({
 export const useTrackSelection = (): SelectionContextValue => {
   const ctx = useContext(TrackSelectionContext)
   if (!ctx) {
-    // Safe no-op fallback for usage outside the provider.
     return {
       selected: new Set(),
       count: 0,

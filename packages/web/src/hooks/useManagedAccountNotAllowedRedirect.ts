@@ -18,10 +18,6 @@ const messages = {
   unauthorizedAsManaged: `You can't do that as a managed user`
 }
 
-/**
- * Hook to redirect a managed account from accessing a particular route
- * @param route route to redirect the user to
- */
 export const useManagedAccountNotAllowedRedirect = (
   route: string = FEED_PAGE
 ) => {
@@ -37,11 +33,6 @@ export const useManagedAccountNotAllowedRedirect = (
   }, [isManagedAccount, navigate, route, toast])
 }
 
-/**
- * Hook to prevent a managed account from some action (e.g. opening a modal)
- * @param trigger condition that when true, fires the callback (e.g. modal is open)
- * @param callback callback to fire when the action is performed (e.g. close the modal)
- */
 export const useManagedAccountNotAllowedCallback = ({
   trigger,
   callback
@@ -60,12 +51,6 @@ export const useManagedAccountNotAllowedCallback = ({
   }, [isManagedAccount, callback, toast, trigger])
 }
 
-/**
- * Hook to prevent a managed account from some action if the
- * managed account does not have access to the provided account
- * @param handle handle of the user we are doing something on behalf of
- * @param route route to redirect the user to
- */
 export const useIsUnauthorizedForHandleRedirect = (
   handle: string,
   route: string = FEED_PAGE

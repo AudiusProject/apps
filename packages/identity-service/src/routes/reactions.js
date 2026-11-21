@@ -21,7 +21,6 @@ const handleReaction = async ({
   const { solanaWeb3Manager } = libs
   const currentSlot = await solanaWeb3Manager.getSlot()
 
-  // Get tips on DN to ensure reactions only to received tips
   const { discoveryProviderEndpoint } = libs.discoveryProvider
   const url = `${discoveryProviderEndpoint}/v1/full/tips`
   const resp = await Axios({
@@ -35,7 +34,6 @@ const handleReaction = async ({
   const tips = resp.data.data
 
   if (tips.length !== 1) {
-    // Can't react to something that doesn't exist
     throw new Error(`No tip for tx_id ${reactedTo}`)
   }
 
@@ -68,14 +66,10 @@ const getReactions = async ({ startIndex, limit }) => {
 }
 
 module.exports = function (app) {
-  /**
-   * POST a new reaction, represented by a numeric ID (reaction) and reactedTo (entity being reacted upon)
-   */
   app.post(
     '/reactions',
     authMiddleware,
     handleResponse(async (req, res, next) => {
-      // Validation
       const senderWallet = req.user.walletAddress
       const { reactedTo, reactionValue } = req.body
 
@@ -115,9 +109,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Get all reactions with ID >= startIndex
-   */
   app.get(
     '/reactions',
     handleResponse(async (req, res, next) => {

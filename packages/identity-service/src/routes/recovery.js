@@ -33,16 +33,12 @@ const toQueryStr = (obj) => {
 }
 
 module.exports = function (app) {
-  /**
-   * Send recovery information to the requested account
-   */
   app.post(
     '/recovery',
     handleResponse(async (req, res, next) => {
       const sg = req.app.get('sendgrid')
       if (!sg) {
         req.logger.error('Missing sendgrid api key')
-        // Short-circuit if no api key provided, but do not error
         return successResponse({
           msg: 'No sendgrid API Key found',
           status: true
@@ -73,10 +69,6 @@ module.exports = function (app) {
           'Invalid signature provided, no user found'
         )
       }
-      // Suppress recovery email if the address has not been verified.
-      // Fall back to the legacy isEmailDeliverable flag for accounts created
-      // before email verification was introduced (those start verified=false
-      // but may have a valid deliverable flag).
       const canReceiveEmail =
         existingUser.isEmailVerified || existingUser.isEmailDeliverable
       if (!canReceiveEmail) {

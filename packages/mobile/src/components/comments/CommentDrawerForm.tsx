@@ -63,7 +63,6 @@ export const CommentDrawerForm = (props: CommentDrawerFormProps) => {
       )
     }
 
-    // Scroll to top of comments when posting a new comment
     if (!editingComment && !replyingToComment) {
       commentListRef.current?.scrollToOffset({ offset: 0 })
     }

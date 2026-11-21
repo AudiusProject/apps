@@ -4,7 +4,6 @@ import { test } from './test'
 import { resetAuthState } from './utils'
 
 test.describe('Sign In', () => {
-  // Resets auth state for this suite so we aren't already signed in
   test.use(resetAuthState)
 
   test('can navigate to sign-in from trending screen', async ({ page }) => {
@@ -27,9 +26,6 @@ test.describe('Sign In', () => {
     await assertOnSignInPage(page)
   })
 
-  // TODO: For some reason the user created with audius-cmd doesn't have a handle in identity
-  // so the email check returns false
-  // https://linear.app/audius/issue/INF-701/re-enable-fix-sign-in-after-entering-email-in-sign-up-test-if-we
   test.skip('can navigate to sign-in after entering email in sign-up', async ({
     page
   }) => {
@@ -41,8 +37,6 @@ test.describe('Sign In', () => {
     await assertOnSignInPage(page)
   })
 
-  // TODO: need to integrate a hard-coded otp for this user before we can turn this test on
-  // https://linear.app/audius/issue/INF-702/fix-signintestts-otp-code
   test.skip('can sign in', async ({ page }) => {
     await page.goto('signin')
     await assertOnSignInPage(page)

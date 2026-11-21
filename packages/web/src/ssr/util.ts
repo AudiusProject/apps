@@ -1,7 +1,6 @@
 import { resolveRoute } from 'vike/routing'
 import type { PageContextServer } from 'vike/types'
 
-// Route constants - defined locally to avoid importing route.ts which pulls in dayjs
 const CHANGE_EMAIL_SETTINGS_PAGE = '/settings/change-email'
 const CHANGE_PASSWORD_SETTINGS_PAGE = '/settings/change-password'
 const CHAT_PAGE = '/messages/:id?'
@@ -10,8 +9,6 @@ const assetPaths = new Set(['src', 'assets', 'scripts', 'fonts', 'favicons'])
 
 const invalidPaths = new Set(['undefined'])
 
-// Reserved paths that have their own SSR handlers and should NOT match /@handle patterns
-// This prevents /upload from being matched as a profile with handle="upload"
 const reservedPaths = new Set([
   'upload',
   'explore',
@@ -36,10 +33,8 @@ const reservedPaths = new Set([
   'error'
 ])
 
-// Static routes that should skip SSR (only the root now, all others have SSR handlers)
 const staticRoutes = new Set(['/'])
 
-// Paths that should not use SSR even if they match a route
 const nonSsrPaths = [
   CHANGE_EMAIL_SETTINGS_PAGE,
   CHANGE_PASSWORD_SETTINGS_PAGE,
@@ -58,7 +53,6 @@ export const makePageRoute =
     for (let i = 0; i < routes.length; i++) {
       const route = routes[i]
 
-      // Don't render page if the route matches any of the asset, invalid, or static routes
       if (
         assetPaths.has(firstSegment) ||
         invalidPaths.has(firstSegment) ||
@@ -67,9 +61,6 @@ export const makePageRoute =
         continue
       }
 
-      // If the route starts with /@handle pattern (e.g. /@handle, /@handle/tracks),
-      // don't match if the first URL segment is a reserved path
-      // This prevents /upload from matching as handle="upload"
       if (route.startsWith('/@') && reservedPaths.has(firstSegment)) {
         continue
       }

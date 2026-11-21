@@ -15,30 +15,7 @@ import {
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
 import { useNavigation } from 'app/hooks/useNavigation'
 
-/**
- * Followers tile. Matches Figma 2888-128953: "FOLLOWERS (N)" label
- * + a stacked row of overlapping avatars + a chevron-right button
- * that opens the leaderboard. Empty follower state hides the avatar
- * row but keeps the title.
- *
- * Extracted from `ContestScreen.tsx` so the Details tab body (which
- * lives in its own file under `tabs/`) can import it without
- * re-introducing a circular dependency back to the screen shell.
- *
- * The whole card is now pressable — tapping anywhere on the card
- * (card surface or chevron) navigates to the dedicated
- * `ContestFollowers` screen. A single `onPress` on the wrapping
- * `Pressable` keeps the target easy to hit, while the inner chevron
- * `IconButton` preserves the affordance called out in Figma without
- * needing its own handler.
- */
-
-// Max avatar discs surfaced before the chevron — matches the web
-// reference and keeps the stack visually readable. Extra discs just
-// compress the row.
 const FOLLOWERS_MAX_AVATARS = 7
-// Horizontal overlap between adjacent avatars. ~1/3 of the 40px
-// avatar diameter, same ratio as the web leaderboard row.
 const FOLLOWERS_OVERLAP_PX = 14
 
 type EventFollowersCardProps = {

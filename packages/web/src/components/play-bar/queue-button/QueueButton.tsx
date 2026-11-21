@@ -24,7 +24,6 @@ const messages = {
 export const QueueButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
-  // Only mount (and load) the popover once it has been opened
   const [hasOpened, setHasOpened] = useState(false)
   if (isOpen && !hasOpened) setHasOpened(true)
   const queue = useSelector(getPlaybackQueue)

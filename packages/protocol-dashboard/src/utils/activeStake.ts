@@ -2,16 +2,6 @@ import BN from 'bn.js'
 
 import { Operator, User } from 'types'
 
-/**
- * Calculates and returns active stake for address
- *
- * Active stake = (active deployer stake + active delegator stake)
- *      active deployer stake = (direct deployer stake - locked deployer stake)
- *          locked deployer stake = amount of pending decreaseStakeRequest for address
- *      active delegator stake = (total delegator stake - locked delegator stake)
- *          locked delegator stake = amount of pending undelegateRequest for address
- */
-
 export const getActiveStake = (user: User | Operator) => {
   let activeDeployerStake: BN = new BN('0')
   let activeDelegatorStake: BN = new BN('0')

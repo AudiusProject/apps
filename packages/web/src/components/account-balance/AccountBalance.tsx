@@ -214,7 +214,6 @@ const AccountBalanceContent = () => {
     )
   }
 
-  // Show zero balance state without graph when balance is 0 or no history
   const hasZeroBalance =
     currentBalance === 0 || !historyData || historyData.length === 0
 

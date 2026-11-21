@@ -110,7 +110,6 @@ export const PlaylistsTabPage = () => {
     )
   }
 
-  // TODO(nkang) - Add separate error state
   if (noResults || !playlistIds) {
     return (
       <EmptyTable

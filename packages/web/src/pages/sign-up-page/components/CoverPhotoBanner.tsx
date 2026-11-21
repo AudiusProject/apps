@@ -18,7 +18,6 @@ type CoverPhotoBannerProps = {
   coverPhotoUrl?: string
   profileImageUrl?: string
   isEditing?: boolean
-  // If true, the banner will be rendered as a paper header
   isPaperHeader?: boolean
 }
 
@@ -65,9 +64,7 @@ export const CoverPhotoBanner = (props: CoverPhotoBannerProps) => {
           height: '100%',
           width: '100%',
           backgroundColor: color.background.default,
-          // gradient overlay
           background: `linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0%, rgba(0, 0, 0, 0.00) 100%)`,
-          // When there is no cover photo we use the profile photo and heavily blur it
           ...(hasImage && !coverPhoto
             ? {
                 backdropFilter: 'blur(25px)'

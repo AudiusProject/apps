@@ -12,9 +12,6 @@ import { type TextLinkProps } from './types'
 
 const AnimatedText = Animated.createAnimatedComponent(Text)
 
-/**
- * Simple component that styles a Text component as a link
- */
 export const TextPressable = (props: TextLinkProps) => {
   const {
     children,
@@ -58,8 +55,6 @@ export const TextPressable = (props: TextLinkProps) => {
     [variant, type]
   )
 
-  // Need to nest the AnimatedText inside a Text so the handlers & animation work
-  // while still supporting proper Text layout. All this nesting is necessary
   return (
     <Text
       suppressHighlighting

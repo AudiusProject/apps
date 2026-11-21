@@ -30,12 +30,6 @@ declare global {
   interface Window extends SafariWindow {}
 }
 
-/*
- * Push Notifications
- * For browsers the implement the Push API
- *
- */
-
 const basename = env.BASENAME
 
 const fcmWebPushPublicKey = env.FCM_PUSH_PUBLIC_KEY
@@ -57,7 +51,6 @@ export const isBrowserPushAvailable =
 
 let swRegistration: any = null
 
-// Used to convert the application server key for service worker registration
 function urlB64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -71,7 +64,6 @@ function urlB64ToUint8Array(base64String: string) {
   return outputArray
 }
 
-// Subscribes the browser to the push api
 export const subscribePushManagerBrowser = async () => {
   try {
     if (isPushManagerAvailable && applicationServerPublicKey) {
@@ -110,7 +102,7 @@ export const subscribeSafariPushBrowser = async (
           webServiceUrl, // The web service URL.
           safariWebPushID, // The Website Push ID.
           {}, // Data that you choose to send to your server to help you identify the user.
-          resolve // The callback function.
+          resolve
         )
       })
       return subscription as SafariPermissionData
@@ -176,8 +168,6 @@ export const getSafariPushBrowser = () => {
   return window.safari.pushNotification.permission(safariWebPushID)
 }
 
-// The localstorage variable 'HAS_REQUESTED_BROWSER_PUSH_PERMISSION' is used to know
-// if the browser permission has been requested by the signed in user
 const HAS_REQUESTED_BROWSER_PUSH_PERMISSION =
   'HAS_REQUESTED_BROWSER_PUSH_PERMISSION'
 

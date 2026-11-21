@@ -44,7 +44,6 @@ import { SearchCategoriesAndFilters } from 'app/screens/search-screen/SearchCate
 import { useSearchQuery } from '../../search-screen/searchState'
 import { useExploreRoute } from '../hooks'
 
-/** Scroll distance over which the status bar fade comes in. */
 const EDGE_FADE_DISTANCE = 24
 
 const SEARCH_FIELD_HEIGHT = 40
@@ -74,17 +73,6 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query])
 
-  // Focus the search input when navigated here with autoFocus: true (e.g.,
-  // user taps the search icon). Use a plain useEffect — NOT useFocusEffect —
-  // so this fires only when the param transitions, not on every screen focus.
-  // Without this, the keyboard re-appears whenever the app returns from
-  // background while explore is the active tab. Consume the param by setting
-  // it back to false so a subsequent search-icon tap can re-trigger focus.
-  //
-  // Gate on isFocused so a stale autoFocus param can't summon the keyboard
-  // while the explore tab isn't the active tab — this is what caused the
-  // brief keyboard flash on cold launch when the explore screen mounted
-  // off-screen with autoFocus: true already on its route.
   useEffect(() => {
     if (params?.autoFocus === true && isFocused) {
       textInputRef.current?.focus()
@@ -121,7 +109,6 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   const [categoriesHeight, setCategoriesHeight] = useState(0)
   const pinnedProgress = useCompactProgressAt(categoriesHeight)
 
-  // The search row only follows the overscroll rubber band.
   const searchRowStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -Math.min(scrollY.value, 0) }]
   }))
@@ -247,7 +234,6 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
 }
 
 const styles = StyleSheet.create({
-  // Extends above the row to fill the gap when overscroll pulls it down.
   backdrop: {
     position: 'absolute',
     left: 0,
@@ -260,7 +246,6 @@ const styles = StyleSheet.create({
   },
   field: {
     flex: 1,
-    // GlassCapsule insets itself from the screen edges while floating.
     marginHorizontal: 0
   },
   input: {

@@ -99,7 +99,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   usePreventOffscreenFocus(profileFocusRootRef)
 
   const {
-    // Profile data
     profile,
     status,
     accountUserId,
@@ -126,11 +125,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updatedCoverPhoto,
     updatedProfilePicture,
 
-    // Lineups (legacy redux lineups — no longer read here; tanquery below)
     tracksLineupOrder,
     handleLower,
 
-    // State
     editMode,
     areArtistRecommendationsVisible,
     showBlockUserConfirmationModal,
@@ -139,7 +136,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     isBlocked,
     canCreateChat,
 
-    // Handlers
     changeTab,
     onSortByRecent,
     onSortByPopular,
@@ -193,8 +189,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     () => ({ handle: handleLower ?? '' }),
     [handleLower]
   )
-  // Artists land on Tracks, so once we know the profile is an artist's, only
-  // fetch reposts when that tab is opened. Everyone else lands on Reposts.
   const userRepostsQuery = useProfileReposts(repostsArgs, {
     enabled:
       !!handleLower &&
@@ -214,12 +208,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   )
   const showContestsTab = profileHasContest
 
-  // Determine which tab is active. The URL is the source of truth; activeTab
-  // (from useProfilePage, derived from route params) drives the body render.
   const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
-  // If a viewer hits /:handle/contests on a profile that doesn't qualify for
-  // the tab (host doesn't run any contest), fall back to the default so the
-  // body matches the (now hidden) tab list.
   const rawTab = activeTab ?? defaultTab
   const currentTab =
     rawTab === ProfilePageTabs.CONTESTS && !showContestsTab
@@ -321,7 +310,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         </Box>
       )
     }
-    // Default: Tracks
     return (
       <Box w='100%'>
         {renderProfileCompletionCard()}
@@ -373,7 +361,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         </Box>
       )
     }
-    // Default: Reposts
     return (
       <Box w='100%'>
         {renderProfileCompletionCard()}

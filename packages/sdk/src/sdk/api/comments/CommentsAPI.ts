@@ -157,17 +157,12 @@ export class CommentsApi extends GeneratedCommentsApi {
       return await this.createCommentWithEntityManager({
         userId,
         entityId: encodeHashId(metadata.entityId) ?? '',
-        // Pass through the caller's entity type (Track | Event) instead of
-        // hardcoding 'Track', so Event comments written via the web path
-        // keep their entity_type on-chain.
         entityType: (md.entityType as 'Track' | 'Event') ?? 'Track',
         body: metadata.body,
         commentId: metadata.commentId,
         parentCommentId: metadata.parentId,
         trackTimestampS: metadata.trackTimestampS,
         mentions: metadata.mentions,
-        // Forward videoUrl on the non-FanClub branch so Event post-updates
-        // carry the same embed the indexer already knows how to render.
         videoUrl: (md as any).videoUrl
       })
     }

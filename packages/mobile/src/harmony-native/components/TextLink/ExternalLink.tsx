@@ -42,7 +42,6 @@ export const useExternalLinkHandlePress = ({
       onPress?.(e)
 
       try {
-        // Ensure URL has a protocol for Linking.openURL
         const urlWithProtocol =
           url.startsWith('http://') || url.startsWith('https://')
             ? url
@@ -71,7 +70,6 @@ export const ExternalLink = (props: ExternalLinkProps) => {
   const handlePress = useExternalLinkHandlePress({ url, onPress })
 
   return (
-    // TextPressable passes these through to Text.
     <TextPressable onPress={handlePress} {...(other as Partial<TextLinkProps>)}>
       {children}
     </TextPressable>

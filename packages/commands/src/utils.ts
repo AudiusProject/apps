@@ -24,7 +24,6 @@ const localStorage = new LocalStorage('./local-storage')
 
 export const parseUserId = async (arg: string) => {
   if (arg.startsWith('@')) {
-    // @handle
     const audiusSdk = await initializeAudiusSdk()
     const { data } = await audiusSdk.users.getUserByHandle({
       handle: arg.slice(1)
@@ -32,10 +31,8 @@ export const parseUserId = async (arg: string) => {
     const id = data!.id
     return decodeHashId(id)!
   } else if (arg.startsWith('#')) {
-    // #userId
     return Number(arg.slice(1))
   } else {
-    // encoded user id
     return decodeHashId(arg)!
   }
 }
@@ -87,13 +84,7 @@ export const getHedgehog = () => {
   }
 
   if (!hedgehog) {
-    hedgehog = new Hedgehog(
-      getFn,
-      setAuthFn,
-      setUserFn,
-      /* useLocalStorage */ true,
-      localStorage
-    )
+    hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn, true, localStorage)
   }
   return hedgehog
 }
@@ -150,8 +141,6 @@ export const initializeAudiusSdk = async ({
   )
 
   if (!audiusSdk || (handle && currentHandle !== handle)) {
-    // If handle was provided, unset current entropy and replace with the entropy
-    // for the given user before initializing UserAuth
     if (handle) {
       localStorage.removeItem('hedgehog-entropy-key')
       const handleEntropy = localStorage.getItem(`handle-${handle}`)
@@ -181,7 +170,6 @@ export const initializeAudiusSdk = async ({
 
 export const parseSplWallet = async (arg: string) => {
   if (arg.startsWith('@') || arg.startsWith('#') || arg.length < 32) {
-    // not splWallet
     const audiusSdk = await initializeAudiusSdk()
     const { data } = await audiusSdk.users.getUser({
       id: encodeHashId(await parseUserId(arg))!
@@ -197,7 +185,6 @@ export const parseSplWallet = async (arg: string) => {
     }
     return new PublicKey(data.splWallet)
   } else {
-    // splWallet
     return new PublicKey(arg)
   }
 }
@@ -234,38 +221,34 @@ export const getCurrentUserHandle = async () => {
 }
 
 export const createRandomImage = () => {
-  const width = 100 // Width of the image
-  const height = 100 // Height of the image
-  const headerSize = 54 // BMP header size
-  const rowPadding = (4 - ((width * 3) % 4)) % 4 // Padding to align rows to 4-byte boundary
+  const width = 100
+  const height = 100
+  const headerSize = 54
+  const rowPadding = (4 - ((width * 3) % 4)) % 4
 
-  // BMP file header
   const buffer = Buffer.alloc(
     headerSize + width * height * 3 + rowPadding * height
   )
-  buffer.write('BM', 0) // Signature
-  buffer.writeUInt32LE(buffer.length, 2) // File size
-  buffer.writeUInt32LE(0, 6) // Reserved
-  buffer.writeUInt32LE(headerSize, 10) // Pixel data offset
+  buffer.write('BM', 0)
+  buffer.writeUInt32LE(buffer.length, 2)
+  buffer.writeUInt32LE(0, 6)
+  buffer.writeUInt32LE(headerSize, 10)
 
-  // DIB header
-  buffer.writeUInt32LE(40, 14) // DIB header size
-  buffer.writeInt32LE(width, 18) // Image width
-  buffer.writeInt32LE(height, 22) // Image height
-  buffer.writeUInt16LE(1, 26) // Color planes
-  buffer.writeUInt16LE(24, 28) // Bits per pixel
-  buffer.writeUInt32LE(0, 30) // Compression
-  buffer.writeUInt32LE(width * height * 3 + rowPadding * height, 34) // Image size
-  buffer.writeInt32LE(0, 38) // Horizontal resolution (pixels per meter)
-  buffer.writeInt32LE(0, 42) // Vertical resolution (pixels per meter)
-  buffer.writeUInt32LE(0, 46) // Number of colors in palette
-  buffer.writeUInt32LE(0, 50) // Important colors
+  buffer.writeUInt32LE(40, 14)
+  buffer.writeInt32LE(width, 18)
+  buffer.writeInt32LE(height, 22)
+  buffer.writeUInt16LE(1, 26)
+  buffer.writeUInt16LE(24, 28)
+  buffer.writeUInt32LE(0, 30)
+  buffer.writeUInt32LE(width * height * 3 + rowPadding * height, 34)
+  buffer.writeInt32LE(0, 38)
+  buffer.writeInt32LE(0, 42)
+  buffer.writeUInt32LE(0, 46)
+  buffer.writeUInt32LE(0, 50)
 
-  // Pixel data (simple pattern)
   let offset = headerSize
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      // Simple color pattern (red, green, blue)
       const r = (x / width) * 255
       const g = (y / height) * 255
       const b = ((x + y) / (width + height)) * 255
@@ -273,7 +256,6 @@ export const createRandomImage = () => {
       buffer.writeUInt8(g, offset++)
       buffer.writeUInt8(r, offset++)
     }
-    // Padding
     for (let p = 0; p < rowPadding; p++) {
       buffer.writeUInt8(0, offset++)
     }
@@ -281,10 +263,6 @@ export const createRandomImage = () => {
   return buffer
 }
 
-/**
- * Commander parses args as strings, this will coerce to boolean.
- * The optional args are passed as true, so keep those truthy.
- */
 export const parseBoolean = (arg: string | true) => {
   return arg === true || arg === 'true'
 }

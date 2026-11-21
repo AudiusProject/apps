@@ -16,7 +16,6 @@ export type LockedStatusBadgeProps = {
   locked: boolean
   variant?: 'premium' | 'gated' | 'tokenGated'
   text?: string
-  /** Whether the badge is colored when locked */
   coloredWhenLocked?: boolean
   iconSize?: IconSize
   id?: string

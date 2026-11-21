@@ -28,7 +28,6 @@ export function* checkIsNewWallet(walletAddress: string, chain: Chain) {
     associatedUserId ||
     associatedWallets?.some(({ address }) => address === walletAddress)
   ) {
-    // The wallet already exists in the associated wallets set
     yield* put(
       updateWalletError({
         errorMessage:

@@ -54,11 +54,6 @@ export const ChatMessagePlaylist = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId])
 
-  /**
-   * Include uids for the tracks as those are used to play the tracks,
-   * and also to determine which track is currently playing.
-   * Also include the other properties to conform with the component.
-   */
   const tracksWithUids = useMemo(() => {
     return (tracks || []).map((track) => ({
       ...track,

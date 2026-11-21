@@ -111,7 +111,6 @@ export const BuyScreen = ({
     return Object.values(transformFanClubsToTokenInfoMap(coins ?? []))
   }, [coins])
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   if (currentExchangeRate !== null) {
     hasRateEverBeenFetched.current = true
@@ -121,8 +120,6 @@ export const BuyScreen = ({
 
   const { baseToken, quoteToken } = tokenPair
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     isBalanceLoading ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)

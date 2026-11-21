@@ -6,10 +6,6 @@ import { indexNames } from './indexNames'
 import { BlocknumberCheckpoint } from './types/blocknumber_checkpoint'
 import { logger } from './logger'
 
-// we want numbers as floats instead of strings.
-// no worries about precision.
-// https://github.com/brianc/node-postgres/issues/811#issuecomment-1500255173
-// 20 = INT8 (64 bit int)
 types.setTypeParser(20, (value) => parseFloat(value))
 
 let pool: PG | undefined = undefined
@@ -42,12 +38,9 @@ export async function recoverFromRedIndex() {
 
   let redIndices = []
 
-  // on startup check for red indices...
-  // check several times with delay to give ES a chance to recover
   for (let i = 0; i < 10; i++) {
     const indices = await es.cat.indices({ format: 'json' })
     redIndices = indices.filter((i) => i.health == 'red')
-    // no red indices... all good!
     if (redIndices.length == 0) {
       return
     }
@@ -87,10 +80,6 @@ export async function ensureSaneCluterSettings() {
   })
 }
 
-/**
- * Gets the max(blocknumber) from elasticsearch indexes
- * Used for incremental indexing to understand "where we were" so we can load new data from postgres
- */
 export async function getBlocknumberCheckpoints(): Promise<BlocknumberCheckpoint> {
   const searches = []
 

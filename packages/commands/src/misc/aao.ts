@@ -13,7 +13,6 @@ const blockCommand = new Command('block')
   .description('Blocks a user from the Anti-Abuse Oracle')
   .option('-f, --from <from>', 'The account for which to generate auth headers')
   .action(async ({ from }) => {
-    // Initting sdk sets current handle...
     const audiusSdk = await initializeAudiusSdk({ handle: from })
     const handle = await getCurrentUserHandle()
     const res = await fetch(
@@ -38,7 +37,6 @@ const unblockCommand = new Command('unblock')
   .description('Unblocks a user from the Anti-Abuse Oracle')
   .option('-f, --from <from>', 'The account for which to generate auth headers')
   .action(async ({ from }) => {
-    // Initting sdk sets current handle...
     const audiusSdk = await initializeAudiusSdk({ handle: from })
     const handle = await getCurrentUserHandle()
     const res = await fetch(

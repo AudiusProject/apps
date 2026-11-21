@@ -20,7 +20,6 @@ type FanClubFlairInputProps = {
   onChange: (badge: FanClubBadge | null) => void
 }
 
-// Special option values for Default and None
 const DEFAULT_OPTION_VALUE = '__default__'
 const NONE_OPTION_VALUE = '__none__'
 
@@ -28,18 +27,14 @@ export const FanClubFlairInput = ({
   selectedBadge,
   onChange
 }: FanClubFlairInputProps) => {
-  // Fetch all tradeable coins, excluding USDC and AUDIO
   const { coinsArray: allCoins, isLoading } = useTradeableCoins({
     excludeSymbols: ['USDC', 'AUDIO']
   })
 
-  // Filter to only owned coins
   const { ownedCoins, isLoading: isOwnedCoinsLoading } = useOwnedCoins(allCoins)
 
-  // Show loading state until both queries are complete
   const isLoadingBoth = isLoading || isOwnedCoinsLoading
 
-  // Create special "Highest Balance" and "None" coin options
   const specialOptions: CoinInfo[] = useMemo(() => {
     return [
       {
@@ -63,13 +58,9 @@ export const FanClubFlairInput = ({
     ]
   }, [])
 
-  // Combine special options with owned coins
   const availableCoins = useMemo(() => {
     const coins = [...specialOptions, ...ownedCoins]
 
-    // Add currently selected coin if it's not already in the list
-    // This ensures the previously selected coin appears in the dropdown
-    // even after switching to Highest Balance or None
     if (
       selectedBadge &&
       selectedBadge.mint !== DEFAULT_OPTION_VALUE &&
@@ -93,14 +84,11 @@ export const FanClubFlairInput = ({
     return coins
   }, [specialOptions, ownedCoins, selectedBadge])
 
-  // Convert selectedBadge to CoinInfo format for TokenDropdown
   const selectedCoin: CoinInfo = useMemo(() => {
-    // If no badge is selected, default to the first option (Highest Balance)
     if (!selectedBadge) {
       return specialOptions[0]
     }
 
-    // Check if it's a special option
     if (selectedBadge.mint === DEFAULT_OPTION_VALUE) {
       return specialOptions[0]
     }
@@ -108,13 +96,11 @@ export const FanClubFlairInput = ({
       return specialOptions[1]
     }
 
-    // Find the coin in ownedCoins
     const coin = ownedCoins.find((c) => c.address === selectedBadge.mint)
     if (coin) {
       return coin
     }
 
-    // Fallback: create a CoinInfo from the badge
     return {
       symbol: selectedBadge.ticker,
       name: selectedBadge.ticker,
@@ -126,7 +112,6 @@ export const FanClubFlairInput = ({
   }, [selectedBadge, ownedCoins, specialOptions])
 
   const handleTokenChange = (coin: CoinInfo) => {
-    // Handle special options
     if (coin.address === DEFAULT_OPTION_VALUE) {
       onChange({
         mint: DEFAULT_OPTION_VALUE,
@@ -144,7 +129,6 @@ export const FanClubFlairInput = ({
       return
     }
 
-    // Convert CoinInfo to FanClubBadge
     const badge: FanClubBadge = {
       mint: coin.address,
       logo_uri: coin.logoURI || '',
@@ -173,7 +157,6 @@ export const FanClubFlairInput = ({
     )
   }
 
-  // Custom trigger element matching Figma design for edit profile flow
   const customTrigger = (
     <Flex
       gap='xs'

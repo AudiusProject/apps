@@ -1,10 +1,3 @@
-/**
- * Builds distributable desktop applications.
- * Mac:
- *  - Must be run on OSX.
- *  - Codesigns and notarizes the binary
- */
-
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
@@ -24,7 +17,6 @@ const PRODUCTION_ICON = 'resources/icons/AudiusIcon.png'
 const PRODUCTION_SCHEME = 'audius'
 const PRODUCTION_BUILD_DIR = 'build-production'
 
-
 program
   .option('-m, --mac', 'Build for mac')
   .option('-w, --win', 'Build for windows')
@@ -37,18 +29,6 @@ program
   )
   .parse(process.argv)
 
-/**
- * Writes the App Store Connect API key (.p8) to a temp file, since notarytool
- * takes a path rather than the key contents. The secret may hold either the raw
- * PEM contents or a base64 encoding of them.
- *
- * notarytool parses the .p8 strictly and rejects anything malformed with a bare
- * `invalidPEMDocument`, which says nothing about what was wrong. Secret stores
- * mangle PEMs in two routine ways — flattening the newlines to literal `\n`, or
- * stripping them entirely — so rather than trusting the stored formatting, pull
- * out the base64 body and rebuild the PEM from scratch.
- * @returns {string} path to the written .p8 file
- */
 const writeApiKeyFile = () => {
   const rawKey = process.env.APP_STORE_CONNECT_API_KEY_KEY
   const decoded = rawKey.includes('BEGIN PRIVATE KEY')
@@ -83,7 +63,6 @@ const writeApiKeyFile = () => {
 }
 
 const notarizeFn = async (appId, params) => {
-  // Only notarize the app on Mac OS.
   if (process.platform !== 'darwin') {
     return
   }
@@ -101,9 +80,7 @@ const notarizeFn = async (appId, params) => {
     'APP_STORE_CONNECT_API_KEY_ISSUER_ID'
   ].filter((name) => !process.env[name])
   if (missing.length) {
-    throw new Error(
-      `Cannot notarize, missing env vars: ${missing.join(', ')}`
-    )
+    throw new Error(`Cannot notarize, missing env vars: ${missing.join(', ')}`)
   }
 
   console.log(`Notarizing ${appId} at ${appPath}`)
@@ -118,7 +95,6 @@ const notarizeFn = async (appId, params) => {
     })
   } catch (error) {
     console.error(error)
-    // Propagate the error back up.
     throw new Error(error)
   } finally {
     fs.rmSync(path.dirname(keyPath), { recursive: true, force: true })
@@ -126,10 +102,6 @@ const notarizeFn = async (appId, params) => {
   console.log(`Finished notarizing ${appId}`)
 }
 
-/**
- * Write a json file indicating what environment the application is running in
- * @param {boolean} isProduction
- */
 const writeEnv = (isProduction) => {
   if (isProduction) {
     return fse.writeFile(
@@ -143,10 +115,6 @@ const writeEnv = (isProduction) => {
   )
 }
 
-/**
- * Generates the correct application info/build config based on the environment
- * @param {boolean} isProduction
- */
 const makeBuildParams = (isProduction) => {
   const appId = PRODUCTION_APP_ID
   const productName = PRODUCTION_NAME
@@ -165,14 +133,8 @@ const makeBuildParams = (isProduction) => {
       appId,
       npmRebuild: false,
       productName,
-      // Inject data into package.json
-      // https://www.electron.build/configuration/configuration
       extraMetadata: {
-        // `productName` controls the app-data location on most platforms.
-        // https://github.com/electron-userland/electron-builder/issues/3429#issuecomment-434024379
         productName,
-        // `name` controls the app-data location on some linux platforms.
-        // https://github.com/electron/electron/blob/main/docs/api/app.md#appgetname
         name: packageJsonName
       },
       extends: null,
@@ -186,7 +148,6 @@ const makeBuildParams = (isProduction) => {
         'package.json'
       ],
       protocols: {
-        // Scheme controls deep links as well as local-storage prefix
         name: scheme,
         schemes: [scheme]
       },
@@ -235,9 +196,6 @@ const makeBuildParams = (isProduction) => {
         icon: icns,
         category: 'Audio'
       },
-      // Do not publish to snap store, which is enabled by default.
-      // See:
-      // https://github.com/electron-userland/electron-builder/issues/3187#issuecomment-709100071
       snap: {
         publish: {
           provider: 'generic',
@@ -263,9 +221,6 @@ if (program.win) {
   buildParams.win = ['default']
 }
 if (program.linux) {
-  // Explicitly AppImage rather than 'default', which electron-builder expands
-  // to snap *and* AppImage. We don't ship a snap, and the build image has no
-  // snapcraft, so 'default' fails the whole linux build.
   buildParams.linux = ['AppImage']
 }
 

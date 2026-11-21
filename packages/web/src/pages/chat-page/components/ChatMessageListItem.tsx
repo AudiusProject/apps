@@ -37,7 +37,6 @@ type ChatMessageListItemProps = {
   chatId: string
   message: ChatMessageWithExtras
   hasTail: boolean
-  // Group chats show who sent each run of messages
   isGroup?: boolean
   isFirstInRun?: boolean
 }
@@ -52,16 +51,13 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
 ) {
   const { chatId, message, hasTail, isGroup, isFirstInRun } = props
 
-  // Refs
   const reactionButtonRef = useRef<HTMLDivElement>(null)
   const bubbleRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch()
 
-  // State
   const [isReactionPopupVisible, setReactionPopupVisible] = useState(false)
   const [emptyUnfurl, setEmptyUnfurl] = useState(false)
 
-  // Selectors
   const { data: userId } = useCurrentUserId()
   const { byId: reactionUsers } = useUsers(
     message.reactions?.map((r) => HashId.parse(r.user_id))
@@ -72,7 +68,6 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   const { data: sender } = useUser(showSender ? senderUserId : null)
   const chat = useSelector((state) => getChat(state, chatId ?? ''))
 
-  // Derived
   const links = find(message.message)
   const link = links.filter((link) => link.type === 'url' && link.isLink)[0]
   const linkValue = link?.value
@@ -87,7 +82,6 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
       : ((message.reactions?.find((r) => r.user_id === currentUserHashId)
           ?.reaction as ReactionTypes | undefined) ?? null)
 
-  // Callbacks
   const handleOpenReactionPopupButtonClicked = useCallback(
     () => setReactionPopupVisible((isVisible) => !isVisible),
     [setReactionPopupVisible]
@@ -139,7 +133,6 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   const onUnfurlSuccess = useCallback(() => {
     if (linkValue) {
       setEmptyUnfurl(false)
-      // Notify the message list that content expanded so it can adjust scroll
       if (typeof window !== 'undefined') {
         window.dispatchEvent(
           new CustomEvent(CONTENT_EXPANDED_LISTENER_KEY, {
@@ -150,7 +143,6 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
     }
   }, [linkValue, chatId])
 
-  // Only render reactions if user has message permissions
   const { canSendMessage } = useCanSendMessage(chatId)
   const renderReactions = () => {
     if (!canSendMessage || chat?.is_blast) return null

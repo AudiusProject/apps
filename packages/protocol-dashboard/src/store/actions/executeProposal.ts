@@ -20,7 +20,6 @@ function executeAudiusProposal(
     try {
       await aud.Governance.evaluateProposalOutcome({ proposalId })
 
-      // Repull proposal
       await dispatch(fetchProposal(proposalId))
 
       setStatus(Status.Success)

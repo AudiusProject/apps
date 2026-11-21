@@ -25,11 +25,6 @@ const messages = {
   completionText: (percentage: number) => `Profile ${percentage}% Complete`
 }
 
-/**
- * ProfileCompletionPanel is a panel that lives in the sidebar, presenting
- * a compact SegmentedProgressBar and profile completion percentage.
- * It handles its own state management and animations.
- */
 export const ProfileCompletionPanel = () => {
   const dispatch = useDispatch()
   const completionStages = useOrderedCompletionStages()
@@ -48,9 +43,6 @@ export const ProfileCompletionPanel = () => {
   const [isTooltipDisabled, setIsTooltipDisabled] = useState(false)
 
   const onDismiss = useCallback(() => {
-    // disable the tooltip before we dismiss,
-    // otherwise it gets scaled in the dismiss animation
-    // and looks super jenk
     setIsTooltipDisabled(true)
     setTimeout(() => {
       setIsDismissed(true)

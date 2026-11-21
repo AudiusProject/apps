@@ -31,17 +31,12 @@ import { ExpandHeaderToggleButton } from './ExpandHeaderToggleButton'
 import { ProfileInfoTiles } from './ProfileInfoTiles'
 import { SocialsAndSites } from './SocialsAndSites'
 
-// Memoized since material-top-tabs triggers unecessary rerenders
 export const ProfileHeader = memo(() => {
   const { data: accountId } = useCurrentUserId()
   const [hasUserFollowed, setHasUserFollowed] = useToggle(false)
   const [isExpanded, setIsExpanded] = useToggle(false)
   const [isExpandable, setIsExpandable] = useState(false)
 
-  // Read from the route-params cache directly so user data is available on
-  // the first render. `useProfileUser` depends on Redux state set in a
-  // focus effect, which races with the component's initial render and
-  // otherwise caused the avatar and follow-state-derived UI to pop in.
   const { params } = useRoute<'Profile'>()
   const { data: paramsUser } = useUserByParams(params, {
     select: (user) => ({
@@ -80,7 +75,6 @@ export const ProfileHeader = memo(() => {
     [website, twitterHandle, instagramHandle, tikTokHandle].filter(Boolean)
       .length > 1
 
-  // Note: we also if the profile bio is longer than 3 lines, but that's handled in the Bio component.
   const shouldExpand =
     hasTier ||
     hasMutuals ||

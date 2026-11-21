@@ -33,12 +33,6 @@ type ArtworkDraft = {
   source?: string
 }
 
-/**
- * Access ("Price & Audience") fields that can be staged for albums. These are
- * the fields the album update actually carries to the SDK; Apply hands them to
- * the editPlaylist saga, which fills in the USDC splits for a newly premium
- * album.
- */
 export type PlaylistAccessDraft = {
   is_stream_gated?: Nullable<boolean>
   stream_conditions?: Nullable<AccessConditions>
@@ -56,7 +50,6 @@ export type PlaylistMetadataDraft = {
   artwork?: ArtworkDraft | null
 } & PlaylistAccessDraft
 
-/** Picks only the access fields that were actually staged. */
 const stagedAccessFields = (
   draft: PlaylistMetadataDraft
 ): PlaylistAccessDraft => ({
@@ -162,9 +155,6 @@ export const PlaylistEditModeProvider = ({
   const [status, setStatus] = useState<Status>('idle')
   const [editModeLoadedAt, setEditModeLoadedAt] = useState<number | null>(null)
 
-  // Undo/redo stacks for staged track removals. Each entry is one user action
-  // (a batch of track ids removed together). These live alongside the draft so
-  // they reset atomically with it on enter/exit/discard/apply.
   const undoStackRef = useRef<ID[][]>([])
   const redoStackRef = useRef<ID[][]>([])
   const [, setHistoryTick] = useState(0)
@@ -193,7 +183,6 @@ export const PlaylistEditModeProvider = ({
     setEditModeLoadedAt(null)
   }, [resetRemovals])
 
-  // For the inline create flow, the page mounts already in edit mode.
   const autoEnteredRef = useRef(false)
   useEffect(() => {
     if (isCreate && !autoEnteredRef.current) {
@@ -202,7 +191,6 @@ export const PlaylistEditModeProvider = ({
     }
   }, [isCreate, enterEditMode])
 
-  // Links can ask for the page to open in edit mode via router state.
   const shouldOpenInEditMode =
     !!(location.state as { editMode?: boolean } | null)?.editMode &&
     isOwner &&
@@ -268,7 +256,6 @@ export const PlaylistEditModeProvider = ({
     setIsEditMode(false)
     setEditModeLoadedAt(null)
     if (isCreate && collectionId != null) {
-      // Abandon the unsaved draft and leave the create page.
       removeDraftCollection(collectionId)
       navigate(-1)
     }
@@ -291,8 +278,6 @@ export const PlaylistEditModeProvider = ({
 
   const hasChanges = useMemo(() => {
     if (!collection) return false
-    // In create mode the page is "dirty" the moment any content exists, so we
-    // warn before navigating away from an unsaved draft.
     if (isCreate && draftTrackCount > 0) return true
     if (removedTrackIds.size > 0) return true
     const fields = ['playlist_name', 'description', 'is_private'] as const
@@ -313,8 +298,6 @@ export const PlaylistEditModeProvider = ({
     return false
   }, [collection, draft, removedTrackIds, isCreate, draftTrackCount])
 
-  // For create, the primary action is enabled as long as the playlist has a
-  // usable name. For edit, it requires actual changes.
   const canApply = isCreate
     ? !!stagedName && stagedName.trim().length > 0
     : hasChanges
@@ -369,8 +352,6 @@ export const PlaylistEditModeProvider = ({
       exitEditMode()
       return
     }
-    // Detect a remote-side change by checking that the collection's
-    // `updated_at` hasn't moved since we entered edit mode.
     const updatedAtMs = collection.updated_at
       ? new Date(collection.updated_at).getTime()
       : null
@@ -524,9 +505,6 @@ export const PlaylistEditModeProvider = ({
 export const usePlaylistEditMode = (): PlaylistEditModeContextValue => {
   const ctx = useContext(PlaylistEditModeContext)
   if (!ctx) {
-    // Not inside a provider — return a no-op context for safe usage in shared
-    // components like CollectionHeader that are rendered for both owners and
-    // non-owners.
     return {
       collectionId: undefined,
       isOwner: false,

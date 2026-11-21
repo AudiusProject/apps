@@ -79,12 +79,10 @@ export const useTrackImage = ({
     }
   })
 
-  // When track has no artwork or track not loaded yet, don't pass a URL so we never show stale image
   if (hasNoArtwork || artworkData === undefined) {
     return { source: undefined, hasNoArtwork: true }
   }
 
-  // Return edited artwork from this session, if it exists
   // @ts-expect-error - url is added for in-session edits
   if (artwork?.url) {
     return {

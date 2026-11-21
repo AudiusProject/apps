@@ -65,12 +65,6 @@ const BUCKET_TO_TEXT_FORMAT = {
 export const formatBucketText = (bucket: string) =>
   BUCKET_TO_TEXT_FORMAT[bucket as Bucket]
 
-/**
- * Calculates the query start time for a given bucket
- * Note: we round to the start of the hour to help with caching
- * @param bucket
- * @param clampDays clamp to the nearest day so the oldest day has complete data
- */
 const getStartTime = (bucket: Bucket, clampDays: boolean = false) => {
   switch (bucket) {
     case Bucket.ALL_TIME:
@@ -92,7 +86,6 @@ const getStartTime = (bucket: Bucket, clampDays: boolean = false) => {
   }
 }
 
-// -------------------------------- Selectors  ---------------------------------
 export const getApiCalls = (state: AppState, { bucket }: { bucket: Bucket }) =>
   state.cache.analytics.apiCalls ? state.cache.analytics.apiCalls[bucket] : null
 export const getTotalStaked = (
@@ -129,8 +122,6 @@ export const getIndividualServiceApiCalls = (
   { node, bucket }: { node: string; bucket: Bucket }
 ) => state.cache.analytics.individualServiceApiCalls?.[node]?.[bucket] ?? null
 
-// -------------------------------- Thunk Actions  ---------------------------------
-
 async function fetchRoutesTimeSeries(bucket: Bucket) {
   let error = false
   let metric: TimeSeriesRecord[] = []
@@ -160,14 +151,6 @@ export function fetchApiCalls(
   }
 }
 
-/**
- * Fetches time series data from a discovery node
- * @param route The route to fetch from (plays, routes)
- * @param bucket The bucket size
- * @param clampDays Whether or not to remove partial current day
- * @param node An optional node to make the request against
- * @returns the metric itself or a MetricError
- */
 async function fetchTimeSeries(
   route: string,
   bucket: Bucket,
@@ -185,7 +168,7 @@ async function fetchTimeSeries(
       endpoint = `${node}/v1/metrics/routes/${bucket}?bucket_size=${bucketSize}`
     }
     if (node) {
-      data = (await fetchWithTimeout(endpoint)).data.slice(1) // Trim off the first day so we don't show partial data
+      data = (await fetchWithTimeout(endpoint)).data.slice(1)
       metric = data
     } else {
       const { data } = await apiFetch(`v1/metrics/${route}`, {
@@ -210,7 +193,6 @@ async function fetchUptime(
   bucket: Bucket
 ) {
   if (bucket !== Bucket.DAY) {
-    // currently only 24h uptime supported
     return MetricError.ERROR
   }
 
@@ -236,7 +218,7 @@ async function fetchUptime(
         `${endpoint}/d_api/uptime?host=${node}`
       )
       if (metric.uptime_percentage === 100) {
-        return metric // If we find a 100% uptime, return early
+        return metric
       }
       if (metric.uptime_percentage >= highestUptimeRecord.uptime_percentage) {
         highestUptimeRecord = metric
@@ -315,33 +297,27 @@ export function fetchTotalStaked(
         break
     }
 
-    // Get all the timestamps we want to query blocks for
     const points = BUCKET_TO_BLOCK_COUNT_MAP[bucket]
     const ts = new Date().getTime()
     const timestamps: number[] = [ts]
     for (let i = 1; i < points; ++i) {
       const time = ts - i * (timeSliceMs / points)
-      // Filter timestamps impacted by
-      // https://blog.audius.co/article/audius-governance-takeover-post-mortem-7-23-22
       if (time > 1658573677000 && time < 1658884462050) {
         continue
       }
       timestamps.push(time)
     }
 
-    // Get the nearest block to the target timestamps
     const blocks = await Promise.all(
       timestamps.map(async (ts) =>
         aud.getBlockNearTimestamp(averageBlockTime, currentBlockNumber, ts)
       )
     )
 
-    // Get the stake value at each block
     const staked = await Promise.all(
       blocks.map(async (block) => aud.Staking.totalStakedAt(block.number))
     )
 
-    // Format the metric & reverse order so we display reverse chronological
     const metric = staked
       .map((stake, i) => ({
         count: weiAudToAud(stake),
@@ -471,8 +447,6 @@ export function fetchTrailingTopGenres(
     }
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useApiCalls = (bucket: Bucket) => {
   const [doOnce, setDoOnce] = useState<Bucket | null>(null)

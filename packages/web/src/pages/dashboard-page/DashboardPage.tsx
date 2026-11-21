@@ -71,9 +71,6 @@ export const DashboardPage = () => {
   const account = accountUser
   const tracks = useFormattedTrackData()
 
-  // Default the listen-data window to the last year. The chart calls
-  // `onSetYearOption` to swap the window; we keep it as local state and the
-  // tan-query hook below refetches automatically when start/end change.
   const [listenWindow, setListenWindow] = useState(() => {
     const now = dayjs()
     return {
@@ -82,7 +79,6 @@ export const DashboardPage = () => {
     }
   })
 
-  // Preload the chart bundle once on mount.
   useEffect(() => {
     TotalPlaysChart.preload()
   }, [])
@@ -97,7 +93,6 @@ export const DashboardPage = () => {
           (totalPlays, track) => totalPlays + (track.play_count || 0),
           0
         ),
-        // downloads: merged in from useUserTrackDownloadCountTotal below
         reposts: account.repost_count,
         followers: account.follower_count
       } as Record<string, number>

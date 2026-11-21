@@ -97,28 +97,25 @@ export type Operator = {
   minDelegationAmount: BN
 } & User
 
-// Transaction
-
 export type TxReceipt = {
-  blockHash: string // "0xf44d07e763348730f96c3f18d799f3d656efbccf901525eea2277177559b6f8a"
-  blockNumber: number // 236
-  contractAddress: null | any // null
+  blockHash: string
+  blockNumber: number
+  contractAddress: null | any
   cumulativeGasUsed: number
-  events: any // {Approval: {…}}
-  from: string // "0x610011d6b4c3b4abc35fa11061e63104fcfecc2a"
-  gasUsed: number // 46721
-  logsBloom: string // "0x00000000000010000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000200000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000400000000000000000000200000000000000000000000000000000000000000000000028000000000000010000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000"
-  status: boolean // true
-  to: string // "0xcdbe3ec8fd92a995fc5c3aefea85122f63807083"
-  transactionHash: string // "0x5c2549e54f8f04e12c2a9328e47aad54ca28c302ab9379155156124dda87b847"
-  transactionIndex: number // 0
+  events: any
+  from: string
+  gasUsed: number
+  logsBloom: string
+  status: boolean
+  to: string
+  transactionHash: string
+  transactionIndex: number
 }
 
 export type TokenApproveReceipt = {
   txReceipt: TxReceipt
 }
 
-// Governance
 export enum Vote {
   Yes = 'Yes',
   No = 'No'
@@ -143,7 +140,7 @@ export enum Outcome {
   Evaluating = 'Evaluating', // Proposal vote passed, and evaluateProposalOutcome function is currently running.
   Vetoed = 'Vetoed', // Proposal was vetoed by Guardian.
   TargetContractAddressChanged = 'TargetContractAddressChanged', // Proposal considered invalid since target contract address changed
-  TargetContractCodeHashChanged = 'TargetContractCodeHashChanged' // Proposal considered invalid since code has at target contract address has changed
+  TargetContractCodeHashChanged = 'TargetContractCodeHashChanged'
 }
 
 export type ProposalId = number
@@ -152,11 +149,11 @@ export type Proposal = {
   proposalId: ProposalId
   proposer: Wallet
   submissionBlockNumber: number
-  targetContractRegistryKey: string // bytes32,
+  targetContractRegistryKey: string
   targetContractAddress: Address
   callValue: number
   functionSignature: string
-  callData: string // bytes,
+  callData: string
   outcome: Outcome
   numVotes: number
   voteMagnitudeYes: BigNumber

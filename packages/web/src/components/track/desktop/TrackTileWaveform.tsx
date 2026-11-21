@@ -46,7 +46,6 @@ const MIN_BAR_HEIGHT = 2
 const AVATAR_SIZE = 24
 const MAX_AVATARS = 24
 const POLL_MS = 250
-// A seek requested before playback starts waits this long for the load.
 const PENDING_SEEK_TTL_MS = 15000
 const PENDING_SEEK_POLL_MS = 50
 
@@ -68,7 +67,6 @@ const buildPath = (peaks: number[], height: number) => {
   return d
 }
 
-/** Fraction of the track that has played, polled only while this tile is the active track. */
 const useTrackProgress = (
   isActive: boolean,
   isPlaying: boolean,
@@ -128,7 +126,6 @@ const CommentAvatar = ({
         onOpenComment(comment.id)
         return
       }
-      // The desktop track page highlights and scrolls to this comment.
       dispatch(push(`${permalink}?commentId=${Id.parse(comment.id)}`))
     },
     [dispatch, permalink, comment.id, onOpenComment]
@@ -177,20 +174,12 @@ type TrackTileWaveformProps = {
   commentCount: number
   isActive: boolean
   isPlaying: boolean
-  /** Seeking is only meaningful on the full stream, not a gated preview. */
   canSeek: boolean
-  /** Start this tile playing; the tile owns gating and queue semantics. */
   onPlay: () => void
-  /** Replaces the default of opening the comment on the track page. */
   onOpenComment?: (commentId: ID) => void
   height?: number
 }
 
-/**
- * Bar waveform for a desktop track tile. Click seeks (or starts the track at
- * that point), and comments with a track timestamp sit on the baseline as
- * avatars that open the comment on the track page.
- */
 export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
   const {
     trackId,
@@ -211,9 +200,6 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
   const { ref: inViewRef, inView } = useDeferredElement()
   const progress = useTrackProgress(isActive, isPlaying, duration)
 
-  // The player swaps in a new audio element once the stream URL resolves, and
-  // marks this track active before that, so a seek sent early lands on the old
-  // element. Hold it until this track is active on a new element.
   const isActiveRef = useRef(isActive)
   isActiveRef.current = isActive
   const pendingSeekRef = useRef<number | null>(null)
@@ -243,17 +229,13 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
     [clearPendingSeek, dispatch]
   )
 
-  // One comments request per tile, and only for tiles that have comments and
-  // have scrolled near the viewport.
   const comments = useTimestampedComments(trackId, inView && commentCount > 0)
-  // Settles to null on a miss or error; either way the fallback shape draws.
   const { data: realPeaks, isFetched: isPeaksSettled } = useTrackWaveformPeaks(
     trackId,
     inView
   )
 
   const barCount = Math.max(0, Math.floor(width / (BAR_WIDTH + BAR_GAP)))
-  // Wait for the lookup so a real shape never replaces a fake one on screen.
   const path = useMemo(() => {
     if (!barCount || !isPeaksSettled) return ''
     return buildPath(
@@ -274,7 +256,6 @@ export const TrackTileWaveform = (props: TrackTileWaveformProps) => {
         AVATAR_SIZE / 2,
         width - AVATAR_SIZE / 2
       )
-      // Keep neighbours from stacking; the first comment at a spot wins.
       if (x - lastX < AVATAR_SIZE + 2) continue
       placed.push({ comment, x })
       lastX = x

@@ -154,7 +154,6 @@ function* downloadCollectionCoverArt(collection: CollectionMetadata) {
   }
 }
 
-// Special case for favorites which is not a real collection with metadata
 async function writeFavoritesCollectionMetadata() {
   const favoritesCollectionDirectory = getLocalCollectionDir(
     DOWNLOAD_REASON_FAVORITES

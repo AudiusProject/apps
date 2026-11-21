@@ -18,7 +18,6 @@ import {
   setCurrentVersion
 } from './slice'
 
-// -------------------------------- Selectors  --------------------------------
 export const getTotalStaked = (state: AppState) =>
   state.cache.protocol.totalStaked
 export const getServiceInfo = (state: AppState) => state.cache.protocol.services
@@ -42,9 +41,6 @@ export const getCurrentVersion = (
   }
 }
 
-// -------------------------------- Thunk Actions  --------------------------------// -------------------------------- Thunk Actions  --------------------------------
-
-// Async function to get
 export function fetchProtocolDelegation(): ThunkAction<
   void,
   AppState,
@@ -84,8 +80,7 @@ export function fetchCurrentVersion(
   serviceType: ServiceType
 ): ThunkAction<void, AppState, Audius, Action<string>> {
   return async (dispatch, getState, aud) => {
-    const numberOfVersions =
-      await aud.NodeType.getNumberOfVersions(serviceType)
+    const numberOfVersions = await aud.NodeType.getNumberOfVersions(serviceType)
     const currentVersion = await aud.NodeType.getVersion(
       serviceType,
       numberOfVersions - 1
@@ -143,8 +138,6 @@ export function fetchAverageBlockTime(): ThunkAction<
     dispatch(setAverageBlockTime(averageBlockTime))
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useTotalStaked = () => {
   const totalStaked = useSelector(getTotalStaked)
@@ -221,7 +214,6 @@ export const useBlock = (blockNumber: number) => {
   const [block, setBlock] = useState<Block>(null)
   useEffect(() => {
     const fetchBlock = async () => {
-      // TODO: Move this window dependency out
       const web3 = window.audiusLibs.ethWeb3Manager!.web3
       const b = await web3.eth.getBlock(blockNumber)
       setBlock(b)

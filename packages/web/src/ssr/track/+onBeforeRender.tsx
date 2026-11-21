@@ -1,6 +1,5 @@
 import type { PageContextServer } from 'vike/types'
 
-// Simple helper to get API URL without importing services/env which pulls in SDK dependencies
 const getApiUrl = () => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {
@@ -18,7 +17,6 @@ type TrackPageContextServer = PageContextServer & {
   }
 }
 
-// Fetch comment data if commentId is provided
 async function fetchCommentData(commentId: string) {
   try {
     const url = `${getApiUrl()}/v1/comments/${commentId}`
@@ -44,7 +42,6 @@ async function fetchCommentData(commentId: string) {
   }
 }
 
-// Fetch parent track permalink when this track is a remix (for SEO: link remix → original)
 async function fetchOriginalTrackPermalink(
   parentTrackId: string
 ): Promise<string | null> {
@@ -81,18 +78,15 @@ export async function onBeforeRender(pageContext: TrackPageContextServer) {
 
     const { user, ...track } = apiTrack
 
-    // Fetch comment data if commentId is provided
     let commentData = null
     if (commentId) {
       commentData = await fetchCommentData(commentId)
-      // Verify the comment is for this track
       if (commentData && commentData.track?.id !== track.id) {
         console.info('Comment track does not match URL track, ignoring comment')
         commentData = null
       }
     }
 
-    // When this track is a remix, fetch original track permalink for SEO (isBasedOn, etc.)
     let originalTrackPermalink: string | null = null
     const remixOf = apiTrack.remix_of ?? apiTrack.remixOf
     const parentId =

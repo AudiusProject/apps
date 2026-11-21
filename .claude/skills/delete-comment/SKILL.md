@@ -19,7 +19,7 @@ node scripts/comment-ratchet.cjs --stats $ARGUMENTS
 node scripts/comment-ratchet.cjs --list $ARGUMENTS > /tmp/comments.jsonl
 ```
 
-Each line is `{file, line, endLine, ownLine, isLine, body}`. Consecutive `//` lines are already merged into one block. Directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, ...), generated code, license headers and `/** */` JSDoc in public-API packages (`sdk`, `harmony`, `fixed-decimal`, `spl`) are exempt and never listed.
+Each line is `{file, line, endLine, ownLine, isLine, body}`. Consecutive `//` lines are already merged into one block. Directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, `@deprecated`, generator headers, ...), generated code, vendored `public/` and `*.min.js` files, `examples/` tutorials, license headers and `/** */` JSDoc in public-API packages (`sdk`, `harmony`, `fixed-decimal`, `spl`) are exempt and never listed.
 
 ## 2. Classify
 
@@ -34,7 +34,7 @@ For every listed comment, read it with the surrounding code and pick exactly one
 
 A correct workaround for a third-party bug is a decision, not an excuse. Be strict with decisions: if a competent reader would work it out from the code in a minute, it is a tautology.
 
-For more than ~300 comments, split the inventory into batches of ~400 and hand each batch to a `worker` subagent with snippets of the code around each comment. Have each one write a verdicts JSONL rather than edit files. Each verdict keeps the inventory fields and adds `cat`, `reason`, plus `issue` (excuse) or `topic` + `record` (decision).
+For more than ~300 comments, split the inventory into batches of ~400 and hand each batch to a `worker` subagent (a `directive` category catches pragmas the exemption regex missed; widen the regex in `scripts/comment-ratchet.cjs` for those) with snippets of the code around each comment. Have each one write a verdicts JSONL rather than edit files. Each verdict keeps the inventory fields and adds `cat`, `reason`, plus `issue` (excuse) or `topic` + `record` (decision).
 
 Spot-check at least 30 verdicts yourself before applying, weighted toward `decision` and `excuse`.
 

@@ -9,7 +9,6 @@ type SettingsCardProps = {
   description: string
   children: React.ReactNode
   isFull?: boolean
-  /** Renders on the right side of the header (e.g. FilterButton) */
   headerAction?: React.ReactNode
 }
 

@@ -90,7 +90,6 @@ const getXShareData = (
   }
 }
 
-// Track play milestones at a card-worthy count get a stat card; the rest keep X
 const getShareCardStat = (
   notification: MilestoneNotificationType,
   entity?: Nullable<EntityType>

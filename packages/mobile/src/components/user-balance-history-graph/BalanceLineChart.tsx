@@ -79,7 +79,6 @@ export const BalanceLineChart = ({
     [points, layout.plotBottom]
   )
 
-  // Reveal the line left to right on mount.
   const revealProgress = useMemo(() => new Animated.Value(0), [])
   useEffect(() => {
     const animation = Animated.timing(revealProgress, {

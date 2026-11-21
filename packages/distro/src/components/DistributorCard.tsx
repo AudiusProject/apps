@@ -31,7 +31,6 @@ export const DistributorCard = ({
   const data = initialData ?? fetchedData
 
   const handleClick = useCallback(() => {
-    // Store the appKey so AuthProvider can recreate this SDK after the redirect
     localStorage.setItem(distributorAppKeyStorageKey, appKey)
     const distroSdk = sdk({ apiKey: appKey })
     distroSdk.oauth.login({

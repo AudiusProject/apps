@@ -103,7 +103,6 @@ export const DelegateInfo = ({
 
 type UserAudioRewardEstimateProps = {
   wallet: Address
-  /** If the estimate is for a certain delegate that the user has delegated to, specify the address here. Otherwise, this will show total AUDIO rewards estimate across all delegates. */
   delegateAddress?: string
 }
 const UserAudioRewardEstimate = ({

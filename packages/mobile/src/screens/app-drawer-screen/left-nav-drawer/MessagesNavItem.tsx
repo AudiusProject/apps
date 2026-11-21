@@ -15,7 +15,6 @@ export const MessagesNavItem = () => {
   const unreadMessagesCount = useSelector(getUnreadMessagesCount)
   const isManagedAccount = useIsManagedAccount()
 
-  // DMs aren't available while managing another account
   if (isManagedAccount) return null
 
   return (

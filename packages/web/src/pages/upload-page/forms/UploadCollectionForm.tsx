@@ -22,7 +22,6 @@ export const UploadCollectionForm = (props: UploadCollectionFormProps) => {
   const { tracks, uploadType, metadata } = formState
   const isAlbum = uploadType === UploadType.ALBUM
 
-  // A restored draft (or a cancelled publish) already has form values.
   const initialValues: CollectionValues = metadata?.isUpload
     ? {
         ...metadata,

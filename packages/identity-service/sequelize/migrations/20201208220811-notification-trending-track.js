@@ -3,18 +3,12 @@ const models = require('../../src/models')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    /**
-     * Add 'TrendingTrack' to enum 'enum_Notifications_type'
-     */
     await queryInterface.sequelize.query(
       `ALTER TYPE "enum_Notifications_type" ADD VALUE 'TrendingTrack'`
     )
   },
 
   down: async (queryInterface, Sequelize) => {
-    /**
-     * Remove 'TrendingTrack' from enum 'enum_Notifications_type'
-     */
     const tableName = 'Notifications'
     const columnName = 'type'
     const enumName = 'enum_Notifications_type'
@@ -52,7 +46,6 @@ module.exports = {
         `,
         { transaction }
       )
-      // Change column type to the new ENUM TYPE
       await queryInterface.sequelize.query(
         `
         ALTER TABLE "${tableName}"
@@ -62,14 +55,12 @@ module.exports = {
       `,
         { transaction }
       )
-      // Drop old ENUM
       await queryInterface.sequelize.query(
         `
         DROP TYPE "${enumName}"
       `,
         { transaction }
       )
-      // Rename new ENUM name
       await queryInterface.sequelize.query(
         `
         ALTER TYPE "${newEnumName}"

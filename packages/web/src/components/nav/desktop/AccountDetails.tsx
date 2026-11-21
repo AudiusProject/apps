@@ -98,8 +98,6 @@ const AccountInfo = ({ children }: AccountInfoProps) => (
   </Flex>
 )
 
-// Unified signed-in component — Avatar stays mounted across collapse/expand so
-// the image never reloads.
 type SignedInAccountDetailsProps = {
   userId: number
   handle: string
@@ -303,7 +301,6 @@ export const AccountDetails = () => {
   })
   const isManagedAccount = useIsManagedAccount()
 
-  // Signed-in: single component handles both collapsed/expanded so Avatar stays mounted
   if (userId && accountHandle) {
     return (
       <SignedInAccountDetails
@@ -314,7 +311,6 @@ export const AccountDetails = () => {
     )
   }
 
-  // Non-signed-in collapsed states
   if (isCollapsed) {
     if (!hasCompletedAccount && guestEmail) {
       return <CollapsedAccountDetails userId={null} linkTo={SIGN_UP_PAGE} />
@@ -329,7 +325,6 @@ export const AccountDetails = () => {
     return <CollapsedAccountDetails userId={null} linkTo={SIGN_IN_PAGE} />
   }
 
-  // Non-signed-in expanded states
   if (!hasCompletedAccount && guestEmail) {
     return (
       <AccountDetailsContainer>

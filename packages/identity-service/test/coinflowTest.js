@@ -5,8 +5,6 @@ const vm = require('vm')
 const { Keypair } = require('@solana/web3.js')
 const { createPrivateKey, sign } = require('crypto')
 
-// Load the route with isolated service boundaries so these tests do not need
-// Postgres, Redis, a merchant key, or a live payment provider.
 function loadModule(filename, dependencies) {
   const module = { exports: {} }
   vm.runInNewContext(

@@ -98,10 +98,8 @@ describe('addRequestSignatureMiddleware', () => {
       }
     })
 
-    // Should not log a warning for HedgehogWalletNotFoundError
     expect(mockLogger.warn).not.toHaveBeenCalled()
 
-    // Should return the original context without signature headers
     expect(ctx?.init.headers).not.toHaveProperty('Encoded-Data-Message')
     expect(ctx?.init.headers).not.toHaveProperty('Encoded-Data-Signature')
   })
@@ -132,7 +130,6 @@ describe('addRequestSignatureMiddleware', () => {
     const ctx = await request()
     expect(ctx?.init.headers).toHaveProperty('Encoded-Data-Signature')
 
-    // Simulate logging out
     getAddresses.mockRejectedValue(new HedgehogWalletNotFoundError())
     const ctx2 = await request()
     expect(ctx2?.init.headers).not.toHaveProperty('Encoded-Data-Message')
@@ -165,12 +162,10 @@ describe('addRequestSignatureMiddleware', () => {
       }
     })
 
-    // Should log a warning for other errors
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Unable to add request signature: Error: Some other error'
     )
 
-    // Should return the original context without signature headers
     expect(ctx?.init.headers).not.toHaveProperty('Encoded-Data-Message')
     expect(ctx?.init.headers).not.toHaveProperty('Encoded-Data-Signature')
   })

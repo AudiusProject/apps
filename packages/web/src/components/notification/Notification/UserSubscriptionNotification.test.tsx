@@ -15,7 +15,6 @@ import { mswServer, render, screen, it } from 'test/test-utils'
 
 import { Notification } from './Notification'
 
-// Component to set up navigation ref for MemoryRouter
 const MemoryRouterNavigationSetup = ({
   children
 }: {
@@ -76,22 +75,17 @@ describe('UserSubscriptionNotification', () => {
   it('renders notification and links to track page correctly', async () => {
     renderNotification(mockNotification)
 
-    // Check that the notification title is rendered
     expect(await screen.findByText('New Release')).toBeInTheDocument()
 
-    // Check that the artist's name is rendered
     expect(await screen.findByText(artistUser.name)).toBeInTheDocument()
 
-    // Check for the time label in the footer
     expect(
       await screen.findByText(mockNotification.timeLabel!)
     ).toBeInTheDocument()
 
-    // Check that the track link with the title in it is rendered
     const trackLink = await screen.findByText(testTrack.title)
     expect(trackLink).toBeInTheDocument()
 
-    // Click the link and check that it goes to the correct page
     trackLink.click()
     expect(
       await screen.findByText(`${testTrack.title} page`)

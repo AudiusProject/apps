@@ -63,7 +63,6 @@ const defaultColumns: AudioTransactionsTableColumn[] = [
 
 export { isChangePositive } from './isChangePositive'
 
-// Cell Render Functions
 const renderTransactionTypeCell = (cellInfo: TransactionCell) => {
   const { transactionType, method } = cellInfo.row.original
   const typeText = transactionTypeLabelMap[transactionType as TransactionType]
@@ -120,7 +119,6 @@ const isEmptyRow = (row: any) => {
   )
 }
 
-// Columns
 const tableColumnMap = {
   transactionType: {
     id: 'transactionType',

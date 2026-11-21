@@ -30,9 +30,6 @@ export const usePurchaseSummaryValues = ({
   })
 
   const purchaseSummaryValues = getPurchaseSummaryValues({
-    // Passing undefined for the None case so that the row doesn't render.
-    // In other cases, the user may have input 0 and we want to show the row
-    // to reflect that until they explicitly select no preset
     extraAmount: amountPreset === PayExtraPreset.NONE ? undefined : extraAmount,
     price,
     currentBalance,

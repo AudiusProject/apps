@@ -10,7 +10,6 @@ type HeaderButtonProps = {
   className?: string
 }
 
-// A button that lives in the mobile header.
 const HeaderButton = ({
   showIcon,
   onClick,

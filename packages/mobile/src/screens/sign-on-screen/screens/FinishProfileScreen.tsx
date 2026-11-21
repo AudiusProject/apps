@@ -64,11 +64,9 @@ export const FinishProfileScreen = () => {
       const { displayName } = values
       dispatch(setValueField('name', displayName))
       if (isFastReferral) {
-        // Fast referral: create account immediately and skip genre/artist selection
         dispatch(signUp())
         navigation.navigate('AccountLoading')
       } else {
-        // Normal flow: don't create account yet, let user select genres/artists first
         navigation.navigate('SelectGenre')
       }
     },

@@ -93,7 +93,6 @@ const SendTokensSuccess = ({
     )
   }
 
-  // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
     return <SendTokensSuccessSkeleton />
   }

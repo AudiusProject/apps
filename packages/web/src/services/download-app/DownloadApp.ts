@@ -2,7 +2,6 @@ import { OS } from '@audius/common/models'
 
 const APP_DOWNLOAD_URL = 'https://download.audius.co'
 
-/** Given the OS, fetch the latest download version from s3. */
 export const getDownloadLinkForSystem = async (os: OS) => {
   let yaml: any
   try {
@@ -15,7 +14,6 @@ export const getDownloadLinkForSystem = async (os: OS) => {
     })
   } catch (e) {
     console.error(e)
-    // Return an empty url to fetch, this will just lead to a no-op on the client's part
     return ''
   }
 

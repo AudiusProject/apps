@@ -60,10 +60,8 @@ type UserGeneratedTextV2Props = {
   }
   mentions?: CommentMention[]
 
-  // If true, only linkify Audius URLs
   internalLinksOnly?: boolean
 
-  // Suffix to append after the text. Used for "edited" text in comments
   suffix?: ReactNode
 } & TextProps
 
@@ -219,9 +217,6 @@ const MentionLink = ({
   )
 }
 
-/**
- * Hand rolled implementation of UserGeneratedText that supports custom matchers, unlike linkify-react
- */
 export const UserGeneratedTextV2 = forwardRef(function (
   props: UserGeneratedTextV2Props,
   ref: ForwardedRef<HTMLElement | undefined>
@@ -237,7 +232,6 @@ export const UserGeneratedTextV2 = forwardRef(function (
     ...other
   } = props
 
-  // Fetch the users for artists popovers for mentions
   useUsers(mentions ? mentions.map((mention) => mention.userId) : [])
 
   const mentionRegex = useMemo(() => {
@@ -306,17 +300,14 @@ export const UserGeneratedTextV2 = forwardRef(function (
   )
 
   const matchers: Matcher[] = [
-    // email matcher (must come before link matcher to prevent double matching)
     {
       pattern: EMAIL_REGEX,
       renderLink
     },
-    // link matcher
     {
       pattern: /https?:\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\S]*)/g,
       renderLink
     },
-    // Handle matcher e.g. @handle
     ...(mentions
       ? [
           {
@@ -333,29 +324,22 @@ export const UserGeneratedTextV2 = forwardRef(function (
     ...(matchersProp ?? [])
   ]
 
-  // Function to split the text and insert rendered elements for matched tokens
   const parseText = (text: string) => {
-    // Start with the entire text as a single unprocessed string
     let elements: ReactNode[] = [squashNewLines(text, 10)]
     let key = 0
 
-    // Process each matcher sequentially
     matchers.forEach(({ pattern, renderLink }) => {
       const newElements: ReactNode[] = []
       const regex = new RegExp(pattern)
 
-      // Iterate through the current elements array and apply the matcher
       elements.forEach((element) => {
         if (typeof element === 'string') {
-          // Iterate over the parts and alternate between text and the rendered link
           let match
           let lastIndex = 0
 
           while ((match = regex.exec(element)) !== null) {
-            // Push the text before the match
             newElements.push(element.substring(lastIndex, match.index))
 
-            // Push the rendered link component for the matched text
             const link = renderLink(match[0], match, key)
             if (link) {
               newElements.push(link)
@@ -363,21 +347,17 @@ export const UserGeneratedTextV2 = forwardRef(function (
               newElements.push(match[0])
             }
 
-            // Update the last index to the end of the current match
             lastIndex = match.index + match[0].length
             key++
           }
 
-          // Push remaining text after the last match
           newElements.push(element.substring(lastIndex))
         } else {
-          // If it's already a React element (from a previous matcher), keep it as-is
           newElements.push(element)
         }
         key++
       })
 
-      // Replace elements with the new ones after applying the current matcher
       elements = newElements
       key++
     })

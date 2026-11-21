@@ -120,7 +120,6 @@ export const ActionDrawerContent = (props: ActionDrawerContentProps) => {
   )
 }
 
-// `ActionDrawer` is a drawer that presents a list of clickable rows with text
 const ActionDrawer = (props: ActionDrawerProps) => {
   const {
     rows,

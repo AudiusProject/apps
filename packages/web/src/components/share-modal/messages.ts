@@ -28,7 +28,6 @@ export const messages = {
     `Check out ${playlistName} by ${handle} @audius $AUDIO`,
   weeklyRotationShareText: (handle: string) =>
     `Check out ${handle}'s Weekly Rotation on @audius $AUDIO`,
-  // TODO: See if you can display my when the account user is the user
   shareDescription: 'Spread the word! Share with your friends and fans!',
   hiddenPlaylistShareDescription:
     'Spread the word! Share your playlist with friends and fans! Hidden playlists will be visible to anyone on the internet with the link.'

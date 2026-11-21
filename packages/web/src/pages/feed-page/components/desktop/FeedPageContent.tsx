@@ -40,14 +40,10 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const [feedFilter, setFeedFilter] = useFeedFilter()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
-  // the shared default (mobile-tuned) so successive load-mores keep up with a
-  // user scrolling deep into the lineup.
   const desktopLoadMorePageSize = 10
 
   const isForYou = feedTab === FeedTab.FOR_YOU
 
-  // Latest lineup. Disabled while For You is active.
   const feedArgs = useMemo(
     () => ({
       userId: currentUserId,
@@ -59,7 +55,6 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   )
   const followFeed = useFeed(feedArgs, { enabled: !isForYou })
 
-  // For You lineup.
   const forYouFeed = useForYouFeed(
     {
       initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
@@ -118,9 +113,6 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
     />
   )
 
-  // Both feed hooks expose the mixed `LineupData[]` the API returns
-  // (tracks + collection reposts). TrackLineup branches per entry, so
-  // collections show up inline wherever the backend puts them.
   const lineupProps = isForYou
     ? {
         trackIds: forYouFeed.trackIds,

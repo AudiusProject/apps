@@ -21,9 +21,6 @@ describe('generatePreview', () => {
     mockFetch.mockReset()
   })
 
-  // The user id names who the preview is attested to; the validator refuses
-  // users that do not claim the source cid. It travels as a query parameter —
-  // an assertion, not a credential.
   it('sends the asserted user id', async () => {
     mockFetch.mockResolvedValue(previewResponse('preview-cid'))
     const storage = new Storage({ storageNodeSelector })
@@ -161,7 +158,6 @@ describe('pollProcessingStatus', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1)
   }, 20000)
 
-  // Image resizes have no '320' result to wait for; the gate is audio-only.
   it('does not require a 320 result for image templates', async () => {
     mockFetch.mockResolvedValue(
       statusResponse({ id: 'upload-1', status: 'done', results: {} })

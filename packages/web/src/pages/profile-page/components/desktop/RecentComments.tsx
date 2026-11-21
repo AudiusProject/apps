@@ -99,7 +99,6 @@ export const RecentComments = ({ userId }: { userId: number }) => {
     pageSize: 3
   })
 
-  // Only animate if comments are not immediately visible
   const [shouldAnimate] = useState(isLoading)
 
   const onClickViewAll = useCallback(() => {
@@ -110,7 +109,6 @@ export const RecentComments = ({ userId }: { userId: number }) => {
 
   const { spring } = useTheme()
 
-  // Main container animation - fade in and expand from top
   const containerSpring = useSpring({
     from: shouldAnimate
       ? { opacity: 0, height: 0, transform: 'translateY(-20px)' }
@@ -119,7 +117,6 @@ export const RecentComments = ({ userId }: { userId: number }) => {
     config: spring.standard
   })
 
-  // Trail animation for comment items - staggered fade in
   const trail = useTrail(comments.length, {
     from: shouldAnimate
       ? { opacity: 0, transform: 'translateY(-10px)' }
@@ -128,14 +125,13 @@ export const RecentComments = ({ userId }: { userId: number }) => {
     config: spring.fast
   })
 
-  // View all button animation
   const viewAllSpring = useSpring({
     from: shouldAnimate
       ? { opacity: 0, transform: 'translateY(-5px)' }
       : { opacity: 1, transform: 'translateY(0)' },
     to: { opacity: 1, transform: 'translateY(0)' },
     config: spring.standard,
-    delay: shouldAnimate ? 300 : 0 // Only delay on initial render
+    delay: shouldAnimate ? 300 : 0
   })
 
   if (comments.length === 0) return null

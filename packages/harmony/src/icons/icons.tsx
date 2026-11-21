@@ -1,5 +1,3 @@
-// Auto-generated file - exports all icons
-// Each icon is in its own file for optimal tree-shaking
 export { IconFilter } from './individual/IconFilter'
 export { IconSearch } from './individual/IconSearch'
 export { IconAlbum } from './individual/IconAlbum'

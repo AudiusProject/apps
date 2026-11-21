@@ -17,7 +17,6 @@ interface ToastProps {
   delay?: number
   containerClassName?: string
   stopClickPropagation?: boolean
-  // Whether or not this toast is controlled by the parent or not
   isControlled?: boolean
   isOpen?: boolean
 }

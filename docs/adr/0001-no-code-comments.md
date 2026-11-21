@@ -12,7 +12,7 @@ The apps repo had about 11,400 hand-written comment blocks (about 24,000 lines, 
 - Code does not carry comments. Names, types and small functions say _what_.
 - A non-obvious _why_ (platform quirks, ordering constraints, money/security reasoning, deliberate fallbacks) goes in an ADR under `docs/adr/`.
 - Unfinished work goes in a GitHub issue, not a TODO.
-- Exempt: tool directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, bundler magic comments), generated code, license headers, and `/** */` JSDoc in the public-API packages `sdk`, `harmony`, `fixed-decimal` and `spl`, where it is shipped documentation.
+- Exempt: tool directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, bundler magic comments, `@format`, and JSDoc type annotations such as `@type {...}` in plain JS files, which TypeScript checks, `@deprecated` tags, which editors and TypeScript surface, and "DO NOT EDIT" headers written by generators), generated code, vendored files under `public/` and `*.min.js`, tutorial comments in `examples/` directories, license headers, and `/** */` JSDoc in the public-API packages `sdk`, `harmony`, `fixed-decimal` and `spl`, where it is shipped documentation.
 
 ## Enforcement
 
@@ -22,5 +22,5 @@ The `/delete-comment` skill (`.claude/skills/delete-comment/`) runs the purge fo
 
 ## Consequences
 
-- Existing comments stay until their path is purged; new ones fail CI.
+- All packages were purged in November 2026 and the baseline is empty, so any new non-exempt comment fails CI.
 - Reviewers look for decision records in `docs/adr/` instead of inline.

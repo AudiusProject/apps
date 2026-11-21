@@ -141,7 +141,6 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
             onSelectOption={handleOptionSelect}
             selected={value}
             options={options}
-            // Matches 0.18s entry animation
             forceRefreshAfterMs={180}
           />
           {value === DownloadTrackAvailabilityType.USDC_PURCHASE ? (

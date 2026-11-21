@@ -47,10 +47,8 @@ type UserResultComposeProps = {
   closeParentModal: () => void
   openInboxUnavailableModal: (user: User) => void
   presetMessage?: string
-  // Group selection, only passed when group messages are enabled
   selection?: {
     isSelected: boolean
-    // At least one user is selected, so clicking a row toggles it
     isSelecting: boolean
     isFull: boolean
     onToggle: (user: User) => void

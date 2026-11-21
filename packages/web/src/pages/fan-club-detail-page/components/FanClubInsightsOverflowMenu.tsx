@@ -29,7 +29,6 @@ import { openXLink } from '../../../utils/xShare'
 
 import { ArtistFanClubDetailsModal } from './ArtistFanClubDetailsModal'
 
-// Mobile route helper function
 const coinDetailMobilePage = (ticker: string) =>
   COIN_DETAIL_MOBILE_WEB_ROUTE.replace(
     ':ticker',
@@ -39,9 +38,6 @@ const coinDetailMobilePage = (ticker: string) =>
 const messages = coinDetailsMessages.overflowMenu
 
 type FanClubInsightsOverflowMenuProps = {
-  /**
-   * The mint address of the fan club
-   */
   mint: string
 }
 
@@ -136,7 +132,6 @@ export const FanClubInsightsOverflowMenu = ({
     }
   ]
 
-  // Don't render if no fan club data
   if (!fanClub?.mint) {
     return null
   }

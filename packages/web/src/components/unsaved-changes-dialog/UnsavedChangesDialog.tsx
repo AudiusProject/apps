@@ -54,8 +54,6 @@ export const UnsavedChangesDialog = () => {
       window.addEventListener('beforeunload', beforeUnload)
 
       if (addElectronListener) {
-        // Configure IPC so we can send receive/send close/quit events from
-        // the main process.
         const ipc = window.require('electron').ipcRenderer
         ipc.on('close', () => {
           setReload(false)
@@ -66,12 +64,12 @@ export const UnsavedChangesDialog = () => {
 
       const hotkeyHook = setupHotkeys(
         {
-          82 /* r */: {
+          82: {
             cb: onRefreshHotkey,
             or: [ModifierKeys.CTRL, ModifierKeys.CMD]
           }
         },
-        /* throttleMs= */ 0
+        0
       )
       hotkeyHookRef.current = hotkeyHook
       return () => {

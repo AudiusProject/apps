@@ -59,7 +59,7 @@ export class DeveloperAppsApi extends GeneratedDeveloperAppsApi {
       apiSecret: privateKey
     })
 
-    const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+    const unixTs = Math.round(new Date().getTime() / 1000)
     const message = `Creating Audius developer app at ${unixTs}`
 
     const signature = await wallet.signMessage({ message })

@@ -113,7 +113,6 @@ describe('PlaylistEditModeContext access staging', () => {
       expect(editAction.playlistId).toBe(1)
       expect(editAction.formFields.is_stream_gated).toBe(true)
       expect(editAction.formFields.stream_conditions).toEqual(premiumConditions)
-      // Untouched fields still come from the collection itself
       expect(editAction.formFields.playlist_name).toBe(
         testCollection.playlist_name
       )

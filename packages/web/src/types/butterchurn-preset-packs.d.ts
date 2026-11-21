@@ -1,5 +1,4 @@
 declare module 'butterchurn' {
-  /** UMD / Vite: `import('butterchurn')` resolves to `{ default: Butterchurn }` */
   export default class Butterchurn {
     static createVisualizer(
       audioContext: AudioContext,

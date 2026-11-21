@@ -80,7 +80,6 @@ const CommentPreviewContent = () => {
     dispatch(pushRoute(`${trackPermalink}/comments`))
   }, [trackPermalink, dispatch])
 
-  // Loading state
   if (isLoading) {
     return (
       <Paper w='100%' direction='column' gap='s' p='l' border='default'>
@@ -95,7 +94,6 @@ const CommentPreviewContent = () => {
     )
   }
 
-  // Empty state
   if (!commentIds || !commentIds.length) {
     return (
       <Paper w='100%' direction='column' gap='s' p='l' border='default'>
@@ -136,7 +134,6 @@ export const CommentPreview = (props: CommentPreviewProps) => {
   const commentId = searchParams.get('commentId')
   const navigate = useNavigate()
 
-  // Show the comment screen if the showComments or commentId query param is present
   useEffect(() => {
     if ((showComments || commentId) && trackPermalink) {
       navigate({ search: '' }, { replace: true })

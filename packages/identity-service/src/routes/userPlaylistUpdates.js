@@ -32,7 +32,6 @@ module.exports = function (app) {
         return successResponse({ playlistUpdates: userEvents.playlistUpdates })
       } catch (e) {
         req.logger.error(e)
-        // no-op. No user events.
         return errorResponseServerError(
           `Unable to get user last playlist views for ${walletAddress}`
         )

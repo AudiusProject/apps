@@ -14,11 +14,6 @@ type UseTrendingQueriesArgs = {
   undergroundPageSize: number
 }
 
-/**
- * Trending lineups for each time range plus underground. Only the visible
- * lineup fetches; the others start when prefetched (e.g. on hover of their
- * filter) or when they become visible.
- */
 export const useTrendingQueries = ({
   trendingArgs,
   timeRange,

@@ -15,7 +15,6 @@ type TabNavigatorProps = {
   initialScreenName?: string
   children: ReactNode
   screenOptions?: MaterialTopTabNavigationOptions
-  /** Replaces the default tab bar, e.g. to float it over the content. */
   tabBar?: (props: MaterialTopTabBarProps) => ReactNode
 }
 

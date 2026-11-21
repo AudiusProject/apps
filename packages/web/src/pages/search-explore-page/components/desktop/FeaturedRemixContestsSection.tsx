@@ -10,10 +10,6 @@ import { CONTEST_CARD_WIDTH } from './constants'
 import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 const SKELETON_COUNT = 6
-// Big enough to cover the featured set with headroom — the All Contests
-// endpoint primes a per-track entry-count cache as a side-effect (see
-// `useAllRemixContests` queryFn). One batched fetch here replaces ~N
-// per-card count-only fetches from `useRemixesCount` inside ContestCard.
 const PRIME_BATCH_SIZE = 30
 
 export const FeaturedRemixContestsSection = () => {
@@ -23,10 +19,6 @@ export const FeaturedRemixContestsSection = () => {
     enabled: inView
   })
 
-  // Side-effect: fetch+prime entry counts for the featured contests so
-  // ContestCard's `useRemixesCount` hits cache instead of firing a
-  // count-only request per card. The return value is intentionally
-  // unused — we only care about the priming inside the hook's queryFn.
   useAllRemixContests({ pageSize: PRIME_BATCH_SIZE }, { enabled: inView })
 
   if (isError || (isSuccess && !data?.featuredRemixContests?.length)) {
@@ -39,7 +31,6 @@ export const FeaturedRemixContestsSection = () => {
     <Carousel
       ref={ref}
       title={messages.contests}
-      // Surface a "View All" affordance back to the dedicated Contests hub.
       viewAllLink={route.CONTESTS_PAGE}
     >
       {showLoading

@@ -298,14 +298,12 @@ const HasBalanceState = ({
                 </Flex>
               )}
               {isAudio
-                ? // For AUDIO, show associated wallets (both ETH and SOL)
-                  associatedAudioBalances.data.map((walletBalance, index) => {
+                ? associatedAudioBalances.data.map((walletBalance, index) => {
                     if (
                       !walletBalance.balance ||
                       walletBalance.balance === AUDIO(0).value
                     )
                       return null
-                    // Use AUDIO constructor to format bigint balance properly
                     const balanceFormatted = AUDIO(
                       walletBalance.balance
                     ).toLocaleString('en-US', {
@@ -339,8 +337,7 @@ const HasBalanceState = ({
                       </Flex>
                     )
                   })
-                : // For other coins, show SPL linked wallets
-                  linkedWallets.map((wallet, index) => (
+                : linkedWallets.map((wallet, index) => (
                     <Flex
                       key={wallet.owner}
                       direction='row'
@@ -436,7 +433,6 @@ const BalanceSectionContent = ({ mint }: FanClubMintProps) => {
   })
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
-  // Modal hooks
   const { onOpen: openBuySellModal } = useBuySellModal()
   const [, openTransferDrawer] = useModalState('TransferAudioMobileWarning')
   const { onOpen: openReceiveTokensModal } = useReceiveTokensModal()
@@ -453,9 +449,7 @@ const BalanceSectionContent = ({ mint }: FanClubMintProps) => {
     setIsOpenAppDrawerOpen(false)
   }, [setIsOpenAppDrawerOpen])
 
-  // Handler functions with account requirements - defined before early return
   const handleBuySell = useCallback(() => {
-    // Has balance - show buy/sell modal
     openBuySellModal({ initialTab, isOpen: true })
   }, [initialTab, openBuySellModal])
 

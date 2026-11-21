@@ -102,7 +102,6 @@ export const stemsAndDownloadsSchema = ({
       }
     )
     .refine(
-      // cannot be download gated if no downloadable assets
       (values) => {
         const formValues = values as StemsAndDownloadsFormValues
         const streamConditions = formValues[STREAM_CONDITIONS]
@@ -123,10 +122,6 @@ export const stemsAndDownloadsSchema = ({
       }
     )
 
-// Because the upload and edit forms share the same menu fields,
-// we pass in the stems handlers in the edit flow to properly handle
-// the selection, addition, and deletion of stems.
-// May do another pass later to refactor.
 type StemsAndDownloadsMenuFieldsProps = {
   isUpload: boolean
   stems?: StemUploadWithFile[]
@@ -153,8 +148,6 @@ export const StemsAndDownloadsMenuFields = (
   )
   const [firstTimeStemsUploaded, setFirstTimeStemsUploaded] = useState(true)
 
-  // If the track is download gated for the first time,
-  // set the track to be downloadable and allow lossless files
   useEffect(() => {
     const firstTimeDownloadGated =
       [
@@ -173,16 +166,12 @@ export const StemsAndDownloadsMenuFields = (
     setIsOriginalAvailable
   ])
 
-  // Allow lossless files by default if the track is downloadable.
-  // Note that the useEffect has been preferred to the corresponding onChange handlers
-  // as those seemed to cause unwanted race conditions resulting in errors showing up incorrectly.
   useEffect(() => {
     if (isDownloadable) {
       setIsOriginalAvailable(true)
     }
   }, [isDownloadable, setIsOriginalAvailable, stemsValue.length])
 
-  // Allow full track download and provide lossless files if additional files are uploaded for the first time.
   useEffect(() => {
     if (
       firstTimeStemsUploaded &&
@@ -264,7 +253,6 @@ export const StemsAndDownloadsMenuFields = (
 
   const handleDeleteStem = useCallback(
     (index: number) => {
-      // Make a copy to be sure children reading this value will re-render.
       const newStems = [
         ...stemsValue.slice(0, index),
         ...stemsValue.slice(index + 1)

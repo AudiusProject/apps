@@ -5,10 +5,6 @@ import { PasswordInput } from '@audius/harmony-native'
 
 export type PasswordFieldProps = PasswordInputProps & {
   name: string
-  /**
-   * Clears out field errors while the input is being changed for a small UX improvement
-   * @default true
-   */
   clearErrorOnChange?: boolean
 }
 

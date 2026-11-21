@@ -44,13 +44,11 @@ export const useClickOutside = (
     }
 
     if (isVisible) {
-      // Don't attach the listener until all the current events are finished bubbling
       setTimeout(() => {
         document.addEventListener('mousedown', handleClick)
       }, 0)
     }
     return () => {
-      // Don't remove the listener until after the listener has been attached
       setTimeout(() => {
         document.removeEventListener('mousedown', handleClick)
       }, 0)

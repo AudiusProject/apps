@@ -46,23 +46,17 @@ const constructUrl = (
   size: Size,
   permalink?: string
 ) => {
-  // Use permalink format if available (needed for private tracks/collections)
   if (permalink) {
-    // Track permalink format: /{handle}/{slug}
-    // Collection permalink format: /{handle}/playlist/{slug} or /{handle}/album/{slug}
     let permalinkPath = permalink.startsWith('/')
       ? permalink.slice(1)
       : permalink
 
-    // For collections, extract handle and slug from permalink
-    // Permalink is /{handle}/playlist/{slug} or /{handle}/album/{slug}
     if (
       (kind === PlayableType.PLAYLIST || kind === PlayableType.ALBUM) &&
       permalinkPath.includes('/')
     ) {
       const parts = permalinkPath.split('/')
       if (parts.length >= 3) {
-        // Extract handle and slug, skip the middle part (playlist/album)
         const handle = parts[0]
         const slug = parts[2]
         permalinkPath = `${handle}/${slug}`
@@ -128,14 +122,11 @@ type EmbedModalProps = OwnProps &
 const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
   const { data: metadata } = useMetadata()
   const [size, setSize] = useState(Size.STANDARD)
-  // Delay the rendering of the embed frame since it's expensive.
-  // This shores up the modal open animation a bit.
   const [delayedOpen, setDelayedOpen] = useState(false)
   useEffect(() => {
     setTimeout(() => setDelayedOpen(isOpen), 100)
   }, [isOpen])
 
-  // Configure analytics
   const record = useRecord()
 
   const onCopy = useCallback(() => {
@@ -150,7 +141,6 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
     }
   }, [kind, id, record, size])
 
-  // Configure frames
   const permalink =
     metadata && kind === PlayableType.TRACK
       ? (metadata as Track).permalink

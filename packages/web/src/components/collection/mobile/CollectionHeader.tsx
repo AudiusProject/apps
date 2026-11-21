@@ -127,8 +127,6 @@ const CollectionHeader = ({
     ({ hasStreamAccess }) => hasStreamAccess
   )
 
-  // Show play if user has access to the collection or any of its contents,
-  // otherwise show preview
   const shouldShowPlay =
     (isPlayable && hasStreamAccess) || doesUserHaveAccessToAnyTrack
   const shouldShowPreview = isPremium && !hasStreamAccess && !shouldShowPlay

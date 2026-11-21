@@ -52,7 +52,6 @@ export const FirstWeeklyCommentChallengeModalContent = ({
     !userChallenge?.claimableAmount &&
     !userChallenge?.undisbursedSpecifiers?.length
 
-  // Following the pattern from mobile implementation
   const modifiedChallenge = challenge
     ? {
         ...challenge,

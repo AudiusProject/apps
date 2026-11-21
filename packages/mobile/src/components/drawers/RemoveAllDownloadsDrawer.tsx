@@ -19,7 +19,6 @@ export const RemoveAllDownloadsDrawer = () => {
   const dispatch = useDispatch()
 
   const handleConfirm = useCallback(() => {
-    // TODO: some tasks can sneak through after. Need to stop the queue and cancel in-progress jobs
     dispatch(clearOfflineDownloads())
   }, [dispatch])
 

@@ -19,7 +19,6 @@ import { LeftNav } from './desktop/LeftNav'
 import { NavSidebarContext } from './desktop/NavSidebarContext'
 import ConnectedNavBar from './mobile/ConnectedNavBar'
 
-// Extend Window interface for React Native WebView
 declare global {
   interface Window {
     ReactNativeWebView?: {
@@ -34,7 +33,6 @@ interface OwnProps {
 
 const EXPANDED_WIDTH = 240
 const COLLAPSED_WIDTH = 64
-// px of drag needed to commit to the other state on release
 const SNAP_DELTA = 15
 const STORAGE_KEY = 'nav-sidebar-collapsed'
 
@@ -43,9 +41,6 @@ const Navigator = ({ className }: OwnProps) => {
   const isMobile = useIsMobile()
   const isElectron = client === Client.ELECTRON
   const location = useLocation()
-  // Mobile-web pages that render their own full-bleed hero + back
-  // control (contest page) opt out of the global top nav so the hero
-  // can own the top of the viewport. Desktop is unaffected.
   const hideMobileNav = isMobile && /\/contest(\/|$)/.test(location.pathname)
 
   const [isCollapsed, setIsCollapsedState] = useState<boolean>(() => {
@@ -57,8 +52,6 @@ const Navigator = ({ className }: OwnProps) => {
   })
   const [isDragging, setIsDragging] = useState(false)
 
-  // Width is always the committed state — no intermediate values during drag.
-  // The sidebar stays put while dragging; on release it animates to the new state.
   const navWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 
   const dragStartX = useRef(0)
@@ -72,8 +65,6 @@ const Navigator = ({ className }: OwnProps) => {
     } catch {}
   }, [])
 
-  // Update app-level nav vars before paint. When nav width changes, use FLIP:
-  // commit the new layout width once, then animate a transform back to zero.
   useLayoutEffect(() => {
     const appEl = document.getElementById('webPlayer')
     if (!appEl) return
@@ -87,7 +78,6 @@ const Navigator = ({ className }: OwnProps) => {
 
     if (!isMobile && didWidthChange) {
       appEl.style.setProperty('--nav-shift', `${shiftDelta}px`)
-      // Flush the starting transform before animating back to zero.
       appEl.getBoundingClientRect()
       appEl.style.setProperty('--nav-shift', '0px')
     } else {
@@ -124,11 +114,8 @@ const Navigator = ({ className }: OwnProps) => {
       const absDelta = Math.abs(delta)
       let commit: boolean
       if (absDelta < SNAP_DELTA) {
-        // Treat as a click — toggle the sidebar
         commit = !dragStartCollapsed.current
       } else {
-        // was collapsed: stay unless dragged right past threshold
-        // was expanded: collapse only if dragged left past threshold
         commit = dragStartCollapsed.current
           ? delta <= SNAP_DELTA
           : delta < -SNAP_DELTA

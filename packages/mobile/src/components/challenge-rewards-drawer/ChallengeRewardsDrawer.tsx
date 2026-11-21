@@ -93,7 +93,6 @@ export const ChallengeRewardsDrawer = () => {
     }
   }, [toast, claimStatus])
 
-  // Bail if not on challenges page/challenges aren't loaded
   if (!challengeName) return null
 
   const challenge = userChallenges ? userChallenges[challengeName] : null
@@ -101,7 +100,6 @@ export const ChallengeRewardsDrawer = () => {
 
   const config = getChallengeConfig(challengeName)
 
-  // Get the appropriate content component from the registry
   const ContentComponent = getChallengeContent(challengeName)
 
   return (

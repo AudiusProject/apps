@@ -1,4 +1,3 @@
-// Keep this minimal. Promo content, images and tracking push security emails to spam.
 const getOtpEmail = ({ otp, copyrightYear }) => {
   return `<!doctype html>
 <html lang="en">

@@ -38,12 +38,9 @@ export const RemixCreateNotification = (
   const navigate = useNavigate()
   const { data: user } = useUser(notification.userId)
 
-  // useNotificationEntities is not used here because the ids are not in the
-  // entities list and we need to fetch them directly
   const { data: childTrack } = useTrack(childTrackId)
   const { data: parentTrack } = useTrack(parentTrackId)
 
-  // unnecessary but makes types happy
   const childTrackEntity = useMemo(
     () =>
       childTrack && user

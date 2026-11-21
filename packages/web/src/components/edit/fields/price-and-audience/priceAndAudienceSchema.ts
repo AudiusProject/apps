@@ -32,7 +32,6 @@ const messages = {
   required: 'Required'
 }
 
-// This type is specific to the AccessAndSaleFormSchema during refinement
 type ZodSchemaValues = {
   stream_availability_type: StreamTrackAvailabilityType
   stream_conditions?: Nullable<AccessConditions>

@@ -64,7 +64,6 @@ const BottomButtons = (props: BottomButtonsProps) => {
   const isUSDCPurchase =
     isUSDCEnabled && isContentUSDCPurchaseGated(props.streamConditions)
 
-  // Wrap with a Harmony Tooltip on desktop web; skip on native mobile (no hover)
   const withTooltip = (
     label: string,
     disabled: boolean,
@@ -78,7 +77,6 @@ const BottomButtons = (props: BottomButtonsProps) => {
       </Tooltip>
     )
 
-  // Readonly variant only renders content for locked USDC tracks
   if (!!props.readonly && (!isUSDCPurchase || props.hasStreamAccess)) {
     return null
   }
@@ -99,7 +97,6 @@ const BottomButtons = (props: BottomButtonsProps) => {
       />
     )
 
-  // Stream conditions without access
   if (!props.isLoading && props.streamConditions && !props.hasStreamAccess) {
     return (
       <Flex

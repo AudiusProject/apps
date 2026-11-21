@@ -133,7 +133,6 @@ export const AllResults = ({ handleSearchTab }: AllResultsProps) => {
 
   const trackClickSearchResult = useCallback(
     (item: any, entityType: string, kind: Kind) => {
-      // Dispatch analytics
       dispatch(
         addRecentSearch({
           searchItem: {
@@ -152,7 +151,6 @@ export const AllResults = ({ handleSearchTab }: AllResultsProps) => {
 
       trackClickSearchResult(item, entityType, kind)
 
-      // Determine navigation path based on entity type
       switch (kind) {
         case Kind.USERS:
           navigationPath = profilePage(item.handle)
@@ -173,7 +171,6 @@ export const AllResults = ({ handleSearchTab }: AllResultsProps) => {
           return
       }
 
-      // Navigate to the page
       navigate(navigationPath)
     },
     [navigate, trackClickSearchResult]

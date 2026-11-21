@@ -1,10 +1,5 @@
 import { abi } from './abi'
 
-/**
- * Contract that can be permitted to send tokens through the Wormhole Portal
- * on a user's behalf. Not to be confused with the standard Wormhole contracts,
- * nor to be confused with wAUDIO (the AudiusToken on Solana).
- */
 export const AudiusWormhole = {
   abi,
   address: '0x6E7a1F7339bbB62b23D44797b63e4258d283E095' as const,

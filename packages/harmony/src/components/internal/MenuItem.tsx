@@ -51,7 +51,6 @@ export const MenuItem = forwardRef(function <Value extends string>(
 
   const { color, cornerRadius, spacing, typography } = useTheme()
 
-  // Popup Styles
   const optionIconCss: CSSObject = {
     width: spacing.unit4,
     height: spacing.unit4

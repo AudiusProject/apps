@@ -232,9 +232,6 @@ export const SignOnPage = () => {
   const welcomeModalShown = useSelector(getWelcomeModalShown)
   const [, setWelcomeModalOpen] = useModalState('Welcome')
 
-  // Welcome modal must open here, not from `/signup/completed`: when sign-up
-  // succeeds we short-circuit below with `<Navigate />` and never render
-  // `<SignUpPage />`, so that URL (and hooks inside it) are skipped entirely.
   useLayoutEffect(() => {
     if (
       signOnStatus === EditingStatus.SUCCESS &&
@@ -252,7 +249,6 @@ export const SignOnPage = () => {
     dispatch
   ])
 
-  // Add ESC key handler
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && routeOnExit) {
@@ -291,7 +287,6 @@ export const SignOnPage = () => {
   }, [dispatch, rf, ref, routeOnCompletion, guestEmail])
 
   useEffectOnce(() => {
-    // Check for referrals and set them in the store
     const rf = searchParams.get('rf')
     const ref = searchParams.get('ref')
     if (rf) {
@@ -300,7 +295,6 @@ export const SignOnPage = () => {
       dispatch(fetchReferrer(ref))
     }
 
-    // Handle completionOnExit parameter
     const routeOnCompletion = searchParams.get('routeOnCompletion')
     if (routeOnCompletion) {
       dispatch(updateRouteOnCompletion(routeOnCompletion))
@@ -318,10 +312,6 @@ export const SignOnPage = () => {
   const location = useLocation()
   const isSignUp = location.pathname.startsWith(SIGN_UP_PAGE)
 
-  // The sign-on saga resets status to editing right after success, often
-  // before the navigation to the completion route commits (it suspends on
-  // lazy pages). Rendering the form again would remount the sign-in routes,
-  // and their first-mount redirect to /signin would cancel that navigation.
   const hasSucceededRef = useRef(false)
   if (signOnStatus === EditingStatus.SUCCESS) {
     hasSucceededRef.current = true

@@ -21,7 +21,6 @@ function cancelDecreaseStake(
       if (!wallet) throw new Error('Not signed in')
       await aud.ServiceProviderClient.cancelDecreaseStakeRequest(wallet)
 
-      // Repull pending transactions
       await dispatch(fetchPendingTransactions(wallet))
 
       setStatus(Status.Success)
@@ -43,7 +42,6 @@ function cancelUpdateOperatorCut(
       if (!wallet) throw new Error('Not signed in')
       await aud.ServiceProviderClient.cancelUpdateDeployerCut(wallet)
 
-      // Repull pending transactions
       await dispatch(fetchPendingTransactions(wallet))
 
       setStatus(Status.Success)
@@ -64,7 +62,6 @@ function cancelUndelegate(
       const wallet = getState().account.wallet
       if (!wallet) throw new Error('Not signed in')
       await aud.Delegate.cancelUndelegateStakeRequest()
-      // Repull pending transactions
       await dispatch(fetchPendingTransactions(wallet))
 
       setStatus(Status.Success)
@@ -88,7 +85,6 @@ function cancelRemoveDelegator(
       if (!wallet) throw new Error('Delegator wallet not provided')
       await aud.Delegate.cancelRemoveDelegatorRequest(accountWallet, wallet)
 
-      // Repull pending transactions
       await dispatch(fetchPendingTransactions(accountWallet))
 
       setStatus(Status.Success)

@@ -37,17 +37,6 @@ const hasWebkitAirplay = (el: HTMLAudioElement | null): boolean => {
   return !!audio && typeof audio.webkitShowPlaybackTargetPicker === 'function'
 }
 
-/**
- * Bridges the browser's wireless-playback APIs to Redux and exposes a
- * `prompt` action that opens the system picker.
- *
- * Safari implements AirPlay via webkit-prefixed APIs on HTMLMediaElement,
- * not via `RemotePlayback.prompt()`. We detect Safari and route through
- * `webkitShowPlaybackTargetPicker()` + the `webkitcurrentplaybacktarget-
- * iswirelesschanged` event, which is what actually drives AirPlay in
- * Safari. Chromium uses the standard `RemotePlayback` API to open
- * Chrome's cast picker.
- */
 export const useRemotePlayback = () => {
   const dispatch = useDispatch()
   const safari = isSafari()
@@ -92,8 +81,6 @@ export const useRemotePlayback = () => {
           )
         }
       }
-      // The audio element is created lazily by AudioPlayer; retry on the
-      // next tick if it isn't there yet.
       let cleanup = attach()
       if (!cleanup) {
         const t = setTimeout(() => {
@@ -135,9 +122,6 @@ export const useRemotePlayback = () => {
   const prompt = useCallback(async () => {
     if (safari) {
       const audio = getAudio() as WebKitAudio | null
-      // webkitShowPlaybackTargetPicker isn't async and doesn't return a
-      // promise. It must be called in direct response to a user gesture —
-      // the popup row click qualifies.
       audio?.webkitShowPlaybackTargetPicker?.()
       return
     }

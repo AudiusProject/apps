@@ -42,10 +42,6 @@ type HarmonyThemeName =
   | 'day'
   | 'dark'
 
-/**
- * Resolve palette + mode + system preference to concrete theme name.
- * Default palette uses Neue colors; Classic uses legacy day/dark.
- */
 const resolveToHarmonyTheme = (
   palette: ThemePalette,
   mode: ThemeMode,
@@ -66,9 +62,6 @@ const resolveToHarmonyTheme = (
   return resolvedMode === 'light' ? 'classic-light' : 'classic-dark'
 }
 
-// Fallback to the live system value when redux hasn't been seeded yet
-// (e.g. on the very first render before ThemeProvider's effect has fired).
-// Without this the first paint would force light even when the OS is dark.
 const getCurrentSystemAppearance = (): SystemAppearance =>
   Appearance.getColorScheme() === 'dark'
     ? SystemAppearance.DARK
@@ -92,7 +85,6 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
     return resolveToHarmonyTheme(themePalette, mode, sysAppearance)
   }
 
-  // No stored palette (e.g. new account, incognito) — always use default (Neue) theme
   switch (theme) {
     case Theme.LIGHT:
       return 'default-light'
@@ -114,9 +106,6 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
 
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
-  // useColorScheme from react-native synchronously returns the current
-  // system value on first render (unlike react-native-dynamic's
-  // useDarkMode, which can report stale `light` until its listener fires).
   const colorScheme = useColorScheme()
   const isDarkMode = colorScheme === 'dark'
   const dispatch = useDispatch()
@@ -138,7 +127,6 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
       savedPalette === ThemePalette.CLASSIC
 
     if (isLegacyTheme) {
-      // Migrate: wipe legacy/classic and set everyone to default palette + auto
       await Promise.all([
         AsyncStorage.setItem(THEME_STORAGE_KEY, Theme.AUTO),
         AsyncStorage.setItem(THEME_PALETTE_KEY, ThemePalette.DEFAULT),
@@ -171,10 +159,6 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   }, [dispatch])
 
   useEffect(() => {
-    // iOS briefly reports dark-mode while generating the app-switcher
-    // snapshot, so ignore changes when backgrounded. The very first
-    // dispatch must always run so the initial render picks up the
-    // system value even if appState hasn't settled to 'active' yet.
     if (appState !== 'active' && hasInitializedSystemAppearanceRef.current) {
       return
     }

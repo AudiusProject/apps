@@ -199,7 +199,6 @@ const SearchExplorePage = ({
             onChange={handleCategoryChange}
             css={{
               overflow: 'scroll',
-              // Hide scrollbar for IE, Edge, and Firefox
               msOverflowStyle: 'none', // IE and Edge
               scrollbarWidth: 'none', // Firefox
               marginLeft: '-50vw',

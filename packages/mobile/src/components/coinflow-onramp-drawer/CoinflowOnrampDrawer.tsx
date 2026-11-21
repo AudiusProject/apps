@@ -124,7 +124,6 @@ export const CoinflowOnrampDrawer = () => {
     >
       {showContent ? (
         <CoinflowPurchase
-          // SDK runtime supports sessionKey with a wallet, but its types omit it.
           {...{ sessionKey }}
           deviceId={deviceId}
           transaction={transaction}

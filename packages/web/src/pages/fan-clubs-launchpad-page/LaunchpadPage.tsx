@@ -66,26 +66,17 @@ const messages = {
   }
 }
 
-/**
- * Fetches an image from a URL and converts it to a File object
- * Used to copy the user's cover photo for the coin banner
- * Note: The URL should already be resolved with mirror fallback (e.g., from useCoverPhoto)
- * @param imageUrl - The URL of the image to fetch
- * @returns A File object representing the image, or null if fetch fails
- */
 const fetchImageAsFile = async (imageUrl: string): Promise<File | null> => {
   try {
     const response = await fetch(imageUrl, {
-      signal: AbortSignal.timeout(5000) // 5 second timeout
+      signal: AbortSignal.timeout(5000)
     })
     if (!response.ok) {
       throw new Error(`Failed to fetch image: ${response.statusText}`)
     }
     const blob = await response.blob()
-    // Extract filename from URL or use a default
     const urlParts = imageUrl.split('/')
     const filename = urlParts[urlParts.length - 1] || 'banner-image.jpg'
-    // Determine content type from blob or URL
     const contentType = blob.type || 'image/jpeg'
     return new File([blob], filename, { type: contentType })
   } catch (error) {
@@ -126,7 +117,6 @@ const LaunchpadPageContent = ({
   const [isInsufficientBalanceModalOpen, setIsInsufficientBalanceModalOpen] =
     useState(false)
 
-  // Set up mobile header with icon
   useMobileHeader({
     title: launchpadMessages.page.title
   })
@@ -143,7 +133,6 @@ const LaunchpadPageContent = ({
     />
   )
 
-  // NOTE: this hook specifically is after the wallet is both added & has sufficient balance
   const handleWalletAddSuccess = useCallback(
     (wallet: ConnectedWallet) => {
       setPhase(Phase.SETUP)
@@ -157,7 +146,6 @@ const LaunchpadPageContent = ({
     [setPhase, toast]
   )
 
-  // Wallet connection handlers
   const handleWalletConnectSuccess = useCallback(
     async (newWallets: {
       solana: string | undefined
@@ -178,7 +166,7 @@ const LaunchpadPageContent = ({
           walletAddress: connectedWallet,
           mint: TOKEN_LISTING_MAP.SOL.address
         }),
-        staleTime: 0 // dont use cached values
+        staleTime: 0
       })
       const walletSolBalance = Number(walletBalanceData.value)
       const isValidWalletBalance = walletSolBalance >= MIN_SOL_BALANCE
@@ -213,10 +201,8 @@ const LaunchpadPageContent = ({
     ]
   )
 
-  // NOTE: an error here can also mean that a wallet has already been added recently
   const handleWalletConnectError = useCallback(
     async (error: unknown) => {
-      // If wallet is already linked, continue with the flow
       if (error instanceof AlreadyAssociatedError) {
         const lastConnectedWallet = externalWalletAccount?.address
         if (lastConnectedWallet) {
@@ -225,7 +211,7 @@ const LaunchpadPageContent = ({
               walletAddress: lastConnectedWallet,
               mint: TOKEN_LISTING_MAP.SOL.address
             }),
-            staleTime: 0 // dont use cached values
+            staleTime: 0
           })
           const walletSolBalance = Number(walletBalanceData.value)
           const isValidWalletBalance = walletSolBalance >= MIN_SOL_BALANCE
@@ -265,7 +251,6 @@ const LaunchpadPageContent = ({
     )
 
   const handleSplashContinue = useCallback(async () => {
-    // Switch to Solana network to prioritize SOL wallets
     await appkitModal.switchNetwork(solana)
     trackSplashGetStarted()
     await appkitModal.disconnect('solana')
@@ -388,7 +373,6 @@ export const LaunchpadPage = () => {
     externalWalletAddress: connectedWalletAddress
   })
 
-  // Launch coin mutation hook - this handles pool creation, sdk coin creation, and first buy transaction
   const {
     mutate: launchCoin,
     isPending: isLaunchCoinPending,
@@ -397,7 +381,6 @@ export const LaunchpadPage = () => {
     isError: uncaughtLaunchCoinError
   } = useLaunchCoin()
 
-  // If something during coin launch hook fails, this errorMetadata is used to trigger recovery flows
   const errorMetadata = launchCoinResponse?.errorMetadata
 
   const isLaunchCoinError = launchCoinResponse?.isError
@@ -413,8 +396,6 @@ export const LaunchpadPage = () => {
     !errorMetadata?.firstBuyConfirmed &&
     errorMetadata?.requestedFirstBuy
 
-  // This hook is used in the case where the first buy TX failed for some reason but the pool was created successfully
-  // Since the pool is launched, we can retry the first buy transaction with a new jupiter swap TX
   const {
     mutate: swapTokens,
     isPending: isSwapRetryPending,
@@ -430,7 +411,6 @@ export const LaunchpadPage = () => {
     size: WidthSizes.SIZE_2000
   })
 
-  // Overall success, pending, and error states account for both hooks
   const isSuccess =
     (isLaunchCoinFinished && !isLaunchCoinError) || isSwapRetrySuccess
   const isPending = isLaunchCoinPending || isSwapRetryPending
@@ -458,18 +438,15 @@ export const LaunchpadPage = () => {
     isSdkCreateError
   ])
 
-  // If an error occurs after the pool is created, we close the modal to let the user resubmit via the swap retry flow
   useEffect(() => {
     if (isPoolCreateError) {
       setIsModalOpen(false)
     }
   }, [isPoolCreateError])
 
-  // Handle successful coin creation
   useEffect(() => {
     if (isSuccess && launchCoinResponse && formValues) {
       trackCoinCreationSuccess(launchCoinResponse, formValues)
-      // Show toast notification
       toast(
         <Flex gap='xs'>
           <IconCheck size='m' color='white' />
@@ -477,10 +454,8 @@ export const LaunchpadPage = () => {
         </Flex>
       )
 
-      // Navigate to the new coin's detail page
       navigate(route.coinPage(formValues.coinSymbol.toUpperCase()))
 
-      // Open the success modal
       openCoinSuccessModal({
         mint: launchCoinResponse.newMint,
         name: formValues.coinName,
@@ -502,15 +477,12 @@ export const LaunchpadPage = () => {
     toast
   ])
 
-  // If the swap retry fails close the modal again and let user attempt to resubmit if they want
   useEffect(() => {
     if (isSwapRetryError) {
       setIsModalOpen(false)
     }
   }, [isSwapRetryError])
 
-  // If the first buy TX fails, we show a toast and close the modal
-  // they are still able to attempt to resubmit
   useEffect(() => {
     if (isFirstBuyError) {
       setIsModalOpen(false)
@@ -520,10 +492,8 @@ export const LaunchpadPage = () => {
     }
   }, [isFirstBuyError, toast])
 
-  // Handle swap results for first buy transaction
   useEffect(() => {
     if (isSwapRetryError) {
-      // Show error toast but keep modal open for retry
       toast(messages.errors.firstBuyFailed, Infinity, {
         rightIcon: IconClose
       })
@@ -532,7 +502,6 @@ export const LaunchpadPage = () => {
 
   const handleSubmit = useCallback(
     async (formValues: LaunchpadFormValues) => {
-      // Store form values for success modal
       setFormValues(formValues)
 
       if (!currentUser || !connectedWalletAddress) {
@@ -558,14 +527,11 @@ export const LaunchpadPage = () => {
           ? audioAmountBigNumber.toString()
           : undefined
 
-      // Check if we've already attempted to submit and need to retry the first buy transaction instead of creating a new pool
       if (isFirstBuyError) {
-        // Recover the mint address from the error metadata
         const mintAddress =
           launchCoinResponse.newMint || errorMetadata?.coinMetadata?.mint
         if (formValues.payAmount && mintAddress) {
           trackFirstBuyRetry(launchCoinResponse)
-          // Retry the first buy transaction with a new swap TX
           swapTokens({
             inputMint: TOKEN_LISTING_MAP.AUDIO.address,
             outputMint: mintAddress,
@@ -590,8 +556,6 @@ export const LaunchpadPage = () => {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
         const socialLinks = getUserSocialLinks(currentUser)
 
-        // Copy the user's cover image to ensure it's independent of profile changes
-        // useCoverPhoto already handles mirror fallback, so we just need to fetch the resolved URL
         let bannerImageFile: File | null = null
         if (defaultBannerImageUrl) {
           try {
@@ -646,7 +610,6 @@ export const LaunchpadPage = () => {
     ]
   )
 
-  // Redirect if user is not verified or already has a fan club
   if (hasExistingFanClub && isLaunchpadVerificationEnabled) {
     track(make({ eventName: Name.LAUNCHPAD_HAS_EXISTING_FAN_CLUB }))
     return <Navigate to={route.CLUBS_EXPLORE_PAGE} replace />

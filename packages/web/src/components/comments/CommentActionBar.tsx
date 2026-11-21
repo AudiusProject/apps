@@ -82,7 +82,6 @@ export const CommentActionBar = ({
   const isPinned = track.pinned_comment_id === commentId
   const isTombstone = 'isTombstone' in comment ? !!comment.isTombstone : false
 
-  // API actions
   const [reactToComment] = useReactToComment()
   const [reportComment] = useReportComment()
   const [pinComment] = usePinComment()
@@ -90,7 +89,6 @@ export const CommentActionBar = ({
 
   const isCommentOwner = Number(comment.userId) === currentUserId
 
-  // Selectors
   const { data: userDisplayName } = useUser(userId, {
     select: (user) => user?.name
   })
@@ -102,13 +100,11 @@ export const CommentActionBar = ({
   const [handleMuteCommentNotifications] =
     useUpdateCommentNotificationSetting(commentId)
 
-  // Handlers
   const handleReact = useRequiresAccountCallback(() => {
     reactToComment(commentId, !isCurrentUserReacted)
   }, [commentId, isCurrentUserReacted, reactToComment])
 
   const handleDelete = useCallback(() => {
-    // note: we do some UI logic in the CommentBlock above this so we can't trigger directly from here
     onClickDelete()
   }, [onClickDelete])
 
@@ -153,7 +149,6 @@ export const CommentActionBar = ({
     toast('Copied to clipboard')
   }, [comment.id, toast, track.permalink])
 
-  // Confirmation Modal state
   const confirmationModals: {
     [k in ConfirmationAction]: ConfirmationModalState
   } = useMemo(
@@ -166,7 +161,6 @@ export const CommentActionBar = ({
         messages: messages.popups.unpin,
         confirmCallback: handlePin
       },
-      // Specifically for an artist deleting someone else's comment
       artistDelete: {
         messages: {
           ...messages.popups.artistDelete,
@@ -174,7 +168,6 @@ export const CommentActionBar = ({
         },
         confirmCallback: handleDelete
       },
-      // An individual deleting their own comment
       delete: {
         messages: messages.popups.delete,
         confirmCallback: handleDelete
@@ -231,7 +224,6 @@ export const CommentActionBar = ({
     [confirmationModals, currentConfirmationModalType]
   )
 
-  // Popup menu items
   const popupMenuItems = useMemo(
     () =>
       [
@@ -311,7 +303,6 @@ export const CommentActionBar = ({
         {!hideReactCount && reactCount > 0 ? (
           <Text color={isDisabled ? 'subdued' : 'default'}> {reactCount}</Text>
         ) : (
-          // Placeholder box to offset where the number would be
           <Box w='8px' />
         )}
       </Flex>

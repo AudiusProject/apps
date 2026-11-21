@@ -40,7 +40,6 @@ export const AddCashModal = NiceModal.create(() => {
   }, [setPage])
 
   useEffect(() => {
-    // Close modal if the buy USDC stage flips to finish
     if (buyUSDCStage === BuyUSDCStage.FINISH) {
       onClose()
     }

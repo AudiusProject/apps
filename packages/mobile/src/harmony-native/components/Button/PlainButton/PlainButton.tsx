@@ -14,10 +14,6 @@ import { BaseButton } from '../BaseButton/BaseButton'
 
 import type { PlainButtonProps } from './types'
 
-/**
- * A plain Button component (no border/background). Includes a few variants and options to
- * include and position icons.
- */
 export const PlainButton = (props: PlainButtonProps) => {
   const { variant = 'default', size = 'default', styles, ...baseProps } = props
   const { disabled, isLoading, onPress } = baseProps
@@ -26,7 +22,6 @@ export const PlainButton = (props: PlainButtonProps) => {
   const { color, spacing, typography, type } = useTheme()
   const pressed = useSharedValue(0)
 
-  // - Size Styles -
   const defaultStyles: ReactNativeStyle = {
     gap: spacing.xs,
     height: 16
@@ -47,7 +42,6 @@ export const PlainButton = (props: PlainButtonProps) => {
     lineHeight: typography.lineHeight.m
   }
 
-  // - Variant Styles -
   const defaultVariantStyles = {
     default: {
       text: color.text.default
@@ -108,7 +102,6 @@ export const PlainButton = (props: PlainButtonProps) => {
     [variant, typeof type === 'string' ? type : 'default-light']
   )
 
-  // Non-animated version for Android
   const staticIconProps = {
     fill: dynamicStyles.default.text
   }

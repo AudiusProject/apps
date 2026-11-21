@@ -13,7 +13,6 @@ export const StatusBar = (props: ThemedStatusBarProps) => {
   const theme = useThemeVariant()
   const { data: accountStatus } = useAccountStatus()
 
-  // Status & nav bar content (the android software buttons) should be light
   const shouldRenderLightContent = isDarkTheme(theme)
 
   const statusBarStyle = shouldRenderLightContent

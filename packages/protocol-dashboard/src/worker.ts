@@ -24,7 +24,6 @@ export default {
         }
       )
     } catch (e: any) {
-      // If asset not found or other error, return 500/404 accordingly
       return new Response(e?.message || 'Error', { status: e?.status || 500 })
     }
   }

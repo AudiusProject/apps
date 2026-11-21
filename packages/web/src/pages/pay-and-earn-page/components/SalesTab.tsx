@@ -94,7 +94,6 @@ export const useSales = () => {
   const isManagerMode = useIsManagedAccount()
   const { data: currentWeb3User } = useCurrentWeb3Account()
 
-  // Defaults: sort method = date, sort direction = desc
   const [sortMethod, setSortMethod] =
     useState<GetSalesSortMethodEnum>(DEFAULT_SORT_METHOD)
   const [sortDirection, setSortDirection] = useState<GetSalesSortDirectionEnum>(
@@ -133,8 +132,6 @@ export const useSales = () => {
       )
     }
   }, [hasQueryError, dispatch])
-
-  // TODO: Should fetch users before rendering the table
 
   const onSort = useCallback(
     (method: SalesTableSortMethod, direction: SalesTableSortDirection) => {
@@ -176,18 +173,15 @@ export const useSales = () => {
       const CONCURRENT_BATCHES = 3
       const rows = []
 
-      // Process sales in concurrent batches
       for (let i = 0; i < sales.length; i += BATCH_SIZE * CONCURRENT_BATCHES) {
         const batchPromises = []
 
-        // Create promises for concurrent batch processing
         for (let j = 0; j < CONCURRENT_BATCHES; j++) {
           const start = i + j * BATCH_SIZE
           const end = Math.min(start + BATCH_SIZE, sales.length)
           if (start < sales.length) {
             const batch = sales.slice(start, end)
 
-            // Process the batch
             const batchPromise = Promise.all(
               batch.map(async (sale) => {
                 try {
@@ -202,7 +196,6 @@ export const useSales = () => {
                     sale.pubkeyBase64
                   ) {
                     try {
-                      // Use the pubkey directly from the sale data
                       const pubkeyToUse = sale.isInitial
                         ? env.EMAIL_ENCRYPTION_PUBLIC_KEY
                         : sale.pubkeyBase64
@@ -256,7 +249,6 @@ export const useSales = () => {
           }
         }
 
-        // Wait for all concurrent batches to complete
         const batchResults = await Promise.all(batchPromises)
         rows.push(...batchResults.flat())
       }
@@ -319,9 +311,6 @@ export const useSales = () => {
     downloadSalesAsCSVFromJSON
   }
 }
-/**
- * Fetches and renders a table of Sales for the currently logged in user
- * */
 export const SalesTab = ({
   count,
   data: sales = [],

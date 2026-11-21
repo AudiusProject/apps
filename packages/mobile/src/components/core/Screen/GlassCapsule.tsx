@@ -10,13 +10,8 @@ import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 import { GlassSurface } from './GlassSurface'
 import { isLiquidGlassAvailable, LiquidGlassView } from './LiquidGlass'
 
-/** Inset of the floating pill from the screen edges. */
 const PILL_SIDE_MARGIN = 16
 
-/**
- * Extra content inset while flat, so the content lines up with the screen's
- * 16px gutter at rest and drifts into the pill as it forms.
- */
 const FLAT_CONTENT_INSET = 8
 
 const SHADOW_OPACITY = 0.12
@@ -26,30 +21,11 @@ type GlassCapsuleProps = {
   children?: ReactNode
   height: number
   style?: StyleProp<ViewStyle>
-  /**
-   * 0 = flat on the page, 1 = floating pill. The capsule sits flush with the
-   * page background at rest and turns into the pill as content scrolls under
-   * it. Glass can't fade in from transparent, so it stays drawn the whole
-   * time under a page-colored cover that fades out.
-   */
   floatProgress: SharedValue<number>
-  /**
-   * Tints the iOS 26 glass, for pills that sit over busy content where the
-   * clear material leaves text hard to read.
-   */
   tintColor?: string
-  /**
-   * iOS 26 glass material. Switching to `'none'` and back animates the glass
-   * away and in natively, which a fade can't do.
-   */
   effect?: 'regular' | 'none'
 }
 
-/**
- * A pill of glass matching the floating tab bar. iOS 26 gets the system
- * material; everywhere else gets a frosted (iOS) or solid (Android)
- * `GlassSurface` clipped to the same shape with a soft shadow.
- */
 export const GlassCapsule = (props: GlassCapsuleProps) => {
   const {
     children,
@@ -87,7 +63,6 @@ export const GlassCapsule = (props: GlassCapsuleProps) => {
         pointerEvents='none'
         style={[
           StyleSheet.absoluteFill,
-          // Theme backgrounds may carry alpha; the cover has to be opaque.
           { backgroundColor: background.slice(0, 7) },
           coverStyle
         ]}
@@ -113,9 +88,6 @@ export const GlassCapsule = (props: GlassCapsuleProps) => {
     )
   }
 
-  // The shadow lives on an unclipped wrapper; the surface inside is clipped
-  // to the capsule so the frost doesn't spill past the corners. The edge keeps
-  // the pill apart from same-colored cards passing under it in dark mode.
   return (
     <Animated.View
       style={[shape, styles.shadow, frameStyle, shadowStyle, style]}

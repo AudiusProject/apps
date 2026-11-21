@@ -37,7 +37,6 @@ export const BuyTab = ({
   const isAnonymousUser = !currentUser
   const [selectedOutputToken, setSelectedOutputToken] = useState(baseToken)
 
-  // Sync selectedOutputToken with baseToken when tokenPair changes
   useEffect(() => {
     setSelectedOutputToken((prev) =>
       prev?.symbol === baseToken.symbol ? prev : baseToken
@@ -79,13 +78,11 @@ export const BuyTab = ({
     return Object.values(transformFanClubsToTokenInfoMap(coins ?? []))
   }, [coins])
 
-  // Token change handlers
   const handleOutputTokenChange = (token: CoinInfo) => {
     setSelectedOutputToken(token)
     onOutputTokenChange?.(token.symbol)
   }
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   if (currentExchangeRate !== null) {
     hasRateEverBeenFetched.current = true
@@ -93,8 +90,6 @@ export const BuyTab = ({
 
   if (!tokenPair) return null
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     (!isAnonymousUser && isBalanceLoading) ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)

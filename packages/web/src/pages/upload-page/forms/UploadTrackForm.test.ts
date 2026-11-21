@@ -31,7 +31,6 @@ describe('getTrackEditInitialMetadata', () => {
     })
   })
 
-  // EditTrackForm reinitializes from formState.tracks after each submit.
   it('preserves user-entered values when the form reinitializes', () => {
     const edited = makeMetadata({
       description: 'Stream elsewhere & follow on IG',

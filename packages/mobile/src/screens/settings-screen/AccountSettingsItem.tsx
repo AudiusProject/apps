@@ -22,11 +22,9 @@ type AccountSettingsItemProps = {
   buttonTitle: string
   onPress?: () => void
   disabled?: boolean
-  /** Optional verification status shown above the action button. */
   isVerified?: boolean
   verifiedText?: string
   notVerifiedText?: string
-  /** Hide the action button (e.g. once the email is verified). */
   hideButton?: boolean
 }
 

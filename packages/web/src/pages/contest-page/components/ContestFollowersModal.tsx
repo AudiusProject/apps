@@ -25,16 +25,6 @@ type ContestFollowersModalProps = {
   onClose: () => void
 }
 
-/**
- * Minimal modal that surfaces the full follower list for a remix
- * contest event. We're not routing through the shared
- * `UserListModal` infrastructure (which is keyed off Redux slices
- * like follower / favorite / mutual) because events are a different
- * entity type and wiring in a dedicated slice + saga would be a
- * substantially larger change than the Figma calls for here. This
- * modal reads directly from `useEventFollowers` (same hook the
- * avatar pile uses) with a larger limit.
- */
 export const ContestFollowersModal = ({
   eventId,
   isOpen,

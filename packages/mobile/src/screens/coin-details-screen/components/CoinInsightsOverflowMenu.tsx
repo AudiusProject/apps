@@ -36,7 +36,6 @@ export const CoinInsightsOverflowMenu = () => {
 
   const handleCopyLink = useCallback(() => {
     if (fanClub?.ticker) {
-      // TODO: Should figure out a way to make this use the correct domain
       const coinUrl = `https://audius.co${route.coinPage(fanClub.ticker)}`
       Clipboard.setString(coinUrl)
       toast({ content: messages.copiedLinkToClipboard, type: 'info' })
@@ -106,7 +105,6 @@ export const CoinInsightsOverflowMenu = () => {
     }
   ]
 
-  // Don't render if no fan club data
   if (!fanClub?.mint) {
     return null
   }

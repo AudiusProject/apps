@@ -13,10 +13,6 @@ type ToastLinkContentProps = {
   linkIcon?: JSX.Element
 }
 
-/**
- * This component can be used as the content of a Toast to render a link
- * in addition to text
- */
 const ToastLinkContent = ({
   link,
   linkText,

@@ -122,13 +122,9 @@ export const CommentForm = (props: CommentFormProps) => {
   )
 
   const focusInput = useCallback(() => {
-    // setTimeout is required to focus the input on android
     setTimeout(() => ref.current?.focus())
   }, [ref])
 
-  /**
-   * Populate and focus input when replying to a comment
-   */
   useEffect(() => {
     if (replyingToComment && replyingToUserHandle && replyingToUserId) {
       setInitialMessage(replyInitialMessage(replyingToUserHandle))
@@ -142,9 +138,6 @@ export const CommentForm = (props: CommentFormProps) => {
     }
   }, [replyingToComment, replyingToUserHandle, replyingToUserId, focusInput])
 
-  /**
-   * Populate and focus input when editing a comment
-   */
   useEffect(() => {
     if (editingComment) {
       setInitialMessage(editingComment.message)
@@ -165,7 +158,6 @@ export const CommentForm = (props: CommentFormProps) => {
       ref.current &&
       !adjustedCursorPosition.current
     ) {
-      // Set the cursor position (required for android)
       const initialMessageLength = initialMessage?.length ?? 0
       ref.current.setSelection(initialMessageLength, initialMessageLength)
       adjustedCursorPosition.current = true

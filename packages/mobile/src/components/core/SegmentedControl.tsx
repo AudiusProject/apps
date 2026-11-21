@@ -10,7 +10,6 @@ import { makeStyles } from 'app/styles'
 
 import type { IconComponent } from '../../harmony-native/icons'
 
-// Note, offset is the inner padding of the container div
 const offset = 3
 
 export type Option<Value> = {
@@ -20,19 +19,14 @@ export type Option<Value> = {
 }
 
 export type SegmentedControlProps<Value> = {
-  // The options to display for the tab slider
   options: Array<Option<Value>>
 
-  // Key of selected option
   selected?: Value
 
-  // Key of initially selected option
   defaultSelected?: Value
 
-  // Callback fired when new option is selected
   onSelectOption: (key: Value) => void
 
-  // If true, all tabs will have the same width
   equalWidth?: boolean
 
   fullWidth?: boolean
@@ -140,7 +134,6 @@ export const SegmentedControl = <Value,>(
       .reduce((totalWidth, width) => totalWidth + width, offset)
   }, [optionWidths, options, selectedOption])
 
-  // Position the slider - only animate when user changes selection
   useEffect(() => {
     const selectedOptionIdx = options.findIndex(
       (option) => option.key === selectedOption
@@ -148,28 +141,22 @@ export const SegmentedControl = <Value,>(
     const width = optionWidths[selectedOptionIdx]
     const left = getLeftValue()
 
-    // Don't update if we don't have valid measurements yet
     if (width === 0 || !optionWidths.every((val) => val !== 0)) {
       return
     }
 
-    // Determine if this is a user selection change (should animate)
-    // vs initial render or layout change (should snap)
     const isUserSelection =
       lastSelectedOption.current !== null &&
       lastSelectedOption.current !== selectedOption
 
     if (isUserSelection) {
-      // User changed selection - animate
       springToValue(leftAnim, left)
       springToValue(widthAnim, width)
     } else {
-      // Initial render or layout shift - snap immediately
       leftAnim.setValue(left)
       widthAnim.setValue(width)
     }
 
-    // Show the slider once positioned
     if (!isReady) {
       opacityAnim.setValue(1)
       setIsReady(true)
@@ -187,19 +174,16 @@ export const SegmentedControl = <Value,>(
     isReady
   ])
 
-  // Calculate maxOptionWidth when all widths are known
   useEffect(() => {
     if (!optionWidths.every((val) => val !== 0)) return
 
     const naturalMaxWidth = optionWidths.reduce((a, b) => Math.max(a, b), 0)
 
     if (fullWidth && equalWidth && containerWidth > 0) {
-      // Calculate available width for options (subtract padding and separators)
-      const separatorsWidth = (options.length - 1) * 1 // 1px per separator
+      const separatorsWidth = (options.length - 1) * 1
       const availableWidth = containerWidth - offset * 2 - separatorsWidth
       const equalOptionWidth = Math.floor(availableWidth / options.length)
 
-      // Use the smaller of natural max width or calculated equal width
       setMaxOptionWidth(Math.min(naturalMaxWidth, equalOptionWidth))
     } else {
       setMaxOptionWidth(naturalMaxWidth)
@@ -243,9 +227,7 @@ export const SegmentedControl = <Value,>(
       {options.map((option, index) => {
         const shouldHideSeparator =
           selectedOption === option.key ||
-          // Hide separator right of the last option
           index === options.length - 1 ||
-          // Hide separator right of an option if the next one is selected
           selectedOption === options[index + 1].key
         const isSelected = option.key === selectedOption
 

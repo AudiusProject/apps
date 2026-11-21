@@ -73,14 +73,12 @@ const ResetPasswordScreen = () => {
     [resetPassword, email]
   )
 
-  // Restart on success
   useEffect(() => {
     if (isSuccess) {
       RNRestart.Restart()
     }
   }, [isSuccess])
 
-  // Error handling
   useEffect(() => {
     if (isError) {
       toast({ content: messages.error })

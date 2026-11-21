@@ -145,7 +145,7 @@ const PastPurchasersMessageField = () => {
             borderTop='default'
             justifyContent='space-between'
             alignItems='center'
-            pt='xl' // TODO: should be l PAY-3430
+            pt='xl'
           >
             <Text variant='body' size='l' strength='strong'>
               {messages.purchasers.filterBy}
@@ -202,7 +202,7 @@ const RemixCreatorsMessageField = () => {
             borderTop='default'
             justifyContent='space-between'
             alignItems='center'
-            pt='xl' // TODO: should be l
+            pt='xl'
           >
             <Text variant='body' size='l' strength='strong'>
               {messages.remixCreators.filterBy}

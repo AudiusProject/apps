@@ -36,7 +36,6 @@ function* watchGetSettings() {
         audiusBackendInstance.getBrowserPushNotificationSettings,
         { sdk }
       )
-      // If settings exist, set them in the store, else leave it at the defaults.
       if (settings) yield* put(actions.setNotificationSettings(settings))
       if (!isElectron()) {
         if (isPushManagerAvailable) {

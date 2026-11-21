@@ -33,7 +33,6 @@ const validRewardIds: Set<ChallengeRewardID> = new Set([
   ChallengeName.TrendingUndergroundTrack
 ])
 
-/** Pulls rewards from remoteconfig */
 export function useRewardIds(
   hideConfig: Partial<Record<ChallengeRewardID, boolean>>
 ) {

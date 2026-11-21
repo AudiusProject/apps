@@ -58,7 +58,6 @@ export const FollowButton = forwardRef(
       stateName: 'following'
     })
 
-    // Track hover manually to swap text and icon
     const [isHovering, setIsHovering] = useState(false)
     const [isPressing, setIsPressing] = useState(false)
 
@@ -145,7 +144,6 @@ export const FollowButton = forwardRef(
       }
     }
 
-    // Handles case where user mouses down, moves cursor, and mouses up
     useEffect(() => {
       if (isPressing) {
         document.addEventListener('mouseup', handleMouseUp)

@@ -15,7 +15,6 @@ const ShareButton = ({ url, title, creator }) => {
   const { toast } = useContext(ToastContext)
 
   const onShare = () => {
-    // Only toast if not-mobile
     if (!navigator.share) {
       toast(messages.toast)
     }

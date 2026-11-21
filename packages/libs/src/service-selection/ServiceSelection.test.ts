@@ -54,10 +54,8 @@ describe('ServiceSelection', () => {
   })
 
   it('should find the needle in the haystack', async () => {
-    // Single good service
     const needle = 'https://needle.audius.co'
     nock(needle).get('/health_check').reply(200)
-    // Many bad services
     const haystack = Array.from(
       { length: 20 },
       (_, i) => `https://${i}.audius.co`
@@ -84,8 +82,6 @@ describe('ServiceSelection', () => {
 
     const s = new ServiceSelection({
       getServices: async () => [bad1, bad2],
-      // Short timeout otherwise, we'll wait for a long time for some request to succeed
-      // TODO: consider ammending promiseFight to early exit
       requestTimeout: 100
     })
     const service = await s.select()
@@ -138,7 +134,6 @@ describe('ServiceSelection', () => {
     const firstService = await s.select()
     assert.strictEqual(firstService, atFirstHealthy)
 
-    // Push the event loop just to let the unhealthy list get cleared
     await Utils.wait(0)
     const secondService = await s.select()
     assert.strictEqual(secondService, atFirstUnhealthy)
@@ -167,7 +162,6 @@ describe('ServiceSelection withBackupCriteria', () => {
     }
   }
 
-  // Crude example of how backups can be used
   it('adds backups', async () => {
     const behind1 = 'https://behind1.audius.co'
     nock(behind1).get('/health_check').reply(200, {
@@ -196,12 +190,10 @@ describe('ServiceSelection withBackupCriteria', () => {
   })
 
   it('should use a backup if there is no better option', async () => {
-    // Single service that's behind
     const needle = 'https://needle.audius.co'
     nock(needle).get('/health_check').reply(200, {
       behind: true
     })
-    // Many bad services
     const haystack = Array.from(
       { length: 20 },
       (_, i) => `https://${i}.audius.co`
@@ -217,20 +209,16 @@ describe('ServiceSelection withBackupCriteria', () => {
     })
     const service = await s.select()
     assert.strictEqual(service, needle)
-    // It should have tried everything before falling back to the "needle"
     assert.strictEqual(s.getTotalAttempts(), 21)
   })
 
   it('should skip over a backup if a better service can be found', async () => {
-    // Single good service
     const needle = 'https://needle.audius.co'
     nock(needle).get('/health_check').reply(200)
-    // Single service that's behind
     const behind = 'https://behind.audius.co'
     nock(behind).get('/health_check').reply(200, {
       behind: true
     })
-    // Many bad services
     const haystack = Array.from(
       { length: 20 },
       (_, i) => `https://${i}.audius.co`

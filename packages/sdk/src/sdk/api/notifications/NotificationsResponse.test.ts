@@ -56,7 +56,6 @@ describe('notifications response parsing', () => {
         })
       )
     )
-    // The SDK wrapper inherits this read method from the generated API.
     const api = new NotificationsApi(
       new Configuration({ basePath: 'https://example.com/v1', fetchApi })
     )

@@ -24,8 +24,6 @@ const messages = {
   retry: 'Try Again'
 }
 
-// This loading page shows up when the users account is still being created either due to slow creation or a fast user
-// The user just waits here until the account is created and before being shown the welcome modal on the trending page
 export const LoadingAccountPage = () => {
   const dispatch = useDispatch()
   const navigate = useNavigateToPage()

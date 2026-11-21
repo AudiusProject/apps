@@ -81,10 +81,6 @@ const interpolatePostion = (
 })
 
 export type BottomTabBarProps = Pick<RNBottomTabBarProps, 'state'> & {
-  /**
-   * Translation animation to move the bottom bar as drawers
-   * are opened behind it
-   */
   translationAnim: Animated.Value
 
   navigation: NavigationHelpers<
@@ -111,7 +107,6 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
         canPreventDefault: true
       })
 
-      // Native navigation
       if (!isFocused && !event.defaultPrevented) {
         navigation.navigate(routeName)
       } else if (isFocused) {
@@ -208,15 +203,6 @@ type FloatingPillProps = {
   children: ReactNode[]
 }
 
-/**
- * iOS 26 style tab bar: a capsule of liquid glass floating over the content,
- * with a highlight that springs to the active tab.
- *
- * Scrolling down collapses it rather than hiding it: the capsule shrinks to a
- * circle holding the active tab, a search button appears on the right, and the
- * play bar drops in between them. Tapping the active tab scrolls back to the
- * top, which expands the bar again.
- */
 const FloatingPill = (props: FloatingPillProps) => {
   const { bottom, activeIndex, tabCount, onPressSearch, children } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
@@ -246,7 +232,6 @@ const FloatingPill = (props: FloatingPillProps) => {
     )
   }))
 
-  // Slide the row so the active tab ends up centered in the collapsed circle.
   const rowStyle = useAnimatedStyle(() => {
     const activeCenter = (index.value + 0.5) * tabWidth
     const shrink = interpolate(
@@ -278,9 +263,6 @@ const FloatingPill = (props: FloatingPillProps) => {
     ]
   }))
 
-  // Grows from a point rather than fading in, since the system glass stops
-  // rendering under a parent that starts at zero opacity. Comes in with the
-  // play bar, once the capsule has pulled back.
   const searchStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -363,7 +345,6 @@ type CollapsingTabProps = {
   children: ReactNode
 }
 
-/** Fades the inactive tabs out ahead of the capsule closing over them. */
 const CollapsingTab = (props: CollapsingTabProps) => {
   const { hidden, isActive, isCollapsed, children } = props
   const style = useAnimatedStyle(() => ({

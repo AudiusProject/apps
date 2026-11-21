@@ -6,9 +6,6 @@ import {
   decrementScrollCount
 } from 'store/application/ui/scrollLock/actions'
 
-/**
- * Wraps Stems `useScrollLock` passing in increment and decrement store functions.
- */
 const useScrollLock = (
   lock: boolean,
   increment?: () => void,

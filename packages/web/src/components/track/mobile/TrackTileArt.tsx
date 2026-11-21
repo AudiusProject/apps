@@ -24,7 +24,6 @@ type TrackTileArtProps = {
   isPlaying?: boolean
   isBuffering?: boolean
   artworkIconClassName?: string
-  // Called when the image is done loading
   callback?: () => void
 }
 

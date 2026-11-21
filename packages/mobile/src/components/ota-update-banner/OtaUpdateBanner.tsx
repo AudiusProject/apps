@@ -26,13 +26,10 @@ import { useEnterForeground } from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
-/** Set to `true` to always show the toast for layout preview; use `false` in production. */
 const FORCE_OTA_BANNER_PREVIEW = false
 
 const TOAST_HEIGHT = 44
-/** Gap between the toast and the play bar or tab bar below it. */
 const TOAST_GAP = 12
-/** Extra travel so the shadow is off screen too. */
 const TOAST_SHADOW_ALLOWANCE = 24
 const ENTER_DURATION_MS = 280
 const EXIT_DURATION_MS = 180
@@ -66,22 +63,9 @@ function syncStatusLabel(status: CodePush.SyncStatus): string {
 
 type BannerPhase = 'none' | 'pending'
 
-/**
- * Poll for a pending package after mount/foreground. The download usually
- * takes tens of seconds and is done by ota-root's sync, not `prefetchUpdate`.
- */
 const PENDING_POLL_INTERVAL_MS = 2000
 const PENDING_POLL_WINDOW_MS = 3 * 60 * 1000
 
-/**
- * CodePush is configured in ota-root (ON_APP_RESUME) to fetch updates with
- * ON_NEXT_RESTART. We only surface UI when an update is already downloaded
- * and installed as pending — then the user restarts when they want.
- *
- * Mounted once, beside the tab bar, as a small toast floating above the play
- * bar. It mounts during ota-root's sync and gets SYNC_IN_PROGRESS from its own
- * sync, so it detects the pending package by polling.
- */
 export const OtaUpdateBanner = () => {
   const bottomInset = useBottomBarInset()
   const isDarkMode = isDarkTheme(useThemeVariant())
@@ -90,10 +74,8 @@ export const OtaUpdateBanner = () => {
   const dismissedRef = useRef(false)
   const pendingLoggedRef = useRef(false)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Bumped on every stop/restart so an in-flight poll can't reschedule itself.
   const pollGenerationRef = useRef(0)
 
-  /** Re-reads CodePush state; resolves to whether a pending package exists. */
   const refresh = useCallback(async (): Promise<boolean> => {
     if (!isOtaEnabled()) {
       if (!FORCE_OTA_BANNER_PREVIEW) {
@@ -140,7 +122,6 @@ export const OtaUpdateBanner = () => {
     }
   }, [])
 
-  // Poll until a pending package appears or the window closes.
   const schedulePendingPolls = useCallback(() => {
     stopPendingPolls()
     if (!isOtaEnabled()) {
@@ -262,9 +243,6 @@ export const OtaUpdateBanner = () => {
     </Flex>
   )
 
-  // Slides rather than fades: the system glass stops rendering under a parent
-  // at zero opacity. Travels only from just below the screen edge, with no
-  // spring.
   const travel = bottomInset + TOAST_GAP + TOAST_HEIGHT + TOAST_SHADOW_ALLOWANCE
   const entering = () => {
     'worklet'

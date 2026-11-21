@@ -32,7 +32,6 @@ type PageProps = FlexProps & {
   noGutter?: boolean
 }
 
-// Horizontal gutter size
 export const gutterSize = 'l'
 
 export const Page = (props: PageProps) => {
@@ -56,8 +55,6 @@ export const Page = (props: PageProps) => {
         style={[
           css({
             zIndex: 1,
-            // Offset the absolute positioned footer
-            // calc = footer button height (48) + footer padding (2*spacing.l) + extra padding (spacing.xl)
             paddingBottom: 48 + spacing.l * 2 + spacing.xl
           }),
           style
@@ -92,7 +89,6 @@ export const PageFooter = (props: PageFooterProps) => {
   const { spacing } = useTheme()
   const { handleSubmit, dirty, isValid } = useFormikContext() ?? {}
 
-  // Safe fallback to prevent undefined component errors
   const KeyboardAvoidContainer = useMemo(() => {
     if (avoidKeyboard) {
       try {
@@ -111,7 +107,6 @@ export const PageFooter = (props: PageFooterProps) => {
   return (
     <Flex
       gap='xl'
-      // Have to escape the pre-existing Page padding
       w={Dimensions.get('window').width}
       style={css({
         position: 'absolute',

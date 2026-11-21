@@ -84,7 +84,6 @@ const TrackPage = () => {
     !!currentTrack &&
     currentTrack.track_id === track.track_id
 
-  // Treat errors and non-streamable tracks as not found.
   useEffect(() => {
     if (status === 'error' || isTrackUnavailable(track, accountUserId)) {
       navigate(NOT_FOUND_PAGE, { replace: true })
@@ -119,7 +118,6 @@ const TrackPage = () => {
     source: FavoriteSource.TRACK_PAGE
   })
 
-  // Handlers
   const onHeroPlay = useCallback(
     ({
       isPlaying: isPlayingParam,
@@ -248,7 +246,6 @@ const TrackPage = () => {
 
   const defaults = getTrackDefaults(track as Track | null)
 
-  // SEO fields (isRemix so original vs remix snippet/structured data is correct)
   const releaseDate = track ? track.release_date || track.created_at : ''
   const seoFields = getTrackPageContext({
     title: track?.title,
@@ -258,7 +255,6 @@ const TrackPage = () => {
     isRemix: !!track?.remix_of
   })
 
-  // Handle deleted track
   if ((track?.is_delete || track?._marked_deleted) && user) {
     return (
       <DeletedPage
@@ -276,7 +272,6 @@ const TrackPage = () => {
     )
   }
 
-  // Render nothing while the not-found redirect is pending.
   if (isTrackUnavailable(track, accountUserId)) {
     return null
   }

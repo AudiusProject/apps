@@ -69,7 +69,6 @@ function* fetchProfileAsync(action) {
       )
     )
 
-    // Get chat permissions
     yield put(fetchPermissions({ userIds: [user.user_id] }))
   } catch (err) {
     console.error(`Fetch users error: ${err}`)
@@ -104,7 +103,6 @@ export function* updateProfileAsync(action) {
         }
   )
 
-  // For base64 images (coming from native), convert to a blob
   if (metadata.updatedCoverPhoto?.type === 'base64') {
     metadata.updatedCoverPhoto.file = dataURLtoFile(
       metadata.updatedCoverPhoto.file
@@ -151,10 +149,6 @@ function* confirmUpdateProfile(userId, metadata) {
         return data ? userMetadataFromSDK(data) : undefined
       },
       function* (confirmedUser) {
-        // Invalidate the user query to refetch fresh data from the server
-        // This ensures we get the canonical data including:
-        // - Processed image sizes (cover photo, profile picture)
-        // - Computed fan_club_badge (based on coin_flair_mint and user's coins)
         queryClient.invalidateQueries({
           queryKey: getUserQueryKey(confirmedUser?.user_id ?? metadata.user_id)
         })

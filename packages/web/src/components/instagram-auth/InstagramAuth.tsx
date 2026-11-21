@@ -15,7 +15,6 @@ const INSTAGRAM_AUTHORIZE_URL =
 const GET_USER_URL =
   `${audiusBackendInstance.identityServiceUrl}/instagram` as const
 
-// Instagram User profile fields to capture
 const igUserFields = [
   'id',
   'username',
@@ -57,7 +56,6 @@ const InstagramAuth = ({
   children,
   text = 'Sign in with Instagram'
 }: InstagramAuthProps) => {
-  // Opens a popup window for the instagram authentication
   const openPopup = useCallback(() => {
     return window.open(
       '',
@@ -69,7 +67,6 @@ const InstagramAuth = ({
   const getProfile = useCallback(
     async (code: string) => {
       try {
-        // Fetch the profile from the graph API
         const profileResp = await window.fetch(GET_USER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -144,7 +141,7 @@ const InstagramAuth = ({
 
   const getRequestToken = useCallback(async () => {
     const popup = openPopup()
-    await new Promise((resolve) => setTimeout(resolve, 500)) // wait 500ms
+    await new Promise((resolve) => setTimeout(resolve, 500))
     if (!popup) {
       console.error('Sign Up', new Error('Unable to open InstagramAuth popup'))
     }

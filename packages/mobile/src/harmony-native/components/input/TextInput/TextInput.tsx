@@ -132,14 +132,12 @@ export const TextInput = forwardRef(
 
     const isFocused = _isFocused ?? isFocusedState
 
-    // For focus behavior and accessiblity, <label> needs to have a htmlFor={} provided to an id matching the input
     const backupId = useId()
     const id = idProp ?? backupId
 
     const characterCount = value !== undefined ? `${value}`.length : 0
     const hasValue = characterCount > 0
 
-    // Hide the label when requested or when the size is set to small
     const shouldShowLabel =
       !hideLabel &&
       size !== TextInputSize.SMALL &&
@@ -154,15 +152,12 @@ export const TextInput = forwardRef(
           ? 'xs'
           : 's'
 
-    // Whenever a label isn't visible the placeholder should be visible in it's place (if provided)
     const shouldShowPlaceholder = isFocused || !shouldShowLabel
     const shouldShowAdornments = isFocused || hasValue || !shouldShowLabel
-    // Show the maxlength text whenever we hit a certain threshold (default 70%) + the input is focused
     const shouldShowMaxLengthText =
       isFocused &&
       maxLength &&
       characterCount >= showMaxLengthThreshold * maxLength
-    // Turn the maxlength text to the warning color whenever we hit a certain threshold (default 90%)
     let maxLengthTextColor: TextColors = 'default'
     if (maxLength && characterCount > maxLength) {
       maxLengthTextColor = 'danger'
@@ -290,7 +285,7 @@ export const TextInput = forwardRef(
               >
                 {StartIcon ? (
                   <StartIcon
-                    size={isExtraSmall ? 's' : isSmall ? 'l' : 'm'} // TODO adjust large variant accordingly
+                    size={isExtraSmall ? 's' : isSmall ? 'l' : 'm'}
                     color='subdued'
                     {...IconProps}
                   />
@@ -362,9 +357,7 @@ export const TextInput = forwardRef(
                       style={[
                         css({
                           flex: 1,
-                          // Need absolute height to ensure consistency across platforms
                           height: isExtraSmall ? 18 : !isSmall ? 23 : undefined,
-                          // Android has a default padding that needs to be removed
                           padding: 0,
                           fontSize:
                             typography.size[

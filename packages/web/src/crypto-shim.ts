@@ -1,16 +1,5 @@
 import { Buffer } from 'buffer'
 
-/**
- * Stand-in for Node's `crypto` module in the browser bundle.
- *
- * The deps that import `crypto` (tweetnacl, ulid, @noble/secp256k1) only use
- * it as a fallback when Web Crypto is missing, so aliasing `crypto` to
- * crypto-browserify shipped ~350 KB (elliptic, asn1.js, browserify-sign, ...)
- * that never ran. This maps the randomness surface to Web Crypto and fails
- * loudly for anything else.
- */
-
-// getRandomValues rejects requests larger than 65536 bytes
 const MAX_RANDOM_BYTES = 65536
 
 export const webcrypto = globalThis.crypto

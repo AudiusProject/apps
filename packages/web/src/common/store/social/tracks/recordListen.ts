@@ -19,10 +19,8 @@ function* recordListen(action: { trackId: number }) {
     return
   }
 
-  // Optimistically update the listen streak if applicable
   yield* put(updateOptimisticListenStreak())
 
-  // Optimistically update the play count if the user is playing their own track
   if (userId === track.owner_id) {
     yield* put(updateOptimisticPlayCount())
   }

@@ -122,7 +122,6 @@ export class UsersApi extends GeneratedUsersApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    // Write metadata to chain
     const { blockHash, blockNumber } = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -176,7 +175,6 @@ export class UsersApi extends GeneratedUsersApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    // Write metadata to chain
     const { blockHash, blockNumber } = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -209,7 +207,6 @@ export class UsersApi extends GeneratedUsersApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    // Write metadata to chain
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.USER,
@@ -331,7 +328,6 @@ export class UsersApi extends GeneratedUsersApi {
     params: EntityManagerFollowUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, followeeUserId } = await parseParams(
       'followUser',
       FollowUserSchema
@@ -368,7 +364,6 @@ export class UsersApi extends GeneratedUsersApi {
     params: EntityManagerUnfollowUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, followeeUserId } = await parseParams(
       'unfollowUser',
       UnfollowUserSchema
@@ -405,7 +400,6 @@ export class UsersApi extends GeneratedUsersApi {
     params: EntityManagerSubscribeToUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, subscribeeUserId } = await parseParams(
       'subscribeToUser',
       SubscribeToUserSchema
@@ -442,7 +436,6 @@ export class UsersApi extends GeneratedUsersApi {
     params: EntityManagerUnsubscribeFromUserRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, subscribeeUserId } = await parseParams(
       'unsubscribeFromUser',
       UnsubscribeFromUserSchema
@@ -623,7 +616,6 @@ export class UsersApi extends GeneratedUsersApi {
     params: SendTipReactionRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, metadata } = await parseParams(
       'sendTipReaction',
       SendTipReactionRequestSchema
@@ -675,7 +667,6 @@ export class UsersApi extends GeneratedUsersApi {
     } = await parseParams('shareEmail', EmailSchema)(params)
 
     let symmetricKey: Uint8Array
-    // Get hashed IDs and validate
     const emailOwnerUserIdHash = encodeHashId(emailOwnerUserId)
     const receivingUserIdHash = encodeHashId(receivingUserId)
     const initialEmailEncryptionUuidHash = encodeHashId(
@@ -711,7 +702,6 @@ export class UsersApi extends GeneratedUsersApi {
       entityType = EntityType.EMAIL_ACCESS
     } else {
       symmetricKey = this.emailEncryption.createSymmetricKey()
-      // Create encrypted keys for owner and receiver
       const ownerEncryptedKey = await this.emailEncryption.encryptSymmetricKey(
         emailOwnerUserIdHash,
         symmetricKey

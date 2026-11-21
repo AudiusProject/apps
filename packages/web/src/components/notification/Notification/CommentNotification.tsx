@@ -30,9 +30,6 @@ import { entityToUserListEntity, USER_LENGTH_LIMIT } from './utils'
 
 const messages = {
   commented: ' commented on your ',
-  // Remix-contest comments resolve their entity through the underlying
-  // track; render the noun as "remix contest" so the sentence reads
-  // correctly instead of "commented on your event <track>".
   remixContestLabel: 'remix contest'
 }
 

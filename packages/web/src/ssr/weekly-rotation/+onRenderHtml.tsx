@@ -1,5 +1,3 @@
-// Weekly Rotation page SSR - meta tags only
-
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
@@ -25,8 +23,6 @@ type WeeklyRotationPageContext = PageContextServer & {
 export default function render(pageContext: WeeklyRotationPageContext) {
   const { routeParams, pageProps, urlPathname } = pageContext
   const { user } = pageProps
-  // Prefer the API's casing of the handle so the card URL matches what the
-  // client will request.
   const handle = user?.handle ?? routeParams.handle
 
   const context = getWeeklyRotationPageContext({

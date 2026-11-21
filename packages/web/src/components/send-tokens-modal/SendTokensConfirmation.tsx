@@ -54,7 +54,6 @@ const SendTokensConfirmation = ({
   onConfirm,
   onBack
 }: SendTokensConfirmationProps) => {
-  // Get token data
   const { data: coin } = useFanClub(mint)
   const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
@@ -73,7 +72,6 @@ const SendTokensConfirmation = ({
     )
   }
 
-  // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
     return <SendTokensConfirmationSkeleton />
   }

@@ -10,7 +10,6 @@ type Styles = {
 
 export const useCashWalletStyles = makeResponsiveStyles<Styles>(
   ({ media, theme }) => ({
-    // Main layout flex container
     mainFlex: {
       tablet: {
         display: 'flex',
@@ -24,7 +23,6 @@ export const useCashWalletStyles = makeResponsiveStyles<Styles>(
       }
     },
 
-    // Payout wallet flex container
     payoutWalletFlex: {
       base: {
         cursor: 'pointer'
@@ -38,14 +36,12 @@ export const useCashWalletStyles = makeResponsiveStyles<Styles>(
       }
     },
 
-    // Transaction history link
     transactionLink: {
       mobile: {
         alignSelf: 'flex-start'
       }
     },
 
-    // Bottom button area
     buttonArea: {
       tablet: {
         flexDirection: 'column'

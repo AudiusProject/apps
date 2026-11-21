@@ -47,7 +47,6 @@ export const GroupMembersModal = ({
     [dispatch, onClose]
   )
 
-  // Current user last
   const sorted = [...(users ?? [])].sort(
     (a, b) =>
       Number(a.user_id === currentUserId) - Number(b.user_id === currentUserId)

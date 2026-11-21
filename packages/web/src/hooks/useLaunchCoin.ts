@@ -18,7 +18,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { appkitModal } from 'app/ReownAppKitModal'
 
-// Leaving in consoles for QA and possibly soft-launch to make sure we have good info on where things are failing
 /* eslint-disable no-console */
 
 export type LaunchCoinParams = {
@@ -34,12 +33,8 @@ export type LaunchCoinParams = {
   bannerImageUrl?: string
 }
 
-export const LAUNCHPAD_COIN_DECIMALS = 9 // All our launched coins will have 9 decimals
+export const LAUNCHPAD_COIN_DECIMALS = 9
 
-/**
- * Hook for launching a new coin on the launchpad with bonding curve.
- * This creates a new token and optionally makes an initial purchase.
- */
 export const useLaunchCoin = () => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
@@ -107,7 +102,6 @@ export const useLaunchCoin = () => {
 
         const walletPublicKey = new PublicKey(walletPublicKeyStr)
 
-        // Sets up coin TXs and on-chain metadata on relay side
         const res = await sdk.services.solanaRelay.launchCoin({
           name,
           symbol: symbolUpper,
@@ -131,7 +125,6 @@ export const useLaunchCoin = () => {
         errorMetadata.relayResponseReceived = true
         errorMetadata.lastStep = 'relayResponseReceived'
 
-        // Sign locally (do not send). Send both to relay confirm endpoint.
         const signedCreatePoolTx = await signTx(createPoolTxSerialized)
         const signedFirstBuyTx = firstBuyTxSerialized
           ? await signTx(firstBuyTxSerialized)
@@ -145,7 +138,6 @@ export const useLaunchCoin = () => {
             createPoolTx: signedCreatePoolTx.serialize(),
             firstBuyTx: signedFirstBuyTx?.serialize()
           })
-          // Treat a successful response as confirmations completed
           errorMetadata.poolCreateConfirmed = true
           if (firstBuyTxSerialized && initialBuyAmountAudio) {
             errorMetadata.firstBuyConfirmed = !!confirmRes.firstBuySignature
@@ -161,10 +153,6 @@ export const useLaunchCoin = () => {
           throw e
         }
 
-        /*
-         * Add coin to Audius database
-         * its in a separate try/catch because it's technically non-blocking
-         */
         try {
           const sanitizedLinks = Array.from(
             new Set(
@@ -191,7 +179,6 @@ export const useLaunchCoin = () => {
             )
           }
 
-          // Create coin in Audius database
           await sdk.coins.createCoin({
             userId: Id.parse(userId),
             createCoinRequest: {
@@ -234,21 +221,16 @@ export const useLaunchCoin = () => {
       }
     },
     onSuccess: (_result, params, _context) => {
-      // Invalidate the list of fan clubs to add it to the list
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.coins] })
-      // Invalidate the user to refresh their badge info
       queryClient.invalidateQueries({
         queryKey: getUserQueryKey(params.userId)
       })
       queryClient.invalidateQueries({
         queryKey: getCurrentAccountQueryKey()
       })
-      // Invalidate our user - this will refresh their badge info
-      // NOTE: this will eventually move to the users metadata
       queryClient.invalidateQueries({
         queryKey: getArtistCreatedFanClubQueryKey(params.userId)
       })
-      // The confirmation call will associate the external wallet, so we need to invalidate the connected wallets query
       queryClient.invalidateQueries({
         queryKey: getConnectedWalletsQueryOptions(
           { audiusSdk },

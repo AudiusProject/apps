@@ -56,7 +56,6 @@ type EditCollectionFormProps = {
   isAlbum: boolean
   isUpload: boolean
   focus?: Nullable<string>
-  /** Rendered inside the Formik context, e.g. a draft autosaver. */
   children?: ReactNode
 }
 
@@ -98,8 +97,6 @@ export const EditCollectionForm = (props: EditCollectionFormProps) => {
           confirmCallback
         })
       } else {
-        // Forward the promise so Formik keeps `isSubmitting` true (and the
-        // submit button in its loading state) while the save is in flight.
         return onSubmit(values)
       }
     },

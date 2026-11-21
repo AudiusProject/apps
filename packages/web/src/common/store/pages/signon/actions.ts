@@ -68,27 +68,14 @@ export const FETCH_REFERRER = 'SIGN_ON/FETCH_REFERRER'
 export const SET_REFERRER = 'SIGN_ON/SET_REFERRER'
 export const SET_WELCOME_MODAL_SHOWN = 'SIGN_ON/SET_WELCOME_MODAL_SHOWN'
 
-/**
- * Sets the value for a field in the sign on state
- * @param field the field to be set
- * @param value the value to be set
- */
 export function setValueField(field: string, value: string | string[]) {
   return { type: SET_VALUE_FIELD, field, value }
 }
 
-/**
- * Sets the value for a field in the sign on state
- * @param field the field to be set
- * @param value the value to be set
- */
 export function setField(field: string, value: unknown) {
   return { type: SET_FIELD, field, value }
 }
 
-/**
- * Resets a field in the signin flow
- */
 export function resetSignOn() {
   return { type: RESET_SIGN_ON }
 }
@@ -102,10 +89,6 @@ export function checkEmail(
   return { type: CHECK_EMAIL, email, onAvailable, onUnavailable, onError }
 }
 
-/**
- * Requests the backend to check if email is valid
- * @param email the email to check
- */
 export function validateEmail(email: string) {
   return { type: VALIDATE_EMAIL, email }
 }
@@ -118,21 +101,10 @@ export function validateEmailSucceeded(available?: boolean) {
   return { type: VALIDATE_EMAIL_SUCCEEDED, available }
 }
 
-/**
- * Email is not valid
- * @param error The reason the email is not vallid
- */
 export function validateEmailFailed(error: string) {
   return { type: VALIDATE_EMAIL_FAILED, error }
 }
 
-/**
- * Requests the backend to check if handle is valid
- * @param handle the handle to check
- * @param isOauthVerified whether or not the user is verified via oauth
- * @param onValidate
- *  callback to fire on successful validation
- */
 export function validateHandle(
   handle: string,
   isOauthVerified: boolean,
@@ -145,39 +117,22 @@ export function validateHandleSucceeded() {
   return { type: VALIDATE_HANDLE_SUCCEEDED }
 }
 
-/**
- * handle is not valid
- * @param error The reason the handle is not valid
- */
 export function validateHandleFailed(error: string) {
   return { type: VALIDATE_HANDLE_FAILED, error }
 }
 
-/**
- * sign up
- * takes params from store signon state
- */
 export function signUp() {
   return { type: SIGN_UP }
 }
 
-/**
- * create guest account
- */
 export function createGuestAccount(guestEmail: string) {
   return { type: CREATE_GUEST_ACCOUNT, guestEmail }
 }
 
-/**
- * When the user starts the sign up flow
- */
 export function startSignUp() {
   return { type: START_SIGN_UP }
 }
 
-/**
- * When the user finishes the sign up flow
- */
 export function finishSignUp() {
   return { type: FINISH_SIGN_UP }
 }
@@ -220,12 +175,6 @@ export const signUpFailed = ({
   uiErrorCode
 })
 
-/**
- * Attemp sign-in to the account
- * @param email account email
- * @param password account password
- * @param? otp account otp
- */
 export function signIn(email: string, password: string, otp?: string) {
   return { type: SIGN_IN, email, password, otp }
 }
@@ -262,18 +211,10 @@ export function setHidePreviewHint() {
   return { type: HIDE_PREVIEW_HINT }
 }
 
-/**
- * Follows users in signup flow after user is created
- * @param userIds array of userIds to follow
- */
 export function followArtists(skipDefaultFollows: boolean = false) {
   return { type: FOLLOW_ARTISTS, skipDefaultFollows }
 }
 
-/**
- * Sets the status of the signon flow 'loading' or 'editing'
- * @param status Status: 'loading' or 'editing'
- */
 export function setStatus(status: 'loading' | 'editing') {
   return { type: SET_STATUS, status }
 }
@@ -282,33 +223,18 @@ export function usingExternalWallet() {
   return { type: USING_EXTERNAL_WALLET }
 }
 
-/**
- * Sets the accout status as ready, when the account is created and the followers are confirmed
- */
 export function setAccountReady() {
   return { type: SET_ACCOUNT_READY }
 }
 
-/**
- * Marks the Identity portion of signup complete so core account creation can
- * be retried without registering the email again.
- */
 export function setIdentityAccountReady() {
   return { type: SET_IDENTITY_ACCOUNT_READY }
 }
 
-/**
- * Adds the user ids to be followed on account completion
- * @param userIds The user ids to add as selected and follow
- */
 export function addFollowArtists(userIds: ID[]) {
   return { type: ADD_FOLLOW_ARTISTS, userIds }
 }
 
-/**
- * Removes the user ids from the selected userIds array
- * @param userIds The user ids to remove from selected
- */
 export function removeFollowArtists(userIds: ID[]) {
   return { type: REMOVE_FOLLOW_ARTISTS, userIds }
 }
@@ -320,12 +246,6 @@ export const showRequiresAccountToast = (isAccountIncomplete?: boolean) =>
       : 'You need an account to do that!'
   })
 
-/**
- * Opens the signin/up modal in mobile and routes to the page on desktop
- * @param signIn Determines if the SignIn or SignUp flow is displayed
- * @param page optional page to open sign on to
- * @param fields optional fields to set in the sign in state when opening
- */
 export const openSignOn = (
   signIn = false,
   page: string | null = null,
@@ -356,18 +276,11 @@ export const sendWelcomeEmail = (name: string) => ({
   name
 })
 
-/**
- * Fetches the referring user given their handle
- * @param handle the handle captured by the ?ref=<handle> search param
- */
 export const fetchReferrer = (handle: string) => ({
   type: FETCH_REFERRER,
   handle
 })
 
-/**
- * Sets the user id of the referrer who invited this user signing up
- */
 export const setReferrer = (userId: ID) => ({
   type: SET_REFERRER,
   userId
@@ -378,8 +291,4 @@ export const setWelcomeModalShown = (newValue: boolean) => ({
   value: newValue
 })
 
-/*
- * Triggers completeFollowArtists saga that determines the best way to follow artists based on
- * the potentially ongoing account creation logic
- */
 export const completeFollowArtists = createCustomAction(COMPLETE_FOLLOW_ARTISTS)

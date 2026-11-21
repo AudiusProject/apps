@@ -12,7 +12,6 @@ import Animated, {
 import { Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 
-/** Scroll range over which the large title hands off to the header title. */
 const TITLE_HANDOFF_START = 20
 const TITLE_HANDOFF_END = 44
 
@@ -21,10 +20,6 @@ type LargeTitleContextValue = {
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
 }
 
-/**
- * Lets `UserList` render the large title as its list header and report its
- * scroll offset, without every user list screen threading the props through.
- */
 export const UserListLargeTitleContext =
   createContext<LargeTitleContextValue | null>(null)
 
@@ -58,10 +53,6 @@ type UserListScreenProps = {
   children: ReactElement
 }
 
-/**
- * A pushed user list (followers, reposts, ...) with a large title at the top of
- * the list that scrolls away into the header.
- */
 export const UserListScreen = (props: UserListScreenProps) => {
   const { title, children } = props
   const scrollY = useSharedValue(0)

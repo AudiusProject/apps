@@ -39,7 +39,6 @@ export function* createAlbumSaga() {
 function* createAlbumWorker(
   action: ReturnType<typeof cacheCollectionsActions.createAlbum>
 ) {
-  // Return early if this is not an album
   if (!action.isAlbum) return
 
   yield* waitForWrite()

@@ -68,7 +68,6 @@ export const FanClubSortScreen = () => {
     )
 
   const handleBackPress = useCallback(() => {
-    // Navigate back to parent screen with sort params
     navigation.popTo(
       'FanClubsExplore',
       {

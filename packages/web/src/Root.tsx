@@ -45,7 +45,6 @@ const AppOrPublicSite = () => {
   )
 
   useEffect(() => {
-    // Listen to popstate events to update renderPublicSite
     const handlePopState = () => {
       setRenderPublicSite(isPublicSiteRoute(window.location.pathname))
     }

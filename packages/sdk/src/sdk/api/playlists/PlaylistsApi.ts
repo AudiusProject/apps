@@ -59,8 +59,6 @@ import {
   type PlaylistsApiServicesConfig
 } from './types'
 
-// Returns current timestamp in seconds, which is the expected
-// format for client-generated playlist entry timestamps
 const getCurrentTimestamp = () => {
   return Math.floor(Date.now() / 1000)
 }
@@ -162,10 +160,8 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       )
     ])
 
-    // Write tracks to chain
     const trackIds = await Promise.all(
       trackMetadatas.map(async (t, i) => {
-        // Transform track metadata (cast: SDK upload schema and API body types align at runtime)
         const trackMetadata = this.combineMetadata(
           this.trackUploadHelper.transformTrackUploadMetadataV2(
             t as CreateTrackRequestBody,
@@ -180,7 +176,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
           throw new Error(`Failed to upload track: ${t.title}`)
         }
 
-        // Update metadata to include uploaded CIDs
         const updatedMetadata =
           this.trackUploadHelper.populateTrackMetadataWithUploadResponseV2(
             trackMetadata,
@@ -218,7 +213,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     const timestamp = getCurrentTimestamp()
 
     if (this.entityManager) {
-      // Update metadata to include track ids
       const updatedMetadata = {
         ...params.metadata,
         playlistContents: (trackIds ?? []).map((trackId) => ({
@@ -228,7 +222,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
         playlistImageSizesMultihash: imageUploadResponse?.orig_file_cid
       }
       const playlistId = await this.generatePlaylistId()
-      // Write playlist metadata to chain
       const response = await this.entityManager.manageEntity({
         userId,
         entityType: EntityType.PLAYLIST,
@@ -246,7 +239,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       }
     }
 
-    // Update metadata to include track ids
     const updatedMetadata = {
       ...params.metadata,
       playlistContents: (trackIds ?? []).map((trackId) => ({
@@ -273,7 +265,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: PublishPlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     await parseParams('publishPlaylist', PublishPlaylistSchema)(params)
 
     return await this.fetchAndUpdatePlaylist(
@@ -297,7 +288,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: AddTrackToPlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     await parseParams('addTrackToPlaylist', AddTrackToPlaylistSchema)(params)
 
     return await this.fetchAndUpdatePlaylist(
@@ -327,7 +317,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: RemoveTrackFromPlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { trackIndex } = await parseParams(
       'removeTrackFromPlaylist',
       RemoveTrackFromPlaylistSchema
@@ -362,7 +351,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerUpdatePlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const parsedParameters = await parseParams(
       'updatePlaylist',
       UpdatePlaylistSchema
@@ -388,7 +376,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: UpdatePlaylistRequestWithImage,
     requestInit?: RequestInit
   ) {
-    // Upload art
     const metadata = params.metadata
     if (params.imageFile) {
       const res = await this.storage
@@ -424,7 +411,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerDeletePlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, playlistId } = await parseParams(
       'deletePlaylist',
       DeletePlaylistSchema
@@ -459,7 +445,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerFavoritePlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, playlistId, metadata } = await parseParams(
       'favoritePlaylist',
       FavoritePlaylistSchema
@@ -495,7 +480,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerUnfavoritePlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, playlistId } = await parseParams(
       'unfavoritePlaylist',
       UnfavoritePlaylistSchema
@@ -530,7 +514,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerRepostPlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, playlistId, metadata } = await parseParams(
       'repostPlaylist',
       RepostPlaylistSchema
@@ -554,7 +537,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
-      // Map repostRequestBody (generated API) to metadata (entity manager schema)
       const entityManagerParams = {
         playlistId: params.playlistId,
         userId: params.userId,
@@ -572,7 +554,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerUnrepostPlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, playlistId } = await parseParams(
       'unrepostPlaylist',
       UnrepostPlaylistSchema
@@ -607,7 +588,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     params: EntityManagerSharePlaylistRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, playlistId } = await parseParams(
       'sharePlaylist',
       SharePlaylistSchema
@@ -648,10 +628,8 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
 
     if (playlistMetadata.tags) {
       if (!metadata.tags) {
-        // Take playlist tags
         metadata.tags = playlistMetadata.tags
       } else {
-        // Combine tags and dedupe
         metadata.tags = [
           ...new Set([
             ...metadata.tags.split(','),
@@ -680,7 +658,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     },
     advancedOptions?: AdvancedOptions
   ) {
-    // Fetch playlist
     const playlistResponse = await this.getPlaylist({
       playlistId,
       userId
@@ -734,7 +711,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       CreatePlaylistSchema
     )(params)
 
-    // Upload cover art to storage node
     const coverArtResponse =
       imageFile &&
       (await this.storage
@@ -762,7 +738,6 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    // Write playlist metadata to chain
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.PLAYLIST,

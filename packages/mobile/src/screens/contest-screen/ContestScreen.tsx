@@ -78,11 +78,6 @@ const messages = {
   secs: 'SECS'
 }
 
-// -----------------------------------------------------------------------------
-// Countdown row. Matches Figma nodes 2888-131647 + 2857-99182: number and
-// label share the same text color; thin vertical dividers between the four
-// unit columns.
-// -----------------------------------------------------------------------------
 const CountdownTile = ({
   value,
   label,
@@ -92,9 +87,6 @@ const CountdownTile = ({
   label: string
   isSubdued?: boolean
 }) => (
-  // Countdown tiles are pure display — `pointerEvents='none'` on the
-  // whole Flex so touches fall through to the underlying scroll view
-  // rather than sticking to the text.
   <Flex
     direction='column'
     alignItems='center'
@@ -143,18 +135,8 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
   )
 }
 
-/**
- * Minimal "no-op" tab icon. `collapsibleTabScreen` always renders an
- * `Icon` above the tab label — this placeholder keeps that contract
- * satisfied while visually leaving the contest tab bar as text-only
- * (Figma calls for labels-only). Swap for a real harmony icon if
- * the designs change.
- */
 const EmptyTabIcon = () => null
 
-// -----------------------------------------------------------------------------
-// Screen
-// -----------------------------------------------------------------------------
 export const ContestScreen = () => {
   const { params } = useRoute<'Contest'>()
   const navigation = useNavigation()
@@ -174,18 +156,9 @@ export const ContestScreen = () => {
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
   const dispatch = useDispatch()
 
-  // Shared scroll value bridged into the contest tabs via
-  // `ContestScrollBridge`. Read by `ContestNavOverlay` so the
-  // floating nav bar's blur background + icon colors fade in as the
-  // hero scrolls out of view — same pattern `ProfileScreen` uses.
   const scrollY = useSharedValue(0)
   useContestScrollStatusBar(scrollY)
 
-  // Updates tab visibility — for non-hosts, hide the tab until
-  // there's at least one host-authored top-level post (a "post
-  // update"). The host always sees the tab so they have somewhere
-  // to compose from. We mirror the filter
-  // `ContestCommentsTile`/the mobile-web screen uses internally.
   const queryClient = useQueryClient()
   const { data: commentFeedItems } = useEventComments({
     eventId: eventId ?? 0,
@@ -205,10 +178,6 @@ export const ContestScreen = () => {
   })
   const showUpdatesTab = isOwner || hasPostUpdates
 
-  // Per the contest QA pass the kebab affordance was replaced with a
-  // dedicated share icon at the top-right of the nav overlay (and
-  // Follow moved next to Enter Contest). Keep this callback as the
-  // share entry point so ContestNavOverlay can invoke it directly.
   const handleShareContest = useCallback(() => {
     if (trackId == null) return
     dispatch(
@@ -220,22 +189,14 @@ export const ContestScreen = () => {
     )
   }, [dispatch, trackId])
 
-  // Pull-to-refresh: invalidate the contest's event + comment queries so all
-  // tabs (details, updates, submissions, comments) refetch the next time
-  // they're focused. Mirrors the profile pull-to-refresh pattern; cover
-  // photo expansion is handled by the `PullToRefreshPortalHost` below.
   const [isRefreshing, setIsRefreshing] = useState(false)
   const handleRefresh = useCallback(() => {
     if (!eventId) return
     setIsRefreshing(true)
     queryClient.invalidateQueries({ queryKey: getEventQueryKey(eventId) })
     queryClient.invalidateQueries({
-      // Matches QUERY_KEYS.eventComments — written this way to avoid pulling
-      // the whole queryKeys map into the contest screen for one constant.
       queryKey: ['eventComments', eventId]
     })
-    // Drop the spinner shortly after — the underlying queries are async but
-    // we don't have a single status flag to watch like profile does.
     setTimeout(() => setIsRefreshing(false), 600)
   }, [eventId, queryClient])
 
@@ -254,9 +215,6 @@ export const ContestScreen = () => {
     unfollowEvent
   ])
 
-  // Only render the Stems & Downloads section when the track actually
-  // has downloadable content — DownloadSection assumes a downloadable
-  // track and its file-sizes query errors otherwise.
   const { data: downloadableFlag } = useTrack(trackId, {
     select: (t) => t?.is_downloadable
   })
@@ -269,9 +227,6 @@ export const ContestScreen = () => {
     return dayjs(contest.endDate).isBefore(dayjs())
   }, [contest?.endDate])
 
-  // Split the deadline into date + time so each part can be styled
-  // independently — Figma 2888-131667 renders the date in strong
-  // uppercase next to a lighter subdued time.
   const deadlineParts = useMemo(() => {
     if (!contest?.endDate) return null
     const d = dayjs(contest.endDate)
@@ -283,11 +238,6 @@ export const ContestScreen = () => {
 
   const handlePickWinners = useCallback(() => {
     if (!trackId) return
-    // Reuse the existing track-screen "Pick Winners" drawer — it
-    // informs the artist that picking winners has to happen in a web
-    // browser. The native picking flow doesn't exist yet, so deferring
-    // the user there is the same pattern the track screen already
-    // uses.
     dispatch(setVisibility({ drawer: 'PickWinners', visible: true }))
   }, [trackId, dispatch])
 
@@ -296,10 +246,6 @@ export const ContestScreen = () => {
     await enterContest()
   }, [enterContest])
 
-  // Hide the stack navigator header — the in-hero back button is the
-  // only back affordance in the Figma (2888-131647). Leaving the
-  // default header visible duplicates it. Must stay before any early
-  // return so the hook order is stable across render paths.
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false })
   }, [navigation])
@@ -321,31 +267,6 @@ export const ContestScreen = () => {
     | string
     | undefined
 
-  // Collapsible header — returned from `renderHeader` below. Tracks
-  // the exact same visual hierarchy as the previous inline version:
-  // hero banner -> title -> primary CTA + kebab -> submissions due
-  // -> countdown -> divider -> hosted-by row. When the user scrolls
-  // in any tab body, this header slides up and the tab bar docks to
-  // the top of the screen. Same collapsing pattern the profile
-  // screen uses.
-  // Every container in the collapsible header tree is marked with
-  // `pointerEvents='box-none'` so scroll/pan gestures on blank
-  // header space fall through to the underlying collapsible scroll
-  // view — same pattern `ProfileHeader` uses to stay interactive
-  // while scrolling. Without this, touches on the hero / title /
-  // countdown zone were swallowed by the header's own Views, so
-  // the collapsible animation only fired when the user happened to
-  // drag inside the tab body. Interactive leaves (Pressable, Button,
-  // UserLink, ContestHero's back button) still capture their own
-  // taps because they're explicit touch targets — only empty space
-  // becomes scroll-transparent.
-  // Theme-aware `backgroundColor='white'` on the outermost wrapper so
-  // the header reacts when the app theme flips (e.g. system light→dark).
-  // Without it, `Tabs.Container`'s internal `topContainer` style
-  // hardcodes `backgroundColor: 'white'` (literal) behind the header,
-  // leaving the title / submissions-due / hosted-by block stuck on a
-  // white backdrop after a theme change. Same pattern `ProfileHeader`
-  // uses to cover the library default.
   const renderHeader = () => (
     <Flex backgroundColor='white' pointerEvents='box-none'>
       {/* Scroll bridge — lives inside the collapsible header so
@@ -414,9 +335,6 @@ export const ContestScreen = () => {
                 variant={followState?.isFollowed ? 'secondary' : 'primary'}
                 size='small'
                 onPress={handleToggleFollow}
-                // Show a spinner while the follow state loads instead of
-                // defaulting to "Follow", which would flash before snapping
-                // to "Following" for users who already follow the contest.
                 isLoading={isFollowStatePending}
                 disabled={!currentUserId || !eventId}
                 fullWidth
@@ -530,10 +448,6 @@ export const ContestScreen = () => {
     followerCount: followState?.followerCount ?? 0
   }
 
-  // Each tab body lives in its own file under `./tabs/` and reads
-  // the shared state via `useContestPage()`. They all render with
-  // `app/components/core` `FlatList` / `SectionList` variants so the
-  // scroll events hook into the collapsible header wrapping them.
   const detailsScreen = collapsibleTabScreen({
     name: 'Details',
     Icon: EmptyTabIcon,
@@ -585,15 +499,7 @@ export const ContestScreen = () => {
             <View style={{ height: '100%' }}>
               <CollapsibleTabNavigator
                 renderHeader={renderHeader}
-                // Hero + title + CTA + countdown + hosted-by stack.
-                // This is the seed height the collapsible navigator
-                // uses before its on-mount measurement kicks in —
-                // over-estimating is fine (the measured value takes
-                // over), but underestimating causes a visible jump.
                 headerHeight={CONTEST_HERO_HEIGHT + 460}
-                // Reserve enough space at full-collapse for the
-                // status bar inset + our floating nav bar so the
-                // overlay never overlaps the tab strip.
                 minHeaderHeight={insets.top + CONTEST_NAV_CONTROLS_HEIGHT}
               >
                 {detailsScreen}

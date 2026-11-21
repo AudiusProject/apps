@@ -9,7 +9,6 @@ type OwnProps = {
   options: string[]
   selection: string
   onSelectOption: (option: string) => void
-  // Optional formatter that specifies the rendered option text
   textFormatter?: (option: string) => string
 }
 

@@ -10,7 +10,6 @@ export const sign = (digest: any, privateKey: Buffer) => {
   return signature
 }
 
-// lazyload permitTypehash to avoid a web3 race
 let _permitTypehash: null | string = null
 const getPermitTypehash = () => {
   if (!_permitTypehash) {
@@ -37,8 +36,6 @@ export interface ApproveTokens {
   value: BN
 }
 
-// Returns the EIP712 hash which should be signed by the user
-// in order to make a call to `permit`
 export function getPermitDigest(
   web3: Web3,
   name: string,
@@ -76,8 +73,6 @@ export interface TransferTokens {
   arbiterFee: BN
 }
 
-// Returns the EIP712 hash which should be signed by the user
-// in order to make a call to `transferTokens`
 export function getTransferTokensDigest(
   web3: Web3,
   name: string,
@@ -117,7 +112,6 @@ export function getTransferTokensDigest(
   return Utils.keccak256(encoded)
 }
 
-// Gets the EIP712 domain separator
 function getDomainSeparator(
   web3: Web3,
   name: string,

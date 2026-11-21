@@ -44,7 +44,6 @@ import { TextField } from 'app/components/fields/TextField'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { launchSelectImageActionSheet } from 'app/utils/launchSelectImageActionSheet'
 
-// Helper function to detect platform from URL
 const detectPlatform = (
   url: string
 ): 'x' | 'instagram' | 'tiktok' | 'website' => {
@@ -63,7 +62,6 @@ const detectPlatform = (
   return 'website'
 }
 
-// Get platform icon
 const getPlatformIcon = (platform: string) => {
   switch (platform) {
     case 'x':
@@ -283,8 +281,6 @@ export const EditCoinDetailsScreen = () => {
       setBannerError(null)
       setIsProcessingBanner(true)
       setBannerImageFile(image)
-      // Use the file URI for preview (React Native format)
-      // image.file can be string | File | { uri, name, type } from launchSelectImageActionSheet
       let previewUri = image.url
       if (image.file) {
         if (typeof image.file === 'object' && 'uri' in image.file) {
@@ -297,7 +293,6 @@ export const EditCoinDetailsScreen = () => {
       setIsProcessingBanner(false)
     }
 
-    // Use same dimensions as cover photo: width 2000, height 1000 (aspect ratio 2:1)
     launchSelectImageActionSheet(handleImageSelected, {
       width: 2000,
       height: 1000
@@ -307,18 +302,16 @@ export const EditCoinDetailsScreen = () => {
   const handleSubmit = async (values: EditCoinDetailsFormValues) => {
     if (!coin) return
 
-    // Transform social links array for API - include empty strings to indicate deletion
     const transformedValues = {
       description: values.description,
       links: values.socialLinks.filter(
         (link: string) => link !== null && link !== undefined
       ),
-      // SDK uploadFile accepts both web File objects and React Native file objects with { uri, name, type }
       bannerImageFile:
         bannerImageFile?.file &&
         typeof bannerImageFile.file === 'object' &&
         'uri' in bannerImageFile.file
-          ? (bannerImageFile.file as any) // SDK handles React Native file format at runtime
+          ? (bannerImageFile.file as any)
           : undefined
     }
 
@@ -330,11 +323,10 @@ export const EditCoinDetailsScreen = () => {
       navigation.goBack()
     } catch (e) {
       await console.error('EditCoinDetails', e instanceof Error)
-      throw e // Re-throw to let Formik handle the error
+      throw e
     }
   }
 
-  // Populate initial social links from existing coin data
   const initialSocialLinks = [
     coin?.link1,
     coin?.link2,

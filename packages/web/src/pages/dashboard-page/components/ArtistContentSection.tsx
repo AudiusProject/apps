@@ -66,7 +66,6 @@ export const ArtistContentSection = () => {
       setSelectedPill(pill)
       setFilterText('')
 
-      // Reset filter button state when switching content types
       if (!isTracks && pill === Pills.TRACKS) {
         setSelectedAlbumFilter(null)
       } else if (isTracks && pill === Pills.ALBUMS) {

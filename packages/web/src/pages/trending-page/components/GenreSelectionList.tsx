@@ -34,11 +34,6 @@ const GenreButton = ({
 
 type GenreSelectionListProps = {
   genres: string[]
-  /**
-   * Genres shown by default (no active search). When provided, `genres` is
-   * treated as the searchable superset so the top genres display first while
-   * long-tail genres remain discoverable via search.
-   */
   topGenres?: string[]
   didSelectGenre: (genre: string | null) => void
   selectedGenre: string | null
@@ -54,8 +49,6 @@ const messages = {
   searchPlaceholder: 'Search Genres'
 }
 
-// A selectable list of genres. Used to filter
-// trending on mobile and desktop.
 const GenreSelectionList = ({
   genres,
   topGenres,
@@ -71,8 +64,6 @@ const GenreSelectionList = ({
     didSelectGenre,
     { selectedGenre }
   )
-  // Show the top genres by default; search across the full list so long-tail
-  // genres remain discoverable.
   const sourceGenres = !searchValue.trim() && topGenres ? topGenres : genres
   const filteredGenreList = sourceGenres.filter((g) =>
     g.toLowerCase().includes(searchValue.toLowerCase())
@@ -94,7 +85,6 @@ const GenreSelectionList = ({
     />
   ))
 
-  // Special case the All Genres button
   if (messages.all.toLowerCase().includes(searchValue.toLowerCase())) {
     genreList.unshift(
       <GenreButton

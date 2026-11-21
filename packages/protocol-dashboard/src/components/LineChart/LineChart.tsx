@@ -155,10 +155,8 @@ const getOptions = (
     yAlign: 'bottom',
     position: 'nearest',
     custom: function (tooltipModel: any) {
-      // Tooltip Element
       let tooltipEl = document.getElementById(`chartjs-tooltip-${id}`)
 
-      // Create element on first render
       if (!tooltipEl) {
         tooltipEl = document.createElement('div')
         tooltipEl.id = `chartjs-tooltip-${id}`
@@ -166,7 +164,6 @@ const getOptions = (
         document.body.appendChild(tooltipEl)
       }
 
-      // Hide if no tooltip
       if (tooltipModel.opacity === 0) {
         ;(tooltipEl as any).style.opacity = 0
         return
@@ -324,7 +321,6 @@ const LineChart: React.FC<LineChartProps> = ({
           <Error />
         ) : data && labels ? (
           <Line
-            // On the initial renders the graph will flicker if redraw is `true`. So we only want redraw on once the user actually changes the data set (i.e. the selected time range).
             redraw={pastSecondDraw}
             data={getData(data, labels, showLeadingDay)}
             options={getOptions(title, dateFormatter, tooltipTitle, size)}

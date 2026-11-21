@@ -45,7 +45,7 @@ const { FEED_PAGE, TRENDING_PAGE } = route
 const createTextField = () => ({
   value: '',
   error: '',
-  status: 'editing' // 'editing', 'loading', 'success', 'failure', 'disabled'
+  status: 'editing'
 })
 
 const initialState = {
@@ -58,7 +58,6 @@ const initialState = {
   otp: createTextField(),
   handle: createTextField(),
   isGuest: false,
-  /** Whether the user linked their social media account on the first page (email page) of the sign up flow */
   linkedSocialOnFirstPage: false,
   accountAlreadyExisted: false,
   verified: false,
@@ -69,9 +68,7 @@ const initialState = {
   status: 'editing', // 'editing', 'loading', 'success', or 'failure'
   page: Pages.EMAIL,
   startedSignUpProcess: false,
-  /** Whether or not the user has fully completed the sign up flow */
   finishedSignUpProcess: false,
-  /** Whether user finished the main part of the flow (before 'Select Genres'), upon which their account gets created */
   finishedPhase1: false,
   hidePreviewHint: false,
   selectedUserIds: [],
@@ -96,8 +93,6 @@ const actionsMap = {
   [RESET_SIGN_ON](state) {
     return {
       ...initialState,
-      // Don't reset route on completion or on exit so completing the form
-      // even if toggling b/w sign up and sign in redirects to the right place
       routeOnCompletion: state.routeOnCompletion,
       routeOnExit: state.routeOnExit,
       isMobileSignOnVisible: state.isMobileSignOnVisible,

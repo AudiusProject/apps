@@ -91,12 +91,6 @@ const { requestPushNotificationPermissions } = settingsPageActions
 const { saveCollection } = collectionsSocialActions
 const { toast } = toastActions
 
-/**
- * Sends a recovery info email to the currently logged-in user.
- * Inlined here from the legacy `recovery-email/sagas.ts` after the user-
- * facing flow moved to the `useResendRecoveryEmail` mutation hook. Sign-up
- * still calls this generator inline as part of account creation.
- */
 function* sendRecoveryEmail() {
   const authService = yield* getContext('authService')
   const identityService = yield* getContext('identityService')
@@ -113,7 +107,7 @@ function* sendRecoveryEmail() {
   })
 }
 
-const SIGN_UP_TIMEOUT_MILLIS = 20 /* min */ * 60 * 1000
+const SIGN_UP_TIMEOUT_MILLIS = 20 * 60 * 1000
 const DEFAULT_HANDLE_VERIFICATION_TIMEOUT_MILLIS = 5_000
 const PASSWORD_RESET_REQUIRED_KEY = 'password-reset-required'
 
@@ -134,13 +128,11 @@ const hasPendingPasswordReset = () => {
 
 function* getDefautFollowUserIds() {
   const { ENVIRONMENT } = yield* getContext('env')
-  // Users ID to filter out of the suggested artists to follow list and to follow by default
 
   let defaultFollowUserIds: Set<number> = new Set([])
 
   switch (ENVIRONMENT) {
     case 'production': {
-      // user id 51: official audius account
       defaultFollowUserIds = new Set([51])
       break
     }
@@ -149,7 +141,6 @@ function* getDefautFollowUserIds() {
   return defaultFollowUserIds
 }
 
-// Fetches whatever artists we want to follow for all accounts by default - aka the Audius acct
 function* fetchDefaultFollowArtists() {
   yield* call(waitForRead)
   try {
@@ -208,10 +199,8 @@ function* validateHandle(
       if (onValidate) onValidate(true)
       return
     }
-    yield* delay(1000) // Wait 1000ms to debounce user input
+    yield* delay(1000)
 
-    // Call fetch user by handle and do not retry if the user is not created, it will
-    // return 404
     const user = yield* call(queryUserByHandle, handle)
     const handleInUse = !!user
     const handleCheckTimeout =
@@ -305,7 +294,6 @@ function* checkEmail(action: ReturnType<typeof signOnActions.checkEmail>) {
     )
     if (inUse) {
       yield* put(signOnActions.goToPage(Pages.SIGNIN))
-      // let mobile client know that email is in use
       yield* put(signOnActions.validateEmailSucceeded(false))
       if (action.onUnavailable) {
         yield* call(action.onUnavailable)
@@ -369,12 +357,10 @@ function* createGuestAccount(
 
   const authService = yield* getContext('authService')
 
-  // get user & user bank
   yield* put(
     confirmerActions.requestConfirmation(
       guestEmail,
       function* () {
-        // clear existing user state
         yield* call([localStorage, 'clearAudiusAccount'])
         yield* call([localStorage, 'clearAudiusAccountUser'])
         yield* call([authService, authService.signOut])
@@ -410,8 +396,6 @@ function* createGuestAccount(
           throw new Error('Failed to create user bank')
         }
 
-        // associates user record with blockchain user ID and creates notification settings
-        // necessary for sending purchase emails
         yield* call(audiusBackendInstance.updateUserLocationTimezone, { sdk })
 
         yield* put(
@@ -497,10 +481,6 @@ function* signUp() {
               )
 
               {
-                // Previously dispatched changePasswordActions.changePassword
-                // which ran a watcher saga in change-password/sagas.ts. Inlined
-                // here as a direct authService call now that the user-facing
-                // change-password flow lives in useChangePasswordFormConfiguration.
                 const authService = yield* getContext('authService')
                 try {
                   yield* call([authService, authService.changeCredentials], {
@@ -521,8 +501,6 @@ function* signUp() {
                 })
               )
 
-              // Optimistically update localStorage so getLocalAccount returns
-              // complete user data before the validator node has indexed.
               const updatedUser = {
                 ...account.user,
                 handle,
@@ -548,15 +526,12 @@ function* signUp() {
               const hedgehog = authService.hedgehogInstance
               if (!alreadyExisted) {
                 if (!usingExternalWallet) {
-                  // Sign up via Hedgehog
                   yield* call([hedgehog, hedgehog.signUp], {
                     username: email,
                     password
                   })
                   yield* fork(sendPostSignInRecoveryEmail, { handle, email })
                 } else {
-                  // Still save user data to Identity if using 3p wallet
-                  // so that users can manage their notifications settings etc.
                   const [wallet] = yield* call([
                     sdk.services.audiusWalletClient,
                     sdk.services.audiusWalletClient.getAddresses
@@ -567,9 +542,6 @@ function* signUp() {
                   })
                 }
 
-                // Identity is committed before the core user write. Preserve
-                // that checkpoint so a failed core write can be retried without
-                // attempting to register the same email again.
                 yield* put(signOnActions.setIdentityAccountReady())
               }
 
@@ -578,9 +550,6 @@ function* signUp() {
                 sdk.services.audiusWalletClient.getAddresses
               ])
 
-              // A previous relay may have succeeded even if its confirmation
-              // timed out. Check the wallet before issuing another CREATE so
-              // resuming remains idempotent once that user is indexed.
               const existingAccount = alreadyExisted
                 ? yield* call(getWalletAccountSaga, wallet, sdk, queryClient)
                 : null
@@ -588,9 +557,6 @@ function* signUp() {
               if (existingAccount) {
                 userId = existingAccount.user.user_id
 
-                // Older incomplete accounts can have an indexed core user but
-                // no profile name. Complete that user rather than creating a
-                // second user ID for the same wallet.
                 if (!existingAccount.user.name) {
                   const completeProfileRequest: UpdateUserRequestWithFiles = {
                     id: Id.parse(userId),
@@ -653,7 +619,6 @@ function* signUp() {
             yield* put(signOnActions.signUpSucceededWithId(userId))
 
             if (!isNativeMobile) {
-              // Set the has request browser permission to true as the signon provider will open it
               setHasRequestedBrowserPermission()
             } else {
               yield* call(
@@ -664,15 +629,12 @@ function* signUp() {
             }
             return handle
           } catch (err: unknown) {
-            // We are including 0 status code here to indicate rate limit,
-            // which appears to be happening for some devices.
             const rateLimited =
               isResponseError(err) && [0, 429].includes(err.response.status)
             const blocked = isResponseError(err) && err.response.status === 403
             const error = err instanceof Error ? err : new Error(err as string)
             const params: signOnActions.SignUpFailedParams = {
               error: error.message,
-              // TODO: Remove phase, stop using error Sagas for signup
               phase: 'CREATE_USER',
               shouldRedirect: false,
               shouldReport: true,
@@ -704,18 +666,14 @@ function* signUp() {
               console.error(error)
             }
             yield* put(signOnActions.signUpFailed(params))
-            // Let the confirmer run its failure callback. Swallowing this error
-            // causes the success callback to run and overwrite the failure.
             throw error
           }
         },
         function* () {
           yield* put(signOnActions.sendWelcomeEmail(name))
           yield* call(fetchAccountAsync, { shouldMarkAccountAsLoading: true })
-          // Check if user has selected artists to follow
           const selectedUserIds = yield* select(getFollowIds)
           if (selectedUserIds && selectedUserIds.length > 0) {
-            // User has selected artists, wait for them and follow
             yield* call(
               waitForValue,
               getFollowIds,
@@ -724,7 +682,6 @@ function* signUp() {
             )
             yield* put(signOnActions.followArtists())
           } else {
-            // User skipped artist selection, just follow default artists
             yield* put(signOnActions.followArtists())
           }
           yield* put(make(Name.CREATE_ACCOUNT_COMPLETE_CREATING, { handle }))
@@ -775,7 +732,6 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
         otp ?? signOn.otp.value
       )
     } catch (err) {
-      // Login failed entirely (no wallet returned)
       yield* put(signOnActions.signInFailed(String(err), 'FIND_WALLET', false))
       const trackEvent = make(Name.SIGN_IN_FINISH, {
         status: 'invalid credentials'
@@ -791,7 +747,6 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       queryClient
     )
 
-    // Login succeeded but we found no account for the user (incomplete signup)
     if (!account) {
       yield* put(
         signOnActions.signInFailed(
@@ -823,21 +778,15 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
 
     const { user } = account
 
-    // Handle deactivated account
     if (user.is_deactivated) {
       yield* put(
         make(Name.SIGN_IN_WITH_DEACTIVATED_ACCOUNT, { handle: user.handle })
       )
-      // authService.signIn persisted a session; clear it so fetchAccount
-      // doesn't restore the deactivated account on refresh.
       yield* call([authService, authService.signOut])
       yield* put(signOnActions.signInFailed('Account is deactivated'))
       yield* put(toastActions.toast({ content: messages.deactivatedAccount }))
       return
     }
-
-    // Login succeeded and we found a user, but it's missing name, likely
-    // due to incomplete signup
 
     if (!user.name) {
       yield* put(
@@ -886,16 +835,12 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       return
     }
 
-    // Now that we have verified the user is valid, run the account fetch flow,
-    // which will pull cached account data from call above.
     yield* put(
       accountActions.fetchAccount({ shouldMarkAccountAsLoading: true })
     )
     yield* put(signOnActions.signInSucceeded())
     const route = yield* select(getRouteOnCompletion)
 
-    // NOTE: Wait on the account success before recording the signin event so that the user account is
-    // populated in the store
     const { failure } = yield* race({
       success: take(accountActions.fetchAccountSucceeded.type),
       failure: take(accountActions.fetchAccountFailed)
@@ -915,7 +860,6 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       return
     }
 
-    // Apply retroactive referral
     if (signOn.referrer) {
       yield* fork(audiusBackendInstance.updateCreator, {
         metadata: { ...user, events: { referrer: signOn.referrer } },
@@ -932,7 +876,6 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
     yield* put(signOnActions.resetSignOn())
 
     if (!isNativeMobile) {
-      // Reset the sign on in the background after page load as to relieve the UI loading
       yield* delay(1000)
     }
     if (isNativeMobile) {
@@ -967,14 +910,11 @@ function* followCollections(
   }
 }
 
-/* This saga makes sure that artists chosen in sign up get followed accordingly */
 function* completeFollowArtists(
   _action: ReturnType<typeof signOnActions.completeFollowArtists>
 ) {
   const isAccountComplete = yield* call(queryIsAccountComplete)
   if (isAccountComplete) {
-    // If account creation has finished we need to make sure followArtists gets called
-    // Also we specifically request to not follow the defaults (Audius user, Hot & New Playlist) since that should have already occurred
     yield* put(signOnActions.followArtists(true))
   }
   // Otherwise, Account creation still in progress and followArtists will get called already, no need to call here
@@ -992,7 +932,6 @@ function* followArtists(
     ? new Set([])
     : yield* call(getDefautFollowUserIds)
   try {
-    // Auto-follow Hot & New Playlist
     if (!skipDefaultFollows) {
       if (ENVIRONMENT === 'production') {
         yield* fork(followCollections, [4281], FavoriteSource.SIGN_UP)
@@ -1039,10 +978,7 @@ function* followArtists(
       if (userIndex > -1) hasFollowConfirmed[userIndex] = true
     }
 
-    // Reload feed is in view
     yield* put(signOnActions.setAccountReady())
-    // The update user location depends on the user being discoverable in discprov
-    // So we wait until both the user is indexed and the follow user actions are finished
     yield* call(audiusBackendInstance.updateUserLocationTimezone, { sdk })
   } catch (err: any) {
     console.error(
@@ -1076,7 +1012,6 @@ function* watchSignUp() {
   yield* takeLatest(
     signOnActions.SIGN_UP,
     function* (_action: ReturnType<typeof signOnActions.signUp>) {
-      // Fetch the default follow artists in parallel so that we don't have to block on this later (thus adding perceived sign up time) in the follow artists step.
       yield* fork(fetchDefaultFollowArtists)
       yield* signUp()
     }

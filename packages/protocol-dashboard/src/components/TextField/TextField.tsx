@@ -7,14 +7,11 @@ import styles from './TextField.module.css'
 const formatValue = (value: string | undefined) => {
   if (!value) return value
 
-  // Capture whole part and decimal parth
   const capture = value.match(/^(?<whole>\d*)(?<dot>.)?(?<decimal>\d*)$/)
   if (!capture || !capture.groups) return value
   const { whole, decimal, dot } = capture.groups
 
-  // Parse out the whole number
   const numericWhole = whole ? parseInt(whole, 10) : 0
-  // Format the whole number
   const formattedWhole = numericWhole.toLocaleString('en-US')
 
   if (dot) {
@@ -83,8 +80,6 @@ const TextField: React.FC<TextFieldProps> = ({
   const setLabelRef = useCallback(
     (node) => {
       if (node) {
-        // TODO: wait for animation before getting width
-        // const width = node.getBoundingClientRect().width
         const width = 78
         setInputPadding(width + inputPaddingRight)
       }

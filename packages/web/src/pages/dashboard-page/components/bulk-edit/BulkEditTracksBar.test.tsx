@@ -84,7 +84,6 @@ describe('BulkEditTracksBar', () => {
       },
       imageFile: undefined
     })
-    // Selection clears once the tracks are updated.
     await waitFor(() =>
       expect(screen.getByText('Select all')).toBeInTheDocument()
     )

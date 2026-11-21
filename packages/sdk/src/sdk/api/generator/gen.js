@@ -46,7 +46,6 @@ const clearOutput = ({ apiFlavor }) => {
 }
 
 const downloadSpec = async ({ env, apiVersion, apiFlavor }) => {
-  // Setup args
   let baseURL = ''
   if (env === 'dev') {
     baseURL = 'http://127.0.0.1:1323'
@@ -95,7 +94,6 @@ program
   )
   .option('--generator <generator>', 'The generator to use', 'typescript-fetch')
   .action(async (options) => {
-    // Only generate default (v1) client; v1/full is no longer used
     const apiFlavor = ''
     const opts = { ...options, apiFlavor }
     clearOutput(opts)

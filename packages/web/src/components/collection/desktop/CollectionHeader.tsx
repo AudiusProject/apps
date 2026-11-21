@@ -313,8 +313,6 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
       borderBottom='strong'
     >
       {isEditingThis && isAlbumFromCollection ? (
-        // Albums can be switched between free and pay-to-unlock while editing.
-        // This takes the place of the gated-content banner until Apply.
         <InlineAlbumPriceAndAudience collectionId={collectionId} />
       ) : isStreamGated && streamConditions ? (
         <GatedContentSection

@@ -15,9 +15,6 @@ export const mockFanClub = {
   link_4: 'https://instagram.com/mock-coin',
   website: 'https://mock-coin.com',
   created_at: '2025-07-23T22:40:23.402315Z',
-  /**
-   * @note All the stuff below is sample data copied from prod data on Oct 24, 2025
-   */
   has_discord: false,
   coin_updated_at: '2025-10-08T19:11:40.970706Z',
   marketCap: 10049.184218222164,
@@ -94,7 +91,6 @@ export const mockUserCoinHasBalance = {
   mint: mockFanClub.mint,
   decimals: 5,
   logo_uri: mockFanClub.logo_uri,
-  // Should match the sum of all the balances in the accounts array
   balance: 8943183931062 + 2806208545 + 3406392544,
   balance_usd: 0.418136809630839 + 0.062363526989732576 + 0.002378729223560982,
   accounts: [

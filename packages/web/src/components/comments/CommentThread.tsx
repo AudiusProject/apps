@@ -16,7 +16,7 @@ import { useHighlightedComment } from './useHighlightedComment'
 
 export const CommentThread = ({ commentId }: { commentId: ID }) => {
   const { data: rootCommentData } = useComment(commentId)
-  const rootComment = rootCommentData as Comment // We can safely assume that this is a parent comment
+  const rootComment = rootCommentData as Comment
   const highlightedComment = useHighlightedComment()
   const highlightReplyId =
     highlightedComment?.parentCommentId === commentId
@@ -43,8 +43,6 @@ export const CommentThread = ({ commentId }: { commentId: ID }) => {
     setHasRequestedMore(true)
   }
 
-  // Combine the replies from the root comment and the additional loaded replies
-
   if (!rootComment) return null
 
   const { replyCount = 0 } = rootComment
@@ -53,7 +51,7 @@ export const CommentThread = ({ commentId }: { commentId: ID }) => {
 
   const replies = rootComment.replies ?? []
 
-  const hasMoreReplies = replyCount >= 3 && replies.length < replyCount // note: hasNextPage is undefined when inactive - have to explicitly check for false
+  const hasMoreReplies = replyCount >= 3 && replies.length < replyCount
 
   return (
     <Flex direction='column' as='li'>

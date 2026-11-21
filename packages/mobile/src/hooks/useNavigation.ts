@@ -33,13 +33,6 @@ export const setLastNavAction = (action: any) => {
   lastNavAction = action
 }
 
-/**
- * Custom wrapper around react-navigation `useNavigation`
- *
- * Features:
- * - Prevent duplicate navigation pushes
- * - Apply contextual params to all routes
- */
 export function useNavigation<
   ParamList extends ParamListBase,
   NavigationProp extends
@@ -50,8 +43,6 @@ export function useNavigation<
   const navigation: NavigationProp =
     options?.customNavigation ?? defaultNavigation
 
-  // Prevent duplicate pushes by de-duping
-  // navigation actions
   const performCustomPush = useCallback(
     (...config: PerformNavigationConfig<ParamList>) => {
       if (!isEqual(lastNavAction, config)) {
@@ -60,7 +51,6 @@ export function useNavigation<
         if (stackNavigator) {
           ;(stackNavigator.push as any)(...config)
 
-          // Set lastNavAction, it will be reset via an event handler in AppTabScreen
           setLastNavAction(config)
         }
       }

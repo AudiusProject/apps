@@ -1,5 +1,3 @@
-// Render the public site on the client instead of hydrating the SSR document.
-
 import '../polyfills'
 
 import 'setimmediate'

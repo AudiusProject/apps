@@ -68,7 +68,6 @@ const {
 
 const WAVEFORM_ARTWORK_SIZE = 176
 
-// Props from ConnectedTrackTile
 export type TrackTileProps = {
   id: ID
   index: number
@@ -165,7 +164,6 @@ export const TrackTile = ({
     size === TrackTileSize.LARGE &&
     !loading &&
     duration > 0
-  // With the waveform the right column is ~176px tall; the artwork matches it.
   const artworkSize = showWaveform
     ? WAVEFORM_ARTWORK_SIZE
     : size === TrackTileSize.LARGE
@@ -343,7 +341,6 @@ export const TrackTile = ({
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
         {
           cursor: canClickTile ? 'pointer' : 'default',
-          // The waveform tile is taller; its height comes from the content.
           height: showWaveform
             ? undefined
             : size === TrackTileSize.LARGE

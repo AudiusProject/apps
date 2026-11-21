@@ -24,7 +24,6 @@ export const useRefreshProfile = (
   const [isRefreshing, setIsRefreshing] = useState(false)
   const status = useSelector((state) => getProfileStatus(state, handleLower))
 
-  // Reset isRefreshing when status becomes SUCCESS
   useEffect(() => {
     if (status === Status.SUCCESS && isRefreshing) {
       setIsRefreshing(false)
@@ -34,7 +33,6 @@ export const useRefreshProfile = (
   const handleRefresh = useCallback(() => {
     if (profile) {
       setIsRefreshing(true)
-      // Invalidate user metadata queries
       queryClient.invalidateQueries({
         queryKey: getUserByHandleQueryKey(handleLower)
       })
@@ -42,7 +40,6 @@ export const useRefreshProfile = (
         queryKey: getUserQueryKey(profile.user_id)
       })
 
-      // Invalidate user playlists and albums
       queryClient.invalidateQueries({
         queryKey: getUserPlaylistsQueryKey({ userId: profile.user_id })
       })
@@ -50,7 +47,6 @@ export const useRefreshProfile = (
         queryKey: getUserAlbumsQueryKey({ userId: profile.user_id })
       })
 
-      // Handle tab-specific queries
       switch (currentTab) {
         case ProfilePageTabs.TRACKS:
           queryClient.resetQueries({
@@ -60,13 +56,11 @@ export const useRefreshProfile = (
           })
           break
         case ProfilePageTabs.ALBUMS:
-          // Albums are already invalidated above, but also reset for immediate refresh
           queryClient.resetQueries({
             queryKey: getUserAlbumsQueryKey({ userId: profile.user_id })
           })
           break
         case ProfilePageTabs.PLAYLISTS:
-          // Playlists are already invalidated above, but also reset for immediate refresh
           queryClient.resetQueries({
             queryKey: getUserPlaylistsQueryKey({ userId: profile.user_id })
           })

@@ -373,13 +373,11 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
     []
   )
 
-  // Ref so the stable FilterHeader component can always call the latest handler
   const handleSearchChangeRef = useRef(handleSearchChange)
   useEffect(() => {
     handleSearchChangeRef.current = handleSearchChange
   }, [handleSearchChange])
 
-  // Stable component reference — created once, never remounted on keystroke
   const FilterHeader = useMemo(() => {
     const Component = () => {
       const [value, setValue] = useState('')

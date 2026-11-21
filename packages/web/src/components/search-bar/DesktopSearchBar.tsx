@@ -243,7 +243,6 @@ export const DesktopSearchBar = () => {
     const hasResults = baseOptions.length > 0
 
     if (hasResults && inputValue) {
-      // append to last group to avoid extra spacing between groups
       baseOptions[baseOptions.length - 1].options.push({
         label: <ViewMoreButton query={inputValue} />,
         // @ts-expect-error
@@ -342,7 +341,6 @@ export const DesktopSearchBar = () => {
   const showResults = !isSearchPage && hasOptions
   const shouldShowMenu = isMenuOpen && showResults
 
-  // Flatten all options for keyboard navigation
   const flatOptions = useMemo(() => {
     const flat: Array<{ value: string; isSelectable: boolean }> = []
     options.forEach((group) => {
@@ -390,7 +388,7 @@ export const DesktopSearchBar = () => {
           if (prev < flatOptions.length - 1) {
             return prev + 1
           }
-          return 0 // Wrap to first
+          return 0
         })
       } else if (event.key === 'ArrowUp') {
         event.preventDefault()
@@ -398,14 +396,13 @@ export const DesktopSearchBar = () => {
           if (prev > 0) {
             return prev - 1
           }
-          return flatOptions.length - 1 // Wrap to last
+          return flatOptions.length - 1
         })
       } else if (event.key === 'Enter') {
         event.preventDefault()
         if (selectedIndex >= 0 && selectedIndex < flatOptions.length) {
           const selectedOption = flatOptions[selectedIndex]
           if (selectedOption.isSelectable) {
-            // Find the actual option and trigger its action
             let optionIndex = 0
             for (const group of options) {
               for (const opt of group.options) {
@@ -417,7 +414,6 @@ export const DesktopSearchBar = () => {
                   } else if (value === 'Clear search') {
                     dispatch(clearHistory())
                   } else {
-                    // This is a search result - find the link and click it
                     const linkElement = document.querySelector(
                       `[data-search-result-value="${value}"]`
                     ) as HTMLElement
@@ -433,7 +429,6 @@ export const DesktopSearchBar = () => {
             }
           }
         } else {
-          // No selection, navigate to search page
           if (isSearchPage) {
             submitSearchPageQuery(inputValue)
           } else {
@@ -459,12 +454,10 @@ export const DesktopSearchBar = () => {
     ]
   )
 
-  // Reset selected index when options change
   useEffect(() => {
     setSelectedIndex(-1)
   }, [options])
 
-  // Scroll selected item into view
   useEffect(() => {
     if (selectedIndex >= 0 && scrollRef.current) {
       const selectedElement = scrollRef.current.querySelector(
@@ -478,14 +471,12 @@ export const DesktopSearchBar = () => {
       }
     }
   }, [selectedIndex])
-  // Calculate hasNoResults for the dropdown class name
   const hasNoResults =
     data &&
     inputValue &&
     autocompleteOptions.length === 1 &&
     String(autocompleteOptions[0].options?.[0]?.value) === 'no-results'
 
-  // Update menu visibility based on results
   useEffect(() => {
     if (hasOptions && inputValue) {
       setIsMenuOpen(true)
@@ -501,7 +492,6 @@ export const DesktopSearchBar = () => {
 
   const handleBlur = useCallback(() => {
     setIsFocused(false)
-    // Delay closing to allow clicks on menu items
     setTimeout(() => {
       setIsMenuOpen(false)
     }, 200)
@@ -512,11 +502,9 @@ export const DesktopSearchBar = () => {
     setIsMenuOpen(true)
   }, [])
 
-  // Set up hotkeys for '/' and 'Cmd + K' to focus search input
   useHotkeys({
     191: focusSearchInput, // '/' key
     75: {
-      // 'K' key
       cb: focusSearchInput,
       and: [ModifierKeys.CMD]
     }

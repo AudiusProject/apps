@@ -110,7 +110,6 @@ const useWithdrawalTransactionPoller = (
 ) => {
   const [isPolling, setIsPolling] = useState(false)
 
-  // Use the existing useUSDCTransactions hook
   const {
     data: transactions,
     isFetching: transactionsIsFetching,
@@ -128,8 +127,6 @@ const useWithdrawalTransactionPoller = (
     method: GetUSDCTransactionsMethodEnum.Send
   })
 
-  // Read via refs so the poller only restarts when the awaited transaction
-  // changes. `reset` is a new function every render.
   const transactionsRef = useRef(transactions)
   transactionsRef.current = transactions
   const resetRef = useRef(reset)
@@ -152,7 +149,6 @@ const useWithdrawalTransactionPoller = (
       setIsPolling(false)
     }
 
-    // Stop polling after 60s even if the transaction never shows up
     const timerId = setTimeout(stopPolling, 60000)
 
     const pollInterval = setInterval(() => {
@@ -160,7 +156,6 @@ const useWithdrawalTransactionPoller = (
         stopPolling()
         return
       }
-      // Refetch transactions
       resetRef.current()
     }, 1000)
 
@@ -179,12 +174,10 @@ const useWithdrawalTransactionPoller = (
 
 export const useWithdrawals = () => {
   const { data: userId } = useCurrentUserId()
-  // Type override required because we're dispatching thunk actions below
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>()
   const lastCompletedTransaction = useSelector(
     withdrawUSDCSelectors.getLastCompletedTransactionSignature
   )
-  // Defaults: sort method = date, sort direction = desc
   const [sortMethod, setSortMethod] =
     useState<GetUSDCTransactionsSortMethodEnum>(DEFAULT_SORT_METHOD)
   const [sortDirection, setSortDirection] =
@@ -212,7 +205,6 @@ export const useWithdrawals = () => {
     method: GetUSDCTransactionsMethodEnum.Send
   })
 
-  // Error handling
   useEffect(() => {
     if (transactionsIsError || countIsError) {
       dispatch(
@@ -271,9 +263,6 @@ export const useWithdrawals = () => {
   }
 }
 
-/**
- * Fetches and renders a table of withdrawals for the currently logged in user
- * */
 export const WithdrawalsTab = ({
   count,
   data: transactions,

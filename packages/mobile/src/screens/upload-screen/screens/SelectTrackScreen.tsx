@@ -60,7 +60,6 @@ export const SelectTrackScreen = () => {
 
   useEffect(() => {
     if (track) {
-      // If we have initialMetadata, merge it with the track metadata
       if (params?.initialMetadata) {
         track.metadata = {
           ...track.metadata,
@@ -68,7 +67,6 @@ export const SelectTrackScreen = () => {
         }
       }
 
-      // Start uploading the track files immediately
       startUpload({
         tracks: [track],
         uploadType: UploadType.INDIVIDUAL_TRACK

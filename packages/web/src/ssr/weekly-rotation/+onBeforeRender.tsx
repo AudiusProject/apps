@@ -1,6 +1,5 @@
 import type { PageContextServer } from 'vike/types'
 
-// Simple helper to get API URL without importing services/env which pulls in SDK dependencies
 const getApiUrl = () => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {
@@ -12,8 +11,6 @@ const getApiUrl = () => {
   }
 }
 
-// Only the listener's name is needed for the tags; the card itself is
-// rendered by og.audius.co from the handle, so the mix is not fetched here.
 export async function onBeforeRender(pageContext: PageContextServer) {
   const { handle } = pageContext.routeParams
 

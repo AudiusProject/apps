@@ -32,18 +32,11 @@ type AudioHoverCardProps = Pick<
   | 'transformOrigin'
   | 'triggeredBy'
 > & {
-  /**
-   * The $AUDIO tier to display
-   */
   tier: AudioTiers
 
-  /**
-   * The user ID to fetch balance and tier information for
-   */
   userId: ID
 }
 
-// Audio tier badge map for header icons
 const audioTierBadgeMap: Record<AudioTiers, IconComponent> = {
   bronze: IconTokenBronze,
   silver: IconTokenSilver,
@@ -55,9 +48,6 @@ const getBadgeName = (tier: BadgeTier) => {
   return `${tier} Badge`
 }
 
-/**
- * A complete HoverCard for $AUDIO badge tiers that includes both header and body
- */
 export const AudioHoverCard = ({
   children,
   tier,
@@ -71,7 +61,6 @@ export const AudioHoverCard = ({
   const navigate = useNavigate()
   const { cornerRadius } = useTheme()
 
-  // Track hover state to conditionally fetch token balance
   const [isHovered, setIsHovered] = useState(false)
 
   const handleHover = useCallback((hovered: boolean) => {

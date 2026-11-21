@@ -29,14 +29,12 @@ export const UserBankAddressDeriver = () => {
     error: coinsError
   } = useFanClubs()
 
-  // Set default token when coins are loaded
   const availableCoins = coins?.filter((coin) => coin.ticker) ?? []
   const defaultToken =
     availableCoins.find((coin) => coin.ticker === '$AUDIO')?.mint ??
     availableCoins[0]?.mint ??
     ''
 
-  // Set default token if not already set
   if (selectedToken === '' && defaultToken !== '') {
     setSelectedToken(defaultToken)
   }

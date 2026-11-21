@@ -38,19 +38,16 @@ export const TokenAmountInput = forwardRef(
     const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
       (e) => {
         const input = e.target.value.replace(/[^0-9.]+/g, '')
-        // Regex to grab the whole and decimal parts of the number, stripping duplicate '.' characters
         const match = input.match(/^(\d*)(.)?(\d*)/)
         const whole = match?.[1] || ''
         const decimal = match?.[3] || ''
         const dot = match?.[2] || ''
 
-        // Conditionally render the decimal part, and only for the number of decimals specified
         const stringAmount =
           dot && decimals && !isWhole
             ? `${whole}.${decimal.substring(0, decimals)}`
             : whole
 
-        // Calculate the wei amount using BigInt arithmetic instead of BN
         const wholeBigInt = BigInt(whole || '0')
         const decimalPadded = decimal
           .padEnd(decimals, '0')
@@ -66,7 +63,6 @@ export const TokenAmountInput = forwardRef(
       },
       [decimals, isWhole, setValueState, onChange]
     )
-    // Determine if endIcon is an IconComponent or ReactNode
     const isIconComponent = endIcon && typeof endIcon === 'function'
 
     return (

@@ -37,20 +37,10 @@ const messages = {
 type AddSourceTrackModalProps = {
   isOpen: boolean
   onClose: () => void
-  /** Tracks already selected on the parent form. First entry pre-selects the radio. */
   initialSelectedIds: number[]
-  /** Called with the final set of selected track IDs when "Done" is clicked. */
   onDone: (selectedIds: number[]) => void
 }
 
-/**
- * Single-select track picker modal used by the Host Remix Contest page's
- * Source Tracks section. Searches over the signed-in user's own tracks
- * (client-side filter for now; falls back to fetch-all). Contests only
- * support one Source Track today — the API returns the selection as an
- * array so the wiring can expand to multi-select later without a
- * caller-facing shape change.
- */
 export const AddSourceTrackModal = ({
   isOpen,
   onClose,
@@ -61,10 +51,6 @@ export const AddSourceTrackModal = ({
   const { data: currentUser } = useUser(currentUserId)
   const handle = currentUser?.handle
 
-  // Fetch the host's public + unlisted tracks. 100 is the discovery-node
-  // max per page; we filter client-side and assume the host's recent
-  // catalog fits. If someone has >100 tracks and can't find an older one,
-  // we'll swap this for a server-side search / paged fetch.
   const { data: tracks, isPending } = useUserTracksByHandle(
     { handle, filterTracks: 'all', limit: 100 },
     { enabled: !!handle }
@@ -174,8 +160,6 @@ export const AddSourceTrackModal = ({
     </Modal>
   )
 }
-
-// ----- one row ---------------------------------------------------------------
 
 type TrackRowProps = {
   trackId: number

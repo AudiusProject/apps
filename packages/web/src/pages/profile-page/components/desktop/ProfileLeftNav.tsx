@@ -129,8 +129,6 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
             </Text>
 
             <TextArea
-              // Ofsetting some internal padding weirdness on
-              // this component
               css={{ marginBottom: -5 }}
               size={TextAreaSize.SMALL}
               grows

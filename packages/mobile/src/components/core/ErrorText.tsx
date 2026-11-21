@@ -6,7 +6,6 @@ import { Text } from '@audius/harmony-native'
 type ErrorTextProps = TextProps
 
 const wrap = css({
-  // Ensure that word wrapping occurs
   flexShrink: 1
 })
 

@@ -6,8 +6,6 @@ import { Nullable, UserMetadata, Utils } from '../utils'
 import type { ServiceProvider } from './ServiceProvider'
 import { Base, BaseConstructorArgs, Services } from './base'
 
-// User metadata fields that are required on the metadata object and can have
-// null or non-null values
 const USER_PROPS = [
   'is_verified',
   'twitter_handle',
@@ -34,10 +32,7 @@ const USER_PROPS = [
   'allow_ai_attribution',
   'spl_usdc_payout_wallet'
 ] as Array<keyof UserMetadata>
-// User metadata fields that are required on the metadata object and only can have
-// non-null values
 const USER_REQUIRED_PROPS = ['name', 'handle']
-// Constants for user metadata fields
 
 const { decodeHashId } = Utils
 
@@ -78,27 +73,6 @@ export class Users extends Base {
     this.cleanUserMetadata = this.cleanUserMetadata.bind(this)
   }
 
-  /* ----------- GETTERS ---------- */
-
-  /**
-   * get users with all relevant user data
-   * can be filtered by providing an integer array of ids
-   * @returns Array of User metadata Objects
-   * additional metadata fields on user objects:
-   *  {Integer} track_count - track count for given user
-   *  {Integer} playlist_count - playlist count for given user
-   *  {Integer} album_count - album count for given user
-   *  {Integer} follower_count - follower count for given user
-   *  {Integer} followee_count - followee count for given user
-   *  {Integer} repost_count - repost count for given user
-   *  {Integer} track_blocknumber - blocknumber of latest track for user
-   *  {Boolean} does_current_user_follow - does current user follow given user
-   *  {Boolean} does_current_user_subscribe - does current user subscribe to given user
-   *  {Array} followee_follows - followees of current user that follow given user
-   * @example
-   * await getUsers()
-   * await getUsers(100, 0, [3,2,6]) - Invalid user ids will not be accepted
-   */
   async getUsers(
     limit = 100,
     offset = 0,
@@ -118,12 +92,6 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * get intersection of users that follow followeeUserId and users that are followed by followerUserId
-   * @param followeeUserId user that is followed
-   * @example
-   * getMutualFollowers(100, 0, 1, 1) - IDs must be valid
-   */
   async getMutualFollowers(
     limit = 100,
     offset = 0,
@@ -142,9 +110,6 @@ export class Users extends Base {
     return []
   }
 
-  /**
-   * get users that follow followeeUserId, sorted by follower count descending
-   */
   async getFollowersForUser(limit = 100, offset = 0, followeeUserId: string) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getFollowersForUser(
@@ -154,9 +119,6 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * get users that are followed by followerUserId, sorted by follower count descending
-   */
   async getFolloweesForUser(limit = 100, offset = 0, followerUserId: string) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.getFolloweesForUser(
@@ -166,20 +128,6 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * Return repost feed for requested user
-   * @param userId - requested user id
-   * @param limit - max # of items to return (for pagination)
-   * @param offset - offset into list to return from (for pagination)
-   * @returns Array of track and playlist metadata objects
-   * additional metadata fields on track and playlist objects:
-   *  {String} activity_timestamp - timestamp of requested user's repost for given track or playlist,
-   *    used for sorting feed
-   *  {Integer} repost_count - repost count of given track/playlist
-   *  {Integer} save_count - save count of given track/playlist
-   *  {Boolean} has_current_user_reposted - has current user reposted given track/playlist
-   *  {Array} followee_reposts - followees of current user that have reposted given track/playlist
-   */
   async getUserRepostFeed(
     userId: number,
     limit = 100,
@@ -195,14 +143,6 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * Returns the top users for the specified genres
-   * @param genres - filter by genres ie. "Rock", "Alternative"
-   * @param limit - max # of items to return
-   * @param offset - offset into list to return from (for pagination)
-   * @param withUsers - If the userIds should be returned or the full user metadata
-   * @returns  Array of user objects if with_users set, else array of userId
-   */
   async getTopCreatorsByGenres(
     genres: string[],
     limit = 30,
@@ -218,10 +158,6 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * Gets listen count data for a user's tracks grouped by month
-   * @returns Dictionary of listen count data where keys are requested months
-   */
   async getUserListenCountsMonthly(
     encodedUserId: string,
     startTime: string,
@@ -235,14 +171,8 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * Gets a user's subscribers.
-   * @param params.encodedUserId string of the encoded user id
-   * @returns Array of User metadata objects for each subscriber
-   */
   async getUserSubscribers(encodedUserId: string) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
-    // 1 min timeout
     const timeoutMs = 60000
     return await this.discoveryProvider.getUserSubscribers(
       encodedUserId,
@@ -250,24 +180,14 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * Bulk gets users' subscribers.
-   * @param params.encodedUserIds JSON stringified array of
-   *   encoded user ids
-   * @returns Array of {user_id: <encoded user id>,
-   *   subscriber_ids: Array[<encoded subscriber ids>]} objects
-   */
   async bulkGetUserSubscribers(encodedUserIds: string) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
-    // 1 min timeout
     const timeoutMs = 60000
     return await this.discoveryProvider.bulkGetUserSubscribers(
       encodedUserIds,
       timeoutMs
     )
   }
-
-  /* ------- SETTERS ------- */
 
   async uploadProfileImagesV2(
     profilePictureFile: File,
@@ -309,9 +229,7 @@ export class Users extends Base {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
 
     try {
-      // Create the user with EntityMananer
       const userId = await this._generateUserId()
-      // Ensure metadata has expected properties
       const newMetadata = this.cleanUserMetadata({ ...metadata })
       this._validateUserMetadata(newMetadata)
 
@@ -319,7 +237,6 @@ export class Users extends Base {
       newMetadata.wallet = this.web3Manager.getWalletAddress()
       newMetadata.user_id = userId
 
-      // Upload images
       if (profilePictureFile) {
         const resp =
           await this.creatorNode.uploadProfilePictureV2(profilePictureFile)
@@ -403,10 +320,6 @@ export class Users extends Base {
     }
   }
 
-  /**
-   * Fixes a bug that caused users to not complete signup
-   * #flare-206
-   */
   async repairEntityManagerUserV2(newMetadata: any) {
     const { user_id: userId } = newMetadata
     const dnUser = await this.discoveryProvider.getUserAccount(
@@ -441,9 +354,6 @@ export class Users extends Base {
     }
   }
 
-  /**
-   * Updates a user on whether they are verified on Audius and what social account they verified with
-   */
   async updateSocialVerification(
     userId: number,
     privateKey: string,
@@ -475,9 +385,6 @@ export class Users extends Base {
     )
   }
 
-  /**
-   * Adds a user subscription for a given subscriber and user
-   */
   async addUserSubscribe(subscribeToUserId: number, userId: number) {
     try {
       const response = await this.contracts.EntityManagerClient!.manageEntity(
@@ -498,9 +405,6 @@ export class Users extends Base {
     }
   }
 
-  /**
-   * Delete a user subscription for a given subscriber and user
-   */
   async deleteUserSubscribe(subscribedToUserId: number, userId: number) {
     try {
       const response = await this.contracts.EntityManagerClient!.manageEntity(
@@ -521,11 +425,6 @@ export class Users extends Base {
     }
   }
 
-  /* ------- PRIVATE  ------- */
-
-  /**
-   * Only posts metadata to chain and not to Content Node.
-   */
   async updateMetadataV2({
     newMetadata,
     userId
@@ -540,7 +439,6 @@ export class Users extends Base {
     this._validateUserMetadata(newMetadata)
 
     try {
-      // Write metadata to chain
       const cid = await Utils.fileHasher.generateMetadataCidV1(newMetadata)
       const { txReceipt } =
         await this.contracts.EntityManagerClient!.manageEntity(
@@ -576,7 +474,6 @@ export class Users extends Base {
   ): Promise<void> {
     const asyncFn = async () => {
       while (true) {
-        // Try to get user. Catch+ignore error if the block number isn't yet indexed
         let user
         try {
           user = (
@@ -587,12 +484,11 @@ export class Users extends Base {
               null, // walletAddress
               null, // handle
               blockNumber, // minBlockNumber
-              true // includeIncomplete
+              true
             )
           )?.[0]
         } catch (err) {}
 
-        // All done (success) if the user was indexed and ID matches
         if (user?.user_id === userId) {
           break
         }
@@ -607,17 +503,11 @@ export class Users extends Base {
     )
   }
 
-  // Throws an error upon validation failure
   _validateUserMetadata(metadata: UserMetadata) {
     this.OBJECT_HAS_PROPS(metadata, USER_PROPS, USER_REQUIRED_PROPS)
     this.creatorNode.validateUserSchema(metadata)
   }
 
-  /**
-   * Metadata object may have extra fields.
-   * - Add what user props might be missing to normalize
-   * - Only keep core fields in USER_PROPS and 'user_id'.
-   */
   cleanUserMetadata(metadata: UserMetadata) {
     USER_PROPS.forEach((prop) => {
       if (!(prop in metadata)) {

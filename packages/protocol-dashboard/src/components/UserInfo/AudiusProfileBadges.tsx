@@ -13,8 +13,6 @@ import IconVerifiedSVG from 'assets/img/iconVerified.svg'
 
 import styles from './AudiusProfileBadges.module.css'
 
-// Inlined from @audius/common/store to avoid circular dependency
-// (store/wallet/utils → api barrel → upload modules → store)
 const badgeTiers: { tier: BadgeTier; humanReadableAmount: number }[] = [
   { tier: 'platinum', humanReadableAmount: 10000 },
   { tier: 'gold', humanReadableAmount: 1000 },
@@ -37,10 +35,6 @@ type UserBadgesProps = {
   className?: string
   inline?: boolean
 
-  /**
-   * When `true` provide styles for container when it has no content.
-   * Useful for cases where margins are inconsistent.
-   */
   noContentClassName?: string
 }
 

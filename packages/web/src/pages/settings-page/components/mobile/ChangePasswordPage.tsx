@@ -96,7 +96,7 @@ export const ChangePasswordMobilePage = () => {
       css={{
         textAlign: 'start',
         backgroundColor: 'white',
-        height: 'calc(100% - 50px)' // account for the header
+        height: 'calc(100% - 50px)'
       }}
     >
       <Formik {...formikConfiguration}>

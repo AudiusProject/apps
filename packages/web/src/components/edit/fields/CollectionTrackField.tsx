@@ -34,7 +34,6 @@ export const CollectionTrackField = (props: CollectionTrackFieldProps) => {
   const [{ value }] = useField('trackDetails')
   const [{ value: isUpload }] = useField<boolean>('isUpload')
 
-  // Override is currently unavailable thru the UI but the code is still here. We will revisit this with a new expandable edit UI
   const { override } = track
   const isPreviewPlaying = playingPreviewIndex === index
 

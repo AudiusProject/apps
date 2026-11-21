@@ -25,7 +25,7 @@ const messages = {
 }
 
 type ViewerActionButtonProps = {
-  contentId: ID // Collection or Track ID
+  contentId: ID
   hasStreamAccess?: boolean
   isDisabled?: boolean
   isLoading?: boolean

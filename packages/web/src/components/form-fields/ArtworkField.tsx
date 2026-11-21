@@ -37,7 +37,6 @@ export const ArtworkField = (props: ArtworkFieldProps) => {
       ? initialValues?.trackMetadatas?.[0]?.track_id === undefined
       : !initialValues?.artwork?.url
 
-  // Check if this is a collection (playlist/album) edit form
   const isCollectionEdit = 'playlist_id' in initialValues
 
   const collectionId = isCollectionEdit
@@ -89,7 +88,6 @@ export const ArtworkField = (props: ArtworkFieldProps) => {
       }
     }
 
-    // For other cases (track editing, upload), just remove artwork
     if (!isUpload) {
       setValue(null)
     } else {

@@ -38,9 +38,6 @@ export const TrendingFilterChips = () => {
   const timeRange = useSelector(getTrendingTimeRange) ?? TimeRange.WEEK
   const genre = useSelector(getTrendingGenre) ?? ALL_GENRES
 
-  // Clearing filters naturally changes the tanquery key (which includes
-  // timeRange + genre), so a new query fires automatically — no manual
-  // lineup reset needed.
   const handleClearTimeRange = useCallback(
     (_value: string, isSelected: boolean) => {
       if (!isSelected) {

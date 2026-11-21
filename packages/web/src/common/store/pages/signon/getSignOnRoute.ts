@@ -16,11 +16,6 @@ type GetSignOnRouteParams = {
   hasHandle: boolean
 }
 
-/**
- * Maps the legacy sign-on page state to the URL-based signup flow.
- * Incomplete Identity-only accounts have no handle yet, so PROFILE resumes at
- * handle selection; accounts with an indexed handle resume at profile details.
- */
 export const getSignOnRoute = ({
   signIn,
   page,

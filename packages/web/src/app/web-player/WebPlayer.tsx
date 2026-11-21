@@ -84,7 +84,6 @@ const { getFrostedSurfaceIntensity } = themeSelectors
 const TrendingGenreSelectionPage = lazy(
   () => import('components/trending-genre-selection/TrendingGenreSelectionPage')
 )
-// Lazy load heavy page components for code-splitting
 const FanClubsExplorePage = lazy(() =>
   import('pages/fan-clubs-explore-page/FanClubsExplorePage').then((m) => ({
     default: m.FanClubsExplorePage
@@ -330,7 +329,6 @@ const {
   USER_ID_PARSER_PAGE
 } = route
 
-// TODO: do we need to lazy load edit?
 const EditTrackPage = lazy(() => import('pages/edit-page'))
 const WeeklyRotationPage = lazy(
   () => import('pages/weekly-rotation-page/WeeklyRotationPage')
@@ -354,7 +352,6 @@ const validSearchCategories = [
   'playlists'
 ]
 
-// Wrapper components for routes that need params or location
 const SearchCategoryLegacyRedirect = () => {
   const params = useParams<{ category?: string; query?: string }>()
   const to = {
@@ -404,7 +401,6 @@ const FanClubDetailPageRoute = ({
   const { ticker } = params
 
   if (ticker && ticker !== ticker.toUpperCase()) {
-    // Preserve the current path prefix (/clubs or /coins)
     const isClubsRoute = location.pathname.startsWith('/clubs')
     const detailPage = isClubsRoute ? CLUB_DETAIL_PAGE : COIN_DETAIL_PAGE
     return (
@@ -509,7 +505,6 @@ const WebPlayer = (props: WebPlayerProps) => {
 
   useActivityPing()
 
-  // Convert mapDispatchToProps to useCallback with useDispatch
   const updateRouteOnSignUpCompletion = useCallback(
     (route: string) => dispatch(updateRouteOnCompletionAction(route)),
     [dispatch]
@@ -568,12 +563,10 @@ const WebPlayer = (props: WebPlayerProps) => {
     }
   }, [dispatch])
 
-  // Listen to location changes using useLocation hook
   useEffect(() => {
     const newRoute = getPathname(location)
     const previousRoute = previousRouteRef.current
 
-    // Only scroll to top and update state if the pathname actually changed (we dont want to scroll on query params)
     if (newRoute !== previousRoute) {
       scrollToTop()
       previousRouteRef.current = newRoute
@@ -1716,7 +1709,6 @@ const WebPlayer = (props: WebPlayerProps) => {
 
 const RouterWebPlayer = WebPlayer
 
-// Taking this approach because the class component cannot use hooks
 type FeatureFlaggedWebPlayerProps = Omit<WebPlayerProps, 'isProduction'>
 
 const FeatureFlaggedWebPlayer = (props: FeatureFlaggedWebPlayerProps) => {
@@ -1729,7 +1721,6 @@ const MainContentRouterWebPlayer = () => {
   return (
     <MainContentContext.Consumer>
       {({ ref, setRef }) => {
-        // Convert MutableRefObject<HTMLDivElement | undefined> to RefObject<HTMLDivElement>
         const mainContentRef = ref as React.RefObject<HTMLDivElement>
         return (
           <FeatureFlaggedWebPlayer

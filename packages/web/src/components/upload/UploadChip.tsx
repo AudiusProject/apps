@@ -37,23 +37,8 @@ const getMessages = (type: 'track' | 'album' | 'playlist') => ({
 
 type UploadChipProps = {
   type?: 'track' | 'album' | 'playlist'
-  /**
-   * nav: For display in a nav-like column
-   *
-   * card: Looks like a 'Card'
-   *
-   * tile: Looks like a 'TrackTile'
-   */
   variant?: 'nav' | 'card' | 'tile'
-  /**
-   * Controls card sizing behavior when variant is `card`.
-   * fixed: legacy 224x312 card dimensions
-   * fluid: responsive card that fills its container while preserving proportions
-   */
   cardStyle?: 'fixed' | 'fluid'
-  /**
-   * Is this upload the user's first of this type
-   * */
   source: 'nav' | 'profile' | CreatePlaylistSource
   isFirst?: boolean
 }

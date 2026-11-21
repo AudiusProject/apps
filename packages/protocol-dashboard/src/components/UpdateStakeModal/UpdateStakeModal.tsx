@@ -55,7 +55,6 @@ const UpdateStakeModal: React.FC<UpdateStakeModalProps> = ({
 }: UpdateStakeModalProps) => {
   const { status: userStatus, user: accountUser } = useAccountUser()
   if (userStatus === Status.Success && !('serviceProvider' in accountUser)) {
-    // This should have never been opened b/c the user is not a service provider
     onClose()
   }
 
@@ -104,7 +103,6 @@ const UpdateStakeModal: React.FC<UpdateStakeModalProps> = ({
   const onCloseConfirm = useCallback(() => setIsConfirmModalOpen(false), [])
 
   const onSubmit = useCallback(() => {
-    // TODO: validate each field
     setIsConfirmModalOpen(true)
   }, [setIsConfirmModalOpen])
 
@@ -130,7 +128,6 @@ const UpdateStakeModal: React.FC<UpdateStakeModalProps> = ({
     }
   }, [isIncrease, updateStake, accountUser, stakingBN])
 
-  // Close All modals on success status
   useEffect(() => {
     if (status === Status.Success) {
       onCloseConfirm()

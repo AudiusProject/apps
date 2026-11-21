@@ -49,13 +49,7 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
 }))
 
 type CopyTextTileProps = {
-  /**
-   * A hint to show at the top of the tile so the user knows what to do
-   */
   hint: string
-  /**
-   * The text to copy
-   */
   text: string
 }
 

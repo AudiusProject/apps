@@ -21,7 +21,6 @@ import {
   UserResponseFromJSON
 } from './generated/default/models'
 
-// Extend that new class
 export class ResolveApi extends BaseAPI {
   /**
    * Resolves a provided Audius app URL to the API resource it represents

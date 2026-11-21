@@ -21,22 +21,10 @@ export type ArtworkProps = {
   borderWidth?: number
   'data-testid'?: string
   noLoading?: boolean
-  /**
-   * Optional low-resolution image source. When provided, it is shown
-   * immediately while the high-res `source` loads, then crossfades out.
-   * Enables true progressive image loading.
-   */
   priorityLowResSource?: ImageProps['source']
 } & Partial<Pick<ImageProps, 'source' | 'onError' | 'onLoad' | 'timeoutMs'>> &
   BoxProps
 
-/**
- * The artwork component displays entity content and appears in several
- * locations such as track tiles, track and playlist, pages,
- * and the sidebar. It can have interactive elements on hover.
- * This component enhances the listening experience and helps users quickly
- * identify their favorite tracks.
- */
 export const Artwork = (props: ArtworkProps) => {
   const {
     isLoading: isLoadingProp,
@@ -56,9 +44,6 @@ export const Artwork = (props: ArtworkProps) => {
   const isLoading = isLoadingProp ?? isLoadingState
   const { color, cornerRadius, motion } = useTheme()
 
-  // Pull primitives off the source so we can memoize on stable identity.
-  // Without this, every render produces a fresh source object, which
-  // AnimatedImage treats as a new image and reloads — visible as a flash.
   const sourceNumber = typeof source === 'number' ? source : undefined
   const sourceUri =
     !source || typeof source === 'number'
@@ -76,15 +61,12 @@ export const Artwork = (props: ArtworkProps) => {
   const hasImageSource = typeof imageSource === 'number' || imageSource?.uri
   const hasChildren = Children.toArray(children).length > 0
 
-  // Create shared value for opacity
   const opacity = useSharedValue(0)
 
-  // Create animated style
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value
   }))
 
-  // Animate opacity when loading state changes
   useEffect(() => {
     if (!isLoading) {
       opacity.value = withTiming(1, motion.expressive)

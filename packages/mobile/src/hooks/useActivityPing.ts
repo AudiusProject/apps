@@ -22,11 +22,9 @@ export const useActivityPing = () => {
     }
   }, [currentUserId, audiusSdk])
 
-  // Ping on initial app open (AppState starts as 'active' with no transition)
   useEffect(() => {
     pingActivity()
   }, [pingActivity])
 
-  // Ping on subsequent foreground transitions
   useEnterForeground(pingActivity)
 }

@@ -19,9 +19,7 @@ import { useThemeColors } from 'app/utils/theme'
 
 const { getPlaybackRate, getSeek, getSeekCounter } = playbackSelectors
 
-// How much the handle "grows" when pressing
 const HANDLE_GROW_SCALE = 1.1
-// Comment marker dot above the rail
 const MARKER_SIZE = 4
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -39,9 +37,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     overflow: 'hidden'
   },
   tracker: {
-    // The tracker must be the full width of the rail
-    // so that it can have rounded edges. It animates
-    // by sliding (translateX) instead of by growing.
     flexGrow: 1,
     backgroundColor: palette.neutral,
     borderRadius: 2,
@@ -60,10 +55,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     backgroundColor: palette.neutralLight2,
     borderColor: palette.borderNegative,
     borderWidth: 1,
-    // Note: React-native-shadow-2 seems to lose fidelity
-    // when styling such a small shadow.
-    // TODO: Revisit this, but as of writing, these values
-    // are fairly good on android/ios
     shadowColor: 'rgb(133,129,153)',
     shadowOffset: {
       width: 0,
@@ -84,48 +75,17 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 type SliderProps = {
-  /**
-   * A unique key to represent this instances of playback.
-   * If the user replays the same track, mediaKey should change
-   */
   mediaKey: string
-  /**
-   * Whether audio is playing and the scrubber should animate
-   */
   isPlaying: boolean
-  /**
-   * The duration of the currently playing track
-   */
   duration: number
-  /**
-   * Callback invoked when focus is gained on the scrubber
-   */
   onPressIn: () => void
   onPressOut: () => void
-  /**
-   * Callback invoked when focus is lost on the scrubber
-   */
   onNewPosition: (percentComplete: number) => void
-  /**
-   * Callback invoked when dragging on the scrubber. A drag
-   * begins by grabbing the handle or pressing the rail
-   * and then dragging.
-   */
   onDrag: (percentComplete: number) => void
   onDragRelease: () => void
-  /**
-   * Positions along the rail, 0 to 1, that get a small dot above them
-   * (timestamped comments).
-   */
   markers?: number[]
 }
 
-/**
- * Slider is an internal component of Scrubber (without the timestamps).
- * It is separated as a different component so that it can be memoized
- * independently in such a way where dragging the Slider does not cause
- * re-renders of itself, despite having to update external timestamps on "drag."
- */
 export const Slider = memo(function Slider(props: SliderProps) {
   const {
     mediaKey,
@@ -146,9 +106,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
   const seek = useSelector(getSeek)
   const seekCounter = useSelector(getSeekCounter)
 
-  // Animation to translate the handle and tracker
   const translationAnim = useRef(new Animated.Value(0)).current
-  // Scale animation for the handle
   const {
     scale: handleScale,
     handlePressIn: handlePressHandleIn,
@@ -156,11 +114,8 @@ export const Slider = memo(function Slider(props: SliderProps) {
   } = usePressScaleAnimation(HANDLE_GROW_SCALE)
 
   const railRef = useRef<View>(null)
-  // The rail component's width
   const [railWidth, setRailWidth] = useState(0)
-  // The rail component's distance from the left
   const [railPageX, setRailPageX] = useState(0)
-  // The position of the drag-handle
   const [handlePosition, setHandlePosition] = useState(0)
 
   const getRailPageX = () => {
@@ -176,7 +131,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
   const currentAnimation = useRef<LinearAnimation | undefined>(undefined)
   const playbackRate = useSelector(getPlaybackRate)
 
-  // Calculate the actual playback rate based on track type
   const isLongFormContent =
     trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
   const actualPlaybackRate = isLongFormContent
@@ -203,9 +157,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
 
   const onPressRail = useCallback(
     (e: GestureResponderEvent) => {
-      // Use the pageX from the native event to determine where
-      // the press was. Unfortunately locationX reports
-      // inconsistent results because of the animation
       const newPosition = e.nativeEvent.pageX - railPageX
       setHandlePosition(newPosition)
       Animated.timing(translationAnim, {
@@ -234,7 +185,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
     [isPlaying, duration, play]
   )
 
-  // When the media key changes, reset the scrubber
   useEffect(() => {
     if (duration) {
       translationAnim.setValue(0)
@@ -322,8 +272,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
     ]
   )
 
-  // When playing starts, start the scrubber animation.
-  // When playing stops, pause the scrubber animation.
   const prevMediaKey = useRef<string>(mediaKey)
   const durationRef = useRef<number>(duration)
   useEffect(() => {
@@ -334,7 +282,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
     if (isPlaying) {
       if (durationRef.current !== undefined) {
         if (mediaKey !== prevMediaKey.current) {
-          // New media key, playback starts at 0
           play(0, durationRef.current * 1000)
           prevMediaKey.current = mediaKey
         } else {
@@ -353,10 +300,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
   const appState = useAppState()
   const previousAppState = usePrevious(appState)
 
-  /**
-   * Ensures the slider handle's position is correctly updated when app
-   * becomes active.
-   */
   useAsync(async () => {
     if (previousAppState === 'background' && appState === 'active') {
       const { position } = await TrackPlayer.getProgress()
@@ -406,9 +349,6 @@ export const Slider = memo(function Slider(props: SliderProps) {
             style={[
               {
                 flex: 1,
-                // Interpolate the handle scale animation to
-                // capture the same timing/easing for the fade in
-                // of the tracker.
                 opacity: handleScale.interpolate({
                   inputRange: [1, HANDLE_GROW_SCALE],
                   outputRange: [0, 1]

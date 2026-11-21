@@ -1,33 +1,11 @@
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  Nullable,
-  route
-} from '@audius/common/utils'
-import {
-  SquareSizes,
-  Track
-} from '@audius/common/models'
-import {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-  type ReactNode
-} from 'react'
-import {
-  push
-} from 'utils/navigation'
-import {
-  AppState
-} from 'store/types'
-import {
-  Dispatch
-} from 'redux'
-import {
-  connect
-} from 'react-redux'
+import { playbackSelectors } from '@audius/common/store'
+import { Nullable, route } from '@audius/common/utils'
+import { SquareSizes, Track } from '@audius/common/models'
+import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
+import { push } from 'utils/navigation'
+import { AppState } from 'store/types'
+import { Dispatch } from 'redux'
+import { connect } from 'react-redux'
 import cn from 'classnames'
 
 import ButterchurnVisualizer from 'utils/visualizer/butterchurnVisualizer'
@@ -37,9 +15,7 @@ import styles from './VisualizerProvider.module.css'
 
 import { Image } from '@audius/harmony'
 import PlayingTrackInfo from 'components/play-bar/desktop/components/PlayingTrackInfo'
-import {
-  webgl2Supported
-} from './utils'
+import { webgl2Supported } from './utils'
 import {
   IconAudiusLogoHorizontalNew,
   IconClose as IconRemove,
@@ -51,22 +27,11 @@ import {
   Text,
   Popup
 } from '@audius/harmony'
-import {
-  useTrackCoverArt
-} from 'hooks/useTrackCoverArt'
-import {
-  audioPlayer
-} from 'services/audio-player'
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
-import {
-  useUser
-} from '@audius/common/api'
-import {
-  toggleAutoCycle,
-  toggleAutoHideTrackDetails
-} from './store/slice'
+import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
+import { audioPlayer } from 'services/audio-player'
+import { useCurrentTrack } from '@audius/common/hooks'
+import { useUser } from '@audius/common/api'
+import { toggleAutoCycle, toggleAutoHideTrackDetails } from './store/slice'
 import {
   getIsVisible,
   getIsAutoCycling,
@@ -91,7 +56,6 @@ const messages = {
   closeVisualizer: 'Close visualizer'
 }
 
-/** ms to keep the now-playing corner visible after `currentQueueItem.uid` changes while auto-hide is on */
 const TRACK_CHANGE_NOW_PLAYING_MS = 4500
 
 const Artwork = ({ track }: { track?: Track | null }) => {
@@ -186,12 +150,7 @@ const VisualizerOptionsForm = connect(
       </div>
       <div className={styles.autoAdvanceBlock}>
         <Flex column gap='xs'>
-          <Text
-            variant='body'
-            size='s'
-            strength='strong'
-            color='staticWhite'
-          >
+          <Text variant='body' size='s' strength='strong' color='staticWhite'>
             {messages.autoAdvance}
           </Text>
           <Text
@@ -216,12 +175,7 @@ const VisualizerOptionsForm = connect(
       </div>
       <div className={styles.autoAdvanceBlock}>
         <Flex column gap='xs'>
-          <Text
-            variant='body'
-            size='s'
-            strength='strong'
-            color='staticWhite'
-          >
+          <Text variant='body' size='s' strength='strong' color='staticWhite'>
             {messages.autoHideTrackDetails}
           </Text>
           <Text
@@ -248,11 +202,9 @@ const VisualizerOptionsForm = connect(
   )
 })
 
-const VisualizerTrackCorner = connect(
-  (state: AppState) => ({
-    autoHideTrackDetails: getAutoHideTrackDetails(state)
-  })
-)(function VisualizerTrackCornerInner({
+const VisualizerTrackCorner = connect((state: AppState) => ({
+  autoHideTrackDetails: getAutoHideTrackDetails(state)
+}))(function VisualizerTrackCornerInner({
   showControls,
   nowPlayingPeek,
   autoHideTrackDetails,
@@ -263,8 +215,7 @@ const VisualizerTrackCorner = connect(
   autoHideTrackDetails: boolean
   children: ReactNode
 }) {
-  const clusterVisible =
-    !autoHideTrackDetails || showControls || nowPlayingPeek
+  const clusterVisible = !autoHideTrackDetails || showControls || nowPlayingPeek
   return (
     <div
       className={cn(styles.trackCornerCluster, {

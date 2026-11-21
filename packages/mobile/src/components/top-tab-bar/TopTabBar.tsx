@@ -6,15 +6,8 @@ import { useThemeColors } from 'app/utils/theme'
 
 const AnimatedText = Animated.createAnimatedComponent(Text)
 
-// How much the tab indicator should horizontally stretch
-// while it translates for a nice effect.
 const INDICATOR_STRETCH_FACTOR = 0.35
 
-// This granularity is how many points of the sin function are added to the stretch animation
-// (min value) 1 will not add any points in between and, therefore, there will be no stretching
-// (recommended min value) 2 will be a linear stretch to max width and back
-// Values above 2 will start to conform to a sin function curve of stretching
-// The higher the number, the more accurate the line stretch will follow the sin function
 const INDICATOR_ANIM_GRANULARITY = 10
 
 const HORIZONTAL_PADDING = 8
@@ -79,7 +72,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 export const TopTabBar = ({ state, descriptors, navigation, position }) => {
-  // Horizontal padding decreases as the number of tabs increases
   const horizontalPadding =
     Math.max(6 - state.routes.length, 0) * HORIZONTAL_PADDING
   const screenWidth = Dimensions.get('screen').width
@@ -98,7 +90,6 @@ export const TopTabBar = ({ state, descriptors, navigation, position }) => {
     })
 
     if (!isFocused(tabIndex) && !event.defaultPrevented) {
-      // The `merge: true` option makes sure that the params inside the tab screen are preserved
       navigation.navigate({ name: route.name, merge: true })
     }
   }
@@ -132,7 +123,7 @@ export const TopTabBar = ({ state, descriptors, navigation, position }) => {
           const inputRange = state.routes.map((_, i) => i)
           const opacity = position.interpolate({
             inputRange,
-            outputRange: inputRange.map((i) => (i === index ? 1 : 0.52)) // opacity range
+            outputRange: inputRange.map((i) => (i === index ? 1 : 0.52))
           })
 
           return (

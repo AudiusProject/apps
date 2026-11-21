@@ -22,20 +22,11 @@ export const isMobileUserAgent = (userAgent: string) => {
     )
   )
 }
-/**
- * Client side utility to determine if the user is on a mobile device
- * This is not SSR compatible, use the `useIsMobile` hook instead
- */
 export const isMobile = () => {
   if (typeof navigator === 'undefined' || typeof window === 'undefined') {
     return false
   }
 
-  // Dev-only override: setting `localStorage.__FORCE_MOBILE__ = '1'` forces
-  // the client into mobile mode regardless of the real user agent, so
-  // engineers + designers can preview the mobile-web layout from a desktop
-  // browser without toggling Chrome DevTools device mode. Unset the key (or
-  // assign any other value) to disable.
   try {
     if (window.localStorage?.getItem('__FORCE_MOBILE__') === '1') {
       return true
@@ -44,10 +35,6 @@ export const isMobile = () => {
     // localStorage may be unavailable (private mode, SSR); fall through.
   }
 
-  // Respect the User-Agent so that "Request Desktop Site" works: when a
-  // mobile browser toggles desktop mode the UA flips to a desktop one, and
-  // we should serve the desktop app. Avoid platform/touchPoints heuristics
-  // (e.g. iPadOS sending a Mac UA) that would override that explicit choice.
   // @ts-ignore -- TODO fix mobile imports causing type errors
   return isMobileUserAgent(
     // @ts-ignore -- TODO fix mobile imports causing type errors
@@ -58,14 +45,10 @@ export const isMobile = () => {
 const BOT_USER_AGENT_REGEX =
   /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|prerender|phantomjs|puppeteer|playwright|selenium|facebookexternalhit|embedly|bingpreview|inspectiontool/i
 
-/**
- * Crawlers and automated browsers. Automation drivers set navigator.webdriver.
- */
 export const isLikelyBot = () => {
   if (typeof navigator === 'undefined') return false
   if (navigator.webdriver === true) return true
   const userAgent = navigator.userAgent ?? ''
-  // Cubot is a phone brand, not a crawler
   return BOT_USER_AGENT_REGEX.test(userAgent) && !/cubot/i.test(userAgent)
 }
 
@@ -99,7 +82,6 @@ export const getMobileOS = () => {
   // @ts-ignore -- TODO fix mobile imports causing type errors
   const userAgent = navigator.userAgent || navigator.vendor || window.opera
 
-  // Windows Phone must come first because its UA also contains "Android"
   // @ts-ignore -- TODO fix mobile imports causing type errors
   if (/windows phone/i.test(userAgent)) {
     return MobileOS.WINDOWS_PHONE
@@ -110,7 +92,6 @@ export const getMobileOS = () => {
     return MobileOS.ANDROID
   }
 
-  // iOS detection from: http://stackoverflow.com/a/9039885/177710
   // @ts-ignore -- TODO fix mobile imports causing type errors
   if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
     return MobileOS.IOS
@@ -118,10 +99,6 @@ export const getMobileOS = () => {
   return null
 }
 
-/**
- * Client side utility to determining the client type
- * This is not SSR compatible, use the `useIsMobile` hook instead
- */
 export const getClient = () => {
   return isElectron()
     ? Client.ELECTRON

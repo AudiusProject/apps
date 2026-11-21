@@ -8,9 +8,6 @@ import { removeNullable } from 'utils/typeUtils'
 const playlistTrackLookupKey = (trackId: number, metadata_time?: number) =>
   `${trackId}-${metadata_time}`
 
-// The edit collection form receives a tracks array, but we need to convert that to playlist_contents
-// We use metadata_time to map back to the original playlist_contents so we can differentiate
-// duplicates of the same track_id
 export const updatePlaylistContents = (
   tracks: (TrackForEdit | TrackForUpload)[],
   playlist_contents: Maybe<Collection['playlist_contents']>
@@ -40,9 +37,6 @@ export const updatePlaylistContents = (
   return { track_ids: updatedPlaylistIds }
 }
 
-/** Map playlist_contents to editable entries that include metadata_time so they
- * can be mapped back to playlist_contents when the form is submitted.
- */
 export const getEditablePlaylistContents = ({
   playlist_contents,
   tracks

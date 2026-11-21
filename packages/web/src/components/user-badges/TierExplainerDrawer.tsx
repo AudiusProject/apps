@@ -22,7 +22,6 @@ const BADGE_SIZE = 108
 
 type AudioTiers = Exclude<BadgeTier, 'none'>
 
-// Mapping for large icons
 const audioTierMapSvg: {
   [tier in AudioTiers]: Nullable<ReactElement>
 } = {

@@ -84,7 +84,6 @@ export const LockedContentDrawer = () => {
           streamConditions={track.stream_conditions}
           isOwner={false}
           hasStreamAccess={hasStreamAccess}
-          // Note: this should ideally come from metadata but at the moment this drawer is only available for tracks
           contentType={PurchaseableContentType.TRACK}
         />
       </View>

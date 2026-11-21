@@ -50,7 +50,6 @@ export const FileReplaceContainer = ({
       <PlainButton
         fullWidth
         size='default'
-        // These styles help ensure long file names are ellipsized
         style={{ paddingRight: spacing.m, justifyContent: 'flex-start' }}
         iconLeft={isPlaying ? IconPause : IconPlay}
         onPress={handleTogglePlay}

@@ -99,7 +99,6 @@ export const SellScreen = ({
     onInputValueChange
   })
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   if (currentExchangeRate !== null) {
     hasRateEverBeenFetched.current = true
@@ -107,11 +106,8 @@ export const SellScreen = ({
 
   if (!tokenPair) return null
 
-  // Extract the tokens from the pair
   const { baseToken, quoteToken } = tokenPair
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     isBalanceLoading ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)
