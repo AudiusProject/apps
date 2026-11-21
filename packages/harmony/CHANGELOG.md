@@ -1,5 +1,11 @@
 # @audius/harmony
 
+## 0.6.0
+
+### Minor Changes
+
+- 66aca9f: Add `has_replied` to user chats and `uncategorized_unreplied` to the unread-by-category counts. Add an `endAdornment` slot to `SelectablePill`.
+
 ## 0.5.3
 
 ### Patch Changes
