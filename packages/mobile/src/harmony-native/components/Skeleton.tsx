@@ -25,10 +25,8 @@ export const Skeleton = (props: SkeletonProps) => {
   const color1 = color.neutral.n50
   const color2 = color.neutral.n100
 
-  // Create shared value for shimmer animation (must be called unconditionally)
   const shimmerPosition = useSharedValue(0)
 
-  // Setup animation loop
   useEffect(() => {
     if (noShimmer) return
     shimmerPosition.value = withRepeat(
@@ -41,22 +39,20 @@ export const Skeleton = (props: SkeletonProps) => {
           duration: 0
         })
       ),
-      -1 // Infinite repeat
+      -1
     )
   }, [shimmerPosition, noShimmer])
 
-  // Create animated styles for the shimmer effect (must be called unconditionally)
   const shimmerStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          translateX: shimmerPosition.value * -200 + 100 // Move from right to left
+          translateX: shimmerPosition.value * -200 + 100
         }
       ]
     }
   })
 
-  // When noShimmer, render a solid color to avoid the split/gradient visual
   if (noShimmer) {
     return (
       <Box

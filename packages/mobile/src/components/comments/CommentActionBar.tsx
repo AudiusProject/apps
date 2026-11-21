@@ -54,7 +54,6 @@ export const CommentActionBar = (props: CommentActionBarProps) => {
               {reactCount}
             </Text>
           ) : (
-            // Placeholder box to offset where the number would be
             <Box w='8px' />
           )}
         </Flex>

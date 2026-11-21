@@ -12,13 +12,9 @@ const { getIsReachable } = reachabilitySelectors
 const emptyTrackStatus = {}
 
 type UseOfflineTrackStatusConfig = {
-  /* Return empty if we are online. Useful as a performance optimization */
   skipIfOnline?: boolean
 }
 
-/** Returns a mapping of tracks to their offline download status. Can be configured
- * to skip updates when online as a performance optimization
- */
 export function useOfflineTracksStatus({
   skipIfOnline = false
 }: UseOfflineTrackStatusConfig = {}) {

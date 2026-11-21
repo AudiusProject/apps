@@ -1,6 +1,5 @@
 const AnalyticsProvider = require('../analytics')
 
-// "Relay: Start" for example
 const eventName = (event) => `Relay: ${event}`
 
 module.exports = class RelayReporter {

@@ -112,8 +112,6 @@ export class IdentityService {
     this.web3Manager = web3Manager
   }
 
-  /* ------- HEDGEHOG AUTH ------- */
-
   async getFn(params: {
     lookupKey: string
     username: string
@@ -127,14 +125,11 @@ export class IdentityService {
   }
 
   async setAuthFn(obj: SetAuthFnParams) {
-    // get wallet from hedgehog and set as owner wallet
     const ownerWallet = obj.wallet
     this.web3Manager?.setOwnerWallet(ownerWallet)
 
-    // sign headers with new wallet so auth server can derive address
     const headers = await this._signData()
 
-    // delete wallet object so it's not passed to identity
     // @ts-ignore
     delete obj.wallet
 
@@ -170,9 +165,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Check if an email address has been previously registered.
-   */
   async checkIfEmailRegistered(email: string) {
     return await this._makeRequest<{ exists: boolean }>({
       url: '/users/check',
@@ -183,11 +175,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Check if the lookupKey exists.
-   * WARNING: might not be the auth credentials for the current user!
-   * Only use when just a soft check is necessary. Use confirmCredentials.
-   */
   async checkAuth({ lookupKey }: { lookupKey: string }) {
     const headers = await this._signData()
     if (headers[AuthHeaders.MESSAGE] && headers[AuthHeaders.SIGNATURE]) {
@@ -202,12 +189,6 @@ export class IdentityService {
     }
   }
 
-  /**
-   * Associates a user with a twitter uuid.
-   * @param uuid from the Twitter API
-   * @param userId
-   * @param handle User handle
-   */
   async associateTwitterUser(
     uuid: string,
     userId: number,
@@ -226,12 +207,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Associates a user with an instagram uuid.
-   * @param uuid from the Instagram API
-   * @param userId
-   * @param handle
-   */
   async associateInstagramUser(
     uuid: string,
     userId: number,
@@ -250,12 +225,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Associates a user with an TikTok uuid.
-   * @param uuid from the TikTok API
-   * @param userId
-   * @param handle
-   */
   async associateTikTokUser(
     uuid: string,
     userId: number,
@@ -274,13 +243,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Logs a track listen for a given user id.
-   * @param trackId
-   * @param userId
-   * @param listenerAddress if logging this listen on behalf of another IP address, pass through here
-   * @param signatureData if logging this listen via a 3p service, a signed piece of data proving authenticity
-   */
   async logTrackListen(
     trackId: number,
     userId: number,
@@ -312,12 +274,6 @@ export class IdentityService {
     return await this._makeRequest(request)
   }
 
-  /**
-   * Return listen history tracks for a given user id.
-   * @param userId - User ID
-   * @param limit - max # of items to return
-   * @param offset - offset into list to return from (for pagination)
-   */
   async getListenHistoryTracks(userId: number, limit = 100, offset = 0) {
     const req: AxiosRequestConfig = {
       method: 'get',
@@ -327,10 +283,6 @@ export class IdentityService {
     return await this._makeRequest(req)
   }
 
-  /**
-   * Looks up a Twitter account by handle.
-   * @returns twitter API response.
-   */
   async lookupTwitterHandle(handle: string) {
     if (handle) {
       return await this._makeRequest({
@@ -343,13 +295,6 @@ export class IdentityService {
     }
   }
 
-  /**
-   * Gets tracks trending on Audius.
-   * @param timeFrame one of day, week, month, or year
-   * @param idsArray track ids
-   * @param limit
-   * @param offset
-   */
   async getTrendingTracks(
     timeFrame: string | null = null,
     idsArray: number[] | null = null,
@@ -393,15 +338,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Gets listens for tracks bucketted by timeFrame.
-   * @param timeFrame one of day, week, month, or year
-   * @param idsArray track ids
-   * @param startTime parseable by Date.parse
-   * @param endTime parseable by Date.parse
-   * @param limit
-   * @param offset
-   */
   async getTrackListens(
     timeFrame: TimeFrame | null = null,
     idsArray: number[] | null = null,
@@ -508,10 +444,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Gets the correct wallet that will relay a txn for `senderAddress`
-   * @param senderAddress wallet
-   */
   async getEthRelayer(senderAddress: string) {
     return await this._makeRequest<{ selectedEthWallet: string }>({
       url: '/eth_relayer',
@@ -532,7 +464,6 @@ export class IdentityService {
     })
   }
 
-  // Relays tx data through the solana relay endpoint
   async solanaRelay(transactionData: RelayTransactionData) {
     const headers = await this._signData()
 
@@ -572,10 +503,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Sends an attestation result to identity.
-   *
-   */
   async sendAttestationResult(data: AttestationResult) {
     return await this._makeRequest({
       url: '/rewards/attestation_result',
@@ -584,9 +511,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Post a reaction to identity.
-   */
   async submitReaction(data: Reaction) {
     const headers = await this._signData()
 
@@ -598,9 +522,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Gets $AUDIO purchase metadata
-   */
   async getUserBankTransactionMetadata(transactionId: string) {
     const headers = await this._signData()
 
@@ -614,9 +535,6 @@ export class IdentityService {
     return metadatas[0]?.metadata ?? null
   }
 
-  /**
-   * Saves $AUDIO purchase metadata
-   */
   async saveUserBankTransactionMetadata(data: {
     transactionSignature: string
     metadata: InAppAudioPurchaseMetadata
@@ -644,8 +562,6 @@ export class IdentityService {
     })
   }
 
-  /* ------- INTERNAL FUNCTIONS ------- */
-
   async _makeRequest<T = unknown>(axiosRequestObj: AxiosRequestConfig) {
     axiosRequestObj.baseURL =
       axiosRequestObj.baseURL || this.identityServiceEndpoint
@@ -656,7 +572,6 @@ export class IdentityService {
       'X-Request-ID': requestId
     }
 
-    // Axios throws for non-200 responses
     try {
       const resp: AxiosResponse<T> = await axios(axiosRequestObj)
       if (!resp.data) {
@@ -680,7 +595,7 @@ export class IdentityService {
 
   async _signData() {
     if (this.web3Manager) {
-      const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+      const unixTs = Math.round(new Date().getTime() / 1000)
       const message = `Click sign to authenticate with identity service: ${unixTs}`
       const signature = await this.web3Manager?.sign(
         Buffer.from(message, 'utf-8')

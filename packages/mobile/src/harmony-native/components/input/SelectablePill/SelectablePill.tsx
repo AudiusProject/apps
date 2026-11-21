@@ -57,11 +57,6 @@ export const SelectablePill = (props: SelectablePillProps) => {
 
   const pressed = useSharedValue(0)
   const selected = useSharedValue(isSelected ? 1 : 0)
-  // Bumped whenever the theme palette changes so the animated style
-  // worklets below re-execute on the UI thread and pick up the new
-  // color values. Reanimated only re-runs a worklet when a shared
-  // value it reads changes; updating useAnimatedStyle's dependency
-  // array alone is not enough to force a repaint.
   const themeNudge = useSharedValue(0)
 
   const handlePressIn = useCallback(() => {
@@ -136,8 +131,6 @@ export const SelectablePill = (props: SelectablePillProps) => {
   ])
 
   const animatedRootStyles = useAnimatedStyle(() => {
-    // Subscribe to themeNudge so this worklet re-runs whenever the
-    // theme palette changes and picks up the latest closure colors.
     // eslint-disable-next-line no-unused-expressions
     themeNudge.value
     return {

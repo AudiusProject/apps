@@ -40,7 +40,6 @@ export enum Genre {
   Hyperpop = 'Hyperpop',
   Dancehall = 'Dancehall',
 
-  // Electronic Subgenres
   Techno = 'Techno',
   Trap = 'Trap',
   House = 'House',

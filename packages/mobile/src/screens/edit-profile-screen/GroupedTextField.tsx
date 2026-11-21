@@ -11,11 +11,9 @@ type GroupedTextFieldProps = Omit<TextInputProps, 'value'> & {
   name: string
   label: string
   icon?: IconComponent
-  /** Fixed text before the value, like the @ on a handle. */
   prefix?: string
 }
 
-/** A row in a `FormGroup`: label on the left, the input filling the rest. */
 export const GroupedTextField = (props: GroupedTextFieldProps) => {
   const { name, label, icon: Icon, prefix, multiline, ...other } = props
   const { color, typography, spacing } = useTheme()
@@ -27,7 +25,6 @@ export const GroupedTextField = (props: GroupedTextFieldProps) => {
     padding: 0,
     fontFamily: typography.fontByWeight.medium,
     fontSize: typography.size.l,
-    // Match the label's line box so the two share a baseline on Android
     lineHeight: typography.lineHeight.l,
     includeFontPadding: false,
     color: color.text.default

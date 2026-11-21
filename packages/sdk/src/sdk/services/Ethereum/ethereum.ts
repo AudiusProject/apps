@@ -47,8 +47,6 @@ export type { EthereumServiceConfig }
 const WORMHOLE_SOLANA_CHAIN_ID = 1
 const ONE_HOUR_IN_S = 60 * 60
 
-// ---------- EthereumService ----------
-
 /**
  * Configured Ethereum service for Audius protocol contracts.
  *

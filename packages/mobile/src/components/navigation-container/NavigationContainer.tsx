@@ -23,10 +23,6 @@ type NavigationContainerProps = {
 
 export const navigationRef = createNavigationContainerRef<ParamListBase>()
 
-/**
- * NavigationContainer contains the react-navigation context
- * and configures linking
- */
 const NavigationContainer = (props: NavigationContainerProps) => {
   const { children } = props
   const theme = useThemeVariant()
@@ -37,11 +33,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
 
   const routeNameRef = useRef<string | undefined>(undefined)
 
-  // hasAccount/accountHandle come from useCurrentAccount's synchronous
-  // placeholderData (sourced from local storage), so getStateFromPath has
-  // the values it needs from the first render — no need to gate the
-  // navigator on the server's account-status round trip.
-
   const linking: LinkingOptions<{}> = {
     prefixes: [
       'audius://',
@@ -50,7 +41,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       'https://redirect.audius.co',
       'http://redirect.audius.co'
     ],
-    // configuration for matching screens with paths
     config: {
       screens: {
         SignOnStack: {
@@ -173,7 +163,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
         }
       }
     },
-    // TODO: This should be unit tested
     getStateFromPath: (path, options) => {
       return getNavigationStateFromDeeplinkPath({
         path,
@@ -197,9 +186,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       ref={navigationRef}
       onReady={onReady}
       onStateChange={() => {
-        // Record screen views for the primary routes
-        // Secondary routes (e.g. Track, Collection, Profile) are recorded via
-        // an effect in the corresponding component
         const previousRouteName = routeNameRef.current
         const currentRouteName = getPrimaryRoute(navigationRef.getRootState())
 

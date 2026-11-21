@@ -9,7 +9,10 @@ type CommentEntityType = 'Track' | 'FanClub' | 'Event'
 
 export const createCommentCommand = new Command('create')
   .description('Create a new comment')
-  .argument('<entityId>', 'The ID of the entity to comment on (hashid or numeric id)')
+  .argument(
+    '<entityId>',
+    'The ID of the entity to comment on (hashid or numeric id)'
+  )
   .argument('[comment]', 'The content of the comment', 'This is a comment')
   .option(
     '-t, --entity-type <entityType>',
@@ -45,9 +48,6 @@ export const createCommentCommand = new Command('create')
       const audiusSdk = await initializeAudiusSdk({ handle: from })
       const userId = await getCurrentUserId()
 
-      // createCommentWithEntityManager expects hashid strings (the zod HashId
-      // schema decodes them to numeric). Accept either a hashid or a numeric
-      // id on the CLI and normalize here.
       const entityIdHash = /^\d+$/.test(entityIdArg)
         ? encodeHashId(Number(entityIdArg))!
         : entityIdArg

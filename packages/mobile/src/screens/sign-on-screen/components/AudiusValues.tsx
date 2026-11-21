@@ -23,9 +23,6 @@ const messages = {
 
 type AudiusValueProps = { icon: IconComponent; text: string }
 
-/**
- * Each individual audius value text + icon row
- */
 const AudiusValue = (props: AudiusValueProps) => {
   const { icon: Icon, text } = props
   const theme = useTheme()
@@ -49,9 +46,6 @@ type AudiusValuesProps = {
   isPanelExpanded?: boolean
 }
 
-/**
- * Renders all the audius values
- */
 export const AudiusValues = (props: AudiusValuesProps) => {
   const { isPanelExpanded } = props
 

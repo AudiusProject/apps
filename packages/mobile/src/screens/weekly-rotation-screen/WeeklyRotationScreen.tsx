@@ -53,15 +53,6 @@ const messages = {
 
 const ART_SIZE = 120
 
-/**
- * The full Weekly Rotation mix. Mirrors the web page: artwork header, then the
- * track list.
- *
- * Shows the signed-in user's mix, or the `handle` param's user's mix (deep
- * link `/explore/weekly-rotation/:handle`).
- *
- * The endpoint returns a fixed 30, so there is no pagination.
- */
 export const WeeklyRotationScreen = () => {
   const { params } = useRoute<'WeeklyRotationScreen'>()
   const handle = params?.handle
@@ -96,7 +87,6 @@ export const WeeklyRotationScreen = () => {
   )
   const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
 
-  // The header button only reflects and controls playback of this mix.
   const isQueued =
     currentPlaybackSource === playbackSource &&
     currentPlaybackTrackId != null &&
@@ -112,8 +102,6 @@ export const WeeklyRotationScreen = () => {
     [trackIds, playbackSource]
   )
 
-  // Mirrors the web page's play-all: toggle when the mix is what's loaded,
-  // otherwise start the queue from the top.
   const handlePlay = useCallback(() => {
     if (playbackQueue.length === 0) return
 
@@ -171,7 +159,6 @@ export const WeeklyRotationScreen = () => {
     )
   }, [dispatch, targetUserId])
 
-  // Fired once the mix resolves, so trackCount and status are real.
   const hasTrackedView = useRef(false)
   useEffect(() => {
     if (hasTrackedView.current || (!isSuccess && !isError)) return

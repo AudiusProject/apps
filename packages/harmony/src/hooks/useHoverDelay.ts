@@ -17,7 +17,6 @@ export const useHoverDelay = (
   const [isClicked, setIsClicked] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Clean up the timer when component unmounts
   useEffect(() => {
     return () => {
       if (timerRef.current !== null) {
@@ -38,7 +37,6 @@ export const useHoverDelay = (
 
     clearTimer()
 
-    // Convert seconds to milliseconds
     const delayMs = delay * 1000
 
     timerRef.current = setTimeout(() => {
@@ -58,11 +56,9 @@ export const useHoverDelay = (
 
     clearTimer()
     setIsClicked((prev) => !prev)
-    // Also clear hover state when clicking
     setIsHovered(false)
   }, [clearTimer, triggeredBy])
 
-  // Determine the final visible state based on trigger type
   const isVisible =
     triggeredBy === 'click'
       ? isClicked

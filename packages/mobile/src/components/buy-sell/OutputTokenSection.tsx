@@ -39,7 +39,6 @@ export const OutputTokenSection = ({
   const { symbol, isStablecoin } = tokenInfo
   const [localAmount, setLocalAmount] = useState(amount || '')
 
-  // Sync local state with prop changes and apply smart decimal formatting
   useEffect(() => {
     const formattedAmount = amount
       ? formatTokenInputWithSmartDecimals(amount)

@@ -190,10 +190,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
   const prevLinkEntities = usePrevious(linkEntities)
 
   const timestamps = useMemo(() => {
-    // `access` is typed as required on Track but is frequently absent at
-    // runtime (tracks hydrated from search/lineup/notification caches before
-    // gated-access enrichment). Optional-chain it so the comment drawer's
-    // composer doesn't crash on open when there's no access info yet.
     if (!partialTrack || !partialTrack.access?.stream) return []
 
     const { duration } = partialTrack
@@ -367,7 +363,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
         return
       }
 
-      // Start user autocomplete
       if (key === AT_KEY && onAutocompleteChange) {
         if (mentionCount < maxMentions) {
           setAutocompletePosition(cursorPosition ?? 0)
@@ -383,10 +378,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
         })
 
         if (editValue) {
-          // Delay the deleting of the matched word because
-          // in react native text change will fire on backspace anyway
-          // and we want the handleChange callback to run first.
-          // This is a bit of a hack. In search of a better way!
           setTimeout(() => {
             setValue(editValue)
           }, 100)
@@ -438,7 +429,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
       const mentions = getUserMentions(value) ?? []
       const fullMatches = [...matches, ...mentions, ...timestamps]
 
-      // If there are no highlightable sections, render text normally
       if (!fullMatches.length && !isAutocompleteActive) {
         return createTextSections(value)
       }
@@ -446,7 +436,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
       const renderedTextSections: ReactNode[] = []
       const autocompleteRange = getAutocompleteRange()
 
-      // Filter out matches split by an autocomplete section
       const filteredMatches = fullMatches.filter(({ index }) => {
         if (index === undefined) return false
         if (autocompleteRange) {
@@ -457,7 +446,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
         return true
       })
 
-      // Add the autocomplete section
       if (
         autocompleteRange &&
         autocompleteRange[0] >= 0 &&
@@ -471,7 +459,6 @@ export const ComposerInput = forwardRef(function ComposerInput(
         })
       }
 
-      // Sort match sections by index
       const sortedMatches = filteredMatches.sort(
         (a, b) => (a.index ?? 0) - (b.index ?? 0)
       )
@@ -484,19 +471,15 @@ export const ComposerInput = forwardRef(function ComposerInput(
         }
 
         if (index > lastIndex) {
-          // Add text before the match
           renderedTextSections.push(
             ...createTextSections(value.slice(lastIndex, index))
           )
         }
-        // Add the matched word with accent color
         renderedTextSections.push(<Text color='secondary'>{text}</Text>)
 
-        // Update lastIndex to the end of the current match
         lastIndex = index + text.length
       }
 
-      // Add remaining text after the last match
       if (lastIndex < value.length) {
         renderedTextSections.push(...createTextSections(value.slice(lastIndex)))
       }

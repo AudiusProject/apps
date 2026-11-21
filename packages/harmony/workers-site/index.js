@@ -29,7 +29,6 @@ async function handleEvent(event) {
   const options = {}
   try {
     if (DEBUG) {
-      // customize caching
       options.cacheControl = {
         bypassCache: true
       }

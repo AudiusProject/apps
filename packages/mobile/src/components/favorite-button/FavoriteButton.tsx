@@ -21,16 +21,12 @@ const styles = StyleSheet.create({
 
 const useAnimations = makeAnimations(({ palette }) => {
   const ColorizedOnIcon = colorize(IconFavoriteOnLight, {
-    // icon_Favorites Outlines 2.Group 1.Fill 1
     'layers.0.shapes.0.it.1.c.k.0.s': palette.neutralLight4,
-    // icon_Favorites Outlines 2.Group 1.Fill 1
     'layers.0.shapes.0.it.1.c.k.1.s': palette.primary
   })
 
   const ColorizedOffIcon = colorize(IconFavoriteOffLight, {
-    // icon_Favorites Outlines 2.Group 1.Fill 1
     'layers.0.shapes.0.it.1.c.k.0.s': palette.primary,
-    // icon_Favorites Outlines 2.Group 1.Fill 1
     'layers.0.shapes.0.it.1.c.k.1.s': palette.neutralLight4
   })
   return [ColorizedOnIcon, ColorizedOffIcon]

@@ -33,13 +33,9 @@ const useAnimations = makeAnimations(({ palette }) => {
   })
 
   const iconRefreshPull = colorize(IconRefreshPull, {
-    // arrow Outlines 4.Group 1.Stroke 1
     'assets.0.layers.0.shapes.0.it.1.c.k': neutralLight4,
-    // arrow Outlines 2.Group 3.Stroke 1
     'layers.1.shapes.0.it.1.c.k': neutralLight4,
-    // arrow Outlines.Group 1.Stroke 1
     'layers.2.shapes.0.it.1.c.k': neutralLight4,
-    // arrow Outlines.Group 2.Stroke 1
     'layers.2.shapes.1.it.1.c.k': neutralLight4
   })
 
@@ -48,13 +44,9 @@ const useAnimations = makeAnimations(({ palette }) => {
   })
 
   const iconRefreshPullWhite = colorize(IconRefreshPull, {
-    // arrow Outlines 4.Group 1.Stroke 1
     'assets.0.layers.0.shapes.0.it.1.c.k': staticWhite,
-    // arrow Outlines 2.Group 3.Stroke 1
     'layers.1.shapes.0.it.1.c.k': staticWhite,
-    // arrow Outlines.Group 1.Stroke 1
     'layers.2.shapes.0.it.1.c.k': staticWhite,
-    // arrow Outlines.Group 2.Stroke 1
     'layers.2.shapes.1.it.1.c.k': staticWhite
   })
 
@@ -83,10 +75,6 @@ type UseOverflowHandlersConfig = {
   onScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void
 }
 
-/**
- * A helper hook to get desired pull to refresh behavior.
- * 1. Momentum scrolling does not trigger pull to refresh
- */
 export const useOverflowHandlers = ({
   isRefreshing,
   scrollResponder,
@@ -113,8 +101,6 @@ export const useOverflowHandlers = ({
 
   useEffect(() => {
     if (!isRefreshing && wasRefreshing && isMomentumScroll) {
-      // If we don't wait, then this triggers too quickly causing scrollToTop
-      // when user is already engaging with content
       const timeout = setTimeout(() => {
         if (currentYOffset.current < 0) scrollTo(0)
       }, DEBOUNCE_TIME_MS)
@@ -172,34 +158,6 @@ type PullToRefreshProps = {
   yOffsetDisappearance?: number
 }
 
-/**
- * Custom pull to refresh to be used with React Native ScrollViews
- * (FlatList, SectionList, etc.).
- *
- * Usage:
- * ```
- * const scrollAnim = useRef(new Animated.Value(0)).current
- *
- * const MyList = () => {
- *  return (
- *    <View>
- *      <PullToRefresh
- *        isRefreshing={}
- *        onRefresh={}
- *      />
- *      <ScrollView
- *        onScroll={attachToScroll(scrollAnim)}
- *        {...props}
- *      />
- *  )
- * }
- * ```
- *
- * Two usage modes of PullToRefresh are provided.
- * If the PullToRefresh is intended to appear in the overscroll
- * space above the view, see `useOverscrollHandlers`
- * Otherwise, the component may suffice.
- */
 export const PullToRefresh = ({
   isRefreshing,
   onRefresh,

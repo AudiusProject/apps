@@ -20,16 +20,10 @@ const messages = {
   openComment: (name: string) => `Open comment by ${name}`
 }
 
-// How long a comment stays up after its timestamp plays.
 const BUBBLE_WINDOW_S = 6
 const POLL_MS = 500
 const BUBBLE_MAX_WIDTH = Dimensions.get('window').width * 0.85
 
-/**
- * Whole-second playback position, polled while active. Cheap enough to run
- * twice a second, and it follows seeks and the native player directly instead
- * of the scrubber's own timer.
- */
 const usePlaybackPosition = (isActive: boolean, mediaKey: string) => {
   const [position, setPosition] = useState(0)
   const seek = useSelector(getSeek)
@@ -66,21 +60,15 @@ const usePlaybackPosition = (isActive: boolean, mediaKey: string) => {
 type CommentBubbleProps = {
   trackId: ID
   comments: TimestampedComment[]
-  /** Poll playback only while the player is open and playing. */
   isActive: boolean
   mediaKey: string
 }
 
-/**
- * Shows the comment whose timestamp just played, SoundCloud style, in the gap
- * under the scrubber. Zero height in the layout; the bubble floats.
- */
 export const CommentBubble = (props: CommentBubbleProps) => {
   const { trackId, comments, isActive, mediaKey } = props
   const { spacing } = useTheme()
   const position = usePlaybackPosition(isActive, mediaKey)
 
-  // Most recent comment inside the window; most reacted on a tie.
   const comment = useMemo(() => {
     let best: TimestampedComment | null = null
     for (const candidate of comments) {
@@ -161,7 +149,6 @@ const Bubble = ({
         pl='xs'
         pr='m'
         backgroundColor='surface2'
-        // 28px tall: clears the play button that overhangs the controls row
         style={{
           paddingVertical: 2,
           borderRadius: 999,

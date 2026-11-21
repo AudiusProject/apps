@@ -120,8 +120,6 @@ export const TrendingFilterDrawer = () => {
   )
 
   const genres = useMemo(() => {
-    // Show the top popular genres by default; while searching, match across the
-    // full set so long-tail genres remain discoverable.
     const filtered = getTrendingGenreSuggestions(
       genreSuggestions,
       searchValue

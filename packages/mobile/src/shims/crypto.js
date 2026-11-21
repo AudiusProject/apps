@@ -1,9 +1,3 @@
-// Node `crypto` for the bundle (see metro.config.js). Bundled callers
-// (ethereumjs-wallet, bip39, tweetnacl, ulid, brorand, sjcl, @noble/secp256k1)
-// only use random bytes, hashes, HMAC, PBKDF2 and AES ciphers. The rest of
-// react-native-crypto (sign/verify, DH, ECDH, public-key encryption) pulled in
-// asn1.js, parse-asn1, browserify-sign and friends, and its randomBytes went
-// through sjcl. Random bytes now come from react-native-get-random-values.
 const aes = require('browserify-cipher')
 const pbkdf2 = require('pbkdf2')
 

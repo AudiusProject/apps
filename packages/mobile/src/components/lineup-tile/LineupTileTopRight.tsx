@@ -27,25 +27,10 @@ const styles = StyleSheet.create({
 })
 
 type Props = {
-  /**
-   * The duration of the track or tracks
-   */
   duration?: number
-  /**
-   * The id of the track
-   */
   trackId?: number
-  /**
-   * Whether or not the tile is for a collection
-   */
   isCollection?: boolean
-  /**
-   * Whether or not the track is long-form content (podcast/audiobook/etc)
-   */
   isLongFormContent?: boolean
-  /**
-   * Whether or not this track is the artist pick
-   */
   isArtistPick?: boolean
 }
 

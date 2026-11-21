@@ -22,14 +22,9 @@ const ACTION_WIDTH = 88
 type ChatCategorySwipeActionsProps = {
   chatId: string
   category: ChatCategory | null
-  /** Called after an action is chosen so the row can close */
   onAction: () => void
 }
 
-/**
- * The actions revealed by swiping a chat row: one button per inbox category
- * the chat is not already in.
- */
 export const ChatCategorySwipeActions = ({
   chatId,
   category,

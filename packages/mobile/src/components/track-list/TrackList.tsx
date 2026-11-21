@@ -25,14 +25,11 @@ type LoadingItem = {
 
 type BaseTrackListProps = {
   hideArt?: boolean
-  // Accept ids as well as uids because some use cases don't have uids available
-  // For example the EditPlaylist track list
   ids?: ID[]
   contextPlaylistId?: ID
   isAlbumPage?: boolean
   onRemove?: (index: number) => void
   showSkeleton?: boolean
-  /** When `showSkeleton` is true, how many placeholder rows to render (capped). */
   skeletonRowCount?: number
   hasNextPage?: boolean
   pageSize?: number
@@ -63,12 +60,6 @@ const DEFAULT_PAGE_SIZE = 10
 const DEFAULT_INITIAL_SKELETON_COUNT = 8
 const MAX_SKELETON_ROWS = 50
 
-/**
- * A FlatList of tracks
- *
- * If isReorderable === true, make sure the TrackList is not nested in a ScrollView,
- * otherwise certain features like auto scroll while dragging will not work
- */
 export const TrackList = (props: TrackListProps) => {
   const {
     contextPlaylistId,
@@ -90,7 +81,6 @@ export const TrackList = (props: TrackListProps) => {
   const data = useMemo(() => {
     const baseData = uids ?? ids ?? []
     if (hasNextPage) {
-      // Add loading items at the end that will render as skeletons
       return [...baseData, ...new Array(pageSize).fill({ _loading: true })]
     }
     return baseData
@@ -103,7 +93,6 @@ export const TrackList = (props: TrackListProps) => {
     UID | ID | LoadingItem
   >['renderItem'] = useCallback(
     ({ item, getIndex = () => -1, drag }) => {
-      // If the item is a loading item, render a skeleton
       if (typeof item === 'object' && '_loading' in item) {
         return renderSkeletonTrack()
       }

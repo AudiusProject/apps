@@ -37,8 +37,6 @@ class App {
     this.optimizelyPromise = null
     this.optimizelyClientInstance = this.configureOptimizely()
 
-    // Note: The order of the following functions is IMPORTANT, as it sets the functions
-    // that process a request in the order applied
     this.expressSettings()
     this.setMiddleware()
     this.setRateLimiters()
@@ -50,32 +48,14 @@ class App {
     let server
     logger.info('identity init')
 
-    /**
-     * From the cluster docs - https://nodejs.org/docs/latest-v14.x/api/cluster.html#cluster_cluster
-     * "A single instance of Node.js runs in a single thread. To take advantage of multi-core systems,
-     * the user will sometimes want to launch a cluster of Node.js processes to handle the load.
-     * The cluster module allows easy creation of child processes that all share server ports."
-     *
-     * We have the master node in the cluster run migrations and start workers.
-     * The workers start express server processes
-     */
     if (cluster.isMaster) {
-      // run all migrations
-      // this is a stupid solution to a timing bug, because migrations attempt to get run when
-      // the db port is exposed, not when it's ready to accept incoming connections. the timeout
-      // attempts to wait until the db is accepting connections
       await new Promise((resolve) => setTimeout(resolve, 2000))
       await this.runMigrations()
 
-      // clear POA & ETH relayer keys
       await Lock.clearAllLocks(generateWalletLockKey('*'))
       await Lock.clearAllLocks(generateETHWalletLockKey('*'))
 
-      // if it's a non test run, fork web server worker processes
       if (!config.get('isTestRun')) {
-        // Fork extra web server workers
-        // note - we can't have more than 1 worker at the moment because POA and ETH relays
-        // use in memory wallet locks
         for (let i = 0; i < config.get('clusterForkProcessCount'); i++) {
           cluster.fork({ WORKER_TYPE: 'web_server' })
         }
@@ -91,7 +71,6 @@ class App {
 
         await this.configureDiscoveryNodeRegistration(audiusInstance)
       } else {
-        // if it's a test run only start the server
         await new Promise((resolve) => {
           server = this.express.listen(this.port, resolve)
         })
@@ -119,7 +98,6 @@ class App {
 
       return { app: this.express, server }
     } else {
-      // if it's not the master worker in the cluster
       await this.configureAudiusInstance()
 
       await new Promise((resolve) => {
@@ -138,7 +116,6 @@ class App {
   }
 
   configureSendGrid() {
-    // Configure sendgrid instance
     if (config.get('sendgridApiKey')) {
       sgMail.setApiKey(config.get('sendgridApiKey'))
       sgClient.setApiKey(config.get('sendgridApiKey'))
@@ -156,7 +133,7 @@ class App {
       sdkKey,
       datafileOptions: {
         autoUpdate: true,
-        updateInterval: 5000 // Poll for updates every 5s
+        updateInterval: 5000
       }
     })
 
@@ -193,7 +170,6 @@ class App {
   }
 
   expressSettings() {
-    // https://expressjs.com/en/guide/behind-proxies.html
     this.express.set('trust proxy', true)
   }
 
@@ -219,7 +195,6 @@ class App {
         return !req.query.otp || req.query.otp === ''
       }
     })
-    // This limiter double dips with the reqLimiter. The 5 requests every hour are also counted here
     this.express.use('/authentication/', authRequestRateLimiter)
     this.express.use('/authentication', otpRequestRateLimiter)
 
@@ -227,18 +202,14 @@ class App {
       prefix: 'twitterLimiter',
       max: config.get('rateLimitingTwitterLimit')
     })
-    // This limiter double dips with the reqLimiter. The 5 requests every hour are also counted here
     this.express.use('/twitter/', twitterRequestRateLimiter)
 
     const tikTokRequestRateLimiter = getRateLimiter({
       prefix: 'tikTokLimiter',
       max: config.get('rateLimitingTikTokLimit')
     })
-    // This limiter double dips with the reqLimiter. The 5 requests every hour are also counted here
     this.express.use('/tiktok/', tikTokRequestRateLimiter)
 
-    // Eth relay rate limits
-    // Default to 50 per ip per day and one of 10 per wallet per day
     const ONE_HOUR_IN_SECONDS = 60 * 60
     const ethRelayIPRateLimiter = getRateLimiter({
       prefix: 'ethRelayIPRateLimiter',
@@ -276,7 +247,6 @@ class App {
   }
 
   setRoutes() {
-    // import routes
     require('./routes')(this.express)
   }
 

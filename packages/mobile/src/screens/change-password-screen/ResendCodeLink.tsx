@@ -18,7 +18,6 @@ export const ResendCodeLink = () => {
   const { toast } = useToast()
 
   const [{ loading }, sendCode] = useAsyncFn(async () => {
-    // Try to confirm without OTP to force OTP refresh
     try {
       await identityService.changeEmail({
         email

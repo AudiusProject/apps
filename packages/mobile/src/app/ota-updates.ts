@@ -1,9 +1,3 @@
-/**
- * Over-the-air (OTA) update configuration using CodePush.
- * Set OTA_UPDATE_URL in .env (e.g. https://your-cdn.com/codepush) to enable.
- * When unset, no update checks are performed.
- */
-
 import type {
   ReleaseHistoryInterface,
   UpdateCheckRequest
@@ -16,7 +10,6 @@ import packageJson from '../../package.json'
 const OTA_BASE_URL =
   (Config as { OTA_UPDATE_URL?: string }).OTA_UPDATE_URL ?? ''
 
-/** Same version CI uses for `--binary-version` (packages/mobile/package.json). */
 const PACKAGE_JSON_APP_VERSION = packageJson.version
 
 let loggedBootstrapOnce = false
@@ -56,7 +49,6 @@ export function getOtaHistoryFetchDiagnostics(): OtaHistoryFetchDiagnostics {
   return { ...historyFetchDiag }
 }
 
-/** Last release-history URL fetched this session (for sync / banner logs). */
 export function getOtaLastHistoryEndpointForLogs(): string {
   const u = historyFetchDiag.lastUrl
   return u != null && u.length > 0
@@ -85,12 +77,6 @@ export function isOtaEnabled(): boolean {
   return OTA_BASE_URL.length > 0
 }
 
-/**
- * CodePush always resolves a "latest" enabled release from history. An empty object
- * throws `There is no latest release.` — handled internally but still `console.error`'d.
- * One synthetic release with an empty `downloadUrl` makes the library treat the check
- * as "no update" without throwing.
- */
 function releaseHistoryNoUpdatePlaceholder(
   historyAppVersion: string
 ): ReleaseHistoryInterface {
@@ -121,10 +107,6 @@ function countEnabledReleases(history: ReleaseHistoryInterface): number {
   return n
 }
 
-/**
- * History URL: `{base}/histories/{platform}/{channel}/{package.json version}.json`
- * (matches CI binary version, not necessarily native CFBundleShortVersionString / versionName.)
- */
 export async function releaseHistoryFetcher(
   updateRequest: UpdateCheckRequest
 ): Promise<ReleaseHistoryInterface> {

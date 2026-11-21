@@ -16,7 +16,6 @@ export type TextProps = NativeTextProps &
   Omit<BaseTextProps, 'textAlign' | 'ellipsis'> & {
     textAlign?: TextStyle['textAlign']
     textTransform?: TextStyle['textTransform']
-    // Needed for proper text wrapping
     flexShrink?: number
     userSelect?: 'none' | 'text' | 'all' | 'contain'
   }
@@ -42,7 +41,6 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
   const parentVariant = contextVariant && !variantProp
   const strength = strengthProp ?? (parentVariant ? undefined : 'default')
   const size = sizeProp ?? (parentVariant ? undefined : 'm')
-  // TODO: make heading a proper gradient
   const color =
     colorProp === 'heading'
       ? theme.color.secondary.secondary
@@ -66,8 +64,6 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
       fontFamily:
         strength && t.fontByWeight[variantStyles.fontWeight[strength]],
       ...('css' in variantStyles ? (variantStyles.css ?? {}) : {}),
-      // On Android, letterSpacing adds trailing space after the last character
-      // that isn't accounted for in text measurement, clipping the final letter.
       ...(Platform.OS === 'android' &&
       'css' in variantStyles &&
       typeof variantStyles.css === 'object' &&
@@ -84,7 +80,6 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
     ...(shadow && t.shadow[shadow]),
     textAlign,
     ...(textTransform && { textTransform }),
-    // Fixes demiBold text misalignment on iOS
     ...(fontWeight === 'demiBold' && Platform.OS === 'ios'
       ? { marginTop: 2 }
       : {}),

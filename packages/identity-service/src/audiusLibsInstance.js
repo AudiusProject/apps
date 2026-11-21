@@ -5,7 +5,6 @@ const entityManagerAddress = config.get('entityManagerAddress')
 const web3ProviderUrl = config.get('web3Provider')
 const Web3 = require('web3')
 
-// Fixed address of the SPL token program
 const SOLANA_TOKEN_ADDRESS = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
 
 class AudiusLibsWrapper {
@@ -21,8 +20,6 @@ class AudiusLibsWrapper {
         useExternalWeb3: true,
         externalWeb3Config: {
           web3: new Web3(web3ProviderUrl),
-          // this is a stopgap since libs external web3 init requires an ownerWallet
-          // this is never actually used in the service's libs calls
           ownerWallet: config.get('relayerPublicKey')
         },
         entityManagerAddress
@@ -44,7 +41,6 @@ class AudiusLibsWrapper {
       rewardsManagerProgramId: config.get('solanaRewardsManagerProgramId'),
       rewardsManagerProgramPDA: config.get('solanaRewardsManagerProgramPDA'),
       rewardsManagerTokenPDA: config.get('solanaRewardsManagerTokenPDA'),
-      // Never use the relay path in identity
       useRelay: false,
       confirmationTimeout: config.get('solanaConfirmationTimeout')
     })

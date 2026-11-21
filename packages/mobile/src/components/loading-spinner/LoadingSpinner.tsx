@@ -21,13 +21,7 @@ export type LoadingSpinnerProps = {
    * @deprecated The color of the spinner
    */
   color?: string
-  /**
-   * Fill color of the spinner
-   */
   fill?: string
-  /**
-   * Style to apply to the spinner
-   */
   style?: StyleProp<ViewStyle>
 }
 
@@ -39,8 +33,6 @@ const LoadingSpinner = (props: LoadingSpinnerProps) => {
   const color = props.color ?? props.fill ?? neutralLight4
   const ref = useRef<AnimatedLottieView>(null)
 
-  // Fix paused animation when entering foreground
-  // see: https://github.com/lottie-react-native/lottie-react-native/issues/412
   useEnterForeground(
     useCallback(() => {
       ref.current?.play()

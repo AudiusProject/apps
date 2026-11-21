@@ -24,7 +24,6 @@ import { SelectArtistsPreviewContextProvider } from './selectArtistPreviewContex
 
 const Tab = createCollapsibleTabNavigator()
 
-// Note for this screen we are not using Formik due to performance issues, and using redux instead.
 export const SelectArtistsScreen = () => {
   const genres = useSelector((state: any) => [
     'Featured',
@@ -58,13 +57,11 @@ export const SelectArtistsScreen = () => {
   const handleSubmit = useCallback(() => {
     setIsSubmitting(true)
 
-    // Only add artists if some were selected
     if (selectedArtists.length > 0) {
       dispatch(addFollowArtists(selectedArtists))
       dispatch(completeFollowArtists())
     }
 
-    // Always create the account (whether artists selected or not)
     dispatch(signUp())
     navigation.navigate('AccountLoading')
   }, [dispatch, navigation, selectedArtists])

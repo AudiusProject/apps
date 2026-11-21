@@ -76,10 +76,6 @@ const getArtworkTargetSize = (artwork?: Track['artwork']) =>
   TRACK_ARTWORK_PREFERRED_SIZES.find((size) => artwork?.[size]) ??
   SquareSizes.SIZE_1000_BY_1000
 
-// Checking a track's stream and artwork against their mirrors costs HEAD
-// requests, so a new queue only checks the tracks around the starting one.
-// The rest go in with their primary URLs; if one fails when it plays, the
-// PlaybackError handler re-resolves it against the mirrors.
 const RESOLVE_AHEAD = 2
 const RESOLVE_BEHIND = 1
 
@@ -143,10 +139,6 @@ type QueueableTrack = {
   track: Nullable<Track>
 } & Pick<PlaybackTrack, 'playerBehavior'>
 
-// ---------------------------------------------------------------------------
-// Hook: useAudioPlayerSetup
-// ---------------------------------------------------------------------------
-/** One-time TrackPlayer initialisation and teardown. */
 const useAudioPlayerSetup = () => {
   const [isAudioSetup, setIsAudioSetup] = useState(false)
   const dispatch = useDispatch()
@@ -171,10 +163,6 @@ const useAudioPlayerSetup = () => {
   return isAudioSetup
 }
 
-// ---------------------------------------------------------------------------
-// Hook: useQueueSync
-// ---------------------------------------------------------------------------
-/** Keeps RNTP's native queue in sync with the redux queue. */
 const useQueueSync = (isAudioSetup: boolean) => {
   const dispatch = useDispatch()
 
@@ -248,9 +236,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
         resolveMirrors = true,
         isUpcoming = false
       }: {
-        /** Check the stream and artwork URLs against their mirrors */
         resolveMirrors?: boolean
-        /** Not the track about to play, so leave its retry count alone */
         isUpcoming?: boolean
       } = {}
     ) => {
@@ -336,10 +322,8 @@ const useQueueSync = (isAudioSetup: boolean) => {
     ]
   )
 
-  // Ref tracking which trackIds RNTP currently has loaded.
   const queueListRef = useRef<ID[]>([])
 
-  // --- resetQueue: full queue replacement (batch) ---
   const resetQueue = useCallback(
     async (tracks: QueueableTrack[], startIndex: number) => {
       await TrackPlayer.reset()
@@ -347,11 +331,9 @@ const useQueueSync = (isAudioSetup: boolean) => {
       const firstTrack = tracks[startIndex]
       if (!firstTrack) return
 
-      // Load and play the target track immediately
       await TrackPlayer.add(await makeTrackData(firstTrack))
       await TrackPlayer.play()
 
-      // Batch-resolve remaining tracks concurrently, then add in order
       if (tracks.length > 1) {
         const remaining = tracks
           .map((t, i) => ({ t, i }))
@@ -372,7 +354,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
           })
         )
 
-        // Sort by original index so RNTP order matches redux order
         resolved.sort((a, b) => a.i - b.i)
 
         const before = resolved
@@ -388,7 +369,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
     [makeTrackData]
   )
 
-  // --- appendToQueue: add new tracks to end ---
   const appendToQueue = useCallback(
     async (newTracks: QueueableTrack[]) => {
       const resolved = await Promise.all(
@@ -404,11 +384,9 @@ const useQueueSync = (isAudioSetup: boolean) => {
     [makeTrackData]
   )
 
-  // --- handleQueueChange: decides reset vs append ---
   const handleQueueChange = useCallback(async () => {
     const refTrackIds = queueListRef.current
 
-    // Wait for all track + owner data to be loaded before touching RNTP
     if (
       !queueTracks.every(
         ({ track }) =>
@@ -449,10 +427,8 @@ const useQueueSync = (isAudioSetup: boolean) => {
     resetQueue
   ])
 
-  // --- handleQueueIdxChange: skip within a synced queue ---
   const latestQueueIdxRef = useRef<number>(-1)
 
-  // Read by handleQueueIdxChange without re-running it on play/pause.
   const playingRef = useRef(playing)
   useEffect(() => {
     playingRef.current = playing
@@ -461,8 +437,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
   const handleQueueIdxChange = useCallback(async () => {
     if (queueIndex === -1) return
 
-    // If RNTP queue hasn't been rebuilt to match the current redux queue,
-    // bail out. handleQueueChange will load the correct track when it fires.
     if (!isEqual(queueListRef.current, queueTrackIds)) return
 
     latestQueueIdxRef.current = queueIndex
@@ -472,9 +446,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
       const queue = await TrackPlayer.getQueue()
       if (queueIndex < queue.length) {
         await TrackPlayer.skip(queueIndex)
-        // On iOS, skip keeps playing only if the player was in the playing
-        // state, so a skip while loading, buffering or paused at the end of
-        // the queue loads the track paused.
         if (playingRef.current) {
           await TrackPlayer.play()
         }
@@ -482,10 +453,8 @@ const useQueueSync = (isAudioSetup: boolean) => {
     }
   }, [queueIndex, queueTrackIds])
 
-  // Store the skip promise so handleTogglePlay can await it
   const queueIdxChangeJobRef = useRef<Promise<void> | undefined>(undefined)
 
-  // --- Effects ---
   useEffect(() => {
     if (isAudioSetup) {
       handleQueueChange()
@@ -525,10 +494,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Hook: usePlaybackEvents
-// ---------------------------------------------------------------------------
-/** Handles all RNTP events: errors, remote controls, track changes. */
 const usePlaybackEvents = ({
   queueIndex,
   queueTracks,
@@ -554,7 +519,6 @@ const usePlaybackEvents = ({
   const { bufferingDuringPlay } = useIsPlaying()
   const previousBufferingState = usePrevious(bufferingDuringPlay)
 
-  // Sync buffering state to redux
   useEffect(() => {
     if (
       bufferingDuringPlay !== undefined &&
@@ -585,7 +549,6 @@ const usePlaybackEvents = ({
     }
   }, [])
 
-  // Register PlaybackState listener once
   useEffect(() => {
     const subscription = TrackPlayer.addEventListener(
       Event.PlaybackState,
@@ -614,7 +577,6 @@ const usePlaybackEvents = ({
   useTrackPlayerEvents(playerEvents, async (event) => {
     const { duration, position } = await TrackPlayer.getProgress()
 
-    // --- Playback error: retry with fresh stream URL ---
     if (event.type === Event.PlaybackError) {
       console.error(`TrackPlayer Playback Error:`, event)
       const updatedTrack = await makeTrackData(
@@ -625,7 +587,6 @@ const usePlaybackEvents = ({
       return
     }
 
-    // --- Remote controls ---
     if (event.type === Event.RemotePlay || event.type === Event.RemotePause) {
       playing
         ? dispatch(playbackActions.pause())
@@ -657,21 +618,15 @@ const usePlaybackEvents = ({
       return
     }
 
-    // --- Queue ended: the native player has stopped, so mark redux paused.
-    // Otherwise `playing` stays true and the next play (restart, previous,
-    // tapping a track) never reaches TrackPlayer.play().
     if (event.type === Event.PlaybackQueueEnded) {
       dispatch(playbackActions.pause({ onlySetState: true }))
       return
     }
 
-    // --- Active track changed ---
     if (event.type === Event.PlaybackActiveTrackChanged) {
       const playerIndex = await TrackPlayer.getActiveTrackIndex()
       if (playerIndex === undefined) return
 
-      // RNTP auto-advanced to next track. The redux queue is always in
-      // playable order (shuffled or not), so RNTP and redux indices align.
       if (playerIndex > queueIndex) {
         const { track: nextTrack, playerBehavior: nextBehavior } =
           queueTracks[playerIndex] ?? {}
@@ -714,7 +669,6 @@ const usePlaybackEvents = ({
         }
       }
 
-      // Update playback rate & lock screen controls for long-form content
       const currentTrack = queueTracks[playerIndex]?.track
       const isLongForm = isLongFormContent(currentTrack)
       const newRate = isLongForm ? playbackRateValueMap[playbackRate] : 1.0
@@ -725,7 +679,6 @@ const usePlaybackEvents = ({
         await updatePlayerOptions(isLongForm)
       }
 
-      // Handle completed long-form track
       if (event?.lastPosition !== undefined && event?.index !== undefined) {
         const { track: endedTrack } = queueTracks[event.index] ?? {}
         if (
@@ -748,10 +701,6 @@ const usePlaybackEvents = ({
   return { setSeekPosition }
 }
 
-// ---------------------------------------------------------------------------
-// Hook: usePlaybackControls
-// ---------------------------------------------------------------------------
-/** Play/pause toggle, seek, repeat, rate, stop. */
 const usePlaybackControls = (
   isAudioSetup: boolean,
   queueIdxChangeJobRef: React.MutableRefObject<Promise<void> | undefined>,
@@ -766,7 +715,6 @@ const usePlaybackControls = (
   const previousPlayingTrackId = usePrevious(playingTrackId)
   const queueIndex = useSelector(getIndex)
 
-  // --- Toggle play/pause ---
   const handleTogglePlay = useCallback(async () => {
     if (playing) {
       await queueIdxChangeJobRef.current
@@ -776,7 +724,6 @@ const usePlaybackControls = (
     }
   }, [playing, queueIdxChangeJobRef])
 
-  // --- Repeat mode ---
   const handleRepeatModeChange = useCallback(async () => {
     if (repeatMode === RepeatMode.SINGLE) {
       await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Track)
@@ -787,14 +734,12 @@ const usePlaybackControls = (
     }
   }, [repeatMode])
 
-  // --- Playback rate ---
   const isLongFormContentRef = useRef<boolean>(false)
   const handlePlaybackRateChange = useCallback(async () => {
     if (!isLongFormContentRef.current) return
     await TrackPlayer.setRate(playbackRateValueMap[playbackRate])
   }, [playbackRate])
 
-  // --- Seek handler ---
   useEffect(() => {
     if (seek !== null) {
       setSeekPosition(seek)
@@ -802,7 +747,6 @@ const usePlaybackControls = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seek])
 
-  // --- Counter/restart handler ---
   const counterRef = useRef<number | null>(null)
   const counterTrackIndex = useRef<number | null>(null)
 
@@ -814,7 +758,6 @@ const usePlaybackControls = (
     }
   }, [counter, queueIndex, setSeekPosition])
 
-  // --- Effects ---
   useEffect(() => {
     if (isAudioSetup) handleRepeatModeChange()
   }, [handleRepeatModeChange, repeatMode, isAudioSetup])
@@ -834,10 +777,6 @@ const usePlaybackControls = (
   }, [playing, playingTrackId, previousPlayingTrackId])
 }
 
-// ---------------------------------------------------------------------------
-// Hook: useRecordListen
-// ---------------------------------------------------------------------------
-/** Records a listen event after a short delay. */
 const useRecordListen = () => {
   const dispatch = useDispatch()
   const track = useCurrentTrack()
@@ -862,9 +801,6 @@ const useRecordListen = () => {
   }, [counter, dispatch, isReachable, track?.track_id])
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 export const AudioPlayer = () => {
   useChromecast()
 

@@ -6,7 +6,6 @@ import { GradientText } from '../core'
 
 import { useStyles } from './styles'
 
-/** Renders the "Reward X Audio" content for a challenge modal */
 export const ChallengeReward = ({
   amount,
   subtext

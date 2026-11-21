@@ -16,7 +16,6 @@ export const RouteHistoryProvider = ({ children }) => {
   const location = useLocation()
 
   useEffect(() => {
-    // Prevent duplicates of the same path in the history stack
     if (
       historyStack.length === 0 ||
       historyStack[historyStack.length - 1] !== location.pathname

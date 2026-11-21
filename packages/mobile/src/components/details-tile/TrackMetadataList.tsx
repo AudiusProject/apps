@@ -14,9 +14,6 @@ type TrackMetadataListProps = {
   trackId: ID
 }
 
-/**
- * The additional metadata shown at the bottom of the Track Screen and Collection Screen Headers
- */
 export const TrackMetadataList = ({ trackId }: TrackMetadataListProps) => {
   const metadataItems = useTrackMetadata({ trackId })
 

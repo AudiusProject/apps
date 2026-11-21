@@ -13,22 +13,6 @@ type TrackContestsSectionProps = {
   trackId: ID
 }
 
-/**
- * "Contests" tile section on the track screen. Replaces the legacy in-line
- * `RemixContestSection` (Details / Prizes / Submissions / Winners tabs)
- * — the full experience now lives on the dedicated contest screen at
- * `/{handle}/{slug}/contest`. This section just lists the contests
- * attached to this track as cards that link out (Figma 2888-16639).
- *
- * Renders nothing when the track has no remix-contest events, so it's
- * safe to drop into every track screen unconditionally.
- *
- * Note: the contest card itself currently resolves a contest via
- * `useRemixContest(trackId)` which returns only the first event for that
- * track. If/when the data model surfaces more than one active contest
- * per track, this section is the natural seam to render N cards instead
- * of one.
- */
 export const TrackContestsSection = ({
   trackId
 }: TrackContestsSectionProps) => {

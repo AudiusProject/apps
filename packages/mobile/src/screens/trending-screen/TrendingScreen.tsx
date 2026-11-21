@@ -38,8 +38,6 @@ export const TrendingScreen = () => {
   const bottomChin = useBottomChinHeight()
   const handleGlassScroll = useGlassScrollHandler()
 
-  // TrackLineup opts out of the shared chin, so it needs the bottom inset
-  // that clears the floating tab bar folded in here.
   const lineupContentStyle = {
     paddingTop: glassHeaderInset,
     paddingBottom: bottomChin
@@ -50,10 +48,6 @@ export const TrendingScreen = () => {
     'tracks' | 'underground'
   >('tracks')
 
-  // Memoized so the header isn't a new function reference on every render —
-  // otherwise Screen's setOptions runs each parent re-render and React
-  // Navigation rebuilds the header, remounting AccountPictureHeader and
-  // re-firing the profile-picture image-fetch path.
   const renderHeader = useCallback(
     () => (
       <MobileRootHeader
@@ -67,10 +61,6 @@ export const TrendingScreen = () => {
     [category]
   )
 
-  // Render the category pills both as the deferred-render skeleton and as
-  // the children. Same JSX in the same position → React reconciles to the
-  // same TrendingHeader instance across the swap, so the pills appear
-  // immediately and don't pop in / shift content when isScreenReady flips.
   const trendingPills = (
     <TrendingHeader
       title={titleByCategory[category]}

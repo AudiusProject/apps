@@ -31,7 +31,6 @@ export const UserBadges = (props: UserBadgesProps) => {
   const { tier } = useTierAndVerifiedForUser(userId)
 
   const displayMint = useMemo(() => {
-    // Priority: explicit mint prop > user's fan_club_badge > null
     if (mint) return mint
     if (userFanClubBadge?.mint) return userFanClubBadge.mint
     return null

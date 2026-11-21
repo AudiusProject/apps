@@ -34,6 +34,7 @@ export const SIGN_UP = 'SIGN_ON/SIGN_UP'
 export const CREATE_GUEST_ACCOUNT = 'SIGN_ON/CREATE_GUEST_ACCOUNT'
 export const START_SIGN_UP = 'SIGN_ON/START_SIGN_UP'
 
+/** @deprecated */
 export const FINISH_SIGN_UP = 'SIGN_ON/FINISH_SIGN_UP'
 
 export const SIGN_UP_SUCCEEDED = 'SIGN_ON/SIGN_UP_SUCCEEDED'

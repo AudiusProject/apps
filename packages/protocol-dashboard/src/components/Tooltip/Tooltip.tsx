@@ -105,7 +105,6 @@ const BasicTooltipText: React.FC<{
 
 type TooltipProps = PropsWithChildren<{
   className?: string
-  /** Deprecated - use `body` instead */
   text?: string
   body?: string
   title?: string

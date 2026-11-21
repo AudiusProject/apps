@@ -17,7 +17,6 @@ export const TransferInProgress = () => {
   const withdrawStatus = useSelector(getWithdrawStatus)
   const { setData } = useWithdrawUSDCModal()
 
-  // Monitor withdrawal status and navigate to success when complete
   useEffect(() => {
     if (withdrawStatus === Status.SUCCESS) {
       setData({ page: WithdrawUSDCModalPages.TRANSFER_SUCCESSFUL })

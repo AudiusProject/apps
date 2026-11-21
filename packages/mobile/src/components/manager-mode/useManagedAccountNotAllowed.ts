@@ -7,10 +7,6 @@ import { useToast } from 'app/hooks/useToast'
 export const managedAccountNotAllowedMessage =
   "You can't do that as a managed user"
 
-/**
- * While managing another account, runs `callback` (e.g. closing a drawer)
- * and shows a toast whenever `trigger` becomes true.
- */
 export const useManagedAccountNotAllowedCallback = ({
   trigger,
   callback
@@ -29,10 +25,6 @@ export const useManagedAccountNotAllowedCallback = ({
   }, [isManagedAccount, callback, toast, trigger])
 }
 
-/**
- * Wraps an action so it shows a toast instead of running while managing
- * another account.
- */
 export const useManagedAccountGuard = () => {
   const isManagedAccount = useIsManagedAccount()
   const { toast } = useToast()

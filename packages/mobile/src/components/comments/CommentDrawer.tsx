@@ -102,7 +102,6 @@ const CommentDrawerAutocompleteContent = ({
   const userList = query !== '' ? searchData : followersData
   const isUserListPending = query !== '' ? searchLoading : followerDataPending
 
-  // Loading state
   if (isUserListPending) {
     return (
       <Flex p='l' alignItems='center'>
@@ -111,7 +110,6 @@ const CommentDrawerAutocompleteContent = ({
     )
   }
 
-  // Empty state
   if (!userList || !userList.length) {
     return (
       <Flex p='l'>
@@ -164,7 +162,6 @@ const CommentDrawerContent = (props: {
     ]
   }, [highlightedCommentId, allCommentIds])
 
-  // Loading state
   if (isLoading) {
     return (
       <>
@@ -175,10 +172,6 @@ const CommentDrawerContent = (props: {
     )
   }
 
-  // Always render BottomSheetFlatList (with ListEmptyComponent for the empty
-  // state) so the bottom sheet can handle keyboard avoidance and touch
-  // propagation correctly. Swapping in a plain <Flex> when there are zero
-  // comments breaks the footer composer's send button on a 0-comment track.
   return (
     <BottomSheetFlatList
       ref={commentListRef}
@@ -216,8 +209,6 @@ export type CommentDrawerData = {
   entityId: number
   navigation: NativeStackNavigationProp<ParamListBase>
   autoFocusInput?: boolean
-  // Source tag for the new playback queue when the user plays the track from
-  // the comment drawer. Kept optional; defaults to 'comments' downstream.
   playbackSource?: string
   highlightedComment?: Comment | null
 }
@@ -225,7 +216,6 @@ export type CommentDrawerData = {
 type CommentDrawerProps = {
   bottomSheetModalRef: React.RefObject<BottomSheetModal | null>
   handleClose: (trackId: ID) => void
-  // Called when the sheet has finished dismissing itself.
   onSheetDismissed: () => void
 } & CommentDrawerData
 
@@ -244,20 +234,8 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
   const insets = useSafeAreaInsets()
   const commentListRef = useRef<BottomSheetFlatListMethods>(null)
 
-  // `closeAndExitNowPlaying` is read here (inside CommentDrawerContext.Provider)
-  // and threaded into CommentSectionContext so that CommentBlock can access it
-  // without calling useCommentDrawer() directly.  We must NOT call
-  // useCommentDrawer() from inside the BottomSheetModal portal content because
-  // @gorhom/portal renders portal children at a PortalHost that is a *sibling*
-  // of the CommentDrawerContext.Provider in the tree, so the context is
-  // unreachable from there — causing a 100%-reproducible crash the moment any
-  // comment renders.
   const { closeAndExitNowPlaying } = useCommentDrawer()
 
-  // When the drawer is opened from a lineup tile (e.g. the feed), the full
-  // track may not yet be in the query cache. CommentSectionProvider returns
-  // null until the track loads, which would render an empty bottom sheet, so
-  // fetch the track here and show a loading state instead of a blank drawer.
   const { data: track } = useTrack(entityId)
 
   const [onAutocomplete, setOnAutocomplete] = useState<
@@ -304,8 +282,6 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
         </BottomSheetFooter>
       </GestureDetector>
     ),
-    // intentionally excluding insets.bottom because it causes a rerender
-    // when the keyboard is opened on android, causing the keyboard to close
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       entityId,
@@ -324,9 +300,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
   const handleSheetChanges = useCallback(
     (index: number) => {
       setIsDrawerVisible(index >= 0)
-      // When the sheet first opens (index >= 0), snap to index 1 (85%) if it's at index 0 (50%)
       if (index === 0 && bottomSheetModalRef.current) {
-        // Use a small delay to ensure the modal is fully presented
         setTimeout(() => {
           bottomSheetModalRef.current?.snapToIndex(1)
         }, 50)

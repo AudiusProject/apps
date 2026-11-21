@@ -27,7 +27,6 @@ export const TokenSelectButton = ({
   const [isVisible, setIsVisible] = useState(false)
   const [tempSelectedToken, setTempSelectedToken] = useState<string>('')
 
-  // Create token options map for quick lookup
   const tokensMap: { [key: string]: CoinInfo } = useMemo(
     () =>
       availableTokens.reduce(
@@ -57,7 +56,6 @@ export const TokenSelectButton = ({
     setIsVisible(false)
   }, [])
 
-  // Convert tokens to selection data format
   const tokenOptions: ListSelectionData[] = useMemo(
     () =>
       availableTokens.map((token) => ({

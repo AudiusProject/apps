@@ -11,15 +11,9 @@ let contractClient
 
 describe('Testing ContractClient class with ProviderSelection', () => {
   afterEach(async () => {
-    // Reset stub
     sinon.restore()
   })
 
-  /**
-   * Given: audius gateway is healthy
-   * When: we do contract logic
-   * Should: do not use provider selection logic and use initially set audius gateway
-   */
   it('should use initial audius gateway if healthy', async () => {
     contractClient = createContractClientWithInternalWeb3()
     sinon
@@ -40,14 +34,6 @@ describe('Testing ContractClient class with ProviderSelection', () => {
     assert(consoleSpy.notCalled)
   })
 
-  /**
-   * Given: both gatetways are unhealthy
-   * When: we do contract logic
-   * Should: try both gateways and then log error
-   *
-   * @notice when web3 is set to a new object, the second call will throw a different error
-   *    that is acceptable as we don't care about what the error is
-   */
   it('should log error if both audius gateway and public gateway are unhealthy', async () => {
     contractClient = createContractClientWithInternalWeb3()
     sinon
@@ -66,11 +52,6 @@ describe('Testing ContractClient class with ProviderSelection', () => {
     assert(consoleSpy.callCount === CONTRACT_INIT_MAX_ATTEMPTS)
   })
 
-  /**
-   * Given: contractClient.web3Manager is instanceof ethWeb3Manager
-   * When: contract logic passes
-   * Should: pass on first try and use initially set gateway
-   */
   it('should use initial gateway url if web3Manager is instanceof ethWeb3Manager and contract logic passes', async () => {
     contractClient = createContractClientWithEthWeb3Manager()
     sinon
@@ -91,11 +72,6 @@ describe('Testing ContractClient class with ProviderSelection', () => {
     assert(consoleSpy.notCalled)
   })
 
-  /**
-   * Given: contractClient.web3Manager is instanceof ethWeb3Manager
-   * When: contract logic fails
-   * Should: do not do retry logic and log error
-   */
   it('should log error if web3Manager is instanceof ethWeb3Manager and contract logic fails', async () => {
     contractClient = createContractClientWithEthWeb3Manager()
     sinon
@@ -118,11 +94,6 @@ describe('Testing ContractClient class with ProviderSelection', () => {
     assert(consoleSpy.callCount === CONTRACT_INIT_MAX_ATTEMPTS)
   })
 
-  /**
-   * Given: we are using an external web3
-   * When: contract logic passes
-   * Should: pass on first try and use initially set gateway
-   */
   it('should use initial gateway url if useExternalWeb3 is true and contract logic passes', async () => {
     contractClient = createContractClientWithExternalWeb3()
     sinon
@@ -143,11 +114,6 @@ describe('Testing ContractClient class with ProviderSelection', () => {
     assert(consoleSpy.notCalled)
   })
 
-  /**
-   * Given: we are using an external web3
-   * When: contract logic fails
-   * Should: do not do retry logic and log error
-   */
   it('should log error if useExternalWeb3 is true and contract logic fails', async () => {
     contractClient = createContractClientWithExternalWeb3()
     sinon
@@ -166,12 +132,9 @@ describe('Testing ContractClient class with ProviderSelection', () => {
     assert(consoleSpy.callCount === CONTRACT_INIT_MAX_ATTEMPTS)
   })
 })
-// Helper stub and functions for providerSelectionTest
 
-// Available providers
 const gateways = ['https://audius.poa.network', 'https://public.poa.network']
 
-// Creates barebones web3 object
 function createWeb3Obj(host) {
   return {
     currentProvider: {
@@ -182,8 +145,6 @@ function createWeb3Obj(host) {
     }
   }
 }
-
-// Helper functions to create ContractClient instances with the appropriate properties
 
 function createContractClient(web3Manager) {
   const getRegistryAddressFn = () => {

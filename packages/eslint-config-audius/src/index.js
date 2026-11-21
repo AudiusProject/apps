@@ -17,8 +17,6 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    // TODO: enable after react-native migration [C-3548]
-    // project: true,
     ecmaFeatures: {
       jsx: true
     },
@@ -34,8 +32,6 @@ module.exports = {
     'import'
   ],
   rules: {
-    // TODO: enable after react-native migration [C-3548]
-    // '@typescript-eslint/consistent-type-exports': 'error',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/member-delimiter-style': 'off',
@@ -89,9 +85,6 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/no-unknown-property': ['error', { ignore: ['css'] }],
 
-    // Let Prettier resolve config natively to match editor behavior
-    // This ensures eslint-plugin-prettier uses the same config resolution
-    // as Prettier CLI/editor extensions
     'prettier/prettier': [
       'error',
       {},

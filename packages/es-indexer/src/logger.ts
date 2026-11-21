@@ -1,15 +1,14 @@
 import pino, { stdTimeFunctions } from 'pino'
 
 const formatters = {
-  level (label: string) {
-      // Set level to string format
-      return { level: label.toUpperCase() }
-  }
+  level(label: string) {
+    return { level: label.toUpperCase() }
+  },
 }
 
 export const logger = pino({
   name: `es-indexer`,
   base: undefined,
   timestamp: stdTimeFunctions.isoTime,
-  formatters
+  formatters,
 })

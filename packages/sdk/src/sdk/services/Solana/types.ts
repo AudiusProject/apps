@@ -149,10 +149,10 @@ export type FirstBuyQuoteResponse = {
 
 export type FirstBuyQuoteRequest =
   | {
-      audioInputAmount: string // in lamports
+      audioInputAmount: string
     }
   | {
-      tokenOutputAmount: string // in big number 9 decimal format
+      tokenOutputAmount: string
     }
 
 export type LaunchpadConfigResponse = {
@@ -168,7 +168,7 @@ export type ClaimFeesRequest = {
 }
 
 export type ClaimFeesResponse = {
-  claimFeeTxs: Array<string> // base64 encoded serialized transaction
+  claimFeeTxs: Array<string>
 }
 
 export type ClaimVestedCoinsRequest = {
@@ -179,7 +179,7 @@ export type ClaimVestedCoinsRequest = {
 }
 
 export type ClaimVestedCoinsResponse = {
-  claimVestedCoinsTxs: Array<string> // base64 encoded serialized transaction
+  claimVestedCoinsTxs: Array<string>
   availableAmount: string
   totalAmount?: string
   claimedAmount?: string
@@ -189,26 +189,26 @@ export type ClaimVestedCoinsResponse = {
 }
 
 export type SwapCoinQuoteRequest = {
-  inputAmount: string // Stringified version of big int number amount of input token (e.g., "1000000000000000000")
-  coinMint: string // Mint address of the artist coin
-  swapDirection: 'audioToCoin' | 'coinToAudio' // Direction of the swap
+  inputAmount: string
+  coinMint: string
+  swapDirection: 'audioToCoin' | 'coinToAudio'
 }
 
 export type SwapCoinQuoteResponse = {
-  outputAmount: string // Expected output amount in raw token format
+  outputAmount: string
 }
 
 export type SwapCoinRequest = {
-  inputAmount: string // Stringified version of big int number amount of input token (e.g., "1000000000000000000")
-  coinMint: string // Mint address of the artist coin
-  swapDirection: 'audioToCoin' | 'coinToAudio' // Direction of the swap
-  userPublicKey: PublicKey // Public key of the user initiating the swap
-  isExternalWallet?: boolean // Whether the user is using an external wallet (optional)
-  feePayer?: PublicKey // Public key of the fee payer (optional)
+  inputAmount: string
+  coinMint: string
+  swapDirection: 'audioToCoin' | 'coinToAudio'
+  userPublicKey: PublicKey
+  isExternalWallet?: boolean
+  feePayer?: PublicKey
 }
 
 export type SwapCoinResponse = {
-  transaction: string // Base64-encoded serialized transaction
-  outputAmount: string // Expected output amount in raw token format
-  includedFeeInputAmount?: string // Exact input amount consumed (including fees)
+  transaction: string
+  outputAmount: string
+  includedFeeInputAmount?: string
 }

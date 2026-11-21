@@ -2,7 +2,6 @@ import { primitiveTheme as harmonyPrimitiveTheme } from '@audius/harmony/src/fou
 import { themes as harmonyTheme } from '@audius/harmony/src/foundations/theme/theme'
 import { merge } from 'lodash'
 
-// linear-gradient at 315deg
 const baseLinearGradient = {
   start: { x: 0, y: 1 },
   end: { x: 1, y: 0 }
@@ -237,7 +236,6 @@ export const colorTheme = {
   }
 }
 
-// Only used for story
 export const primitiveTheme = merge(
   {},
   harmonyPrimitiveTheme,

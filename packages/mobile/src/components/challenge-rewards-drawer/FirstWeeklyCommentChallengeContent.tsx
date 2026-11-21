@@ -73,7 +73,6 @@ export const FirstWeeklyCommentChallengeContent = ({
           variant='label'
           size='l'
           color='subdued'
-          // iOS has a bug where emojis are not vertically aligned with the text
           style={{ lineHeight: Platform.OS === 'ios' ? 0 : undefined }}
         >
           {statusText}
@@ -116,8 +115,6 @@ export const FirstWeeklyCommentChallengeContent = ({
       </Button>
     )
 
-  // Following the pattern from FirstWeeklyCommentChallengeModalContent
-  // where totalAmount is set to challenge.amount
   const modifiedAmount = challenge?.amount ?? 0
 
   return (

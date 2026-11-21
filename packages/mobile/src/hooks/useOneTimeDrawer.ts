@@ -8,7 +8,7 @@ import type { Drawer as DrawerName } from 'app/store/drawers/slice'
 import { setVisibility } from 'app/store/drawers/slice'
 
 type UseOneTimeDrawerProps = {
-  key: string // AsyncStorage key
+  key: string
   name: DrawerName
   disabled?: boolean
 }

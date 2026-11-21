@@ -25,13 +25,8 @@ type PurchaseSummaryTableProps = {
   totalPriceInCents: number
   basePrice: number
   extraAmount?: number
-  // How many "streams" are available for purchase
-  // Prior to albums/bundles this should be 0 or 1.
   streamPurchaseCount?: number
-  // How many "downloads" are available for purchase
-  // Prior to albums/bundles this should be 0 or 1.
   downloadPurchaseCount?: number
-  // How many stems are available for purchase
   stemsPurchaseCount?: number
 }
 

@@ -117,7 +117,6 @@ const DelegateStakeModal: React.FC<DelegateStakeModalProps> = ({
 
   const { status, delegateStake, error } = useDelegateStake(!isConfirmationOpen)
 
-  // Close All modals on success status
   useEffect(() => {
     if (status === Status.Success) {
       onCloseConfirmation()

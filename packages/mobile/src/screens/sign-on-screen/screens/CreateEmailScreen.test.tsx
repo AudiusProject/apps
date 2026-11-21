@@ -15,7 +15,6 @@ jest.mock('@audius/common/messages', () => ({
   createEmailPageMessages: new Proxy({}, { get: (_, key) => String(key) })
 }))
 
-// Stands in for the shared schema, whose refinement calls /users/check
 jest.mock('@audius/common/schemas', () => {
   const { z } = require('zod')
   return {
@@ -77,7 +76,6 @@ jest.mock(
   { virtual: true }
 )
 
-// Mirrors EmailField: the value is written to redux on every keystroke
 jest.mock('../components/NewEmailField', () => {
   const React = require('react')
   const { TextInput } = require('react-native')

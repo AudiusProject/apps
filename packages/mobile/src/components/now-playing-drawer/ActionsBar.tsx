@@ -168,8 +168,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
 
   const handleComments = useCallback(() => {
     if (track) {
-      // From Now Playing — play-from-comment goes through the playback slice
-      // with a generic 'comments' source (not a lineup prefix).
       open({
         entityId: track.track_id,
         navigation,
@@ -234,10 +232,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
   }
 
   const renderCastButton = () => {
-    // The button is always tappable when reachable; the drawer itself can
-    // show "This Device" + the system AirPlay/Bluetooth picker even when no
-    // chromecast devices are discoverable. When offline, fall back to a
-    // disabled state since neither chromecast nor AirPlay/Bluetooth will help.
     const disabled = !isReachable && castDevices.length === 0
     return (
       <IconButton

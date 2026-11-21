@@ -208,7 +208,6 @@ describe('StorageNodeSelector', () => {
       endpoint: discoveryNode
     })
 
-    // The first fetch fails, so selection falls back to the bootstrap nodes
     expect([storageNodeA.endpoint, storageNodeB.endpoint]).toContain(
       await storageNodeSelector.getSelectedNode()
     )

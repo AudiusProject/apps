@@ -7,9 +7,6 @@ import { Flex } from '../Flex/Flex'
 
 import type { DividerProps } from './types'
 
-/**
- * A separator between two elements, usually consisting of a horizontal or vertical line.
- */
 export const Divider = (props: DividerProps) => {
   const { children, orientation = 'horizontal', style, ...other } = props
   const { color, spacing } = useTheme()

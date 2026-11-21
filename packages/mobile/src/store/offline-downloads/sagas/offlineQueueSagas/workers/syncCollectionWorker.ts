@@ -103,7 +103,6 @@ function* syncFavoritesCollection() {
     (favorite) => favorite.save_item_id
   )
 
-  // Remove
   const trackIdsToRemove = difference(
     offlineFavoritedTrackIds,
     latestFavoritedTrackIds
@@ -123,7 +122,6 @@ function* syncFavoritesCollection() {
     yield* put(removeOfflineItems({ items: tracksToRemove }))
   }
 
-  // Add
   const trackIdsToAdd = difference(
     latestFavoritedTrackIds,
     offlineFavoritedTrackIds
@@ -179,10 +177,6 @@ function* syncCollection(collectionId: ID) {
     )
   }
 
-  // Even though updated_at should tell us when we need to update, we still
-  // check tracks here to be extra safe. Sometimes tracks are missing on
-  // initial download, and this sync helps ensure things stay more in sync
-
   const currentCollectionTrackIds =
     currentCollection.playlist_contents.track_ids.map(({ track }) => track)
 
@@ -203,7 +197,6 @@ function* syncCollection(collectionId: ID) {
       })
     )
 
-  // Remove tracks
   const tracksIdsToRemove = difference(
     currentCollectionTrackIds,
     latestCollectionTrackIds
@@ -220,8 +213,6 @@ function* syncCollection(collectionId: ID) {
   if (trackItemsToRemove.length > 0) {
     dispatch(removeOfflineItems({ items: trackItemsToRemove }))
   }
-
-  // Add tracks
 
   const offlineTrackStatus = yield* select(getOfflineTrackStatus)
   const currentOfflineCollectionTrackIds = currentCollectionTrackIds.filter(

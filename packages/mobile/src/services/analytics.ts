@@ -41,13 +41,9 @@ export const init = async () => {
         serverUrl: AmplitudeProxy,
         appVersion: clientVersion, // Identifies our app version to Amplitude
         logLevel: AmplitudeTypes.LogLevel.Error,
-        // Events queued in memory will flush when number of events exceed upload threshold
-        // Default value is 30
         flushQueueSize: 50,
-        // Events queue will flush every certain milliseconds based on setting
-        // Default value is 10000 milliseconds
         flushIntervalMillis: 20000,
-        minIdLength: 1 // By default amplitude rejects our handle ids if they're less than 5 characters
+        minIdLength: 1
       })
       analyticsSetupStatus = 'ready'
       identifyClient().catch(() => {})
@@ -68,7 +64,6 @@ const coreEvents: ReadonlySet<string> = new Set([
   ...MOBILE_CORE_EVENTS
 ])
 
-// Which client the user is on, as a user property set once per install
 const identifyClient = async () => {
   const client = Platform.OS === 'ios' ? 'iOS App' : 'Android App'
   const previous = await AsyncStorage.getItem(CLIENT_IDENTIFIED_KEY).catch(
@@ -106,7 +101,6 @@ export const make = (event: AllEvents) => {
   }
 }
 
-// Identify User
 export const identify = async (traits: IdentifyTraits) => {
   const isSetup = await isAudiusSetup()
   if (!isSetup) return
@@ -115,9 +109,6 @@ export const identify = async (traits: IdentifyTraits) => {
     setUserId(traits.handle)
   }
 
-  // User properties persist in Amplitude, so skip an identify that would set
-  // the same values again (it runs on every account load). Resend weekly in
-  // case an earlier one was dropped.
   const serializedTraits = JSON.stringify([
     Math.floor(Date.now() / WEEK_MS),
     Object.keys(traits)
@@ -139,7 +130,6 @@ export const identify = async (traits: IdentifyTraits) => {
   )
 }
 
-// Track Event
 export const track = async ({ eventName, properties }: Track) => {
   const isSetup = await isAudiusSetup()
   if (!isSetup) return
@@ -163,7 +153,6 @@ export const track = async ({ eventName, properties }: Track) => {
   await amplitudeTrack(eventName, propertiesWithContext)
 }
 
-// Screen Event
 export const screen = async ({ route, properties = {} }: Screen) => {
   const isSetup = await isAudiusSetup()
   if (!isSetup) return

@@ -45,14 +45,11 @@ export class UserIndexer extends BaseIndexer<UserDoc> {
         is_deactivated: { type: 'boolean' },
         location: lowerKeyword,
 
-        // subscribed
         subscribed_ids: { type: 'keyword' },
 
-        // following
         following_ids: { type: 'keyword' },
         following_count: { type: 'integer' },
 
-        // followers
         follower_count: { type: 'integer' },
 
         track_count: { type: 'integer' },
@@ -112,7 +109,6 @@ export class UserIndexer extends BaseIndexer<UserDoc> {
   }
 
   async withBatch(rows: UserDoc[]) {
-    // attach user's tracks
     const userIds = rows.map((r) => r.user_id)
     const [tracksByOwnerId, followMap, subscriptionsMap] = await Promise.all([
       this.userTracks(userIds),

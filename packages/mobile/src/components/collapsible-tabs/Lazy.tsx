@@ -4,59 +4,35 @@ import Animated, {
   useSharedValue,
   useAnimatedReaction,
   withTiming,
-  useAnimatedStyle,
+  useAnimatedStyle
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 
 import { ScrollView } from './ScrollView'
 import { useScroller, useTabNameContext, useTabsContext } from './hooks'
 
-/**
- * Typically used internally, but if you want to mix lazy and regular screens you can wrap the lazy ones with this component.
- */
 export const Lazy: React.FC<{
-  /**
-   * Whether to cancel the lazy fade in animation. Defaults to false.
-   */
   cancelLazyFadeIn?: boolean
-  /**
-   * How long to wait before mounting the children.
-   */
   mountDelayMs?: number
-  /**
-   * Whether to start mounted. Defaults to true if we are the focused tab.
-   */
   startMounted?: boolean
   children: React.ReactElement
 }> = ({
   children,
   cancelLazyFadeIn,
   startMounted: _startMounted,
-  mountDelayMs = 50,
+  mountDelayMs = 50
 }) => {
   const name = useTabNameContext()
   const { focusedTab, refMap } = useTabsContext()
 
-  /**
-   * We keep track of whether a layout has been triggered
-   */
   const didTriggerLayout = useSharedValue(false)
 
-  /**
-   * This is used to control when children are mounted
-   */
   const [canMount, setCanMount] = React.useState(false)
-  /**
-   * Ensure we don't mount after the component has been unmounted
-   */
   const isSelfMounted = React.useRef(true)
 
   const opacity = useSharedValue(0)
 
   useLayoutEffect(() => {
-    /**
-     * We start mounted if we are the focused tab, or if props.startMounted is true.
-     */
     const shouldStartMounted =
       typeof _startMounted === 'boolean'
         ? _startMounted
@@ -76,7 +52,6 @@ export const Lazy: React.FC<{
 
   const startMountTimer = React.useCallback(
     (focusedTab: string) => {
-      // wait the scene to be at least mountDelay ms focused, before mounting
       setTimeout(() => {
         if (focusedTab === name) {
           if (isSelfMounted.current) setCanMount(true)
@@ -123,7 +98,7 @@ export const Lazy: React.FC<{
 
   const stylez = useAnimatedStyle(() => {
     return {
-      opacity: opacity.value,
+      opacity: opacity.value
     }
   }, [opacity])
 
@@ -136,7 +111,7 @@ export const Lazy: React.FC<{
       children
     ) : (
       <Animated.View
-        pointerEvents="box-none"
+        pointerEvents='box-none'
         style={[styles.container, !cancelLazyFadeIn ? stylez : undefined]}
         onLayout={onLayout}
       >
@@ -150,6 +125,6 @@ export const Lazy: React.FC<{
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
+    flex: 1
+  }
 })

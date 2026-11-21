@@ -66,9 +66,6 @@ export const UploadingTracksScreen = () => {
   const { neutralLight4 } = useThemeColors()
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  // Upload error is reset asynchronously after this component mounts.
-  // This is used for logic below to detect that we got an error *after*
-  // this upload attempt started
   const [uploadStarted, setUploadStarted] = useState(false)
   const { toast } = useToast()
 

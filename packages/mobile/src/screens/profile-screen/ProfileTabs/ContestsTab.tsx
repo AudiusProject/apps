@@ -9,19 +9,6 @@ import { spacing } from 'app/styles/spacing'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
-/**
- * Profile "Contests" tab on native. Lists the contests hosted by this
- * profile as a stacked list of `ContestCard`s that link out to the
- * dedicated contest screen (Figma 2864-13286 / 2888-22006).
- *
- * Uses the shared `FlatList` from `app/components/core` so the list
- * integrates with the parent `CollapsibleTabNavigator`'s scroll-tracking
- * — a regular `ScrollView` here breaks the collapsible header behaviour.
- *
- * Backed by `GET /v1/users/{id}/contests` (active first by soonest end,
- * then ended) so the tab no longer needs to walk the global list and
- * filter client-side.
- */
 export const ContestsTab = () => {
   const { user_id: hostUserId } =
     useProfileUser({
@@ -65,10 +52,6 @@ export const ContestsTab = () => {
           <ContestCard trackId={trackId} variant='grid' />
         </View>
       )}
-      // Pad the top of the list so the first card has breathing room
-      // below the sticky tab strip (otherwise the cover banner butts
-      // straight up against the tab underline — the bug surfaced in
-      // simulator verification).
       contentContainerStyle={{
         paddingTop: spacing(4),
         paddingBottom: spacing(6)

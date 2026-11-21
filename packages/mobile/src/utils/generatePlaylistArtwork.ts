@@ -13,13 +13,12 @@ const {
   fs: { dirs, writeFile }
 } = ReactNativeBlobUtil
 
-const canvasWidth = 1000 // Adjust the width and height as per your requirements
+const canvasWidth = 1000
 const canvasHeight = 1000
 const imageWidth = canvasWidth / 2
 const imageHeight = canvasHeight / 2
 
 const mimeType = 'image/jpeg'
-// jimp's default JPEG quality
 const jpegQuality = 100
 
 export async function generatePlaylistArtwork(imageUrls: string[]) {
@@ -35,7 +34,6 @@ export async function generatePlaylistArtwork(imageUrls: string[]) {
     for (let i = 0; i < 4; i++) {
       const image = images[i]
       if (image) {
-        // Calculate the x and y position based on the quadrant
         const x = i % 2 === 0 ? 0 : imageWidth
         const y = i < 2 ? 0 : imageHeight
 

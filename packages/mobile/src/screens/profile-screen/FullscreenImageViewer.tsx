@@ -13,9 +13,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IconClose } from '@audius/harmony-native'
 
-// Distance (px) the user has to drag in any direction before the viewer
-// dismisses on release. Velocity above the threshold also dismisses to allow
-// a quick flick.
 const DISMISS_DISTANCE_THRESHOLD = 120
 const DISMISS_VELOCITY_THRESHOLD = 800
 const SPRING_BACK_DURATION_MS = 200
@@ -46,27 +43,10 @@ const styles = StyleSheet.create({
 type FullscreenImageViewerProps = {
   isOpen: boolean
   onClose: () => void
-  /**
-   * The image content to render centered on the black backdrop. Pan
-   * translation is applied to the wrapper around this node, so each
-   * specific viewer (avatar circle, cover-photo rectangle) just describes
-   * the image shape and source.
-   */
   children: ReactNode
-  /**
-   * Accessibility label for the close button. Defaults to "Close image
-   * viewer"; callers can override (e.g. "Close avatar viewer").
-   */
   closeAccessibilityLabel?: string
 }
 
-/**
- * Shared chrome for the profile-screen full-window image viewers. Wraps the
- * children in a black-backdrop Modal with fade-in/out animation, an X close
- * button anchored to the top-right safe-area inset, and a pan gesture that
- * translates the children with the finger and dismisses on a sufficient
- * drag distance or flick velocity in any direction.
- */
 export const FullscreenImageViewer = ({
   isOpen,
   onClose,
@@ -78,9 +58,6 @@ export const FullscreenImageViewer = ({
   const translationX = useSharedValue(0)
   const translationY = useSharedValue(0)
 
-  // Reset translation on every open — otherwise a partial drag that didn't
-  // pass the dismiss threshold last time would leave the image off-center
-  // when the user reopens the viewer.
   useEffect(() => {
     if (isOpen) {
       translationX.value = 0

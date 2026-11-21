@@ -26,7 +26,7 @@ export enum Bucket {
   YEAR = 'year', // Granularity: month
   MONTH = 'month', // Granularity: week
   WEEK = 'week', // Granularity: day
-  DAY = 'day' // Granularity: hour
+  DAY = 'day'
 }
 
 export enum MetricError {
@@ -53,11 +53,9 @@ export type State = {
   trailingTopGenres: CountMetric
   trailingApiCalls: CountMetric
   individualNodeUptime: {
-    // Mapping of node endpoint to TimeSeriesMetric
     [node: string]: UptimeMetric
   }
   individualServiceApiCalls: {
-    // Mapping of node endpoint to TimeSeriesMetric
     [node: string]: TimeSeriesMetric
   }
 }

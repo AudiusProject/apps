@@ -8,10 +8,6 @@ import { decodeHashId } from '../util/hashIds'
 
 const SEEK_INTERVAL = 200
 
-// Sets up playback.
-//
-// Accepts a function, onAfterAudioEnd, which is called internally with
-// stop, onTogglePlay, and load functions as arguments.
 const usePlayback = (id, onAfterAudioEnd) => {
   const [timing, setTiming] = useState({ position: 0, duration: 0 })
   const seekInterval = useRef(null)
@@ -20,36 +16,22 @@ const usePlayback = (id, onAfterAudioEnd) => {
   const [mediaKey, setMediaKey] = useState(0)
   const playingStateRef = useRef(PlayingState.Stopped)
 
-  // The AudioPlayer must be initialized in response
-  // to a user event to avoid angering the Chrome gods.
   const audioRef = useRef(null)
   const initAudio = () => {
     audioRef.current = new AudioPlayer()
   }
-  // We may need to manually trigger a rerender in the case
-  // that the playingStateRef changes. We need to store the playingState
-  // in a ref (as opposed to useState) because stale values
-  // can be easily captured by clients. But we also need to give
-  // clients the most recent version to update their UI, so we manually
-  // trigger a rerender if we update the ref.
   const [, setRerenderBool] = useState(true)
   const setPlayingStateRef = useCallback((state) => {
     setRerenderBool((b) => !b)
     playingStateRef.current = state
   }, [])
 
-  // Hold onto the callbacks we return as refs, to be passed into
-  // onTrackEnd to break the cyclic dependeny here.
   const togglePlayRef = useRef(() => {})
   const loadRef = useRef(() => {})
   const stopRef = useRef(() => {})
   const setVolumeRef = useRef(() => {})
 
-  // On track end, we need to be able to refer to the
-  // latest updated onAfterAudioEnd function passed in
-  // by the client.
   const onAfterAudioEndRef = useRef(onAfterAudioEnd)
-  // Always call the latest onAudioEnd callback
   const onAfterAudioEndCallback = () => {
     onAfterAudioEndRef.current({
       stop: stopRef.current,
@@ -60,7 +42,6 @@ const usePlayback = (id, onAfterAudioEnd) => {
     sendPostMessage({ event: 'finish' })
   }
 
-  // Update the ref when a new callback function is provided.
   useEffect(() => {
     onAfterAudioEndRef.current = onAfterAudioEnd
   }, [onAfterAudioEndRef, onAfterAudioEnd])
@@ -90,7 +71,6 @@ const usePlayback = (id, onAfterAudioEnd) => {
       sendPostMessage({ event: 'ready' })
       sendPostMessage({ event: 'progress', data: newTiming })
     },
-    // TODO: Fix these deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [audioRef, setTiming, id]
   )
@@ -111,7 +91,6 @@ const usePlayback = (id, onAfterAudioEnd) => {
       if (playingStateRef.current === PlayingState.Playing) {
         sendPostMessage({ event: 'progress', data: newTiming })
       }
-      // Handle buffering state
       const isBuffering = audio.isBuffering()
       if (isBuffering && playingStateRef.current !== PlayingState.Buffering) {
         playingStateRef.current = PlayingState.Buffering
@@ -126,7 +105,6 @@ const usePlayback = (id, onAfterAudioEnd) => {
     }, SEEK_INTERVAL)
   }, [audioRef, setTiming])
 
-  // Clean up
   useEffect(() => {
     return () => {
       if (seekInterval.current) {
@@ -135,7 +113,6 @@ const usePlayback = (id, onAfterAudioEnd) => {
     }
   }, [seekInterval])
 
-  // The play counter changes (same song again or new song)
   useEffect(() => {
     if (playCounter !== prevPlayCounter) {
       setPrevPlayCounter(playCounter)

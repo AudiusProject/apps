@@ -55,7 +55,6 @@ export const AccountHeader = (props: AccountHeaderProps) => {
   const { spacing } = useTheme()
 
   return (
-    // 2 zIndex is to appear above the <Page> component
     <Flex style={{ zIndex: 2 }} w='100%'>
       <CoverPhoto
         onSelectCoverPhoto={onSelectCoverPhoto}
@@ -71,8 +70,6 @@ export const AccountHeader = (props: AccountHeaderProps) => {
           position: 'absolute',
           left: spacing.unit4,
           top: spacing.unit10,
-          // Need to use explicit width to ensure text doesn't overflow
-          // unit16 covers the 4xunit4 spacings on left and right
           width: Dimensions.get('window').width - spacing.unit16
         })}
       >
@@ -127,7 +124,6 @@ const CoverPhoto = (props: CoverPhotoProps) => {
     >
       {onSelectCoverPhoto ? (
         <Pressable
-          // we want the pressable surface larger than just the icon
           hitSlop={{
             bottom: spacing.unit10,
             left: spacing.unit7,

@@ -16,7 +16,6 @@ class LogTimer {
   }
 
   getDuration(hrtime) {
-    // [seconds, nanoseconds] -> milliseconds
     return (
       process.hrtime(hrtime)[0] * 1000 +
       process.hrtime(hrtime)[1] / 1000000

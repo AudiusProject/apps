@@ -31,9 +31,6 @@ type OwnProps = {
 
 type BoundsProps = OwnProps
 
-/**
- * Shows stats about staking. Lives on the SP page
- */
 const Bounds: React.FC<BoundsProps> = ({ wallet }) => {
   const { user } = useUser({ wallet })
   if (!user || !('serviceProvider' in user)) {

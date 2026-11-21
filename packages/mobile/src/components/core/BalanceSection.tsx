@@ -7,13 +7,9 @@ import Skeleton from 'app/components/skeleton'
 import { TokenIcon } from './TokenIcon'
 
 export type BalanceSectionProps = {
-  /** Mint address for fetching balance */
   mint?: string
-  /** Whether to enable polling for balance updates */
   isPolling?: boolean
-  /** Interval for polling in milliseconds */
   pollingInterval?: number
-  /** Whether to show only internal wallet balance (excludes external wallets and staked) */
   internalWalletOnly?: boolean
 }
 
@@ -30,7 +26,7 @@ export const BalanceSection = ({
       isPolling,
       pollingInterval,
       !internalWalletOnly, // includeExternalWallets
-      !internalWalletOnly // includeStaked
+      !internalWalletOnly
     )
 
   const { data: coin, isPending: isCoinLoading } = useFanClub(mint)

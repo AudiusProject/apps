@@ -11,14 +11,10 @@ const messages = {
   profilePictureFor: 'Profile picture for'
 }
 
-// Per-URL render timeout (ms) so a hung connection from a slow Open Audio
-// Validator Node advances to the next mirror instead of blocking on the OS
-// TCP timeout (60–90s). Matches the web MirrorImage pattern.
 const PROFILE_PICTURE_TIMEOUT_MS = 3000
 
 type BaseAvatarProps = Omit<AvatarProps, 'source' | 'accessibilityLabel'>
 
-// User should prefer userId, and provide user if it's not in the cache
 type ProfilePictureUserProps =
   | {
       userId: ID | undefined | null
@@ -28,8 +24,6 @@ type ProfilePictureUserProps =
 export type ProfilePictureProps = BaseAvatarProps & ProfilePictureUserProps
 
 export const ProfilePicture = (props: ProfilePictureProps) => {
-  // Pull onError off so we can chain it with the mirror-retry handler from
-  // `useProfilePicture` instead of being clobbered by the props spread.
   const { onError: callerOnError, ...restProps } = props as BaseAvatarProps &
     ProfilePictureUserProps
   const userId = 'user' in restProps ? restProps.user.user_id : restProps.userId
@@ -50,9 +44,6 @@ export const ProfilePicture = (props: ProfilePictureProps) => {
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // Forward render-time failures to `useImageSize` so it can mark the URL
-  // failed and swap in the next mirror. Without this wiring the mirror
-  // retry only ever fires on prefetch failures, not on stalled renders.
   const handleError = (error: { nativeEvent: { error: string } }) => {
     if (source && typeof source === 'object' && 'uri' in source) {
       onImageError?.(source.uri as string)

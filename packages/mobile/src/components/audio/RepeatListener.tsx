@@ -13,7 +13,6 @@ export const RepeatListener = () => {
       previousPosition > position &&
       position < 1
     ) {
-      // Manually increment player count if we are repeating
       if ((await TrackPlayer.getRepeatMode()) === RepeatMode.Track) {
         dispatch(playbackActions.incrementCounter())
       }

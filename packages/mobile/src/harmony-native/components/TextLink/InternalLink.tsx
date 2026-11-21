@@ -30,7 +30,6 @@ export const InternalLinkTo = <ParamList extends ReactNavigation.RootParamList>(
 ) => {
   const { to, action, onPress, children, ...other } = props
 
-  // Always use push action for internal navigation since we always have screen and params
   const finalAction =
     action ||
     (to && 'screen' in to

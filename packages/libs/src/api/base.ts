@@ -136,8 +136,6 @@ export class Base {
     }
   }
 
-  /* ------- PRIVATE  ------- */
-
   static _missingService(...serviceNames: string[]) {
     throw new Error(
       `Requires the following services: ${serviceNames.join(', ')}`

@@ -50,7 +50,6 @@ const CreatePlaylistMetadataSchema = z
       )
     ),
 
-    // Album fields
     isStreamGated: z.optional(z.boolean()),
     streamConditions: z.optional(USDCPurchaseConditions).nullable(),
     isDownloadGated: z.optional(z.boolean()),
@@ -96,10 +95,8 @@ export const UploadPlaylistMetadataSchema = CreatePlaylistMetadataSchema.extend(
   }
 ).strict()
 
-// Base type from schema (used for external API)
 type PlaylistMetadataBase = z.input<typeof CreatePlaylistMetadataSchema>
 
-// Extended type that supports both string (HashId) and number (internal ID) for trackId
 export type PlaylistMetadata = Omit<
   PlaylistMetadataBase,
   'playlistContents'

@@ -102,9 +102,6 @@ export const LineupTileActionButtons = ({
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const showPublishButton = isOwner && isUnlisted
 
-  // onPressIn fires on touch-down, so we block before Paper's tap completes.
-  // Use direct onPress (not wrapWithBlock) - repost/favorite handlers run after
-  // Lottie animation, too late for the current tap's 100ms check.
   const repostButton = (
     <RepostButton
       wrapperStyle={styles.button}
@@ -125,8 +122,6 @@ export const LineupTileActionButtons = ({
     />
   )
 
-  // Wrap in RN TouchableOpacity so the tile doesn't stay depressed - RN touchables
-  // let the Paper's RNGH tap properly receive the release and run onFinalize.
   const shareButton = (
     <TouchableOpacity
       onPressIn={blockTilePress}

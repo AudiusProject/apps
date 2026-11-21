@@ -33,8 +33,6 @@ export const DownloadStatusIndicator = (
   const { color, iconSizes } = useTheme()
 
   const renderIndicator = () => {
-    // If we are offline, display as download succeeded
-    // since we only show the user successfully downloaded things.
     if (!isReachable && status !== OfflineDownloadStatus.INACTIVE) {
       return <IconCloudDownload color='accent' size={size} />
     }

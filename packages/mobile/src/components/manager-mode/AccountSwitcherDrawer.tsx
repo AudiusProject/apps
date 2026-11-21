@@ -57,7 +57,6 @@ export const AccountSwitcherDrawer = () => {
   const { switchAccount } = useAccountSwitcher()
   const [isSwitching, setIsSwitching] = useState(false)
 
-  // Keep the account in use at the top of the managed list
   const sortedAccounts = useMemo(() => {
     const selected = accounts.filter(
       ({ user }) => user.user_id === currentUserId

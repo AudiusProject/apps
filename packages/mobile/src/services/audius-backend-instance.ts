@@ -7,9 +7,6 @@ import { env } from 'app/services/env'
 import { getFeatureEnabled } from './remote-config'
 import { remoteConfigInstance } from './remote-config/remote-config-instance'
 
-/**
- * audiusBackend initialized for a mobile environment
- */
 export const audiusBackendInstance = audiusBackend({
   claimDistributionContractAddress:
     env.CLAIM_DISTRIBUTION_CONTRACT_ADDRESS ?? undefined,

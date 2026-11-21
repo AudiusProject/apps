@@ -30,7 +30,6 @@ const messages = {
   connectError: 'Could not connect your wallet. Please try again.'
 }
 
-// Connection a new wallet to an Audius account
 function* connectNewWalletAsync(action: ConnectNewWalletAction) {
   const accountUserId = yield* call(queryCurrentUserId)
   if (!accountUserId) throw new Error('No current user')
@@ -44,7 +43,6 @@ function* connectNewWalletAsync(action: ConnectNewWalletAction) {
       const { phantom_encryption_public_key, data, nonce } = action.payload
       const dappKeyPair = yield* select(getDappKeyPair)
 
-      // Lost if the app restarted while Phantom was open
       if (!dappKeyPair) throw new Error('Missing dapp key pair')
 
       const sharedSecretDapp = nacl.box.before(
@@ -137,8 +135,6 @@ function* connectNewWalletAsync(action: ConnectNewWalletAction) {
   }
 }
 
-// Connect a wallet to establish a session, but don't connect
-// to an Audius account
 function* connectAsync(action: ConnectAction) {
   const accountUserId = yield* call(queryCurrentUserId)
   if (!accountUserId) return
@@ -181,7 +177,6 @@ export function* watchConnectNewWallet() {
         yield* call(connectNewWalletAsync, action)
       } catch (e) {
         console.error('Failed to connect new wallet', e)
-        // Clears the Connecting status and shows a toast
         yield* put(updateWalletError({ errorMessage: messages.connectError }))
       }
     }

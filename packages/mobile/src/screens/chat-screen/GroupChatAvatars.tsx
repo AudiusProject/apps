@@ -6,12 +6,10 @@ import { ProfilePicture } from 'app/components/core'
 
 type GroupChatAvatarsProps = {
   users: Pick<User, 'user_id'>[]
-  /** Diameter of each avatar in points. */
   size: number
   limit?: number
 }
 
-/** Overlapping avatars for a group chat's members. */
 export const GroupChatAvatars = ({
   users,
   size,

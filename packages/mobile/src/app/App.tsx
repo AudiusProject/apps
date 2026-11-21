@@ -46,8 +46,6 @@ import ErrorBoundary from './ErrorBoundary'
 import { ThemeProvider } from './ThemeProvider'
 import './registerNiceModals'
 
-// Wire the platform-agnostic bridge so common (sagas/services) can drive
-// nice-modal-react without depending on the package directly.
 setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
 
 const Airplay = Platform.select({
@@ -55,19 +53,14 @@ const Airplay = Platform.select({
   android: () => () => null
 })?.()
 
-// Need to enable this flag for LayoutAnimation to work on Android
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true)
   }
 }
 
-// Increment the session count when the App.tsx code is first run
 incrementSessionCount()
 
-// Tracks completion of the AsyncStorage preload kicked off at module load.
-// Set to true synchronously if the promise has already resolved by the time
-// React boots, so we never gate when there's nothing to wait on.
 let localStoragePreloaded = false
 localStoragePreloadPromise.then(
   () => {
@@ -87,18 +80,12 @@ const App = () => {
     remoteConfigInstance.waitForRemoteConfig().then(() => {
       dispatch(remoteConfigActions.setDidLoad())
     })
-    // The preload can resolve after the first render but before this effect
-    // runs, so subscribe even when the flag is already set.
     localStoragePreloadPromise.then(
       () => setPreloaded(true),
       () => setPreloaded(true)
     )
   })
 
-  // Wait for the cached account/user to land in the sync cache before
-  // rendering. Without this gate, useCurrentAccount.placeholderData returns
-  // null on first render and we briefly flash the sign-on screen for a
-  // logged-in user. Native splash stays up during this short wait.
   if (!preloaded) return null
 
   return (
@@ -119,12 +106,6 @@ const App = () => {
                     loading={null}
                     persistor={getOrCreatePersistor()}
                     onBeforeLift={() => {
-                      // Reset the player before any children render so that
-                      // NowPlayingDrawer never sees isPlaying=true from a
-                      // previous session. Without this, the PlayBar slide-up
-                      // animation fires (child effects run before parent
-                      // useEffectOnce) and is visible through the fading
-                      // splash screen.
                       dispatch(playbackActions.reset({ shouldAutoplay: false }))
                     }}
                   >

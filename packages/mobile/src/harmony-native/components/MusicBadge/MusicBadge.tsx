@@ -14,21 +14,9 @@ export type MusicBadgeVariant = 'default' | 'accent'
 export type MusicBadgeSize = 's' | 'm'
 
 export type MusicBadgeProps = {
-  /**
-   * The type of the MusicBadge
-   */
   variant?: MusicBadgeVariant
-  /**
-   * The size of the MusicBadge
-   */
   size?: 's' | 'm'
-  /**
-   * The icon to display in the left of the MusicBadge
-   */
   icon?: IconComponent
-  /**
-   * Override the colors of the MusicBadge
-   */
   color?: SpecialColors
 } & ComponentPropsWithoutRef<'div'>
 
@@ -85,8 +73,6 @@ export const MusicBadge = (props: MusicBadgeProps) => {
       <Text
         variant='label'
         size={size}
-        // Hack - should not have to explicitly  set lineHeight, but there's a bug
-        // that adds extra margins to demibold + bold text variants.
         style={css({ color: textColor, lineHeight: 16 })}
       >
         {children}

@@ -70,7 +70,7 @@ const overflowRowConfig = ({
     text:
       commentCount !== undefined
         ? `View (${commentCount}) Comments`
-        : 'View Comments' // slightly better than incorrectly showing a 0 count
+        : 'View Comments'
   },
   [OverflowAction.HOST_REMIX_CONTEST]: {
     text: isRemixContest ? 'Edit Remix Contest' : 'Host Remix Contest'
@@ -108,7 +108,6 @@ export const OverflowMenuDrawer = () => {
     {
       [OverflowSource.TRACKS]: TrackOverflowMenuDrawer,
       [OverflowSource.COLLECTIONS]: CollectionOverflowMenuDrawer,
-      // No case for NOTIFICATIONS because there currently isn't an overflow menu on notifications
       [OverflowSource.PROFILE]: ProfileOverflowMenuDrawer
     }[source] ?? TrackOverflowMenuDrawer
 

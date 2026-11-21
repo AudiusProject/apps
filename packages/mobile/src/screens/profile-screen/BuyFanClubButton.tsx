@@ -23,7 +23,6 @@ export const BuyFanClubButton = ({ userId }: { userId: number }) => {
     }
   }, [navigation, fanClub?.ticker])
 
-  // Don't render if user doesn't own a coin
   if (!fanClub?.mint) {
     return null
   }

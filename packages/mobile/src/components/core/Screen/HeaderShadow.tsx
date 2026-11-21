@@ -16,10 +16,6 @@ const useStyles = makeStyles(({ palette }) => ({
   }
 }))
 
-/**
- * Hack: temporary component to add a shadow below mobile headers for DMs.
- * TODO: delete this and implement app wide header shadows [C-2709]
- */
 export const HeaderShadow = () => {
   const styles = useStyles()
   return <View style={styles.shadow} />

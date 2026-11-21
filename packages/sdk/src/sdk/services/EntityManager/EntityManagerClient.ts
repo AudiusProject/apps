@@ -80,7 +80,6 @@ export class EntityManagerClient implements EntityManagerService {
       domain: this.getDomain(),
       primaryType: 'ManageEntity',
       message: {
-        // TODO: Strictly check callsites to ensure userId always passed in
         // @ts-ignore Need to update this type to "uint32" instead of "uint"
         userId: userId!,
         entityType,
@@ -107,7 +106,6 @@ export class EntityManagerClient implements EntityManagerService {
       'Content-Type': 'application/json'
     })
 
-    // Add auth header for API identification and rate limiting
     if (this.bearerToken) {
       headers.set('Authorization', `Bearer ${this.bearerToken}`)
     } else if (this.apiKey && this.apiSecret) {
@@ -134,7 +132,6 @@ export class EntityManagerClient implements EntityManagerService {
           ],
           functionName: 'manageEntity'
         }),
-        // Gas limit not really needed with ACDC
         gasLimit: DEFAULT_GAS_LIMIT,
         senderAddress
       })
@@ -228,10 +225,8 @@ export class EntityManagerClient implements EntityManagerService {
     if (
       !userId ||
       !entityType ||
-      // 0 is a valid entityId for some actions
       (!entityId && entityId !== BigInt(0)) ||
       !action ||
-      // Empty string is valid metadata for some actions
       (!metadata && metadata !== '') ||
       !nonce ||
       !subjectSig

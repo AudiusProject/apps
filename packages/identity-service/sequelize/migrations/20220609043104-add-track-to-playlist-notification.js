@@ -46,14 +46,11 @@ module.exports = {
     ]
 
     return queryInterface.sequelize.transaction(async (transaction) => {
-      // Delete notifs with this type
       await models.Notification.destroy({
         where: { type: { [models.Sequelize.Op.in]: ['AddTrackToPlaylist'] } }
       })
-      // Remove metadata
       await queryInterface.removeColumn('Notifications', 'metadata')
 
-      // Revert enum change
       await queryInterface.sequelize.query(
         `
       CREATE TYPE "${newEnumName}"

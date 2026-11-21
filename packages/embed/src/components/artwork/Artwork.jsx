@@ -70,13 +70,9 @@ const Artwork = ({
   const [hasImageLoaded, hasImageErrored] = usePreloadImage(artworkURL)
   if (hasImageErrored) artworkURL = DEFAULT_IMAGE
 
-  // Get height & width for large mode, percentage doesn't work bc of chrome
-  // subpixel issues
   const [sideLength, setSideLength] = useState(0)
   const playButtonParentRef = useRef(null)
   useEffect(() => {
-    // Parent component doesn't initially have height,
-    // so wait 100ms before checking the ref for the height.
     setTimeout(() => {
       if (!playButtonParentRef.current) return
       const side = Math.ceil(playButtonParentRef.current.clientHeight * 0.2)

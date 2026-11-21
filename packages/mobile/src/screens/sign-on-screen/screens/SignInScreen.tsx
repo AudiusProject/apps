@@ -55,8 +55,6 @@ export const SignInScreen = () => {
   useEffect(() => {
     if (requiresOtp) {
       navigation.navigate('ConfirmEmail')
-      // This unsets the otp error so we can come back to this page
-      // if necessary
       dispatch(setValueField('password', existingPassword))
     }
   }, [dispatch, existingPassword, navigation, requiresOtp])

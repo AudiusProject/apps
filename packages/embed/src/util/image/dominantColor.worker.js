@@ -6,15 +6,10 @@ export default () => {
   const SAMPLE_RATE = 20
   const REQUEST_TIMEOUT = 1500
 
-  // Based off this site: https://app.contrast-finder.org/result.html?foreground=%23FFFFFF&background=%23cdc8c8&ratio=4.5&isBackgroundTested=true&algo=Rgb
-  // the brightest color we want to support, given white text, is
-  // #CDC8C8, which works out to a luminance of 201.
   const LUMINANCE_THRESHOLD = 201
 
-  const clampedRGBColor = (rgbString /* string of 'r,g,b' */) => {
+  const clampedRGBColor = (rgbString) => {
     const [r, g, b] = rgbString.split(',').map((x) => parseInt(x, 10))
-    // Luminance in [0, 255]
-    // https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
     const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
     if (luminance < LUMINANCE_THRESHOLD) {

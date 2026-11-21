@@ -23,14 +23,9 @@ type DescriptionContent =
     }
 
 type ChallengeDescriptionProps = {
-  /** Indicates if the challenge has a cooldown period */
   isCooldownChallenge?: boolean
 } & DescriptionContent
 
-/** Renders the task description for the challenge. Pass `description` to render
- * a simple text string or use `renderDescription` to render fully customized
- * content.
- */
 export const ChallengeDescription = ({
   description,
   renderDescription,

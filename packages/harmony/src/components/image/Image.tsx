@@ -89,9 +89,6 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(
     const [isLoaded, setIsLoaded] = useState(false)
     const [hasError, setHasError] = useState(false)
 
-    // When src changes, reset error state so a retry can re-fade-in. We don't
-    // reset isLoaded preemptively here because doing so causes a brief skeleton
-    // flash even when the next image is already cached.
     useEffect(() => {
       setHasError(false)
     }, [src])
@@ -118,10 +115,6 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(
       objectFit
     }
 
-    // The outer Box defaults to filling its parent via Image.module.css .root
-    // (height/width 100%). Because the CSS module is injected before any
-    // consumer CSS module (import order), consumer classes win for conflicts,
-    // letting callers override sizing via className without fighting Emotion.
     const rootClassName = className
       ? `${styles.root} ${className}`
       : styles.root
@@ -152,7 +145,6 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(
             css={{
               ...baseImgStyle,
               zIndex: 1,
-              // Slight blur smooths the visual jump from low-res to high-res.
               filter: 'blur(8px)',
               transform: 'scale(1.05)'
             }}

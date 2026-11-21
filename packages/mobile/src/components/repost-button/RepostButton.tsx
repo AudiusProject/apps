@@ -19,16 +19,12 @@ const styles = StyleSheet.create({
 
 const useAnimations = makeAnimations(({ palette }) => {
   const ColorizedOnIcon = colorize(IconRepostOnLight, {
-    // iconRepost Outlines Comp 1.iconRepost Outlines.Group 1.Fill 1
     'assets.0.layers.0.shapes.0.it.3.c.k.0.s': palette.neutralLight4,
-    // iconRepost Outlines Comp 1.iconRepost Outlines.Group 1.Fill 1
     'assets.0.layers.0.shapes.0.it.3.c.k.1.s': palette.primary
   })
 
   const ColorizedOffIcon = colorize(IconRepostOffLight, {
-    // iconRepost Outlines Comp 2.iconRepost Outlines.Group 1.Fill 1
     'assets.0.layers.0.shapes.0.it.3.c.k.0.s': palette.primary,
-    // iconRepost Outlines Comp 2.iconRepost Outlines.Group 1.Fill 1
     'assets.0.layers.0.shapes.0.it.3.c.k.1.s': palette.neutralLight4
   })
 

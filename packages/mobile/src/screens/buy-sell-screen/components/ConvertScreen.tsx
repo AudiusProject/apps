@@ -94,7 +94,6 @@ export const ConvertScreen = ({
 }: ConvertScreenProps) => {
   const { baseToken, quoteToken } = tokenPair
 
-  // Use tokens from the tokenPair prop instead of local state
   const selectedInputToken = baseToken
   const selectedOutputToken = quoteToken
 
@@ -134,10 +133,9 @@ export const ConvertScreen = ({
     return [...(availableOutputTokens ?? []), ...fanClubs].filter(
       (token, index, arr) =>
         arr.findIndex((t) => t.symbol === token.symbol) === index
-    ) // Remove duplicates
+    )
   }, [availableOutputTokens, fanClubs])
 
-  // Filter out the currently selected input token from available output tokens
   const filteredAvailableOutputTokens = useMemo(() => {
     return totalAvailableTokens.filter(
       (token) => token.symbol !== selectedInputToken?.symbol
@@ -148,7 +146,6 @@ export const ConvertScreen = ({
     (token: CoinInfo) => {
       onInputTokenChange?.(token.symbol)
 
-      // If there are only 2 total available tokens, automatically set the other token
       if (totalAvailableTokens.length === 2) {
         const otherToken = totalAvailableTokens.find(
           (t) => t.symbol !== token.symbol
@@ -165,7 +162,6 @@ export const ConvertScreen = ({
     (token: CoinInfo) => {
       onOutputTokenChange?.(token.symbol)
 
-      // If there are only 2 total available tokens, automatically set the other token
       if (totalAvailableTokens.length === 2) {
         const otherToken = totalAvailableTokens.find(
           (t) => t.symbol !== token.symbol
@@ -178,7 +174,6 @@ export const ConvertScreen = ({
     [onInputTokenChange, onOutputTokenChange, totalAvailableTokens]
   )
 
-  // Track if an exchange rate has ever been successfully fetched
   const hasRateEverBeenFetched = useRef(false)
   if (currentExchangeRate !== null) {
     hasRateEverBeenFetched.current = true
@@ -186,8 +181,6 @@ export const ConvertScreen = ({
 
   if (!tokenPair) return null
 
-  // Show initial loading state if balance is loading,
-  // OR if exchange rate is loading AND we've never fetched a rate before.
   const isInitialLoading =
     isBalanceLoading ||
     (isExchangeRateLoading && !hasRateEverBeenFetched.current)

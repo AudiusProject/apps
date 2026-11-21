@@ -7,32 +7,20 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg'
 
 import { useThemeColors } from 'app/utils/theme'
 
-/** Background opacity at the very top, behind the status bar. */
 export const EDGE_FADE_FROM_OPACITY = 0.94
 
-/** How far a fade reaches past the chrome it sits behind. */
 export const EDGE_FADE_TAIL = 16
 
 type GlassEdgeFadeProps = {
   height: number
-  /** Opacity of the page background at the top and bottom of the fade. */
   fromOpacity: number
   toOpacity: number
   style?: ComponentProps<typeof Animated.View>['style']
 }
 
-/**
- * Fades the page background over the content scrolling under the floating
- * chrome, so text passing beneath the status bar and the glass capsules
- * doesn't collide with them. Replaces the full-width frosted slab.
- *
- * Drawn with `stopOpacity` rather than harmony's `LinearGradient`, because
- * react-native-svg ignores the alpha channel of a stop's color.
- */
 export const GlassEdgeFade = (props: GlassEdgeFadeProps) => {
   const { height, fromOpacity, toOpacity, style } = props
   const { background } = useThemeColors()
-  // Theme backgrounds are #RRGGBB or #RRGGBBAA; the stops carry the alpha.
   const color = background.slice(0, 7)
   const gradientId = `glass-edge-fade-${useId().replace(/[^\w-]/g, '')}`
 

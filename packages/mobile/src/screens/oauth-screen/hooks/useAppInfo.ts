@@ -14,10 +14,6 @@ type UseAppInfoResult = {
   error: string | null
 }
 
-/**
- * Fetches developer app metadata and checks whether the current user has
- * already granted write access to the app.
- */
 export const useAppInfo = ({
   apiKey,
   queryParamAppName,
@@ -31,7 +27,6 @@ export const useAppInfo = ({
   redirectUri: string | null
   scope: string | null
   userId: number | undefined
-  /** Skip all fetching (e.g. when there's already a param validation error). */
   skip: boolean
 }): UseAppInfoResult => {
   const [registeredAppName, setRegisteredAppName] = useState<

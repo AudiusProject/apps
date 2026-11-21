@@ -32,7 +32,6 @@ export const Tag = (props: TagProps) => {
     height: 23,
     boxSizing: 'border-box',
     padding: '5.5px 8px',
-    // gap: spacing.xs,
     borderRadius: cornerRadius.xs,
     backgroundColor:
       variant === 'composed' ? color.secondary.s300 : color.neutral.n400,

@@ -28,7 +28,6 @@ export { CastState, MediaPlayerState } from 'react-native-google-cast'
 export const useChromecast = () => {
   const dispatch = useDispatch()
 
-  // Data hooks
   const counter = useSelector(getCounter)
   const track = useCurrentTrack()
   const prevTrack = usePrevious(track)
@@ -37,7 +36,6 @@ export const useChromecast = () => {
 
   const { data: owner } = useUser(track?.owner_id)
 
-  // Cast hooks
   const client = useRemoteMediaClient()
   const castState = useCastState()
   const mediaStatus = useMediaStatus()
@@ -82,12 +80,8 @@ export const useChromecast = () => {
     client?.pause()
   }, [client])
 
-  // Update our cast UI when the cast device connects
   useEffect(() => {
     if (castState !== CastState.CONNECTED) {
-      // Tag the disconnect with method:'chromecast' so the reducer only
-      // clears state if chromecast was the active method — symmetric with
-      // Airplay.tsx so the two listeners don't clobber each other.
       dispatch(setIsCasting({ isCasting: false, method: 'chromecast' }))
       return
     }
@@ -109,15 +103,12 @@ export const useChromecast = () => {
     }
   }, [castState, castSession, dispatch])
 
-  // Ensure that the progress gets reset to 0
-  // when a new track is played
   useEffect(() => {
     if (prevTrack && prevTrack !== track && counter !== internalCounter) {
       setInternalCounter(0)
     }
   }, [prevTrack, track, counter, internalCounter, setInternalCounter])
 
-  // Load media when the cast connects
   useEffect(() => {
     if (castState !== CastState.CONNECTED) return
     let cancelled = false
@@ -132,8 +123,6 @@ export const useChromecast = () => {
       if (currentPlaying) {
         loadCast(track, currentPosition, currentPlaying?.url)
       } else {
-        // If nothing is currently playing, listen for something to start
-        // playing and then load it to cast.
         activeTrackSubscription = TrackPlayer.addEventListener(
           Event.PlaybackActiveTrackChanged,
           async () => {
@@ -155,7 +144,6 @@ export const useChromecast = () => {
     }
   }, [castState, track, loadCast])
 
-  // Play & pause the cast device
   useEffect(() => {
     if (castState === CastState.CONNECTED) {
       if (playing) {
@@ -166,7 +154,6 @@ export const useChromecast = () => {
     }
   }, [playing, playCast, pauseCast, castState])
 
-  // Set buffering state when cast is buffering
   useEffect(() => {
     if (
       castState === CastState.CONNECTING ||
@@ -183,14 +170,12 @@ export const useChromecast = () => {
     }
   }, [mediaStatus, castState, dispatch])
 
-  // Seek the cast device
   useEffect(() => {
     if (seek !== null) {
       client?.seek({ position: seek })
     }
   }, [client, seek])
 
-  // Mute the track player if we are connecting to cast
   useEffect(() => {
     if (
       castState === CastState.CONNECTED ||
@@ -200,7 +185,6 @@ export const useChromecast = () => {
     }
   }, [castState])
 
-  // Handle disconnection from cast device
   useEffect(() => {
     if (
       castState === CastState.NOT_CONNECTED &&

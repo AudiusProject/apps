@@ -19,7 +19,7 @@ node scripts/comment-ratchet.cjs --stats $ARGUMENTS
 node scripts/comment-ratchet.cjs --list $ARGUMENTS > /tmp/comments.jsonl
 ```
 
-Each line is `{file, line, endLine, ownLine, isLine, body}`. Consecutive `//` lines are already merged into one block. Directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, ...), generated code, vendored `public/` and `*.min.js` files, `examples/` tutorials, license headers and `/** */` JSDoc in public-API packages (`sdk`, `harmony`, `fixed-decimal`, `spl`) are exempt and never listed.
+Each line is `{file, line, endLine, ownLine, isLine, body}`. Consecutive `//` lines are already merged into one block. Directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, `@deprecated`, generator headers, ...), generated code, vendored `public/` and `*.min.js` files, `examples/` tutorials, license headers and `/** */` JSDoc in public-API packages (`sdk`, `harmony`, `fixed-decimal`, `spl`) are exempt and never listed.
 
 ## 2. Classify
 

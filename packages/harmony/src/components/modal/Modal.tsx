@@ -235,9 +235,6 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
 
     if (bgModal) bgModal.classList.add('bgModalVisible')
 
-    // Need to prevent safari iOS bounce
-    // overscroll effect by intercepting
-    // touchmove events.
     if (modalRoot) modalRoot.addEventListener('touchmove', onTouchMove)
     return () => {
       if (bgModal) bgModal.classList.remove('bgModalVisible')
@@ -267,46 +264,30 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
   })
 
   const modalContentClickedRef = useRef<boolean>(false)
-  const outsideClickRef = useClickOutside(
-    onClose,
-    isOpen,
-    // Check to see if the click outside is not another modal wrapper.
-    // If it is, that means we have a nested modal situation and shouldn't
-    // dismiss "this" modal. We let the useClickOutside in "that" modal to
-    // dismiss it.
-    (e: EventTarget) => {
-      // Only close if we're open.
-      // Closing when we're not open can cause a race condition when opened
-      // via a click since this handler exists prior to visibility,
-      // causing the modal to open and close immediately
-      if (
-        !isOpen ||
-        modalContentClickedRef?.current ||
-        !dismissOnClickOutside
-      ) {
-        modalContentClickedRef.current = false
-        return true
-      }
-      if (e instanceof Element) {
-        const modalElement = findAncestor(e, `.${wrapperClass}`)
-        if (!modalElement) {
-          return false
-        }
-        const isModalWrapper = modalElement.classList.contains(wrapperClass)
-        const isThisModalWrapper = modalElement.classList.contains(
-          `${wrapperClass}-${id}`
-        )
-        return isModalWrapper && !isThisModalWrapper
-      }
-      return false
+  const outsideClickRef = useClickOutside(onClose, isOpen, (e: EventTarget) => {
+    if (!isOpen || modalContentClickedRef?.current || !dismissOnClickOutside) {
+      modalContentClickedRef.current = false
+      return true
     }
-  )
+    if (e instanceof Element) {
+      const modalElement = findAncestor(e, `.${wrapperClass}`)
+      if (!modalElement) {
+        return false
+      }
+      const isModalWrapper = modalElement.classList.contains(wrapperClass)
+      const isThisModalWrapper = modalElement.classList.contains(
+        `${wrapperClass}-${id}`
+      )
+      return isModalWrapper && !isThisModalWrapper
+    }
+    return false
+  })
 
   const handleEscape = useCallback(() => {
     if (isOpen) onClose()
   }, [isOpen, onClose])
 
-  useHotkeys({ 27 /* escape */: handleEscape })
+  useHotkeys({ 27: handleEscape })
 
   const modalBodyRef = useRef<HTMLDivElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
@@ -399,8 +380,6 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
       [wrapperClassName!]: !!wrapperClassName
     },
     wrapperClass,
-    // Add a unique id class name to detect whether, if we're using
-    // click outside to dismiss the modal, the correct "outside" is being clicked.
     `${wrapperClass}-${id}`
   )
 

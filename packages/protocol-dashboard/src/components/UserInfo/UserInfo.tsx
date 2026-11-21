@@ -66,7 +66,6 @@ const UserInfo = ({
   delegatesStatus,
   audiusProfile
 }: UserInfoProps) => {
-  // TODO: Get Rank
   const { name, wallet } = user
   const audiusProfileName = audiusProfile?.name
   const { isLoggedIn } = useAccount()

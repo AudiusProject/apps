@@ -16,7 +16,6 @@ import { formatUser } from './formatter'
 import { GET_USER, GET_USERS } from './queries'
 import { FullUser, UserData, UserVars, UsersData, UsersVars } from './types'
 
-// Async function to get
 function populateUsers(
   users: FullUser[],
   setStatus?: (status: Status) => void
@@ -47,7 +46,6 @@ function populateUsers(
   }
 }
 
-// -------------------------------- Hooks  --------------------------------
 export const useUsers = (status: Status | undefined) => {
   const { hasBackupClient, didError } = useSelector(getGraphAPI)
 
@@ -67,7 +65,6 @@ export const useUsers = (status: Status | undefined) => {
     }
   }, [gqlData, dispatch, status])
 
-  // If there is a fallback, do not return error until the fallback also errors
   if (hasBackupClient && gqlError && !didError) {
     return { error: null }
   }
@@ -102,7 +99,6 @@ export const useUser = (
     }
   }, [hasUser, gqlData, dispatch, setStatus, didFetch, setDidFetch])
 
-  // If there is a fallback, do not return error until the fallback also errors
   if (hasBackupClient && gqlError && !didError && !userNotFound) {
     return { error: null }
   }

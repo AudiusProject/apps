@@ -1,9 +1,3 @@
-/**
- * Given an array of promises, it returns the first resolved promise as soon as it finishes
- * @param promises
- * @param captureErrored optional capture errored promises
- * @return A promise that resolves with the first promise that resolves
- */
 export async function promiseFight<T1, T2>(
   promises: Array<Promise<T1>>
 ): Promise<T1 | T2>

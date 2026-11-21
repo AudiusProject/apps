@@ -5,19 +5,6 @@ import { sha1 } from '@noble/hashes/sha1'
 import { sha256 } from '@noble/hashes/sha256'
 import { sha384, sha512 } from '@noble/hashes/sha512'
 
-/**
- * The subset of SubtleCrypto that code in the app bundle calls, built on the
- * @noble libraries. Replaces @peculiar/webcrypto, which pulled ~170 KB plus the
- * Node crypto polyfills into the bundle.
- *
- * Callers:
- * - micro-aes-gcm (sdk chat + email encryption): AES-GCM importKey/encrypt/decrypt
- * - @noble/secp256k1 async sign: HMAC SHA-256 importKey/sign, SHA-256 digest
- * - pbkdf2 (async): PBKDF2 importKey/deriveBits
- * - multiformats sha2-browser: SHA-256/512 digest
- * - common commonPasswordCheck: SHA-1 digest
- */
-
 type AlgorithmInput = string | { name: string; [key: string]: unknown }
 type BytesInput = ArrayBuffer | ArrayBufferView
 
@@ -50,7 +37,6 @@ const toBytes = (data: BytesInput) =>
     ? new Uint8Array(data)
     : new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
 
-// Copies into an exactly-sized ArrayBuffer, as WebCrypto returns.
 const toArrayBuffer = (bytes: Uint8Array) => bytes.slice().buffer
 
 const getHash = (algorithm: AlgorithmInput | undefined) => {
@@ -219,7 +205,6 @@ export const subtle = {
   }
 }
 
-/** Adds `crypto.subtle` without touching the native getRandomValues. */
 export const installSubtleCrypto = () => {
   const g = global as unknown as { crypto?: { subtle?: unknown } }
   if (!g.crypto) g.crypto = {}

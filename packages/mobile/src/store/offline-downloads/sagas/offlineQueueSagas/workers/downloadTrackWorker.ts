@@ -145,9 +145,6 @@ function* downloadTrackAudio(track: UserTrackMetadata, userId: ID) {
 
   const trackFilePath = getLocalAudioPath(track_id)
 
-  // Prefer the v1 pre-signed stream URL (with mirrors), matching the
-  // AudioPlayer's online-streaming logic. Only fall back to building a
-  // URL manually when the v1 response omits stream.url.
   let candidateUris: string[]
   if (stream?.url) {
     candidateUris = buildMirrorUris(stream.url, stream.mirrors)

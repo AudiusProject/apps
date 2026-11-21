@@ -75,8 +75,6 @@ export type ModalProps = {
   /** @deprecated */
   allowScroll?: boolean
 
-  // Classnames
-
   wrapperClassName?: string
 
   /**

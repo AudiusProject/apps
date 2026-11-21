@@ -32,7 +32,6 @@ export const CashWallet = () => {
   const { balanceFormatted, isLoading } = useFormattedUSDCBalance()
   const dispatch = useDispatch()
 
-  // Check for USDC stuck in the root wallet from an interrupted onramp
   useEffect(() => {
     dispatch(buyUSDCActions.startRecoveryIfNecessary())
   }, [dispatch])

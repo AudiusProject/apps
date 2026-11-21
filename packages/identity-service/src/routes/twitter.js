@@ -12,16 +12,7 @@ const {
   errorResponseBadRequest
 } = require('../apiHelpers')
 
-/**
- * This file contains the twitter endpoints for oauth
- * For a great article about the walkthrough of the oauth process visit this link
- * https://medium.com/@robince885/how-to-do-twitter-authentication-with-react-and-restful-api-e525f30c62bb
- */
 module.exports = function (app) {
-  /**
-   * The first leg of the Twitter Oauth. It asks twitter for a request token, and this
-   * token gets sent to the client which will redirect to twitter for the user's authorization
-   */
   app.post(
     '/twitter',
     handleResponse(async (req, res, next) => {
@@ -45,12 +36,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * When the user clicks authorize and twitter calls back to the client, the client calls this route and
-   * passes the oauth token and verifier via query params. This route will use the token and verifier and
-   * calls Twitter for the oauth token and secret and then make a request to get the user profile
-   * and returns it to the client
-   */
   app.post(
     '/twitter/callback',
     handleResponse(async (req, res, next) => {
@@ -124,7 +109,6 @@ module.exports = function (app) {
         )
       }
 
-      // Alternate between two similar routes to double our rate-limit
       const userLookupRoute =
         Math.random() > 0.5 ? `username/${handle}?` : `?usernames=${handle}`
 
@@ -146,7 +130,6 @@ module.exports = function (app) {
           return errorResponseBadRequest(rateLimitMessage)
         }
 
-        // Coerce /usernames api response to /username response
         if (Array.isArray(profile.data)) {
           profile.data = profile.data[0]
         }
@@ -158,10 +141,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * After the user finishes onboarding in the client app and has a blockchain userId, we need to associate
-   * the blockchainUserId with the twitter profile so we can write the verified flag on chain
-   */
   app.post(
     '/twitter/associate',
     handleResponse(async (req, res, next) => {
@@ -181,7 +160,6 @@ module.exports = function (app) {
           logger: req.logger
         })
 
-        // only set blockchainUserId if not already set
         const isUnassociated = twitterObj && !twitterObj.blockchainUserId
         const handlesMatch =
           twitterObj &&
@@ -190,8 +168,6 @@ module.exports = function (app) {
         if (isUnassociated && handlesMatch) {
           twitterObj.blockchainUserId = userId
 
-          // Update the user's social verification status along with the social app handle that verification came from.
-          // If the user is not verified, send the transaction to ensure that their linked social handle is updated.
           const [encodedABI, contractAddress] =
             await audiusLibsInstance.User.updateSocialVerification(
               userId,
@@ -236,7 +212,6 @@ module.exports = function (app) {
             })
           }
 
-          // the final step is to save userId to db and respond to request
           try {
             await twitterObj.save()
             return successResponse()

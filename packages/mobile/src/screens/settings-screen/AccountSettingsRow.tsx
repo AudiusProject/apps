@@ -33,7 +33,6 @@ export const AccountSettingsRow = () => {
   const { spacing } = useTheme()
   const { isVerified } = useTierAndVerifiedForUser(user_id)
 
-  // Calculate badge size based on h2 font size (h2 is fontSize.medium = 16, so badge is 14)
   const badgeSize = 14
 
   const handlePress = useCallback(() => {

@@ -33,7 +33,6 @@ describe('rgbaImage', () => {
     const image = decodeImage(asset('weeklyRotation.jpg'))
     const canvas = createImage(1000, 1000)
     compositeImage(canvas, resizeImage(image, 500, 500), 500, 0)
-    // Untouched quadrant stays transparent black like a new jimp canvas
     expect(Array.from(canvas.data.subarray(0, 4))).toEqual([0, 0, 0, 0])
     expect(canvas.data[500 * 4 + 3]).toBe(255)
 

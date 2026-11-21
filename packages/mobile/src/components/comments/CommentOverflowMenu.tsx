@@ -50,7 +50,6 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
 
   const { toast } = useToast()
 
-  // Need isOpen and isVisible to account for the closing animation
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -130,7 +129,6 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
         text: isPinned ? messages.menuActions.unpin : messages.menuActions.pin,
         callback: () => {
           if (isPinned) {
-            // Unpin the comment
             handlePinComment()
           } else {
             setIsPinConfirmationOpen(true)

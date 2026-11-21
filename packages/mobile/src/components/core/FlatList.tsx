@@ -24,10 +24,6 @@ type CollapsibleFlatListProps<ItemT> = RNFlatListProps<ItemT>
 function CollapsibleFlatList<ItemT>(props: CollapsibleFlatListProps<ItemT>) {
   const { neutral, staticWhite } = useThemeColors()
 
-  // Pull refresh state from CollapsibleTabNavigatorContext when the host
-  // screen provides one (profile, contest). Falling back to the props lets
-  // direct callers (anything outside the navigator) keep the legacy inline
-  // RefreshControl behavior.
   const collapsibleContext = useContext(CollapsibleTabNavigatorContext)
   const refreshing =
     collapsibleContext.refreshing !== undefined
@@ -133,10 +129,6 @@ export type FlatListProps<ItemT> = RNFlatListProps<ItemT> & {
   isCollapsible?: boolean
 }
 
-/**
- * Provides either a FlatList or an animated FlatList
- * depending on whether or not the list is found in a "collapsible" header tab
- */
 export const FlatList = forwardRef(function FlatList<ItemT>(
   props: FlatListProps<ItemT>,
   ref: Ref<FlatListT<ItemT>>

@@ -18,17 +18,16 @@ import type {
   UploadFileParams
 } from './types'
 
-// tus-js-client is only needed once an upload starts
 const loadTus = async () => {
   const tus: any = await import('tus-js-client')
   return ('Upload' in tus ? tus : tus.default) as typeof import('tus-js-client')
 }
 
-const MAX_TRACK_TRANSCODE_TIMEOUT = 3600000 // 1 hour
-const MAX_TRACK_TRANSCODE_NO_PROGRESS_TIMEOUT = 1200000 // 20 minutes
-const MAX_IMAGE_RESIZE_TIMEOUT_MS = 300000 // 5 minutes
-const POLL_STATUS_INTERVAL = 3000 // 3s
-const MAX_DONE_WITHOUT_RESULTS_MS = 120000 // 2 minutes
+const MAX_TRACK_TRANSCODE_TIMEOUT = 3600000
+const MAX_TRACK_TRANSCODE_NO_PROGRESS_TIMEOUT = 1200000
+const MAX_IMAGE_RESIZE_TIMEOUT_MS = 300000
+const POLL_STATUS_INTERVAL = 3000
+const MAX_DONE_WITHOUT_RESULTS_MS = 120000
 
 export class Storage implements StorageService {
   /**
@@ -72,11 +71,6 @@ export class Storage implements StorageService {
                 reject(new Error('Upload aborted'))
                 return
               }
-              // In Node, tus-js-client accepts Buffer or fs.ReadStream as the
-              // source. When the caller passes a NodeFile wrapper
-              // (`{ buffer, name, type }`) — which is what the zod
-              // CrossPlatformFile schema validates in Node — unwrap it so the
-              // underlying Buffer reaches tus instead of the plain object.
               const tusSource =
                 (file as any) &&
                 typeof Buffer !== 'undefined' &&
@@ -123,7 +117,6 @@ export class Storage implements StorageService {
                     reject(new Error('No upload ID received'))
                     return
                   }
-                  // tus doesn't await onSuccess, so forward polling failures
                   this.pollProcessingStatus(
                     uploadId,
                     metadata.template,
@@ -234,7 +227,6 @@ export class Storage implements StorageService {
     const start = Date.now()
     let lastProgressUpdate = Date.now()
     let lastTranscodeProgress = 0
-    // When a node first reported done without a 320 result.
     let doneWithoutResultsSince: number | null = null
 
     const maxPollingMs =
@@ -243,7 +235,6 @@ export class Storage implements StorageService {
         : MAX_IMAGE_RESIZE_TIMEOUT_MS
 
     while (Date.now() - start < maxPollingMs) {
-      // Outside the try so the abort isn't caught and retried
       if (abortSignal?.aborted) {
         throw new Error('Upload aborted')
       }
@@ -253,9 +244,6 @@ export class Storage implements StorageService {
           if (template !== 'audio' || resp.results?.['320']) {
             return resp
           }
-          // A node can report done before its copy of the upload row has the
-          // transcode results. Keep polling, on the next node, until the 320
-          // cid shows up.
           doneWithoutResultsSince ??= Date.now()
           if (
             Date.now() - doneWithoutResultsSince >
@@ -270,7 +258,6 @@ export class Storage implements StorageService {
           )
           await this.storageNodeSelector.getSelectedNode(true)
         } else if (template === 'audio' && resp.transcode_progress) {
-          // Only update lastProgressUpdate if the progress has increased
           if (resp.transcode_progress > lastTranscodeProgress) {
             lastProgressUpdate = Date.now()
             lastTranscodeProgress = resp.transcode_progress
@@ -294,7 +281,6 @@ export class Storage implements StorageService {
           )
         }
       } catch (e: any) {
-        // Rethrow if error is "Upload failed", stalled, or if status code is 422 (Unprocessable Entity)
         if (
           e.message?.startsWith('Upload failed') ||
           e.message?.startsWith('Upload reported done') ||
@@ -304,7 +290,6 @@ export class Storage implements StorageService {
           throw e
         }
 
-        // Swallow errors caused by failure to establish connection to node so we can retry polling
         this.logger.error(`Failed to poll for processing status, ${e}`)
       }
 

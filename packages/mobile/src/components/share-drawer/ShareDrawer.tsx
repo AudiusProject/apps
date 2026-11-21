@@ -104,7 +104,6 @@ export const ShareDrawer = NiceModal.create(() => {
     content?.type === 'track' && accountUserId === content.artist.user_id
   const shareType = content?.type ?? 'track'
 
-  // Content whose track can be rendered into a story
   const storyContent =
     content?.type === 'track' || content?.type === 'milestone' ? content : null
   const isStreamGatedTrack = !!storyContent?.track.is_stream_gated
@@ -163,7 +162,6 @@ export const ShareDrawer = NiceModal.create(() => {
     const link = getContentUrl(content)
     Clipboard.setString(link)
     toast({
-      // A milestone share links to its track
       content: messages.toast(shareType === 'milestone' ? 'track' : shareType),
       type: 'info',
       timeout: shareToastTimeout
@@ -199,8 +197,6 @@ export const ShareDrawer = NiceModal.create(() => {
         dispatch(shareCollection(content.playlist.playlist_id, source))
         break
       case 'weeklyRotation': {
-        // No saga for weekly rotation shares; open the share sheet directly.
-        // share() prepends AUDIUS_URL.
         const url = getWeeklyRotationRoute(content.user)
         share({
           url,
@@ -221,8 +217,6 @@ export const ShareDrawer = NiceModal.create(() => {
     }
   }, [dispatch, content, source])
 
-  // Story sharing renders the track's audio, so skip tracks the API marks
-  // unstreamable (undefined = not populated).
   const isShareableTrack =
     !!storyContent &&
     !storyContent.track.is_unlisted &&
@@ -301,7 +295,6 @@ export const ShareDrawer = NiceModal.create(() => {
       content?.type === 'weeklyRotation' ||
       content?.type === 'milestone'
     ) {
-      // Story/video shares need a single track; X only needs the link.
       result.push(shareToXAction)
     }
 
@@ -323,7 +316,6 @@ export const ShareDrawer = NiceModal.create(() => {
     isManagedAccount
   ])
 
-  // Trigger share action on mount with new content
   useEffect(() => {
     if (!content) return
     switch (content.type) {
@@ -382,9 +374,5 @@ export const ShareDrawer = NiceModal.create(() => {
   )
 })
 
-// Register so saga code (and anything else outside React) can open it via
-// `showNiceModal('Share')`. The id is also added to the nice-modal bridge
-// allowlist so legacy `setVisibility('Share', true)` dispatches translate
-// to `showNiceModal('Share')`.
 NiceModal.register('Share', ShareDrawer)
 registerNiceModalId('Share')

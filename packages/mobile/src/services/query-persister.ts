@@ -5,29 +5,18 @@ import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-cl
 
 import { queryClient } from 'app/services/query-client'
 
-// Bump when the persisted shape changes incompatibly so existing snapshots
-// are dropped on next launch.
 const QUERY_CACHE_BUSTER = 'v2'
 const QUERY_CACHE_STORAGE_KEY = 'tanquery-cache'
 const QUERY_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24
 
-// Narrow positive allowlist: only the queries needed to paint the Trending
-// screen instantly on a warm cold-start. A wide allowlist inflates the cached
-// JSON blob and forces a large JSON.stringify on the JS thread every time any
-// allowlisted query updates — causing periodic freezes. We can broaden this
-// later per-screen once we've confirmed the overhead is acceptable.
 const PERSIST_QUERY_KEY_ALLOWLIST: ReadonlySet<string> = new Set([
-  // Account / identity.
   QUERY_KEYS.account,
   QUERY_KEYS.accountUser,
   QUERY_KEYS.walletAddresses,
 
-  // Entity caches — needed for trending tiles to render without a network
-  // round-trip (tracks + their owners).
   QUERY_KEYS.user,
   QUERY_KEYS.track,
 
-  // Trending lineup (the initial landing screen).
   QUERY_KEYS.trending,
   QUERY_KEYS.trendingIds
 ])
@@ -36,12 +25,6 @@ type ReferencedEntityIds = { trackIds: Set<number>; userIds: Set<number> }
 
 let referencedEntityIds: ReferencedEntityIds | null = null
 
-/**
- * Track and user ids the persisted lineups and account point at. Only these
- * entities are persisted, so the snapshot (and the restore the splash waits
- * on) stays the size of the trending lineup instead of everything browsed in
- * the last few minutes. Computed once per dehydrate pass.
- */
 const getReferencedEntityIds = (): ReferencedEntityIds => {
   if (referencedEntityIds) return referencedEntityIds
 
@@ -74,8 +57,6 @@ const getReferencedEntityIds = (): ReferencedEntityIds => {
   if (account?.userId) userIds.add(account.userId)
 
   referencedEntityIds = { trackIds, userIds }
-  // dehydrate() calls shouldDehydrateQuery synchronously for every query, so
-  // drop the memo once this pass is done.
   Promise.resolve().then(() => {
     referencedEntityIds = null
   })
@@ -85,9 +66,6 @@ const getReferencedEntityIds = (): ReferencedEntityIds => {
 const queryClientPersister = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: QUERY_CACHE_STORAGE_KEY,
-  // Coalesce writes: 1 write per 5 s max. Aggressive throttling keeps the
-  // JSON.stringify work (which runs on the JS thread) from firing too
-  // often and causing periodic frame drops.
   throttleTime: 5000
 })
 
@@ -103,7 +81,6 @@ export const queryClientPersistOptions: Omit<
       const topKey = query.queryKey?.[0]
       if (typeof topKey !== 'string') return false
       if (!PERSIST_QUERY_KEY_ALLOWLIST.has(topKey)) return false
-      // Skip errored / pending queries — let them refetch from scratch.
       if (query.state.status !== 'success') return false
 
       if (topKey === QUERY_KEYS.track || topKey === QUERY_KEYS.user) {

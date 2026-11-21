@@ -15,7 +15,6 @@ import {
 const mockGoBack = jest.fn()
 let mockSafeBottom = 0
 
-// React 19 requires this flag when using the renderer directly.
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 
 jest.mock('react-native', () => ({ View: 'View', Pressable: 'Pressable' }))
@@ -88,11 +87,9 @@ describe('FixedFooter floating navigation clearance', () => {
     const footer = renderer.root.findByType('Flex' as any)
     expect(footer.props.style.bottom).toBe(inset)
     expect(footer.props.w).toBe('100%')
-    // The safe area is already part of the navigation inset.
     expect(
       renderer.root.findByType('Paper' as any).props.style.paddingBottom
     ).toBe(16)
-    // Adding the inset to the translation offset avoids lifting the footer twice.
     expect(
       renderer.root.findByType('KeyboardAvoidingView' as any).props
         .keyboardShowingOffset

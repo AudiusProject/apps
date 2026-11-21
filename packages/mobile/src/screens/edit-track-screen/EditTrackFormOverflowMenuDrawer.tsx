@@ -34,7 +34,6 @@ export const EditTrackFormOverflowMenuDrawer = ({
       ...(onDownload
         ? [{ text: messages.download, callback: handleDownload }]
         : []),
-      // TODO: Figure out how to make the drawer not be at the bottom
       { text: '' },
       { text: '' }
     ],

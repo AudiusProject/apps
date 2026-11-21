@@ -26,9 +26,7 @@ const IndividualNodeUptimeChart: React.FC<IndividualNodeUptimeChartProps> = ({
     data = []
     for (const [bucket, up] of Object.entries(uptime.uptime_raw_data)) {
       data.push({
-        // TODO add harmony and use harmony css vars
         color: up === 1 ? '#13c65a' : '#f9344c',
-        // color: up === 1 ? 'var(--harmony-light-green)' : 'var(--harmony-red)',
         tooltip: new Date(bucket).toUTCString()
       })
     }

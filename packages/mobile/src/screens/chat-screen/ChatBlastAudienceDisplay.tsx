@@ -27,7 +27,6 @@ export const ChatBlastAudienceDisplay = (
 
   const { audienceCount } = useChatBlastAudienceContent({ chat })
 
-  // Add 1 to the limit to ensure we have a bg photo for the overflow count
   const users = useAudienceUsers(chat, USER_LIST_LIMIT + 1)
 
   return (

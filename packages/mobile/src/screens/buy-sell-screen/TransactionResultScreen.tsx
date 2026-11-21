@@ -52,7 +52,6 @@ export const TransactionResultScreen = ({
   const tabNavigation = useAppTabNavigation()
   const { result } = route.params
 
-  // Always call hooks at the top level to avoid conditional hook calls
   const successData = result.status === 'success' ? result.data : null
 
   const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
@@ -70,7 +69,6 @@ export const TransactionResultScreen = ({
   })
 
   const handleDone = () => {
-    // Close the modal and navigate back to the wallet screen
     navigation.getParent()?.goBack()
     tabNavigation.navigate('wallet', undefined, { pop: true })
   }

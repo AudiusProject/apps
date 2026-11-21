@@ -15,7 +15,6 @@ const {
 
 const PROOF_MAX_AGE_MS = 5 * 60 * 1000
 const SESSION_DURATION_MS = 30 * 60 * 1000
-// ASN.1 SubjectPublicKeyInfo prefix for an Ed25519 public key.
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
 
 module.exports = function (app) {
@@ -36,9 +35,6 @@ module.exports = function (app) {
         return errorResponseBadRequest('Invalid Coinflow session request')
       }
 
-      // The root wallet is derived locally and is not the public spl_wallet
-      // (user bank). Require proof of ownership, bound to this identity and
-      // environment, rather than trusting a caller-supplied wallet address.
       const message = `Audius Coinflow session:${req.user.walletAddress.toLowerCase()}:${wallet}:${environment}:${timestamp}`
       try {
         const publicKey = createPublicKey({
@@ -89,7 +85,6 @@ module.exports = function (app) {
           expiresAt: requestedAt + SESSION_DURATION_MS
         })
       } catch (error) {
-        // Axios errors include the merchant key in their request config.
         req.logger.error(
           { status: error.response?.status },
           'Failed to create Coinflow session'

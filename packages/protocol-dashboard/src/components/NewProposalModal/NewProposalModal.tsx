@@ -51,7 +51,6 @@ const NewProposalModal: React.FC<NewProposalModalProps> = ({
   const { status, error, createProposal } =
     useCreateProposal(!isConfirmModalOpen)
 
-  // Handle success scenario
   useEffect(() => {
     if (status === Status.Success) {
       if (isConfirmModalOpen) {

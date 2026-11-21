@@ -1,9 +1,6 @@
 'use strict'
 const models = require('../../src/models')
 
-/**
- * Adds enum value `MilestoneListen` to the solana notifications table, column "type"
- */
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(
@@ -30,7 +27,6 @@ module.exports = {
         `,
         { transaction }
       )
-      // Change column type to the new ENUM TYPE
       await queryInterface.sequelize.query(
         `
         ALTER TABLE "${tableName}"
@@ -40,14 +36,12 @@ module.exports = {
       `,
         { transaction }
       )
-      // Drop old ENUM
       await queryInterface.sequelize.query(
         `
         DROP TYPE "${enumName}"
       `,
         { transaction }
       )
-      // Rename new ENUM name
       await queryInterface.sequelize.query(
         `
         ALTER TYPE "${newEnumName}"

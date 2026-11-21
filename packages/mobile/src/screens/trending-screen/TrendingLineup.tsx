@@ -22,12 +22,8 @@ import { TrackLineup } from 'app/components/lineup/TrackLineup'
 const { setTrendingTimeRange } = trendingPageActions
 const { getTrendingGenre } = trendingPageSelectors
 
-// Matches the query client's default staleTime.
 const STALE_TIME_MS = 1000 * 60 * 5
 
-// Trending is persisted to disk so it can paint on a cold start. A snapshot
-// that was already stale when this session started gets refetched on mount,
-// and painting it first means showing an old order and then reshuffling.
 const sessionStartedAt = Date.now()
 
 const sourceFor = (timeRange: TimeRange) => {
@@ -58,8 +54,6 @@ export const TrendingLineup = ({
   const dispatch = useDispatch()
   const genre = useSelector(getTrendingGenre)
 
-  // Keep the redux "active time range" in sync with the selected tab — the
-  // filter UI components read from it.
   useEffect(() => {
     // @ts-ignore tabPress is a tab navigator event
     const tabPressListener = navigation.addListener?.('tabPress', () => {
@@ -88,8 +82,6 @@ export const TrendingLineup = ({
     loadNextPage
   } = useTrending(queryArgs)
 
-  // Show skeletons until the refetch of a stale restored snapshot lands. If
-  // it fails, the snapshot is shown.
   const isRestoredStale =
     isRefetching && dataUpdatedAt < sessionStartedAt - STALE_TIME_MS
 

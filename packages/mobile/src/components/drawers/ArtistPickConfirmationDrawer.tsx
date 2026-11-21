@@ -38,7 +38,6 @@ export const ArtistPickConfirmationDrawer = () => {
 
   const action = useMemo(
     () => (!user?.artist_pick_track_id ? 'add' : trackId ? 'update' : 'remove'),
-    // We don't want optimistic update, otherwise the text changes as the drawer is closing
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trackId]
   )

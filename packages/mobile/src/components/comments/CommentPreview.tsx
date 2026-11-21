@@ -116,7 +116,6 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
     [postComment, entityId, playerTrackId]
   )
 
-  // Loading state
   if (isLoading) {
     return (
       <Flex direction='row' gap='s' alignItems='center'>
@@ -129,7 +128,6 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
     )
   }
 
-  // Empty state
   if (!commentIds || !commentIds.length) {
     return (
       <Flex gap='m'>

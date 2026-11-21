@@ -4,7 +4,7 @@ import {
   PressableProps,
   StyleProp,
   TextStyle,
-  ViewStyle,
+  ViewStyle
 } from 'react-native'
 import { AnimatedStyle, SharedValue } from 'react-native-reanimated'
 
@@ -19,68 +19,26 @@ export type MaterialTabItemProps<T extends TabName> = TabItemProps<T> & {
   scrollEnabled?: boolean
 
   style?: StyleProp<ViewStyle>
-  /**
-   * Style to apply to the tab item label
-   */
   labelStyle?: AnimatedTextStyle
   inactiveOpacity?: number
   pressColor?: string
   pressOpacity?: number
-  /**
-   * Color applied to the label when active
-   */
   activeColor?: string
-  /**
-   * Color applied to the label when inactive
-   */
   inactiveColor?: string
 } & Omit<PressableProps, 'onPress' | 'children'>
 
 export type MaterialTabBarProps<N extends TabName> = TabBarProps<N> & {
-  /**
-   * Indicates whether the tab bar should contain horizontal scroll, when enabled the tab width is dynamic
-   */
   scrollEnabled?: boolean
-  /**
-   * Style to apply to the active indicator.
-   */
   indicatorStyle?: AnimatedViewStyle
-  /**
-   * React component to render as tab bar item
-   */
   TabItemComponent?: (props: MaterialTabItemProps<N>) => React.ReactElement
-  /**
-   * Function to compute the tab item label text
-   */
   getLabelText?: (name: N) => string
-  /**
-   * Style to apply to the tab bar container.
-   */
   style?: StyleProp<ViewStyle>
-  /**
-   * Style to apply to the inner container for tabs
-   */
   contentContainerStyle?: StyleProp<ViewStyle>
-  /**
-   * Style to apply to the individual tab items in the tab bar.
-   */
   tabStyle?: StyleProp<ViewStyle>
-  /**
-   * Style to apply to the tab item label
-   */
   labelStyle?: AnimatedTextStyle
-  /**
-   * Color applied to the label when active
-   */
   activeColor?: string
-  /**
-   * Color applied to the label when inactive
-   */
   inactiveColor?: string
 
-  /**
-   * Whether to keep the currently active tab centered in a scrollable tab bar
-   */
   keepActiveTabCentered?: boolean
 }
 

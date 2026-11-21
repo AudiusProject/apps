@@ -2,16 +2,6 @@ import { Address } from 'types'
 
 import AudiusClient from './AudiusClient'
 
-/**
- * Wrapper functions for libs
- */
-
-/**
- * Get all the service provider addresses that the given wallet delegates to
- * @param this Audius
- * @param delegator Wallet address of the delegator
- * @returns Array of service provider addresses
- */
 export async function getUserDelegates(this: AudiusClient, delegator: Address) {
   await this.hasPermissions()
   const delegates = []

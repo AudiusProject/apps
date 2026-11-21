@@ -64,7 +64,6 @@ describe('test contentNodeIPCheck', () => {
         },
         logger: { info: console.log }
       },
-      // Known content node at 0x209220b86C13EED39c126E1824adb7Cb5F548835
       new Set(['0x209220b86C13EED39c126E1824adb7Cb5F548835']),
       new Set([])
     )

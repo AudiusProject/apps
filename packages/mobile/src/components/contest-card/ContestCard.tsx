@@ -57,10 +57,6 @@ const formatStatus = (endDate?: string | null): string => {
 export type ContestCardVariant = 'hero' | 'grid'
 
 type ContestCardProps = PaperProps & {
-  /**
-   * The parent track ID the contest is attached to. The card resolves the
-   * remix-contest event (end date, prize info) internally via useRemixContest.
-   */
   trackId: ID
   variant?: ContestCardVariant
   noNavigation?: boolean
@@ -70,10 +66,6 @@ type NavigationProp = NativeStackNavigationProp<AppTabScreenParamList>
 
 const COVER_HEIGHT = 96
 
-/**
- * The mobile Skeleton component fills its parent via position:absolute, so each
- * skeleton placeholder needs a relatively-positioned sizing container.
- */
 const SkeletonBlock = ({
   height,
   width,
@@ -150,11 +142,6 @@ const Pill = ({
   </Flex>
 )
 
-/**
- * Banner-aspect cover for the contest card. Mirrors the loading pattern of
- * harmony-native's `Artwork` component (skeleton overlay, fade-in on load)
- * but sized as a fixed-height banner instead of a square.
- */
 const ContestCover = ({
   source,
   children
@@ -244,8 +231,6 @@ export const ContestCard = (props: ContestCardProps) => {
   const { data: user } = useUser(track?.owner_id)
   const { data: remixContest } = useRemixContest(trackId)
 
-  // Hero is full-width of the device, so always request the largest size the
-  // SDK exposes (1000×1000). Grid cards are narrower so 480×480 is enough.
   const { source: trackImageSource } = useTrackImage({
     trackId,
     size:
@@ -253,9 +238,6 @@ export const ContestCard = (props: ContestCardProps) => {
         ? SquareSizes.SIZE_1000_BY_1000
         : SquareSizes.SIZE_480_BY_480
   })
-  // Prefer the contest's own cover photo (set on the host contest form's
-  // "Cover Photo" field) over the parent track's artwork — same fallback
-  // ordering the contest screen header uses.
   const contestCoverPhotoUrl = (remixContest?.eventData as any)
     ?.coverPhotoUrl as string | undefined
   const coverSource = contestCoverPhotoUrl
@@ -270,10 +252,6 @@ export const ContestCard = (props: ContestCardProps) => {
   const navigation = useNavigation<NavigationProp>()
   const handlePress = useCallback(() => {
     if (noNavigation || !trackId) return
-    // Match the web-side ContestCard change: tapping the card goes to
-    // the dedicated Contest screen (the redesigned remix-contest surface
-    // with countdown / About / Prizes / Submissions / Updates / Comments
-    // tabs), not the underlying track screen.
     navigation.navigate('Contest', { trackId })
   }, [navigation, trackId, noNavigation])
 
@@ -281,10 +259,6 @@ export const ContestCard = (props: ContestCardProps) => {
     return null
   }
 
-  // Skip contests hosted by deactivated users — same filter as the web
-  // ContestCard. The validator node API can still surface tombstoned
-  // hosts (the fake "Audius" / life-audius-airdrop accounts) and
-  // rendering them on explore was the QA bug we needed to suppress.
   if (user.is_deactivated) {
     return null
   }

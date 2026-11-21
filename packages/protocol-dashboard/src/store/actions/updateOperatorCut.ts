@@ -26,7 +26,6 @@ function updateAudiusOperatorCut(
       }
       await aud.ServiceProviderClient.requestUpdateDeployerCut(wallet, cut)
 
-      // Repull for user information and pending transactions
       await dispatch(fetchPendingTransactions(wallet))
 
       setStatus(Status.Success)

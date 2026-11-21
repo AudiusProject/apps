@@ -179,7 +179,6 @@ export const WithdrawUSDCDrawer = () => {
 
   const handleSubmit = useCallback(
     ({ amount, method, address }: WithdrawFormValues) => {
-      // On mobile, amount is always a string from text input
       const amountInCents = filterDecimalString(amount as string).value
 
       dispatch(
@@ -194,7 +193,6 @@ export const WithdrawUSDCDrawer = () => {
     [dispatch, balanceNumberCents]
   )
 
-  // Open/close the bottom sheet based on modal state
   useEffect(() => {
     if (isOpen && bottomSheetRef.current) {
       bottomSheetRef.current.present()

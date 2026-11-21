@@ -1,5 +1,4 @@
 export const messages = {
-  // Shared
   allow: 'Allow Audius to Connect to',
   permissionsRequestedHeader: 'This application will receive',
   authorizeButton: 'Sign In & Authorize',
@@ -9,7 +8,6 @@ export const messages = {
     'You must be signed in to the Audius app to authorize this request.',
   cancelButton: 'Cancel',
   miscError: 'An error has occurred. Please try again.',
-  // Permission labels
   readOnlyAccountAccess: 'Read-only Access',
   readOnlyGrants:
     'This app cannot interact with or make changes to your account.',
@@ -21,7 +19,6 @@ export const messages = {
   yourAccountDataAccess:
     'Account activity, and identifying information, including the email address',
   yourAccountDataAccessNoEmail: 'Account activity and identifying information.',
-  // Validation errors
   redirectURIInvalidError:
     'Whoops, this is an invalid link (redirect URI missing or invalid).',
   responseModeInvalidError:
@@ -45,7 +42,6 @@ export const messages = {
     'Whoops, this is an invalid link (the specified wallet is not connected to an Audius account).',
   disconnectDashboardWalletWrongUserError:
     'This account is not connected to that wallet.',
-  // Payment flow
   confirmTransaction: 'Confirm Transaction',
   balance: 'Balance',
   recipient: 'Recipient',

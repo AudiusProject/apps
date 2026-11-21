@@ -13,7 +13,6 @@ type ServiceInfo = {
 export type State = {
   totalStaked?: BN
   ethBlockNumber?: number
-  // Average block processing time
   averageBlockTime?: number
   delegator: {
     minDelegationAmount?: BN

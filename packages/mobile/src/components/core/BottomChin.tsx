@@ -8,11 +8,6 @@ import { PLAY_BAR_HEIGHT } from '../now-playing-drawer'
 
 const { getHasTrack } = playbackSelectors
 
-/**
- * Bottom padding a list needs so its last row clears the floating tab bar
- * (positioned absolutely, see `AppTabBar`) and, when a track is loaded, the
- * play bar.
- */
 export const useBottomChinHeight = () => {
   const hasTrack = useSelector(getHasTrack)
   const insets = useSafeAreaInsets()

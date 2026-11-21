@@ -39,7 +39,6 @@ export const usePosition = (
   useEffect(() => {
     let currentTimeout: ReturnType<typeof setTimeout>
 
-    // Calculate the actual playback rate based on track type
     const isLongFormContent =
       trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
     const actualPlaybackRate = isLongFormContent
@@ -79,8 +78,6 @@ export const usePosition = (
     trackGenre
   ])
 
-  // Android pauses timeouts when in background, so we use app state
-  // to trigger a position coercion
   const appState = useAppState()
 
   useAsync(async () => {

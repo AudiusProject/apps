@@ -7,21 +7,17 @@ import { removeNullable, Uid } from '@audius/common/utils'
 import { uniq } from 'lodash'
 
 export const useEnhancedCollectionTracks = (uid: UID) => {
-  // Get collection from UID
   const collectionId = useMemo(() => Uid.fromString(uid)?.id as ID, [uid])
   const { data: playlistTracks } = useCollection(collectionId, {
     select: (collection) => collection.playlist_contents.track_ids
   })
 
-  // Get tracks using useTracks
   const { data: tracks, byId: tracksById } = useTracks(
     uniq(playlistTracks?.map((t) => t.track))
   )
 
-  // Get users using useUsers
   const { byId: usersById } = useUsers(uniq(tracks?.map((t) => t.owner_id)))
 
-  // Combine everything into EnhancedCollectionTrack[]
   const collectionTracks = useMemo(() => {
     if (!playlistTracks || !tracks || !usersById) return []
 

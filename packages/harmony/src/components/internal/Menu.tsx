@@ -8,8 +8,6 @@ import { Popup } from '~harmony/components/popup/Popup'
 import { PopupProps } from '~harmony/components/popup/types'
 import { WithCSS } from '~harmony/foundations'
 
-// TODO menu label
-
 export type MenuProps = Omit<PopupProps, 'children'> & {
   children: ReactNode
   PaperProps?: WithCSS<Partial<PaperProps>>

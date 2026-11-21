@@ -10,13 +10,10 @@ export type Option<T> = {
 }
 
 export type SegmentedControlProps<T extends string> = {
-  // The options to display for the tab slider
   options: Array<Option<T>>
 
-  // References the key of an available option that is selected
   selected: string
 
-  // Called on select option
   onSelectOption: (key: T) => void
 
   /**

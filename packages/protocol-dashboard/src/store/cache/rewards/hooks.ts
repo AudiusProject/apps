@@ -20,7 +20,6 @@ import { Address, User, Operator, Status } from 'types'
 
 import { getRewardForClaimBlock } from './helpers'
 
-// -------------------------------- Selectors  --------------------------------
 export const getUserRewards = (wallet: Address) => (state: AppState) =>
   state.cache.rewards.users[wallet]
 
@@ -28,8 +27,6 @@ export const getUserWeeklyRewards = (wallet: Address) => (state: AppState) => {
   const userReward = state.cache.rewards.users[wallet]
   return userReward?.status === Status.Success ? userReward.reward : undefined
 }
-
-// -------------------------------- Thunk Actions  --------------------------------
 
 export function fetchRewards({
   wallet,
@@ -48,7 +45,6 @@ export function fetchRewards({
     dispatch(fetchWeeklyRewards({ wallet }))
     await aud.awaitSetup()
     try {
-      // NOTE: If blocknumber is set to lastFundedBlock, then the reward will represent the pending claim amount
       const blockNumber = currentBlockNumber
       const { totalRewards, delegateToUserRewards } =
         await getRewardForClaimBlock({
@@ -66,13 +62,10 @@ export function fetchRewards({
         })
       )
     } catch (error) {
-      // TODO: Handle error case
       console.error(error)
     }
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useUserWeeklyRewards = ({ wallet }: { wallet: Address }) => {
   const weeklyRewards = useSelector(getUserRewards(wallet))

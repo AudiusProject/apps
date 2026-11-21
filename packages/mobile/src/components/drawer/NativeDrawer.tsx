@@ -15,10 +15,6 @@ export type NativeDrawerProps = SetOptional<
   drawerName: DrawerName
 }
 
-/*
- * Drawer that hooks into the native-drawer slice to automatically handle
- * opening and closing.
- */
 export const NativeDrawer = (props: NativeDrawerProps) => {
   const {
     drawerName,

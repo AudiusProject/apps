@@ -74,14 +74,12 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
 
     const isFocused = _isFocused ?? isFocusedState
 
-    // For focus behavior and accessiblity, <label> needs to have a htmlFor={} provided to an id matching the input
     const backupId = useId()
     const id = idProp ?? backupId
 
     const characterCount = value !== undefined ? `${value}`.length : 0
     const hasValue = characterCount > 0
 
-    // Hide the label when requested or when the size is set to small or extra small
     const shouldShowLabel =
       !hideLabel &&
       size !== TextInputSize.SMALL &&
@@ -98,16 +96,13 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         ? 'xs'
         : 's'
 
-    // Whenever a label isn't visible the placeholder should be visible in it's place (if provided)
     const shouldShowPlaceholder =
       (isFocused || !shouldShowLabel) && !hidePlaceholder
     const shouldShowAdornments = isFocused || hasValue || !shouldShowLabel
-    // Show the maxlength text whenever we hit a certain threshold (default 70%) + the input is focused
     const shouldShowMaxLengthText =
       isFocused &&
       maxLength &&
       characterCount >= showMaxLengthThreshold * maxLength
-    // Turn the maxlength text to the warning color whenever we hit a certain threshold (default 90%)
     let maxLengthTextColor: TextColors = 'default'
     if (maxLength && characterCount > maxLength) {
       maxLengthTextColor = 'danger'
@@ -118,7 +113,6 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
       maxLengthTextColor = 'warning'
     }
 
-    // Styles for the root of the input
     const inputRootStyle = {
       [styles.default]: size === TextInputSize.DEFAULT,
       [styles.small]: size === TextInputSize.SMALL,
@@ -133,7 +127,6 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
       [styles.disablePointerEvents]: _disablePointerEvents
     }
 
-    // Styles for the input element itself
     const inputElStyle = {
       [styles.default]: size === TextInputSize.DEFAULT,
       [styles.small]: size === TextInputSize.SMALL,

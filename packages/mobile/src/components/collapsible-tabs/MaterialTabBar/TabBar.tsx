@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react'
 import {
   StyleSheet,
   useWindowDimensions,
-  LayoutChangeEvent,
+  LayoutChangeEvent
 } from 'react-native'
 import Animated, {
   cancelAnimation,
@@ -11,7 +11,7 @@ import Animated, {
   useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
-  withTiming,
+  withTiming
 } from 'react-native-reanimated'
 
 import { Indicator } from './Indicator'
@@ -21,26 +21,6 @@ import { TabName } from '../types'
 
 export const TABBAR_HEIGHT = 48
 
-/**
- * Basic usage looks like this:
- *
- * ```tsx
- * <Tabs.Container
- *   ...
- *   TabBarComponent={(props) => (
- *     <MaterialTabBar
- *       {...props}
- *       activeColor="red"
- *       inactiveColor="yellow"
- *       inactiveOpacity={1}
- *       labelStyle={{ fontSize: 14 }}
- *     />
- *   )}
- * >
- *   {...}
- * </Tabs.Container>
- * ```
- */
 const MaterialTabBar = <T extends TabName = TabName>({
   tabNames,
   indexDecimal,
@@ -58,7 +38,7 @@ const MaterialTabBar = <T extends TabName = TabName>({
   activeColor,
   tabStyle,
   width: customWidth,
-  keepActiveTabCentered,
+  keepActiveTabCentered
 }: MaterialTabBarProps<T>): React.ReactElement => {
   const tabBarRef = useAnimatedRef<Animated.ScrollView>()
   const windowWidth = useWindowDimensions().width
@@ -84,7 +64,6 @@ const MaterialTabBar = <T extends TabName = TabName>({
     if (isFirstRender.current) {
       isFirstRender.current = false
     } else if (!scrollEnabled) {
-      // update items width on window resizing
       const tabWidth = width / nTabs
       setItemsLayout(
         tabNames.map((_, i) => {
@@ -102,10 +81,9 @@ const MaterialTabBar = <T extends TabName = TabName>({
 
         itemLayoutGathering.current.set(name, {
           width,
-          x,
+          x
         })
 
-        // pick out the layouts for the tabs we know about (in case they changed dynamically)
         const layout = Array.from(itemLayoutGathering.current.entries())
           .filter(([tabName]) => tabNames.includes(tabName))
           .map(([, layout]) => layout)
@@ -140,7 +118,7 @@ const MaterialTabBar = <T extends TabName = TabName>({
       },
       onMomentumEnd: () => {
         isScrolling.value = false
-      },
+      }
     },
     []
   )
@@ -191,15 +169,15 @@ const MaterialTabBar = <T extends TabName = TabName>({
       contentContainerStyle={[
         styles.contentContainer,
         !scrollEnabled && { width },
-        contentContainerStyle,
+        contentContainerStyle
       ]}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps='handled'
       bounces={false}
       alwaysBounceHorizontal={false}
       scrollsToTop={false}
       showsHorizontalScrollIndicator={false}
       automaticallyAdjustContentInsets={false}
-      overScrollMode="never"
+      overScrollMode='never'
       scrollEnabled={scrollEnabled}
       onScroll={scrollEnabled ? onScroll : undefined}
       scrollEventThrottle={16}
@@ -245,6 +223,6 @@ export { MemoizedTabBar as MaterialTabBar }
 const styles = StyleSheet.create({
   contentContainer: {
     flexDirection: 'row',
-    flexWrap: 'nowrap',
-  },
+    flexWrap: 'nowrap'
+  }
 })

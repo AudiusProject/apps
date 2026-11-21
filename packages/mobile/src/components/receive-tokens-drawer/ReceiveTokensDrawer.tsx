@@ -37,7 +37,6 @@ export const ReceiveTokensDrawer = () => {
   const { rootWalletAddress, loading: rootWalletLoading } =
     useRootWalletAddress()
 
-  // Use root wallet address for USDC, user bank for others
   const isUsdc = mint === env.USDC_MINT_ADDRESS
   const shouldUseRootWallet = isUsdc
   const displayAddress = shouldUseRootWallet

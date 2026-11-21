@@ -18,11 +18,6 @@ const paeth = (a: number, b: number, c: number) => {
   return pb <= pc ? b : c
 }
 
-/**
- * Minimal non-interlaced PNG decoder (all color types and bit depths) that
- * outputs 8-bit RGBA. Artwork is served as JPEG, so this only covers the odd
- * local PNG.
- */
 export const decodePng = (bytes: Uint8Array): RgbaImage => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   let width = 0
@@ -90,11 +85,9 @@ export const decodePng = (bytes: Uint8Array): RgbaImage => {
     prev = cur
   }
 
-  // Reads sample `index` of row `y`, scaled to 8 bits (palette indexes are not scaled).
   const maxSample = (1 << bitDepth) - 1
   const sample = (y: number, index: number, scale: boolean) => {
     const row = y * stride
-    // 16-bit samples keep their high byte.
     if (bitDepth === 16) return pixels[row + index * 2]
     if (bitDepth === 8) return pixels[row + index]
     const bit = index * bitDepth

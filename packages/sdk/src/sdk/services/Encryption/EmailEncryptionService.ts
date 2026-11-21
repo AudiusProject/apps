@@ -73,7 +73,6 @@ export class EmailEncryptionService extends BaseAPI {
     const cacheKey = `${userId}-${encryptedKey}`
 
     if (!this.symmetricKeyCache.has(cacheKey)) {
-      // Store the promise in the cache to handle concurrent requests
       this.symmetricKeyCache.set(
         cacheKey,
         pubkeyBase64
@@ -81,7 +80,6 @@ export class EmailEncryptionService extends BaseAPI {
           : this.decryptSymmetricKeyDirect(encryptedKey, userId)
       )
 
-      // Remove oldest entries if caches get too large
       if (this.symmetricKeyCache.size >= this.cacheSize) {
         this.removeOldestEntries(this.symmetricKeyCache)
       }
@@ -133,13 +131,10 @@ export class EmailEncryptionService extends BaseAPI {
     receivingIds: string[],
     grantorId: string
   ): Promise<SharedSymmetricKey> {
-    // Generate random symmetric key
     const symmetricKey = this.createSymmetricKey()
 
-    // Include email owner in the list of recipients
     const allRecipientIds = [emailOwnerId, ...receivingIds]
 
-    // Encrypt for each receiving user including the owner
     const receiverEncryptedKeys: EncryptedKey[] = await Promise.all(
       allRecipientIds.map(async (receivingId) => {
         const encryptedKey = await this.encryptSymmetricKey(
@@ -174,14 +169,12 @@ export class EmailEncryptionService extends BaseAPI {
     grantorId: string,
     emails: string[]
   ): Promise<EncryptedEmailsResult> {
-    // Create symmetric key for all recipients
     const { symmetricKey, receiverEncryptedKeys } = await this.createSharedKey(
       emailOwnerId,
       receivingIds,
       grantorId
     )
 
-    // Encrypt emails with symmetric key
     const encryptedEmails = await Promise.all(
       emails.map((email) => this.encryptEmail(email, symmetricKey))
     )
@@ -192,7 +185,6 @@ export class EmailEncryptionService extends BaseAPI {
     }
   }
 
-  // Caching Infrastructure
   /**
    * Removes oldest entries from a cache map when size limit is reached
    * @param map - The cache map to prune
@@ -204,7 +196,6 @@ export class EmailEncryptionService extends BaseAPI {
     entries.slice(0, this.cacheSize / 3).forEach((key) => map.delete(key))
   }
 
-  // Core Decryption Implementations
   /**
    * Direct decryption path using user ID to fetch public key
    * @param encryptedKey - Base64 encoded encrypted symmetric key

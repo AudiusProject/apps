@@ -2,13 +2,6 @@ import assert from 'assert'
 
 import { promiseFight } from './promiseFight'
 
-/**
- * A promise that either resolves or rejects. If it resolves,
- * resolves with the provided id.
- * @param id identifier for this promise
- * @param resolveTimeout resolves after this timeout
- * @param rejectTimeout rejects after this timeout
- */
 const p = async (
   id: string,
   resolveTimeout: null | number,

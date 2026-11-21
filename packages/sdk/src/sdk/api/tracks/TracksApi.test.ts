@@ -77,7 +77,6 @@ vitest
   })
 
 describe('TracksApi', () => {
-  // TODO: Move this out of describe
   let tracks: TracksApi
 
   // eslint-disable-next-line mocha/no-setup-in-describe
@@ -168,7 +167,6 @@ describe('TracksApi', () => {
             name: 'coverArt'
           },
           metadata: {
-            // intentionally missing trackCid, genre
             title: 'BachGavotte'
           } as any,
           audioFile: {

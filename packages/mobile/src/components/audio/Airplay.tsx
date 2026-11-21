@@ -24,25 +24,11 @@ export const useAirplay = () => {
   return { openAirplayDialog }
 }
 
-/**
- * An airplay component that talks to the native layer and
- * lets the user broadcast and receive information from
- * a native AVRoutePickerView.
- *
- * Unlike other casting (e.g. chromecast), the Airplay
- * interface requires a native component to be silently rendered.
- * There may be other ways to do this, but documentation
- * for a react-native bridge is quite sparse.
- * See the implementation of AirplayViewManager.m in the ios
- * codebase.
- */
 const Airplay = () => {
   const listenerRef = useRef<EmitterSubscription | null>(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
-    // On mount, we start scanning the network for airplay devices
-    // and listen for changes to `deviceConnected`
     AirplayEvent.startScan()
     listenerRef.current = airplayEventListener.addListener(
       'deviceConnected',
@@ -58,11 +44,6 @@ const Airplay = () => {
             })
           )
         } else {
-          // Tag the disconnect with method:'airplay' so the reducer only
-          // clears state if AirPlay was the active method. This prevents the
-          // listener (which fires on any audio route change, including the
-          // one Chromecast triggers when it takes over) from clobbering
-          // chromecast state.
           dispatch(setIsCasting({ isCasting: false, method: 'airplay' }))
         }
       }

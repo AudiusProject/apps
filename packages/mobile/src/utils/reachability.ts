@@ -17,12 +17,10 @@ export const checkNetInfoReachability = (netInfo: NetInfoState | null) => {
   return !!isInternetReachable
 }
 
-// Check that a response from REACHABILITY_URL is valid
 const isResponseValid = (response: Response | undefined) =>
   response && response.ok
 
 export const pingTest = async () => {
-  // If there's no reachability url available, consider ourselves reachable
   if (!REACHABILITY_URL) {
     console.warn('No reachability url provided')
     return true
@@ -46,26 +44,21 @@ export const pingTest = async () => {
 const updateReachability = async (netInfoState: NetInfoState) => {
   const newValue = checkNetInfoReachability(netInfoState)
   if (!newValue) {
-    // Don't trust offline signal while app is not in focus
-    // We check on refocus
     const appState = AppState.currentState
     if (appState !== 'active') return
 
-    // Perform our own reachability test to be extra sure we're offline
     const reachable = await pingTest()
     if (!reachable) {
       setUnreachable(true)
     }
     dispatch(setCurrentNetworkType({ currentNetworkType: netInfoState.type }))
   } else {
-    // Supercede the setUnreachable debounce if necessary
     setUnreachable(false)
     dispatch(reachabilityActions.setReachable())
     dispatch(setCurrentNetworkType({ currentNetworkType: netInfoState.type }))
   }
 }
 
-/** Debounce calls only for reachable -> unreachable */
 const setUnreachable = debounce(
   (isUnreachable: boolean) => {
     if (isUnreachable) {
@@ -82,7 +75,6 @@ export const forceRefreshConnectivity = async () => {
   updateReachability(updatedNetInfoState)
 }
 
-/** Called on first app render */
 export const subscribeToNetworkStatusUpdates = () => {
   NetInfo.addEventListener(updateReachability)
 }

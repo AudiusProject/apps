@@ -21,10 +21,6 @@ const IOS = 'ios'
 const ANDROID = 'android'
 const DEVICE_TYPES = new Set([IOS, ANDROID])
 
-/**
- * Checks if a browser Push API subscription is valid for notifications
- * @params {Object} subscription
- */
 const isValidBrowserSubscription = (subscription) => {
   return (
     subscription &&
@@ -36,9 +32,6 @@ const isValidBrowserSubscription = (subscription) => {
 }
 
 module.exports = function (app) {
-  /**
-   * Get the settings for mobile push notifications for a user
-   */
   app.get(
     '/push_notifications/settings',
     authMiddleware,
@@ -65,10 +58,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Create or update mobile push notification settings
-   * POST body contains {userId, settings: {favorites, milestonesAndAchievements, reposts, announcements, followers}}
-   */
   app.post(
     '/push_notifications/settings',
     authMiddleware,
@@ -80,7 +69,6 @@ module.exports = function (app) {
         return errorResponseBadRequest(`Did not pass in a valid userId`)
 
       try {
-        // pseudo-upsert without sequlize magic
         const userSettings =
           await models.UserNotificationMobileSettings.findOne({
             where: { userId }
@@ -107,10 +95,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Register a device token
-   * POST body contains {deviceToken: <string>, deviceType: ios/android/safari }
-   */
   app.post(
     '/push_notifications/device_token',
     authMiddleware,
@@ -130,7 +114,6 @@ module.exports = function (app) {
       }
 
       try {
-        // Build the aws sns platform params based on device type
         let params = { Token: deviceToken }
         if (deviceType === IOS) params = { ...iOSSNSParams, ...params }
         else if (deviceType === ANDROID)
@@ -157,10 +140,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Remove a device token from the device token table
-   * POST body contains {deviceToken}
-   */
   app.post(
     '/push_notifications/device_token/deregister',
     authMiddleware,
@@ -176,7 +155,6 @@ module.exports = function (app) {
 
       let tokenDeleted = false
       try {
-        // delete device token
         const tokenObj = await models.NotificationDeviceToken.findOne({
           where: {
             deviceToken,
@@ -185,7 +163,6 @@ module.exports = function (app) {
         })
 
         if (tokenObj) {
-          // delete the endpoint from AWS SNS
           if (tokenObj.awsARN)
             await deleteEndpoint({ EndpointArn: tokenObj.awsARN })
           await tokenObj.destroy()
@@ -206,10 +183,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Checks if a device token/type exists for a userId
-   * Get query must include {deviceToken: <string>, deviceType: ios/android/safari }
-   */
   app.get(
     '/push_notifications/device_token/enabled',
     authMiddleware,
@@ -251,9 +224,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Get the settings for browser push notifications for a user
-   */
   app.get(
     '/push_notifications/browser/settings',
     authMiddleware,
@@ -281,10 +251,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * Create or update browser push notification settings
-   * POST body contains {userId, settings: {favorites, milestonesAndAchievements, reposts, followers}}
-   */
   app.post(
     '/push_notifications/browser/settings',
     authMiddleware,
@@ -315,9 +281,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Returns if a user browser subscription exists and is enabled
-   */
   app.get(
     '/push_notifications/browser/enabled',
     authMiddleware,
@@ -348,9 +311,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Creates/Updates a user browser notification bscription exists
-   */
   app.post(
     '/push_notifications/browser/register',
     authMiddleware,
@@ -378,9 +338,6 @@ module.exports = function (app) {
     })
   )
 
-  /*
-   * Deletes the browser notification subscription.
-   */
   app.post(
     '/push_notifications/browser/deregister',
     handleResponse(async (req, res, next) => {

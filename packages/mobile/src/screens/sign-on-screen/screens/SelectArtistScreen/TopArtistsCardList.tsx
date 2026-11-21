@@ -47,7 +47,6 @@ export const TopArtistsCardList = (props: Props) => {
       )}
       numColumns={2}
       isCollapsible
-      // TODO: Figure out sticky header and footers
       ListFooterComponent={<Box h={148} />}
       LoadingCardComponent={FollowArtistTileSkeleton}
     />

@@ -61,7 +61,6 @@ const getComputedOrigins = (
     return horizontal
   }
 
-  // Avoid mutating caller-provided origin objects across opens.
   const computedAnchorOrigin = { ...anchorOrigin }
   const computedTransformOrigin = { ...transformOrigin }
 
@@ -78,7 +77,6 @@ const getComputedOrigins = (
     containerHeight = portalRect.height + portalRect.y - CONTAINER_INSET_PADDING
   }
 
-  // Get new wrapper position
   const anchorTranslation = getOriginTranslation(
     computedAnchorOrigin,
     anchorRect
@@ -90,14 +88,11 @@ const getComputedOrigins = (
   const wrapperX = anchorRect.x + anchorTranslation.x - wrapperTranslation.x
   const wrapperY = anchorRect.y + anchorTranslation.y - wrapperTranslation.y
 
-  // Check bounds of the wrapper in new position are inside container
   const overflowRight = wrapperX + wrapperRect.width > containerWidth
   const overflowLeft = wrapperX < 0
   const overflowBottom = wrapperY + wrapperRect.height > containerHeight
   const overflowTop = wrapperY < 0
 
-  // On horizontal overflow, mirror both origins so the popup flips direction
-  // while remaining aligned to the trigger edge.
   if (overflowRight !== overflowLeft) {
     computedAnchorOrigin.horizontal = flipHorizontalOrigin(
       computedAnchorOrigin.horizontal
@@ -230,8 +225,6 @@ export const PopupInternal = forwardRef<
   } = props
   const { spring, shadows } = useTheme()
 
-  // Refs (e.g. mainContentRef.current) are often null on first render; default
-  // only applies to undefined, so null must fall back to document.body.
   const portalLocation: HTMLElement =
     rawPortalLocation != null ? rawPortalLocation : document.body
 
@@ -382,10 +375,8 @@ export const PopupInternal = forwardRef<
     ]
   )
 
-  // On visible, set the position
   useEffect(() => {
     if ((isVisible && !previousIsVisible) || wrapperSizeChange) {
-      // Add a small delay to ensure content is rendered
       requestAnimationFrame(() => updatePosition(true))
     }
   }, [
@@ -402,7 +393,6 @@ export const PopupInternal = forwardRef<
     wrapperSizeChange
   ])
 
-  // Set up scroll listeners
   useEffect(() => {
     if (isVisible && anchorRef.current) {
       const scrollParent = getScrollParent(anchorRef.current)
@@ -427,12 +417,9 @@ export const PopupInternal = forwardRef<
       }
 
       const onScroll = () => {
-        // For non-body portals the popup naturally scrolls with content;
-        // only body portals need active repositioning.
         schedule(isBodyPortal)
       }
       const onResize = () => {
-        // Keep the popup aligned on viewport changes without reflipping origins.
         schedule(true)
       }
 
@@ -457,7 +444,6 @@ export const PopupInternal = forwardRef<
     updatePosition
   ])
 
-  // Set up key listeners
   useEffect(() => {
     if (isVisible) {
       const escapeListener = (e: KeyboardEvent) => {

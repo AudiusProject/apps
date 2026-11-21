@@ -15,29 +15,17 @@ const messages = {
 }
 
 type ChallengeRewardsLayoutProps = {
-  /** The description component or content */
   description: ReactNode
-  /** Optional additional description */
   optionalDescription?: string
-  /** The amount of $AUDIO that is rewarded */
   amount?: number | null
-  /** The reward subtext (e.g. "$AUDIO") */
   rewardSubtext?: string
-  /** Whether to show the progress bar */
   showProgressBar?: boolean
-  /** Current progress value */
   progressValue?: number | null
-  /** Maximum progress value */
   progressMax?: number | null
-  /** Status label component */
   statusLabel: ReactNode
-  /** Additional content to render */
   additionalContent?: ReactNode
-  /** Error content to display */
   errorContent?: ReactNode
-  /** The claim button or other action component */
   actions: ReactNode
-  /** Whether this is a cooldown challenge */
   isCooldownChallenge?: boolean
 }
 

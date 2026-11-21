@@ -39,10 +39,7 @@ export const BaseButton = forwardRef<HTMLButtonElement, BaseButtonProps>(
     )
 
     const getAriaLabel = () => {
-      // always default to manual aria-label prop if provided
       if (ariaLabelProp) return ariaLabelProp
-      // We use the children prop as the aria-label if the text becomes hidden
-      // and no aria-label was provided to keep the button accessible.
       if (isTextHidden && typeof children === 'string') return children
       return undefined
     }

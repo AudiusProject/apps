@@ -139,7 +139,6 @@ export const FanClubDetailsDrawer = () => {
   const showLockerStats = !isAudio && hasGraduated && !!locker
   const ticker = fanClub.ticker ? `$${fanClub.ticker}` : ''
 
-  // Market data
   const totalSupply = isAudio
     ? coingeckoResponse?.market_data?.total_supply
     : fanClub.totalSupply

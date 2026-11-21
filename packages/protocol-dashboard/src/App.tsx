@@ -71,7 +71,6 @@ const NavigateWithParams = ({ to, ...rest }: NavigateWithParamsParams) => {
 }
 
 const App = () => {
-  //  If the client fails, set it to the backup client
   const [apolloClient, setApolloClient] = useState(client)
   const [willReload, setWillReload] = useState(false)
   const { selectedNetworkId } = useWeb3ModalState()

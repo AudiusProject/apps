@@ -21,7 +21,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
   scrollableRef,
   scrollableContentOffsetY
 ) => {
-  // hooks
   const {
     animatedSheetState,
     animatedScrollableState,
@@ -36,10 +35,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
     useCallback(
       ({ contentOffset: { y } }, context) => {
         'worklet'
-        /**
-         * if sheet position is extended or fill parent, then we reset
-         * `shouldLockInitialPosition` value to false.
-         */
         if (
           animatedSheetState.value === SHEET_STATE.EXTENDED ||
           animatedSheetState.value === SHEET_STATE.FILL_PARENT
@@ -52,11 +47,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           detents !== undefined &&
           detents.some((v) => animatedPosition.value === v)
 
-        /**
-         * NOTE: this is the change to the default hook.
-         * If the drawer is not at a a snap point or the scrollable is scrolled upwards,
-         * lock the scrolling
-         */
         if (!atSnapPoint || y < 0) {
           const lockPosition = 0
 
@@ -88,10 +78,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           contentOffsetY: y
         }))
 
-        /**
-         * if sheet position not extended or fill parent and the scrollable position
-         * not at the top, then we should lock the initial scrollable position.
-         */
         if (
           animatedSheetState.value !== SHEET_STATE.EXTENDED &&
           animatedSheetState.value !== SHEET_STATE.FILL_PARENT &&
@@ -113,11 +99,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           detents !== undefined &&
           detents.some((v) => animatedPosition.value === v)
 
-        /**
-         * NOTE: this is the change to the default hook.
-         * If the drawer is not at a a snap point or the scrollable is scrolled upwards,
-         * lock the scrolling
-         */
         if (!atSnapPoint || y < 0) {
           const lockPosition = context.shouldLockInitialPosition
             ? (context.initialContentOffsetY ?? 0)
@@ -153,11 +134,6 @@ export const useScrollEventsHandlers: ScrollEventsHandlersHookType = (
           detents !== undefined &&
           detents.some((v) => animatedPosition.value === v)
 
-        /**
-         * NOTE: this is the change to the default hook.
-         * If the drawer is not at a a snap point or the scrollable is scrolled upwards,
-         * lock the scrolling
-         */
         if (y < 0 || !atSnapPoint) {
           const lockPosition = context.shouldLockInitialPosition
             ? (context.initialContentOffsetY ?? 0)

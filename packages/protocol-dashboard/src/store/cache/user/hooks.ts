@@ -50,7 +50,6 @@ type UseUsersProp = {
   filter?: 'isOperator' | 'isDelegator'
 }
 
-// -------------------------------- Selectors  --------------------------------
 export const getStatus = (state: AppState) => state.cache.user.status
 export const getUser = (wallet: Address) => (state: AppState) =>
   state.cache.user.accounts[wallet]
@@ -93,8 +92,6 @@ export const getUsers =
 
     return serviceProviders
   }
-
-// -------------------------------- Helpers  --------------------------------
 
 const getUserMetadata = async (wallet: Address, aud: Audius): Promise<User> => {
   const audToken = await aud.AudiusToken.balanceOf(wallet)
@@ -160,7 +157,6 @@ const getServiceProviderMetadata = async (
     await aud.Delegate.getMinDelegationAmount()
   const spMinDelegationAmount =
     await aud.Delegate.getSPMinDelegationAmount(wallet)
-  // Prefer service provider min delegation amount if provided and greater than protocol wide amount
   const minDelegationAmount = spMinDelegationAmount.gt(
     protocolMinDelegationAmount
   )
@@ -220,9 +216,6 @@ const getDelegatorAmounts = async (
   return delegatorAmounts
 }
 
-// -------------------------------- Thunk Actions  --------------------------------
-
-// Async function to get
 function fetchUsers(): ThunkAction<void, AppState, Audius, Action<string>> {
   return async (dispatch, getState, aud) => {
     dispatch(setLoading())
@@ -254,7 +247,6 @@ function fetchUsers(): ThunkAction<void, AppState, Audius, Action<string>> {
       })
     )
 
-    // Get all delegators that are not service operators
     let delegators = Object.keys(users).reduce(
       (delgators: string[], operatorWallet) => {
         const operator = users[operatorWallet]
@@ -284,7 +276,6 @@ function fetchUsers(): ThunkAction<void, AppState, Audius, Action<string>> {
   }
 }
 
-// Async function to get
 export function fetchUser(
   wallet: Address,
   setStatus?: (status: Status) => void
@@ -331,7 +322,6 @@ export function fetchUserProfile(
   }
 }
 
-// -------------------------------- Hooks  --------------------------------
 export const useUsers = ({ limit, sortBy, filter }: UseUsersProp = {}) => {
   const status = useSelector(getStatus)
   const users = useSelector(getUsers({ limit, sortBy, filter }))
@@ -433,7 +423,6 @@ export const useTotalDelegates = ({ wallet }: UseTotalDelegatesProps) => {
   return { status, totalDelegates }
 }
 
-/** Returns the total amount delegated inbound to an SP */
 export const useActiveInboundDelegation = ({ wallet }: { wallet: Address }) => {
   const { status, user } = useUser({ wallet })
   if (status !== Status.Success || !user) {
@@ -450,9 +439,6 @@ export const useActiveInboundDelegation = ({ wallet }: { wallet: Address }) => {
   return { status, amount: totalInboundDelegation }
 }
 
-/**
- * Get the amount the signed in user delegates to the wallet address
- */
 type UseUserDelegates = { wallet: Address }
 export const useUserDelegates = ({ wallet }: UseUserDelegates) => {
   const { status, user } = useAccountUser()

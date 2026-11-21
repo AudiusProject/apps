@@ -57,10 +57,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     ethContracts: Nullable<EthContracts>
   ) {
     super({
-      /**
-       * Gets the "current" expected service version as well as
-       * the list of registered providers from chain
-       */
       getServices: async ({ verbose = false } = {}) => {
         this.currentVersion = await ethContracts!.getCurrentVersion(
           DISCOVERY_SERVICE_NAME
@@ -82,16 +78,11 @@ export class DiscoveryProviderSelection extends ServiceSelection {
       config.unhealthyBlockDiff ?? DEFAULT_UNHEALTHY_BLOCK_DIFF
     this.localStorage = config.localStorage
 
-    // Whether or not we are running in `regressed` mode, meaning we were
-    // unable to select a discovery provider that was up-to-date. Clients may
-    // want to consider blocking writes.
     this._regressedMode = false
 
-    // List of valid past discovery provider versions registered on chain
     this.validVersions = null
   }
 
-  /** Retrieves a cached discovery provider from localstorage */
   async getCached() {
     if (this.localStorage) {
       try {
@@ -125,14 +116,12 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     return null
   }
 
-  /** Clears any cached discovery provider from localstorage */
   async clearCached() {
     if (this.localStorage) {
       await this.localStorage.removeItem(DISCOVERY_PROVIDER_TIMESTAMP)
     }
   }
 
-  /** Sets a cached discovery provider in localstorage */
   async setCached(endpoint: string) {
     if (this.localStorage) {
       await this.localStorage.setItem(
@@ -142,7 +131,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     }
   }
 
-  /** Allows the selection take a shortcut if there's a cached provider */
   override async shortcircuit() {
     return await this.getCached()
   }
@@ -159,19 +147,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     return endpoint
   }
 
-  /**
-   * Checks whether a given response is healthy:
-   * - Not behind in blocks
-   * - 200 response
-   * - Current version
-   *
-   * Other responses are collected in `this.backups` if
-   * - Behind by only a patch version
-   *
-   * @param response axios response
-   * @param urlMap health check urls mapped to their cannonical url
-   * e.g. https://discoveryprovider.audius.co/health_check => https://discoveryprovider.audius.co
-   */
   override isHealthy(response: AxiosResponse, urlMap: Record<string, string>) {
     const { status, data } = response
     const { block_difference: blockDiff, service, version, plays } = data.data
@@ -204,7 +179,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
           challengeLastEventAgeSec: data.challenge_last_event_age_sec
         })
       } catch (e) {
-        // Swallow errors -- this method should not throw generally
         console.error(e)
       }
     }
@@ -213,25 +187,20 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     if (service !== DISCOVERY_SERVICE_NAME) return false
     if (!semver.valid(version)) return false
 
-    // If this service is not at least the version on chain, reject
     if (!isVersionAtLeastSameMajorMinor(this.currentVersion, version)) {
       return false
     }
 
-    // If this service is behind, add it as a backup and reject
     if (semver.lt(version, this.currentVersion)) {
       this.addBackup(urlMap[response.config.url as string] as string, data.data)
       return false
     }
 
-    // If this service is an unhealthy block diff behind, add it as a backup and reject
     if (blockDiff > this.unhealthyBlockDiff) {
       this.addBackup(urlMap[response.config.url as string] as string, data.data)
       return false
     }
 
-    // If this service is an unhealthy slot diff behind on the plays table, add it
-    // as a backup and reject
     if (
       slotDiffPlays !== null &&
       this.unhealthySlotDiffPlays !== null &&
@@ -244,9 +213,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     return true
   }
 
-  /**
-   * Estabilishes that connection to discovery providers has regressed
-   */
   enterRegressedMode() {
     console.info('Entering regressed mode')
     this._regressedMode = true
@@ -268,12 +234,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     return this._regressedMode
   }
 
-  /**
-   * In the case of no "healthy" services, we resort to backups in the following order:
-   * 1. Pick the most recent (patch) version that's not behind
-   * 2. Pick the least behind provider that is a valid patch version and enter "regressed mode"
-   * 3. Pick `null`
-   */
   override async selectFromBackups() {
     const versions: string[] = []
     const blockDiffs: number[] = []
@@ -281,10 +241,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
     const versionMap: Record<string, string[]> = {}
     const blockDiffMap: Record<string, string[]> = {}
 
-    // Go backwards in time on chain and get the registered versions up to PREVIOUS_VERSIONS_TO_CHECK.
-    // Record those versions in a set and validate any backups against that set.
-    // TODO: Clean up this logic when we can validate a specific version rather
-    // than traversing backwards through all the versions
     if (!this.validVersions) {
       this.validVersions = [this.currentVersion]
       const numberOfVersions = await this.ethContracts.getNumberOfVersions(
@@ -297,17 +253,12 @@ export class DiscoveryProviderSelection extends ServiceSelection {
       ) {
         const pastServiceVersion = await this.ethContracts.getVersion(
           DISCOVERY_SERVICE_NAME,
-          // Exclude the latest version when querying older versions
-          // Latest index is numberOfVersions - 1, so 2nd oldest version starts at numberOfVersions - 2
           numberOfVersions - 2 - i
         )
         this.validVersions.push(pastServiceVersion)
       }
     }
 
-    // Go through each backup and create two keyed maps:
-    // { semver => [provider] }
-    // { blockdiff => [provider] }
     Object.keys(this.backups).forEach((backup) => {
       const { block_difference: blockDiff, version } = this.backups[
         backup
@@ -325,7 +276,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
           break
         }
       }
-      // Filter out any version that wasn't valid given what's registered on chain
       if (!isVersionOk) return
 
       versions.push(version)
@@ -344,10 +294,8 @@ export class DiscoveryProviderSelection extends ServiceSelection {
       }
     })
 
-    // Sort the versions by desc semver
     const sortedVersions = versions.sort(semver.rcompare)
 
-    // Select the closest version that's a healthy # of blocks behind
     let selected: string = ''
     for (const version of sortedVersions) {
       const endpoints = versionMap[version] as string[]
@@ -363,7 +311,6 @@ export class DiscoveryProviderSelection extends ServiceSelection {
       if (selected) return selected
     }
 
-    // Select the best block diff provider
     // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
     const bestBlockDiff = blockDiffs.sort()[0] as number
 

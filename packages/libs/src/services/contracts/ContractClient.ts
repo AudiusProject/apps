@@ -15,11 +15,6 @@ const METHOD_CALL_MAX_RETRIES = 5
 
 export type GetRegistryAddress = (key: string) => Promise<string>
 
-/*
- * Base class for instantiating contracts.
- * Performs a single init of the eth contract the first
- * time a method on the contract is invoked.
- */
 export class ContractClient {
   web3Manager: Web3Manager | EthWeb3Manager
   contractABI: ContractABI['abi']
@@ -48,22 +43,15 @@ export class ContractClient {
     this.getRegistryAddress = getRegistryAddress
     this.logger = logger
 
-    // Once initialized, contract address and contract are set up
-
-    // contractAddress: <entity manager POA>, <entity manager nethermind>
-    // this is backwards compatible so clients may pass in one address
-    // or both POA and nethermind
     const contractAddresses = contractAddress ? contractAddress.split(',') : []
     this._contractAddress = contractAddresses[0] ?? null
     this._nethermindContractAddress = contractAddresses[1] ?? null
     this._contract = null
 
-    // Initialization setup
     this._isInitialized = false
     this._isInitializing = false
     this._initAttempts = 0
 
-    // Initializing this.providerSelector for POA provider fallback logic
     if (
       this.web3Manager instanceof Web3Manager &&
       !this.web3Manager.web3Config.useExternalWeb3
@@ -76,12 +64,9 @@ export class ContractClient {
     }
   }
 
-  /** Inits the contract if necessary */
   async init() {
-    // No-op if we are already initted
     if (this._isInitialized) return
 
-    // If we are already initting, wait until we are initted and return
     if (this._isInitializing) {
       let interval
       await new Promise<void>((resolve, reject) => {
@@ -146,9 +131,6 @@ export class ContractClient {
     }
   }
 
-  /**
-   * Adds current provider into unhealthy set and selects the next healthy provider
-   */
   async selectNewEndpoint() {
     const currentProviderUrl = (
       this.web3Manager.getWeb3().currentProvider as HttpProvider
@@ -166,29 +148,20 @@ export class ContractClient {
       this.providerSelector?.clearBackups()
     }
 
-    // Reset _isInitializing to false to retry init logic and avoid the _isInitialzing check
     this._isInitializing = false
     await this.providerSelector?.select(this)
   }
 
-  /** Gets the contract address and ensures that the contract has initted. */
   async getAddress() {
     await this.init()
-    // calling init first ensures _contactAddress is present
     return this._contractAddress as string
   }
 
   async getNethermindAddress() {
     await this.init()
-    // calling init first ensures _contactAddress is present
     return this._nethermindContractAddress as string
   }
 
-  /**
-   * Gets a contract method and ensures that the contract has initted
-   * The contract can then be invoked with .call() or be passed to a sendTransaction.
-   * @param methodName the name of the contract method
-   */
   async getMethod(methodName: string, ...args: any[]) {
     await this.init()
     if (!this._contract || !(methodName in this._contract.methods)) {
@@ -200,7 +173,6 @@ export class ContractClient {
     }
     const method = await this._contract.methods[methodName](...args)
 
-    // Override method.call (chain reads) with built in retry logic
     const call = method.call
     method.call = async (...args: unknown[]) => {
       return await retry(
@@ -208,8 +180,6 @@ export class ContractClient {
           return call(...args)
         },
         {
-          // Retry function 5x by default
-          // 1st retry delay = 500ms, 2nd = 1500ms, 3rd...nth retry = 4000 ms (capped)
           minTimeout: 500,
           maxTimeout: 4000,
           factor: 3,
@@ -235,7 +205,6 @@ export class ContractClient {
 
   async getContract() {
     await this.init()
-    // init ensures _contract is set
     return this._contract as Contract
   }
 }

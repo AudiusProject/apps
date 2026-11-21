@@ -11,7 +11,6 @@ export const getCoinflowDeviceId = (): string => {
     return deviceId
   }
 
-  /* Bail early if native module isn't found */
   if (!nsureSDK) {
     console.warn('Native module NSureSDK not found')
     deviceId = ''

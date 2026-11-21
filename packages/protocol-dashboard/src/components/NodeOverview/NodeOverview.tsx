@@ -454,7 +454,7 @@ export function timeSince(date: Date) {
 }
 
 export function nanosToReadableDuration(nanos: number) {
-  const seconds = nanos / 1e9 // Convert nanoseconds to seconds
+  const seconds = nanos / 1e9
   return secondsToReadableDuration(seconds)
 }
 

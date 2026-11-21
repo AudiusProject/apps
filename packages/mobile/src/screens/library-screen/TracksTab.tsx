@@ -146,8 +146,6 @@ export const TracksTab = () => {
 
   const lineupStatus = savedTracksStatus
 
-  // Combine server-fetched ids with locally-added ones (optimistic favorites
-  // / reposts / purchases that haven't yet been included in the server page).
   const trackIds = useMemo(() => {
     const ids = new Set<ID>()
     fetchedTrackIds.forEach((id) => ids.add(id))
@@ -221,12 +219,8 @@ export const TracksTab = () => {
     fetchNextPage
   ])
 
-  // Read playback state at press time so play/pause/skip don't re-render the
-  // whole list
   const store = useStore<CommonState>()
 
-  // Matches legacy `saveTracksLineupActions.prefix` so AudioPlayer's
-  // source-based offline-download check keeps working.
   const playbackSource = 'SAVED_TRACKS'
   const playbackQueue: PlaybackTrack[] = useMemo(
     () =>
@@ -284,8 +278,6 @@ export const TracksTab = () => {
   const shouldShowFilterInput =
     trackUids.length > 0 || filterValue || (isPending && saveCount > 0)
 
-  // Banner and filter ride in the list header so they scroll away with the
-  // page header.
   const listHeader = (
     <>
       <OfflineContentBanner />
@@ -306,8 +298,6 @@ export const TracksTab = () => {
 
   const renderBody = () => {
     const isEmpty = filteredTrackUids.length === 0 && !isPending
-    // While filtering, keep the list (and its filter input) mounted with an
-    // empty state inside it, so the input doesn't lose focus mid-typing.
     if (isEmpty && !filterValue) {
       return (
         <View style={{ paddingTop: headerInset }}>

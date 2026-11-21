@@ -13,9 +13,6 @@ class NodeScore {
   }
 }
 
-/**
- * TypeScript equivalent of https://github.com/tysonmote/rendezvous/blob/be0258dbbd3d/rendezvous.go
- */
 export class RendezvousHash {
   private readonly nodes: NodeScore[] = []
 

@@ -162,8 +162,6 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
   let res = {}
 
   if (serviceType === 'discovery-node') {
-    // ----------Discovery health----------
-
     res = {
       diskGbUsed: health?.filesystem_used
         ? bytesToGb(health.filesystem_used)
@@ -182,17 +180,13 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
       otherErrors: health?.errors?.length ? health.errors : undefined
     }
   } else {
-    // ----------Content health----------
-
     const mediorumDiskUsed = bytesToGb(health.mediorumPathUsed)
     const mediorumDiskSize = bytesToGb(health.mediorumPathSize)
 
-    // Last "full" repair.go run (checks files that are not in the top R rendezvous)
     const lastCleanupSize = health.lastSuccessfulCleanup?.ContentSize
       ? bytesToGb(health.lastSuccessfulCleanup.ContentSize)
       : '?'
 
-    // Last repair.go run (only checks files for which this node is in the top R rendezvous)
     const lastRepairSize = health.lastSuccessfulRepair?.ContentSize
       ? bytesToGb(health.lastSuccessfulRepair.ContentSize)
       : '?'
@@ -200,13 +194,11 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
     let totalMediorumUsed: number | '?' = '?'
     if (health.blobStorePrefix === 'file') totalMediorumUsed = mediorumDiskUsed
     else {
-      // Use the last "full" repair.go run because it would've checked the most files
       if (typeof lastCleanupSize === 'number')
         totalMediorumUsed = lastCleanupSize
       else if (typeof lastRepairSize === 'number')
         totalMediorumUsed = lastRepairSize
 
-      // But it's possible the last normal repair.go run added more files
       if (lastRepairSize > lastCleanupSize) totalMediorumUsed = lastRepairSize
     }
 
@@ -221,7 +213,6 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
         ? totalMediorumSize
         : Math.max(totalMediorumSize, diskGbUsed)
 
-    // calculate healthy peers counts
     const now = new Date()
     const twoMinutesAgoDate = new Date(now.getTime() - 2 * 60 * 1000)
     let healthyPeers2m = 0

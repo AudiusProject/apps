@@ -1,8 +1,6 @@
 const assert = require('assert')
 const crypto = require('crypto')
 
-// Unit tests for email verification utilities.
-// These run without a database — pure logic only.
 const {
   TOKEN_TTL_MS,
   generateVerificationToken,
@@ -11,10 +9,6 @@ const {
 } = require('./emailVerification')
 
 const { isDisposableEmail, getEmailDomain } = require('./disposableEmail')
-
-// ---------------------------------------------------------------------------
-// emailVerification utils
-// ---------------------------------------------------------------------------
 
 describe('generateVerificationToken', () => {
   it('returns a 64-char hex string (32 bytes)', () => {
@@ -57,12 +51,10 @@ describe('hashToken', () => {
 describe('buildVerificationLink', () => {
   it('points to /email/verify on the identity service (not the frontend)', () => {
     const link = buildVerificationLink('mytoken')
-    // Must NOT be the frontend website host
     assert.ok(
       !link.startsWith('https://audius.co/verify-email'),
       `Link should not point to frontend: ${link}`
     )
-    // Must contain the identity service path
     assert.ok(
       link.includes('/email/verify?token='),
       `Link must include /email/verify: ${link}`
@@ -81,7 +73,6 @@ describe('buildVerificationLink', () => {
 
   it('uses identityServiceHost from config', () => {
     const link = buildVerificationLink('tok')
-    // The link must start with the identityServiceHost config value, not websiteHost
     assert.ok(
       link.startsWith('https://identityservice.audius.co') ||
         link.includes('/email/verify'),
@@ -95,10 +86,6 @@ describe('TOKEN_TTL_MS', () => {
     assert.strictEqual(TOKEN_TTL_MS, 24 * 60 * 60 * 1000)
   })
 })
-
-// ---------------------------------------------------------------------------
-// disposableEmail utils
-// ---------------------------------------------------------------------------
 
 describe('getEmailDomain', () => {
   it('extracts domain correctly', () => {
@@ -119,7 +106,6 @@ describe('getEmailDomain', () => {
 
 describe('isDisposableEmail', () => {
   it('rejects known disposable domains', () => {
-    // mailinator.com and guerrillamail.com are in most blocklists
     assert.strictEqual(isDisposableEmail('test@mailinator.com'), true)
     assert.strictEqual(isDisposableEmail('anon@guerrillamail.com'), true)
   })

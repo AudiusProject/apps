@@ -1,20 +1,14 @@
 /* globals Chart */
 
-// Custom draw function to allow for corner radius on bar charts
-// Stolen from
-// https://stackoverflow.com/questions/47186273/rounded-corners-on-chartjs-v-2-bar-charts-with-negative-values
 // @ts-ignore
 Chart.elements.Rectangle.prototype.draw = function () {
   const ctx = this._chart.ctx
   const vm = this._view
   let left, right, top, bottom, signX, signY, borderSkipped, radius
   let borderWidth = vm.borderWidth
-  // Set Radius Here
-  // If radius is large enough to cause drawing errors a max radius is imposed
   const cornerRadius = 2
 
   if (!vm.horizontal) {
-    // bar
     left = vm.x - vm.width / 2
     right = vm.x + vm.width / 2
     top = vm.y
@@ -23,7 +17,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
     signY = bottom > top ? 1 : -1
     borderSkipped = vm.borderSkipped || 'bottom'
   } else {
-    // horizontal bar
     left = vm.base
     right = vm.x
     top = vm.y - vm.height / 2
@@ -33,14 +26,10 @@ Chart.elements.Rectangle.prototype.draw = function () {
     borderSkipped = vm.borderSkipped || 'left'
   }
 
-  // Canvas doesn't allow us to stroke inside the width so we can
-  // adjust the sizes to fit if we're setting a stroke on the line
   if (borderWidth) {
-    // borderWidth shold be less than bar width and bar height.
     const barSize = Math.min(Math.abs(left - right), Math.abs(top - bottom))
     borderWidth = borderWidth > barSize ? barSize : borderWidth
     const halfStroke = borderWidth / 2
-    // Adjust borderWidth when bar top position is near vm.base(zero).
     const borderLeft =
       left + (borderSkipped !== 'left' ? halfStroke * signX : 0)
     const borderRight =
@@ -48,12 +37,10 @@ Chart.elements.Rectangle.prototype.draw = function () {
     const borderTop = top + (borderSkipped !== 'top' ? halfStroke * signY : 0)
     const borderBottom =
       bottom + (borderSkipped !== 'bottom' ? -halfStroke * signY : 0)
-    // not become a vertical line?
     if (borderLeft !== borderRight) {
       top = borderTop
       bottom = borderBottom
     }
-    // not become a horizontal line?
     if (borderTop !== borderBottom) {
       left = borderLeft
       right = borderRight
@@ -65,9 +52,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
   ctx.strokeStyle = vm.borderColor
   ctx.lineWidth = borderWidth
 
-  // Corner points, from bottom-left to bottom-right clockwise
-  // | 1 2 |
-  // | 0 3 |
   const corners = [
     [left, bottom],
     [left, top],
@@ -75,7 +59,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
     [right, bottom]
   ]
 
-  // Find first (starting) corner with fallback to 'bottom'
   const borders = ['bottom', 'left', 'top', 'right']
   let startCorner = borders.indexOf(borderSkipped, 0)
   if (startCorner === -1) {
@@ -86,7 +69,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
     return corners[(startCorner + index) % 4]
   }
 
-  // Draw rectangle from 'startCorner'
   let corner = cornerAt(0)
   let width, height, x, y, nextCornerId
   let x_tl, x_tr, y_tl, y_tr
@@ -107,7 +89,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
 
     radius = cornerRadius
 
-    // Fix radius being too large
     if (radius > Math.abs(height) / 2) {
       radius = Math.floor(Math.abs(height) / 2)
     }
@@ -116,7 +97,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
     }
 
     if (height < 0) {
-      // Negative values in a standard bar chart
       x_tl = x
       x_tr = x + width
       y_tl = y + height
@@ -127,7 +107,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
       y_bl = y
       y_br = y
 
-      // Draw
       ctx.moveTo(x_bl + radius, y_bl)
       ctx.lineTo(x_br - radius, y_br)
       ctx.quadraticCurveTo(x_br, y_br, x_br, y_br - radius)
@@ -138,7 +117,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
       ctx.lineTo(x_bl, y_bl - radius)
       ctx.quadraticCurveTo(x_bl, y_bl, x_bl + radius, y_bl)
     } else if (width < 0) {
-      // Negative values in a horizontal bar chart
       x_tl = x + width
       x_tr = x
       y_tl = y
@@ -149,7 +127,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
       y_bl = y + height
       y_br = y + height
 
-      // Draw
       ctx.moveTo(x_bl + radius, y_bl)
       ctx.lineTo(x_br - radius, y_br)
       ctx.quadraticCurveTo(x_br, y_br, x_br, y_br - radius)
@@ -160,7 +137,6 @@ Chart.elements.Rectangle.prototype.draw = function () {
       ctx.lineTo(x_bl, y_bl - radius)
       ctx.quadraticCurveTo(x_bl, y_bl, x_bl + radius, y_bl)
     } else {
-      // Positive Value
       ctx.moveTo(x + radius, y)
       ctx.lineTo(x + width - radius, y)
       ctx.quadraticCurveTo(x + width, y, x + width, y + radius)

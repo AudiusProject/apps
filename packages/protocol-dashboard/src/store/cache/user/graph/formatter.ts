@@ -58,8 +58,6 @@ export const formatUser = async (
   )
     return formattedUser
 
-  // Note: We must make a contract call to check "validBounds" because that value is not
-  // updated with the graph
   const serviceProvider: ServiceProvider =
     await aud.ServiceProviderClient.getServiceProviderDetails(userWallet)
 
@@ -67,7 +65,6 @@ export const formatUser = async (
     await aud.Delegate.getMinDelegationAmount()
   const spMinDelegationAmount =
     await aud.Delegate.getSPMinDelegationAmount(userWallet)
-  // Prefer service provider min delegation amount if provided and greater than protocol wide amount
   const minDelegationAmount = spMinDelegationAmount.gt(
     protocolMinDelegationAmount
   )

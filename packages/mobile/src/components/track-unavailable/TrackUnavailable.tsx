@@ -13,7 +13,6 @@ const messages = {
   buttonText: 'Take Me Back To The Music'
 }
 
-/** Shown in place of a track the API reports as non-streamable. */
 export const TrackUnavailable = () => {
   const linkTo = useLinkTo()
 

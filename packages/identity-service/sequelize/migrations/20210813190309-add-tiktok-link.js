@@ -1,8 +1,5 @@
 'use strict'
 
-/**
- * Adds a 'tikTok' field to SocialHandles
- */
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {

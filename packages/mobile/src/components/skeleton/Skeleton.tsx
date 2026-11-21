@@ -10,11 +10,8 @@ import { useThemeColors } from 'app/utils/theme'
 const ANIMATION_DURATION_MS = 1500
 
 type SkeletonProps = {
-  // Width (css string) of the skeleton to display. Default 100%.
   width?: DimensionValue
-  // Height (css string) of the skeleton to display. Default 100%.
   height?: DimensionValue
-  // Optional style to pass in and override styles with
   style?: StyleProp<ViewStyle>
   noShimmer?: boolean
 }

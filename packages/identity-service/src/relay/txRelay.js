@@ -12,8 +12,7 @@ const { libs } = require('@audius/sdk-legacy/dist/libs')
 const AudiusABIDecoder = libs.AudiusABIDecoder
 const { primaryWeb3, nethermindWeb3, secondaryWeb3 } = require('../web3')
 
-// L2 relayerWallets
-const relayerWallets = config.get('relayerWallets') // { publicKey, privateKey }
+const relayerWallets = config.get('relayerWallets')
 
 const ENVIRONMENT = config.get('environment')
 const MIN_GAS_PRICE = config.get('minGasPrice')
@@ -51,7 +50,6 @@ async function getGasPrice(logger, web3) {
     gasPrice = GANACHE_GAS_PRICE
   } else if (gasPrice === 0) {
     logger.info('txRelay - gas price was zero', gasPrice)
-    // If the gas is zero, the txn will likely never get mined.
     gasPrice = MIN_GAS_PRICE
   } else if (gasPrice < MIN_GAS_PRICE) {
     logger.info('txRelay - gas price was less than MIN_GAS_PRICE', gasPrice)
@@ -62,7 +60,6 @@ async function getGasPrice(logger, web3) {
   return gasPrice
 }
 
-/** Attempt to send transaction to primary web3 provider, if that fails try secondary */
 const sendTransaction = async (
   req,
   resetNonce = false,
@@ -99,7 +96,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
   const redis = req.app.get('redis')
   const startTransactionLatency = new Date().getTime()
   const reporter = new RelayReporter({
-    // report analytics everywhere except local
     shouldReportAnalytics: config.get('environment') !== 'development'
   })
 
@@ -117,8 +113,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
     senderAddress
   })
 
-  // SEND to both nethermind and POA
-  // sendToNethermindOnly indicates relay should respond with that receipt
   const currentBlock = await web3.eth.getBlockNumber()
   const finalPOABlock = config.get('finalPOABlock')
   let sendToNethermindOnly = finalPOABlock
@@ -130,7 +124,7 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
   }
 
   const contractName =
-    contractRegistryKey.charAt(0).toUpperCase() + contractRegistryKey.slice(1) // uppercase the first letter
+    contractRegistryKey.charAt(0).toUpperCase() + contractRegistryKey.slice(1)
   const decodedABI = AudiusABIDecoder.decodeMethod(contractName, encodedABI)
 
   const nonce = decodedABI.params.find((param) => param.name === '_nonce').value
@@ -141,24 +135,21 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
 
   const existingTx = await models.Transaction.findOne({
     where: {
-      encodedNonceAndSignature: hashedData // this should always be unique
+      encodedNonceAndSignature: hashedData
     }
   })
 
-  // if this transaction has already been submitted before and succeeded, send this receipt
   if (existingTx) {
     return existingTx.receipt
   }
 
   filterReplicaSetUpdates(decodedABI, senderAddress)
 
-  // will be set later. necessary for code outside scope of try block
   let txReceipt
   let txParams
   let redisLogParams
   let wallet = await selectWallet()
 
-  // If all wallets are currently in use, keep iterating until a wallet is freed up
   while (!wallet) {
     await delay(200)
     wallet = await selectWallet()
@@ -178,7 +169,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
     `L2 - txRelay - selected wallet ${wallet.publicKey} for sender ${senderAddress}`
   )
 
-  // relay stats object that gets filled out as relay occurs
   const relayStats = {
     poa: {
       isRecipient: false,
@@ -195,9 +185,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
       `L2 - txRelay - selected wallet ${wallet.publicKey} for sender ${senderAddress}`
     )
 
-    // send to POA
-    // PROD doesn't have sendToNethermindOnly and should default to POA
-    // STAGE defaults to nethermind but can send to POA when it has both addresses
     const relayPromises = []
 
     if (!sendToNethermindOnly) {
@@ -215,9 +202,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
       )
     }
 
-    // send to nethermind
-    // PROD doesn't have sendToNethermindOnly and only sends to nethermind when it has both addresses
-    // STAGE defaults to nethermind
     if (sendToNethermindOnly) {
       if (!nethermindContractAddress) {
         nethermindContractAddress = contractAddress
@@ -242,7 +226,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
     if (relayTxs.length === 1) {
       txParams = relayTxs[0].value.txParams
       txReceipt = relayTxs[0].value.receipt
-      // infer tx type and populate time
       if (relayStats.nethermind.isRecipient) {
         relayStats.nethermind.txSubmissionTime =
           relayTxs[0].value.timeToComplete
@@ -281,7 +264,6 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
         txParams = poaTx.txParams
         txReceipt = poaTx.receipt
       }
-      // populate both, we want stats if relay went to both chains
       relayStats.nethermind.txSubmissionTime = nethermindTx.timeToComplete
       relayStats.poa.txSubmissionTime = poaTx.timeToComplete
       reporter.reportSuccess({
@@ -381,20 +363,11 @@ const sendTransactionInternal = async (req, web3, txProps, reqBodySHA) => {
   return txReceipt
 }
 
-/**
- * Rate limit replica set reconfiguration transactions
- * the available wallets using mod
- *
- * A reconfiguration (as opposed to a first time selection) will have an
- * _oldPrimaryId value of "0"
- */
-
 const filterReplicaSetUpdates = (decodedABI, senderAddress) => {
   let isReplicaSetTransaction = false
   let isFirstReplicaSetConfig = false
 
   if (decodedABI.name === 'updateReplicaSet') {
-    // TODO remove legacy replica set updates
     isFirstReplicaSetConfig = decodedABI.params.find(
       (param) => param.name === '_oldPrimaryId' && param.value === '0'
     )
@@ -427,17 +400,9 @@ const filterReplicaSetUpdates = (decodedABI, senderAddress) => {
   }
 }
 
-/**
- * Randomly select a wallet with a random offset. Circularly iterate through all
- * the available wallets using mod
- *
- * e.g. If there are 5 wallets available and the offset is at 2, iterate
- * in the order 2, 3, 4, 0, 1, and use const count to iterate through
- * all the available number of wallets
- */
 const selectWallet = async () => {
-  let i = Math.floor(Math.random() * relayerWallets.length) // random offset
-  let count = 0 // num wallets to iterate through
+  let i = Math.floor(Math.random() * relayerWallets.length)
+  let count = 0
 
   while (count++ < relayerWallets.length) {
     const wallet = relayerWallets[i++ % relayerWallets.length]
@@ -450,9 +415,6 @@ const selectWallet = async () => {
   }
 }
 
-/**
- * Fund L2 wallets as necessary to facilitate multiple relayers
- */
 const fundRelayerIfEmpty = async () => {
   const minimumBalance = primaryWeb3.utils.toWei(
     config.get('minimumBalance').toString(),
@@ -472,7 +434,7 @@ const fundRelayerIfEmpty = async () => {
         `L2 - Relay account below minimum expected. Attempting to fund ${wallet.publicKey}`
       )
       if (ENVIRONMENT === 'development') {
-        const account = (await primaryWeb3.eth.getAccounts())[0] // local acc is unlocked and does not need private key
+        const account = (await primaryWeb3.eth.getAccounts())[0]
         logger.info(
           `L2 - transferring funds [${minimumBalance}] from ${account} to wallet ${wallet.publicKey}`
         )
@@ -512,7 +474,6 @@ const fundRelayerIfEmpty = async () => {
   }
 }
 
-// Send transaction using provided web3 object
 const createAndSendTransaction = async (
   sender,
   receiverAddress,
@@ -565,9 +526,6 @@ const createAndSendTransaction = async (
   return { receipt, txParams, timeToComplete: took }
 }
 
-//
-// Relay txn to nethermind
-//
 async function relayToNethermindWithTimeout(
   encodedABI,
   contractAddress,
@@ -591,7 +549,6 @@ async function relayToNethermind(encodedABI, contractAddress, gasLimit) {
     `txRelay - relayToNethermind input params: ${encodedABI} ${contractAddress} ${gasLimit}`
   )
 
-  // generate a new private key per transaction (gas is free)
   const accounts = new Accounts(config.get('nethermindWeb3Provider'))
 
   const wallet = accounts.create()

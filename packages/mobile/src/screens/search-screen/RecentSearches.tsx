@@ -36,10 +36,8 @@ export const RecentSearches = (props: RecentSearchesProps) => {
   const dispatch = useDispatch()
   const { InViewWrapper } = useDeferredElement()
 
-  // Get state from context
   const [category] = useSearchCategory()
 
-  // Get and filter search history
   const history = useSelector(getSearchHistory)
   const categoryKind: Kind | null = category
     ? itemKindByCategory[category]

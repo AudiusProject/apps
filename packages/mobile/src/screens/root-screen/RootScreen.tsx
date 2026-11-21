@@ -50,10 +50,8 @@ const { FEED_PAGE } = route
 
 const Stack = createNativeStackNavigator()
 
-// Upper bound in case an interaction handle never clears
 const STARTUP_DEFER_MAX_MS = 3000
 
-/** Runs `fn` once startup interactions settle. Returns a cancel function. */
 const runAfterStartup = (fn: () => void) => {
   let done = false
   const run = () => {
@@ -82,17 +80,9 @@ export type RootScreenParamList = {
   OAuthScreen: { search: string }
 }
 
-/**
- * The top level navigator. Switches between sign on screens and main tab navigator
- * based on if the user is authed
- */
 export const RootScreen = () => {
   const { updateRequired } = useUpdateRequired()
   const dispatch = useDispatch()
-  // Keep the native splash up until the query-client cache is fully restored
-  // from AsyncStorage. The skeleton→real content swap happens under the splash,
-  // so the user never sees the brief layout settling that caused a visible
-  // "slide down/up" glitch on content load.
   const isRestoring = useIsRestoring()
   usePrefetchTrendingImages()
   const { data: accountStatus } = useAccountStatus()
@@ -121,18 +111,13 @@ export const RootScreen = () => {
   useActivityPing()
   useManagedAccountAccessCheck()
 
-  // Reset the player on first mount so a crash doesn't leak previous playback
-  // state into the next session. PAY-1412.
   useEffectOnce(() => {
     dispatch(reset({ shouldAutoplay: false }))
   })
 
-  // Connect to chats once the server confirms the account.
   useEffect(() => {
     let cancelConnect: (() => void) | undefined
     if (accountStatus === Status.SUCCESS) {
-      // The socket and chat list aren't needed for the first screen; the
-      // unread badge comes from fetchUnreadMessagesCount right away.
       cancelConnect = runAfterStartup(() => {
         dispatch(connect())
         dispatch(fetchMoreChats())
@@ -152,13 +137,11 @@ export const RootScreen = () => {
   useEffect(() => {
     if (showHomeStack && startedSignUp && !welcomeModalShown) {
       openWelcomeDrawer()
-      // On iOS this will auto-navigate when we un-render sign up but on Android we have to navigate intentionally
       if (isAndroid && navigate) {
         navigate('HomeStack')
       }
     }
     if (showHomeStack && routeOnCompletion && routeOnCompletion !== FEED_PAGE) {
-      // Route to the original deep link after user signs up
       linkTo(routeOnCompletion)
     }
   }, [
@@ -193,7 +176,6 @@ export const RootScreen = () => {
           <Stack.Screen
             name='HomeStack'
             component={AppDrawerScreen}
-            // animation: none here is a workaround to prevent "white screen of death" on Android
             options={isAndroid ? { animation: 'none' } : undefined}
           />
         ) : (

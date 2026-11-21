@@ -88,7 +88,6 @@ export const ChallengeRewardNotification = (
     }
   }, [challengeId, amount, listenStreak])
 
-  // Skip deprecated trending-playlist (tp) notifications (legacy API may still send)
   const id = String(challengeId)
   if (id === 'tp' || id === 'trending-playlist') {
     return null

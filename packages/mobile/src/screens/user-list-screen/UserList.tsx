@@ -15,7 +15,6 @@ import { UserListItemSkeleton } from './UserListItemSkeleton'
 import { UserListLargeTitleContext } from './UserListScreen'
 import { USER_LIST_AVATAR_SIZE } from './constants'
 
-/** Hairline that starts under the name, past the avatar. */
 const InsetSeparator = () => {
   const { color, spacing } = useTheme()
   return (
@@ -51,39 +50,14 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 type UserListProps = {
-  /**
-   * The list of users to display
-   */
   data?: ID[]
-  /**
-   * If the number of users is known, use this prop to display the correct number of skeletons
-   */
   totalCount?: number
-  /**
-   * Whether we're loading more users
-   */
   isFetchingNextPage: boolean
-  /**
-   * Whether we're loading the initial data
-   */
   isPending: boolean
-  /**
-   * Function to load more users
-   */
   fetchNextPage?: () => void
-  /**
-   * Tag for the UserListItem component
-   */
   tag: string
-  /**
-   * Whether to show ranks (1, 2, 3, etc.) next to users
-   */
   showRank?: boolean
-  /**
-   * Function to render the right content for each user row
-   */
   renderRightContent?: (userId: ID, index: number) => React.ReactNode
-  /** Skip "Follows you" where every row would say it, like your own followers. */
   hideFollowsYou?: boolean
 }
 

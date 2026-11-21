@@ -10,8 +10,6 @@ const BAR_COLOR = '#CC5DE8'
 const BAR_DURATIONS_MS = [520, 410, 640, 470]
 const BAR_DELAYS_MS = [0, 180, 90, 260]
 
-// Each bar is a full-height bar slid down inside a rounded clip, so the
-// native driver can animate it with translateY instead of height.
 const BAR_MIN_OFFSET = BAR_MAX_HEIGHT - BAR_MIN_HEIGHT
 
 type AnimatedEqBarsProps = {

@@ -12,11 +12,6 @@ import {
   requestRemoveAllDownloadedFavorites
 } from '../slice'
 
-/*
- * Saga initiated when user has requested to un-download their favorites.
- * This includes the "favorites" collection and all collections that were
- * not explicitly downloaded by the user previously.
- */
 export function* requestRemoveAllDownloadedFavoritesSaga() {
   yield* takeEvery(
     requestRemoveAllDownloadedFavorites.type,

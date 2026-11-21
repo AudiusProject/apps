@@ -97,7 +97,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   const tabNavigation = useAppTabNavigation()
   const dispatch = useDispatch()
 
-  // Use track file selector directly like web version
   const { track: selectedTrack, selectFile } = useTrackFileSelector()
 
   const initiallyHidden = initialValues.is_unlisted
@@ -106,7 +105,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   const isToBePublished = !isUpload && initiallyHidden && !values.is_unlisted
   const [isOverflowMenuOpen, setIsOverflowMenuOpen] = useState(false)
 
-  // Formik fields for managing track file state
   const [{ value: origFilename }, , { setValue: setOrigFilename }] =
     useField('orig_filename')
   const [{ value: streamUrl }] = useField('stream.url')
@@ -118,7 +116,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
     null
   )
 
-  // Initialize the original track file reference
   useEffect(() => {
     if (origFilename && !originalOrigFilename.current) {
       originalOrigFilename.current = origFilename
@@ -155,17 +152,13 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
     selectFile()
   }, [selectFile])
 
-  // Handle when a new track file is selected
   useEffect(() => {
     if (selectedTrack) {
-      // Update form values with new track metadata
-      // Only update title to file name if it's an upload AND user hasn't touched the title
       if (isUpload && !isTitleTouched) {
         setTitle(selectedTrack.metadata.title)
       }
       setOrigFilename(selectedTrack.metadata.orig_filename)
 
-      // Handle both File and React Native file object types
       const fileUri =
         'uri' in selectedTrack.file
           ? selectedTrack.file.uri
@@ -216,7 +209,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
       metadata,
       audioFile: selectedTrack.file
     })
-    // Close the modal, then show the track in the tab stack below
     navigation.goBack()
     tabNavigation.navigate('Track', { trackId: values.track_id })
   }, [
@@ -231,7 +223,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
 
   const handleSubmit = useCallback(() => {
     Keyboard.dismiss()
-    // Check if a new file has been selected (either in upload or edit flow)
     const isFileReplaced =
       selectedTrackFile && selectedTrackFile !== originalOrigFilename.current
 
