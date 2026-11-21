@@ -24,6 +24,7 @@ import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 
+import { COVER_PHOTO_CONTENT_HEIGHT } from './ProfileCoverPhoto'
 import { useProfileScrollY } from './ProfileScrollContext'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -35,9 +36,20 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 // the matching amount of space via minHeaderHeight.
 export const PROFILE_NAV_CONTROLS_HEIGHT = 56
 
-// Scroll distance (in px) over which the blur background fades in and the
-// button icons transition from white to the neutral theme color.
-export const PROFILE_NAV_SCROLL_FADE_PX = 60
+// Scroll distance over which the blur background fades in.
+const BLUR_FADE_PX = 60
+
+// Scroll distance at which the cover photo has fully scrolled out of the nav
+// controls row. The status bar switches to theme colors here.
+export const PROFILE_NAV_SCROLL_FADE_PX = COVER_PHOTO_CONTENT_HEIGHT
+
+// Dark icons and the title fade in from when the cover photo's bottom edge
+// passes the middle of the nav controls row until it has left the row, so
+// they never sit on top of a dark cover photo.
+const CONTENT_FADE_RANGE = [
+  COVER_PHOTO_CONTENT_HEIGHT - PROFILE_NAV_CONTROLS_HEIGHT / 2,
+  COVER_PHOTO_CONTENT_HEIGHT
+]
 
 const useStyles = makeStyles(({ spacing }) => ({
   root: {
@@ -96,38 +108,38 @@ export const ProfileNavOverlay = () => {
 
   const blurBackgroundStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
+      ? interpolate(scrollY.value, [0, BLUR_FADE_PX], [0, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
       : 0
   }))
 
-  // White icons fade out as the user scrolls past the cover photo.
+  // White icons fade out as the cover photo leaves the nav row.
   const whiteIconsStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [1, 0], {
+      ? interpolate(scrollY.value, CONTENT_FADE_RANGE, [1, 0], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
       : 1
   }))
 
-  // Neutral icons fade in as the user scrolls past the cover photo.
+  // Neutral icons fade in as the cover photo leaves the nav row.
   const neutralIconsStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
+      ? interpolate(scrollY.value, CONTENT_FADE_RANGE, [0, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
       : 0
   }))
 
-  // Title fades in alongside the blur background so it only appears once
-  // the cover photo has scrolled away.
+  // Title fades in with the neutral icons, once the cover photo leaves the
+  // nav row.
   const titleStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
+      ? interpolate(scrollY.value, CONTENT_FADE_RANGE, [0, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
