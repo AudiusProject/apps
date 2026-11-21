@@ -1,13 +1,14 @@
 import { useMemo } from 'react'
 
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs'
-import { Dimensions, View } from 'react-native'
+import { View } from 'react-native'
 import Animated, {
   interpolate,
   useAnimatedStyle
 } from 'react-native-reanimated'
 
 import type { TabBarProps } from 'app/components/collapsible-tabs'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { makeStyles } from 'app/styles'
 
 import { TabItem } from './TabItem'
@@ -59,7 +60,7 @@ export const CollapsibleTopTabBar = (props: CollapsibleTopTabBarProps) => {
 
   const horizontalPadding =
     Math.max(6 - state.routes.length, 0) * HORIZONTAL_PADDING
-  const screenWidth = Dimensions.get('screen').width
+  const screenWidth = useContentWidth()
   const tabsWidth = screenWidth - horizontalPadding * 2
   const tabWidth = tabsWidth / state.routes.length
 

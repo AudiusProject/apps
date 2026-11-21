@@ -42,7 +42,7 @@ import { TrackImage } from '../image/TrackImage'
 
 import { PlayButton } from './PlayButton'
 import { TrackingBar } from './TrackingBar'
-import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
+import { PLAY_BAR_HEIGHT, useNowPlayingHeight } from './constants'
 const { getPreviewing } = playbackSelectors
 
 const QUEUE_BUTTON_WIDTH = 32
@@ -201,6 +201,7 @@ export const PlayBar = (props: PlayBarProps) => {
       'clamp'
     )
   }))
+  const NOW_PLAYING_HEIGHT = useNowPlayingHeight()
   const queueStyle = useAnimatedStyle(() => {
     const shrink = interpolate(
       hidden.value,

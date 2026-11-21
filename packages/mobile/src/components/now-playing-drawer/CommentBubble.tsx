@@ -4,7 +4,7 @@ import { useUser } from '@audius/common/api'
 import type { TimestampedComment } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
-import { Dimensions, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated'
 import TrackPlayer from 'react-native-track-player'
 import { useSelector } from 'react-redux'
@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux'
 import { Flex, Text, useTheme } from '@audius/harmony-native'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import { ProfilePicture } from 'app/components/core'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 const { getSeek, getSeekCounter } = playbackSelectors
@@ -22,9 +23,8 @@ const messages = {
 
 const BUBBLE_WINDOW_S = 6
 const POLL_MS = 500
-const BUBBLE_MAX_WIDTH = Dimensions.get('window').width * 0.85
 
-const usePlaybackPosition = (isActive: boolean, mediaKey: string) => {
+export const usePlaybackPosition = (isActive: boolean, mediaKey: string) => {
   const [position, setPosition] = useState(0)
   const seek = useSelector(getSeek)
   const seekCounter = useSelector(getSeekCounter)
@@ -121,6 +121,7 @@ const Bubble = ({
 }) => {
   const navigation = useNavigation()
   const { open } = useCommentDrawer()
+  const contentWidth = useContentWidth()
   const { data: name } = useUser(comment.userId, {
     select: (user) => user.name
   })
@@ -152,7 +153,7 @@ const Bubble = ({
         style={{
           paddingVertical: 2,
           borderRadius: 999,
-          maxWidth: BUBBLE_MAX_WIDTH
+          maxWidth: contentWidth * 0.85
         }}
       >
         <ProfilePicture userId={comment.userId} size='small' />

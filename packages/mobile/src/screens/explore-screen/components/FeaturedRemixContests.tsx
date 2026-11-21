@@ -2,11 +2,11 @@ import React from 'react'
 
 import { useAllRemixContests } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { useWindowDimensions } from 'react-native'
 
 import { useTheme } from '@audius/harmony-native'
 import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
 import { CardList } from 'app/components/core'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 
 import { useDeferredElement } from '../../../hooks/useDeferredElement'
 
@@ -16,7 +16,7 @@ const CONTEST_CARD_PEEK = 48
 
 export const FeaturedRemixContests = () => {
   const { spacing } = useTheme()
-  const { width: windowWidth } = useWindowDimensions()
+  const windowWidth = useContentWidth()
   const contestCardWidth = windowWidth - CONTEST_CARD_PEEK
   const { InViewWrapper, inView } = useDeferredElement()
   const { data: allContestTrackIds, isPending: isAllContestsPending } =

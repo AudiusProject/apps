@@ -7,7 +7,7 @@ import type { QueueSource } from '@audius/common/store'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
 import { make, useRecord } from 'common/store/analytics/actions'
-import { Dimensions, Pressable, View } from 'react-native'
+import { Pressable, useWindowDimensions, View } from 'react-native'
 import DraggableFlatList from 'react-native-draggable-flatlist'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -44,8 +44,6 @@ const {
 
 const DRAWER_NAME = 'Queue'
 
-const SCREEN_HEIGHT = Dimensions.get('window').height
-const COLLAPSED_HEIGHT = Math.round(SCREEN_HEIGHT * 0.85)
 const ROW_HEIGHT = 64
 
 const messages = {
@@ -90,7 +88,7 @@ type RowProps = {
   onDragHandleLongPress?: () => void
 }
 
-const MiniTrackRow = ({
+export const MiniTrackRow = ({
   trackId,
   variant,
   isPlaying,
@@ -276,6 +274,7 @@ export const QueueDrawer = () => {
   const index = useSelector(getPlaybackIndex)
   const isPlaying = useSelector(getIsPlaying)
   const { spacing, color } = useTheme()
+  const { height: windowHeight } = useWindowDimensions()
   const { trackIds: nextFromIds, sourceKey } = useNextFromSourceMobile()
   const record = useRecord()
 
@@ -531,7 +530,7 @@ export const QueueDrawer = () => {
       <View
         style={{
           width: '100%',
-          height: isFullscreen ? SCREEN_HEIGHT : COLLAPSED_HEIGHT
+          height: isFullscreen ? windowHeight : Math.round(windowHeight * 0.85)
         }}
       >
         <Flex alignItems='center' pt='s' pb='xs'>

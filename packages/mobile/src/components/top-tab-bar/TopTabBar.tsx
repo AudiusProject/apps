@@ -1,6 +1,7 @@
-import { Animated, Dimensions, TouchableOpacity, View } from 'react-native'
+import { Animated, TouchableOpacity, View } from 'react-native'
 
 import { Text } from '@audius/harmony-native'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
@@ -74,7 +75,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 export const TopTabBar = ({ state, descriptors, navigation, position }) => {
   const horizontalPadding =
     Math.max(6 - state.routes.length, 0) * HORIZONTAL_PADDING
-  const screenWidth = Dimensions.get('screen').width
+  const screenWidth = useContentWidth()
   const tabsWidth = screenWidth - horizontalPadding * 2
   const tabWidth = tabsWidth / state.routes.length
 

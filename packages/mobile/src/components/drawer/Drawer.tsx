@@ -25,7 +25,7 @@ import { makeStyles } from 'app/styles'
 import { attachToDy } from 'app/utils/animation'
 
 import { DrawerHeader } from './DrawerHeader'
-import { FULL_DRAWER_HEIGHT } from './constants'
+import { getFullDrawerHeight, useFullDrawerHeight } from './constants'
 
 const MAX_SHADOW_OPACITY = 0.15
 const ON_MOVE_RESPONDER_DY = 10
@@ -152,8 +152,10 @@ export const springToValue = ({
       friction = 25
       break
     case DrawerAnimationStyle.SPRINGY:
-      tension = 70 + 60 * (1 - Math.min(drawerHeight / FULL_DRAWER_HEIGHT, 1))
-      friction = 10 + 2 * (1 - Math.min(drawerHeight / FULL_DRAWER_HEIGHT, 1))
+      tension =
+        70 + 60 * (1 - Math.min(drawerHeight / getFullDrawerHeight(), 1))
+      friction =
+        10 + 2 * (1 - Math.min(drawerHeight / getFullDrawerHeight(), 1))
       break
   }
   Animated.spring(animation, {
@@ -203,6 +205,7 @@ export const Drawer: DrawerComponent = ({
 }: DrawerProps) => {
   const styles = useStyles()
   const insets = useSafeAreaInsets()
+  const FULL_DRAWER_HEIGHT = useFullDrawerHeight()
 
   const [drawerHeight, setDrawerHeight] = useState(
     isFullscreen ? FULL_DRAWER_HEIGHT : 0
@@ -506,6 +509,7 @@ export const Drawer: DrawerComponent = ({
         }
       }),
     [
+      FULL_DRAWER_HEIGHT,
       translationAnim,
       drawerHeight,
       initialOffsetOpenPosition,

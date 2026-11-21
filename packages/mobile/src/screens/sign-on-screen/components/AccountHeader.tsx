@@ -9,7 +9,7 @@ import {
 import type { ImageFieldValue } from '@audius/web/src/pages/sign-up-page/components/ImageField'
 import { css } from '@emotion/native'
 import { isEmpty } from 'lodash'
-import { Pressable, Dimensions } from 'react-native'
+import { Pressable, useWindowDimensions } from 'react-native'
 import type { ImageSourcePropType } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -42,6 +42,7 @@ type AccountHeaderProps = {
 }
 
 export const AccountHeader = (props: AccountHeaderProps) => {
+  const { width: windowWidth } = useWindowDimensions()
   const {
     onSelectCoverPhoto,
     onSelectProfilePicture,
@@ -70,7 +71,7 @@ export const AccountHeader = (props: AccountHeaderProps) => {
           position: 'absolute',
           left: spacing.unit4,
           top: spacing.unit10,
-          width: Dimensions.get('window').width - spacing.unit16
+          width: windowWidth - spacing.unit16
         })}
       >
         <ProfilePicture

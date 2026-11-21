@@ -3,7 +3,7 @@ import { StyleSheet, Animated } from 'react-native'
 import AudiusLogoHorizontal from 'app/assets/images/audiusLogoHorizontalDeprecated.svg'
 import { useThemeColors } from 'app/utils/theme'
 
-import { NOW_PLAYING_HEIGHT } from './constants'
+import { useNowPlayingHeight } from './constants'
 
 const styles = StyleSheet.create({
   root: {
@@ -18,6 +18,7 @@ type LogoProps = {
 
 export const Logo = ({ translationAnim }: LogoProps) => {
   const { neutralLight4 } = useThemeColors()
+  const NOW_PLAYING_HEIGHT = useNowPlayingHeight()
   return (
     <Animated.View
       style={[

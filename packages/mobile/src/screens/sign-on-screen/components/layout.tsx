@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 
 import { css } from '@emotion/native'
 import { useFormikContext } from 'formik'
-import { Dimensions, View } from 'react-native'
+import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import type {
@@ -86,6 +86,7 @@ export const PageFooter = (props: PageFooterProps) => {
     ...other
   } = props
   const insets = useSafeAreaInsets()
+  const { width: windowWidth } = useWindowDimensions()
   const { spacing } = useTheme()
   const { handleSubmit, dirty, isValid } = useFormikContext() ?? {}
 
@@ -107,7 +108,7 @@ export const PageFooter = (props: PageFooterProps) => {
   return (
     <Flex
       gap='xl'
-      w={Dimensions.get('window').width}
+      w={windowWidth}
       style={css({
         position: 'absolute',
         bottom: insets.bottom === 0 ? spacing.l : 0,

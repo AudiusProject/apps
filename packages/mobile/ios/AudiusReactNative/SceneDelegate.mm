@@ -1,5 +1,6 @@
 #import "SceneDelegate.h"
 #import "AppDelegate.h"
+#import "AudiusHinge.h"
 
 #import <React/RCTLinkingManager.h>
 #import <TiktokOpensdkReactNative-Bridging-Header.h>
@@ -16,6 +17,7 @@
 
   AppDelegate *appDelegate = (AppDelegate *)UIApplication.sharedApplication.delegate;
   self.window = [appDelegate loadReactNativeWindowInScene:(UIWindowScene *)scene connectionOptions:connectionOptions];
+  [AudiusHinge observeHingeForView:self.window];
 
   // React Native reads the launch URL from launchOptions. TikTok still needs
   // to see it here.

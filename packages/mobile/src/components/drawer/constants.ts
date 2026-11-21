@@ -1,5 +1,9 @@
-import { Dimensions } from 'react-native'
+import { Dimensions, Platform, useWindowDimensions } from 'react-native'
 
-const { height } = Dimensions.get('screen')
+export const getFullDrawerHeight = () =>
+  Dimensions.get(Platform.OS === 'ios' ? 'window' : 'screen').height
 
-export const FULL_DRAWER_HEIGHT = height
+export const useFullDrawerHeight = () => {
+  useWindowDimensions()
+  return getFullDrawerHeight()
+}

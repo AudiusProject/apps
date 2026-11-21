@@ -1,7 +1,6 @@
 import React, { useLayoutEffect } from 'react'
 import {
   StyleSheet,
-  useWindowDimensions,
   LayoutChangeEvent
 } from 'react-native'
 import Animated, {
@@ -18,6 +17,7 @@ import { Indicator } from './Indicator'
 import { MaterialTabItem } from './TabItem'
 import { MaterialTabBarProps, ItemLayout } from './types'
 import { TabName } from '../types'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 
 export const TABBAR_HEIGHT = 48
 
@@ -41,7 +41,7 @@ const MaterialTabBar = <T extends TabName = TabName>({
   keepActiveTabCentered
 }: MaterialTabBarProps<T>): React.ReactElement => {
   const tabBarRef = useAnimatedRef<Animated.ScrollView>()
-  const windowWidth = useWindowDimensions().width
+  const windowWidth = useContentWidth()
   const width = customWidth ?? windowWidth
   const isFirstRender = React.useRef(true)
   const itemLayoutGathering = React.useRef(new Map<T, ItemLayout>())

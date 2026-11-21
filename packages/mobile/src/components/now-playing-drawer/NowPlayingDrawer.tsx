@@ -9,11 +9,7 @@ import {
   useState
 } from 'react'
 
-import { useUser, useTimestampedComments } from '@audius/common/api'
-import { useCurrentTrack, useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
-import { playbackActions, playbackSelectors } from '@audius/common/store'
-import { Genre } from '@audius/common/utils'
+import { playbackSelectors } from '@audius/common/store'
 import { useNavigationState } from '@react-navigation/native'
 import type {
   GestureResponderEvent,
@@ -33,13 +29,8 @@ import Reanimated, {
   useAnimatedStyle
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import TrackPlayer from 'react-native-track-player'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
-import {
-  RESTART_THRESHOLD_SEC,
-  SKIP_DURATION_SEC
-} from 'app/components/audio/constants'
 import {
   BOTTOM_BAR_HEIGHT,
   COLLAPSE_DROP_START,
@@ -51,7 +42,7 @@ import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import { SetPlayBarVisibilityContext } from 'app/components/core/BottomBarInsetContext'
 import Drawer, {
   DrawerAnimationStyle,
-  FULL_DRAWER_HEIGHT
+  useFullDrawerHeight
 } from 'app/components/drawer'
 import { Scrubber } from 'app/components/scrubber'
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -72,11 +63,9 @@ import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
 import { WaveformScrubber } from './WaveformScrubber'
 import { PLAY_BAR_HEIGHT } from './constants'
-import { useCurrentTrackDuration } from './useCurrentTrackDuration'
-import { useDominantArtworkColors } from './useDominantArtworkColors'
-const { seekTo: seek, reset, next, previous } = playbackActions
+import { useNowPlayingControls } from './useNowPlayingControls'
 
-const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
+const { getPlaying, getTrackId, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
 
@@ -85,7 +74,6 @@ const INSET_STATUS_BAR_HIDE_THRESHOLD = 20
 const useStyles = makeStyles(({ palette, spacing }) => ({
   container: {
     paddingTop: 0,
-    height: FULL_DRAWER_HEIGHT,
     justifyContent: 'space-evenly'
   },
   playBarContainer: {
@@ -137,15 +125,14 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const navigation = useNavigation({
     customNavigation: contextNavigation
   })
-  const dispatch = useDispatch()
   const insets = useSafeAreaInsets()
   const staticTopInset = useRef(insets.top)
   const styles = useStyles()
+  const FULL_DRAWER_HEIGHT = useFullDrawerHeight()
 
   const { isOpen, onOpen, onClose } = useDrawer('NowPlaying')
   const tabBarHidden = useTabBarHiddenProgress()
   const { isOpen: isCommentDrawerOpen } = useCommentDrawer()
-  const playCounter = useSelector(getCounter)
   const currentTrackId = useSelector(getTrackId)
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
@@ -280,24 +267,19 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const [isGestureEnabled, setIsGestureEnabled] = useState(true)
 
-  const track = useCurrentTrack()
-  const trackDuration = useCurrentTrackDuration()
-  const trackId = track?.track_id
-
-  const { data: user } = useUser(track?.owner_id)
-  const [mediaKey, setMediaKey] = useState(0)
-
-  const { isEnabled: isNowPlayingCommentsEnabled } = useFeatureFlag(
-    FeatureFlags.NOW_PLAYING_COMMENTS
-  )
-  const { isEnabled: isWaveformEnabled } = useFeatureFlag(
-    FeatureFlags.NOW_PLAYING_WAVEFORM
-  )
-  useDominantArtworkColors(trackId, isWaveformEnabled && isOpen)
-  const timestampedComments = useTimestampedComments(
+  const {
+    track,
     trackId,
-    (isNowPlayingCommentsEnabled || isWaveformEnabled) && isOpen
-  )
+    user,
+    trackDuration,
+    mediaKey,
+    isLongFormContent,
+    isNowPlayingCommentsEnabled,
+    isWaveformEnabled,
+    timestampedComments,
+    onNext,
+    onPrevious
+  } = useNowPlayingControls(isOpen)
   const commentMarkers = useMemo(
     () =>
       trackDuration > 0 && timestampedComments.length > 0
@@ -307,41 +289,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
         : undefined,
     [timestampedComments, trackDuration]
   )
-
-  useEffect(() => {
-    setMediaKey((mediaKey) => mediaKey + 1)
-  }, [playCounter, currentTrackId])
-
-  const onNext = useCallback(async () => {
-    const isLongFormContent =
-      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
-    if (isLongFormContent) {
-      const { position: currentPosition } = await TrackPlayer.getProgress()
-      const newPosition = currentPosition + SKIP_DURATION_SEC
-      dispatch(seek({ seconds: Math.min(track.duration, newPosition) }))
-    } else {
-      dispatch(next({ skip: true }))
-      setMediaKey((mediaKey) => mediaKey + 1)
-    }
-  }, [dispatch, setMediaKey, track])
-
-  const onPrevious = useCallback(async () => {
-    const { position: currentPosition } = await TrackPlayer.getProgress()
-    const isLongFormContent =
-      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
-    if (isLongFormContent) {
-      const newPosition = currentPosition - SKIP_DURATION_SEC
-      dispatch(seek({ seconds: Math.max(0, newPosition) }))
-    } else {
-      const shouldGoToPrevious = currentPosition < RESTART_THRESHOLD_SEC
-      if (shouldGoToPrevious) {
-        dispatch(previous())
-        setMediaKey((mediaKey) => mediaKey + 1)
-      } else {
-        dispatch(reset({ shouldAutoplay: true }))
-      }
-    }
-  }, [dispatch, setMediaKey, track])
 
   const onPressScrubberIn = useCallback(() => {
     setIsGestureEnabled(false)
@@ -362,7 +309,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const playBar = (
     <View style={styles.playBarContainer}>
       <PlayBar
-        mediaKey={`${mediaKey}`}
+        mediaKey={mediaKey}
         duration={trackDuration}
         track={track}
         user={user}
@@ -418,6 +365,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
           style={[
             styles.container,
             {
+              height: FULL_DRAWER_HEIGHT,
               paddingTop: effectiveTopInset,
               paddingBottom: effectiveBottomInset
             },
@@ -444,7 +392,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               <WaveformScrubber
                 trackId={trackId}
                 duration={trackDuration}
-                mediaKey={`${mediaKey}`}
+                mediaKey={mediaKey}
                 isOpen={isOpen}
                 isPlaying={isPlaying && !isBuffering}
                 comments={timestampedComments}
@@ -453,7 +401,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               />
             ) : (
               <Scrubber
-                mediaKey={`${mediaKey}`}
+                mediaKey={mediaKey}
                 isPlaying={isPlaying && !isBuffering}
                 onPressIn={onPressScrubberIn}
                 onPressOut={onPressScrubberOut}
@@ -467,7 +415,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
               trackId={trackId}
               comments={timestampedComments}
               isActive={isOpen && isPlaying && !isBuffering}
-              mediaKey={`${mediaKey}`}
+              mediaKey={mediaKey}
             />
           ) : null}
           {isWaveformEnabled ? (
@@ -477,10 +425,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             <AudioControls
               onNext={onNext}
               onPrevious={onPrevious}
-              isLongFormContent={
-                track?.genre === Genre.Podcasts ||
-                track?.genre === Genre.Audiobooks
-              }
+              isLongFormContent={isLongFormContent}
             />
             <ActionsBar track={track} />
           </View>
