@@ -1,12 +1,3 @@
-/**
- * This file includes schemas for use in EIP-712 compliant signature generation and
- * signature validation, generator functions for generating data
- * in the form needed by eth_personalSign / eth-sig-util's signTypedData functions,
- * generators for contract signing domains, and a helper function for generating
- * cryptographically secure nonces in nodejs or in the browser.
- * modeled off: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md
- */
-
 const domains = {}
 
 function getDomainData(
@@ -29,7 +20,6 @@ domains.getEntityManagerDomain = function (chainId, contractAddress) {
 
 const schemas = {}
 
-/* contract signing domain */
 schemas.domain = [
   { name: 'name', type: 'string' },
   { name: 'version', type: 'string' },
@@ -69,7 +59,6 @@ function getRequestData(
   }
 }
 
-/* User Factory Generators */
 generators.getAddUserRequestData = function (
   chainId,
   contractAddress,
@@ -118,20 +107,13 @@ generators.getManageEntityData = function (
   )
 }
 
-/** Return a secure random hex string of nChar length in a browser-compatible way
- *  Taken from https://stackoverflow.com/questions/37378237/how-to-generate-a-random-token-of-32-bit-in-javascript
- */
 function browserRandomHash(nChar) {
-  // convert number of characters to number of bytes
   var nBytes = Math.ceil((nChar = (+nChar || 8) / 2))
 
-  // create a typed array of that many bytes
   var u = new Uint8Array(nBytes)
 
-  // populate it wit crypto-random values
   window.crypto.getRandomValues(u)
 
-  // convert it to an Array of Strings (e.g. '01', 'AF', ..)
   var zpad = function (str) {
     return '00'.slice(str.length) + str
   }
@@ -139,25 +121,19 @@ function browserRandomHash(nChar) {
     return zpad(x.toString(16))
   })
 
-  // Array of String to String
   var str = a.join('').toLowerCase()
-  // and snip off the excess digit if we want an odd number
   if (nChar % 2) str = str.slice(1)
 
-  // return what we made
   return str
 }
 
 async function getNonce() {
-  // We need to detect whether the nodejs crypto module is available to determine how to
-  // generate secure random numbers below
   let nodeCrypto
   try {
     nodeCrypto = await import('crypto')
   } catch (e) {
     nodeCrypto = null
   }
-  // detect whether we are in browser or in nodejs, and use the correct csprng
   if (typeof window === 'undefined' || window === null) {
     return '0x' + nodeCrypto.randomBytes(32).toString('hex')
   } else {

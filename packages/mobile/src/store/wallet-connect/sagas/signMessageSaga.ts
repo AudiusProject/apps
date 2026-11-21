@@ -26,7 +26,6 @@ type SignMessagePayload = {
   publicKey: string
 }
 
-// TODO-NOW: verify on mobile to the best of ability
 function* signMessageAsync(action: SignMessageAction) {
   const { wallet, chain } = yield* select(getConfirmingWallet)
   if (!wallet || !chain) throw new Error('No wallet being confirmed')
@@ -60,15 +59,12 @@ function* signMessageAsync(action: SignMessageAction) {
     case 'solana-phone-wallet-adapter': {
       const { data: signature } = action.payload
 
-      // With solana phone, connectWallet saga doesn't finish in time before
-      // signMessage starts
       yield* waitForValue((state: CommonState) => {
         const { wallet, chain } = getConfirmingWallet(state)
         const error = getError(state)
         return wallet || chain || error
       })
 
-      // Check for cases where an error has occured, like if the wallet is already connected
       const walletError = yield* select(getError)
       if (walletError) return
 
@@ -105,7 +101,6 @@ export function* watchSignMessage() {
       yield* call(signMessageAsync, action)
     } catch (e) {
       console.error('Failed to sign wallet message', e)
-      // Clears the Connecting status and shows a toast
       yield* put(updateWalletError({ errorMessage: messages.signError }))
     }
   })

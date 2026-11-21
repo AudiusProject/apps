@@ -22,12 +22,10 @@ const messages = {
 }
 
 export const PayAndEarnPage = ({ tableView }: PayAndEarnPageProps) => {
-  // Get the appropriate hook data based on tableView
   const salesData = useSales()
   const purchasesData = usePurchases()
   const withdrawalsData = useWithdrawals()
 
-  // Get the appropriate table data based on tableView
   const getTableData = () => {
     switch (tableView) {
       case TableType.SALES:
@@ -55,7 +53,6 @@ export const PayAndEarnPage = ({ tableView }: PayAndEarnPageProps) => {
 
   const tableData = getTableData()
 
-  // Render the appropriate table component based on tableView
   const renderTable = () => {
     switch (tableView) {
       case TableType.WITHDRAWALS:

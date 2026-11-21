@@ -44,9 +44,8 @@ export const createHedgehog = ({
   createKey = getPlatformCreateKey()
 }: HedgehogConfig): HedgehogInstance => {
   const getAuthHeaders = async (wallet: EthWallet) => {
-    const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+    const unixTs = Math.round(new Date().getTime() / 1000)
     const message = `Click sign to authenticate with identity service: ${unixTs}`
-    // EIP-191 personal_sign, same bytes as eth-sig-util personalSign
     const signature = await signMessage({
       message,
       privateKey: wallet.getPrivateKeyString() as `0x${string}`
@@ -68,7 +67,6 @@ export const createHedgehog = ({
       'X-Request-ID': requestId
     }
 
-    // Axios throws for non-200 responses
     try {
       const resp: AxiosResponse<T> = await axios(axiosRequestObj)
       if (!resp.data) {
@@ -99,7 +97,6 @@ export const createHedgehog = ({
   }
 
   const setAuthFn: SetAuthFn = async (params) => {
-    // Get wallet from hedgehog to use for signing, remove from params sent to identity
     const { wallet: ownerWallet, ...data } = params
 
     const headers = await getAuthHeaders(ownerWallet)
@@ -129,9 +126,6 @@ export const createHedgehog = ({
     createKey
   )
 
-  /**
-   * Generate secure credentials to allow login
-   */
   // @ts-expect-error -- adding our own custom method to hedgehog
   hedgehog.generateRecoveryInfo = async () => {
     const entropy = await WalletManager.getEntropyFromLocalStorage(
@@ -140,7 +134,7 @@ export const createHedgehog = ({
     if (entropy === null) {
       throw new Error('generateRecoveryLink - missing entropy')
     }
-    let btoa // binary to base64 ASCII conversion
+    let btoa
     let currentHost
     if (typeof window !== 'undefined' && window && window.btoa) {
       btoa = window.btoa
@@ -167,7 +161,6 @@ export const createHedgehog = ({
     )
   }
 
-  // Wrap the original login method to handle ready state
   const originalLogin = hedgehog.login.bind(hedgehog)
   hedgehog.login = async (...params: Parameters<typeof originalLogin>) => {
     hedgehog.ready = false

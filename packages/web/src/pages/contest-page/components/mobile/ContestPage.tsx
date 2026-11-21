@@ -96,11 +96,6 @@ export const CONTEST_PAGE_SIZE = 10
 
 type MobileContestTab = 'details' | 'updates' | 'submissions' | 'comments'
 
-// -----------------------------------------------------------------------------
-// Countdown — horizontal tile row, one tile per unit, divider between tiles.
-// Matches Figma node 2888-131647 / 2857-99182: number and label share the
-// same text color (both default, both subdued on a leading zero unit).
-// -----------------------------------------------------------------------------
 const CountdownTile = ({
   value,
   label,
@@ -152,20 +147,6 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
   )
 }
 
-// -----------------------------------------------------------------------------
-// Tab bar. Matches Figma mobile node 2888-131647: title-case labels
-// (Details / Updates / Submissions / Comments), accent color + purple
-// underline on the active tab, subdued on inactive. Uses `title` variant
-// so the text renders mixed case (the `label` variant would force
-// uppercase).
-//
-// Wrapped in a Paper so the tab strip reads as a distinct surface from
-// the hero content above it (the hero sits on the page background).
-// A continuous thin bottom border acts as the inactive underline for
-// every tab, with a thicker accent underline overlaying the active
-// one — this keeps tab widths uniform (equal flex columns) and the
-// row visually anchored.
-// -----------------------------------------------------------------------------
 const TabBar = ({
   active,
   onChange,
@@ -205,9 +186,6 @@ const TabBar = ({
               paddingBottom: 10,
               position: 'relative',
               cursor: 'pointer',
-              // Overlay a 2px accent rule on the active tab — sits on
-              // top of the container's 1px default border so active
-              // state reads clearly without disturbing tab widths.
               '&::after': isActive
                 ? {
                     content: '""',
@@ -236,20 +214,12 @@ const TabBar = ({
   )
 }
 
-// -----------------------------------------------------------------------------
-// Section label. Matches the desktop treatment: label size='m' subdued, no
-// extra-bold strength — Figma 2888-131647 uses a regular-weight uppercase
-// label for ABOUT THIS CONTEST, PRIZES, SUBMISSIONS, etc.
-// -----------------------------------------------------------------------------
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <Text variant='label' size='m' color='subdued'>
     {children}
   </Text>
 )
 
-// -----------------------------------------------------------------------------
-// Page
-// -----------------------------------------------------------------------------
 type MobileContestPageProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
@@ -311,10 +281,6 @@ const ContestPage = ({
   })
   const coverArtUrl = contest?.eventData?.coverPhotoUrl || trackCoverArtUrl
 
-  // Updates tab visibility — for non-hosts, hide the tab until there's
-  // at least one host-authored top-level post (a "post update"). The
-  // host always sees the tab so they have somewhere to compose from.
-  // We mirror the filter ContestCommentsTile uses internally.
   const queryClient = useQueryClient()
   const { data: commentFeedItems } = useEventComments({
     eventId: eventId ?? 0,
@@ -333,9 +299,6 @@ const ContestPage = ({
   })
   const showUpdatesTab = isOwner || hasPostUpdates
 
-  // Stems & Downloads panel: only mount when the track has downloadable
-  // content. Matches the desktop behaviour — DownloadSection assumes a
-  // downloadable track and errors otherwise.
   const { data: downloadableFlag } = useTrack(trackId, {
     select: (t) => t?.is_downloadable
   })
@@ -345,17 +308,10 @@ const ContestPage = ({
 
   const [activeTab, setActiveTab] = useState<MobileContestTab>('details')
 
-  // Submissions tab filter state — URL-backed so deep links + back/forward
-  // work the same way as the track-page RemixesPage (the reference).
   const { sortMethod, isCosign } = useRemixPageParams()
   const updateSortParam = useUpdateSearchParams('sortMethod')
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
 
-  // Submissions lineup — driven on demand by the Submissions tab.
-  // Includes the original (parent) track at the top of the lineup so
-  // listeners can compare against the source remixes are built on
-  // without jumping back out, matching the track-page `RemixesPage`
-  // and the desktop contest page.
   const remixesLineupArgs = useMemo(
     () => ({
       trackId: trackId ?? undefined,
@@ -379,9 +335,6 @@ const ContestPage = ({
     }),
     [remixesLineupArgs]
   )
-  // Total lineup length includes the original + winners + remixes.
-  // The "N Submissions" label should show the number of *actual*
-  // submissions (remixes), not the whole lineup.
   const lineupLength = lineupTrackIds.length
   const winnerCount = contest?.eventData?.winners?.length ?? 0
   const submissionsCount = lineup.isPending
@@ -405,9 +358,6 @@ const ContestPage = ({
     return dayjs(contest.endDate).isBefore(dayjs())
   }, [contest?.endDate])
 
-  // Split the deadline into date + time so each part can be styled
-  // independently — Figma 2888-131667 shows the date in strong
-  // uppercase next to a lighter subdued time.
   const deadlineParts = useMemo(() => {
     if (!contest?.endDate) return null
     const d = dayjs(contest.endDate)
@@ -421,21 +371,12 @@ const ContestPage = ({
     if (track?.permalink) navigate(pickWinnersPage(track.permalink))
   }, [track?.permalink, navigate])
 
-  // "Enter Contest" — deep-link into the upload flow with the source
-  // track's artwork + genre + remix_of pre-filled. See
-  // `useEnterContest` for the full shape; reused across the desktop +
-  // mobile contest pages and the mobile track-page contest details
-  // tab so submitters get the same pre-filled form regardless of
-  // entry point.
   const handleEnterContest = useEnterContest(trackId)
 
   if (!track || !user) {
     return null
   }
 
-  // Contest hasn't resolved yet (or no contest exists for this track).
-  // Render a skeleton matching the mobile page layout instead of the old
-  // "No contest is currently running" copy.
   if (!contest || !eventId) {
     return (
       <Page title={messages.title} variant='flush'>
@@ -484,9 +425,6 @@ const ContestPage = ({
     </Button>
   ) : null
 
-  // Overflow menu items. Host gets Share only (follow doesn't apply to
-  // your own contest); public gets Follow/Unfollow + Share. Wired
-  // through Harmony `PopupMenu` — the kebab IconButton is the anchor.
   const isFollowed = !!followState?.isFollowed
   const followMenuItem = {
     icon: isFollowed ? <IconUserFollowing /> : <IconUserFollow />,
@@ -677,11 +615,6 @@ const ContestPage = ({
           ) : activeTab === 'submissions' ? (
             <Flex direction='column' gap='l' pt='l'>
               {(() => {
-                // Mirror the legacy `RemixesPage` delineator pattern:
-                // WINNERS label after the original, and a
-                // `N SUBMISSIONS + filter bar` delineator after the
-                // last winner (or after the original when there are
-                // no winners).
                 const winnersDelineator = (
                   <Box pt='l' pb='s'>
                     <Divider />
@@ -765,17 +698,6 @@ const ContestPage = ({
   )
 }
 
-// -----------------------------------------------------------------------------
-// Details tab — About / Prizes / Followers / Stems stacked vertically.
-// Matches Figma node 2888-131647: the Updates tab owns the post-update feed
-// and composer, so Details is purely informational for both owner and
-// public viewers.
-//
-// About section renders the description only. The deadline already appears
-// in the page header above the tabs, so we deliberately do not reuse
-// `RemixContestDetailsTab` here (that desktop tab prepends a "Submission
-// Due:" row that would duplicate the header on mobile).
-// -----------------------------------------------------------------------------
 const fallbackDescription =
   'Enter my remix contest before the deadline for your chance to win!'
 

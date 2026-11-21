@@ -30,7 +30,6 @@ import { AppState } from 'store/types'
 import { createMockAppContext } from './mocks/app-context'
 import { audiusSdk } from './mocks/audiusSdk'
 
-// Create a mock wagmi config for testing
 const mockWagmiConfig = createConfig({
   chains: [mainnet],
   connectors: [
@@ -46,7 +45,7 @@ const mockWagmiConfig = createConfig({
 type TestOptions = {
   reduxState?: PartialDeep<AppState>
   featureFlags?: Partial<Record<FeatureFlags, boolean>>
-  skipRouter?: boolean // If true, don't wrap in BrowserRouter (useful when using MemoryRouter in test)
+  skipRouter?: boolean
 }
 
 type ReduxProviderProps = {
@@ -72,7 +71,6 @@ type TestProvidersProps = {
   children: ReactNode
 }
 
-// Component to set up navigation ref for middleware when using BrowserRouter
 const NavigationSetup = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate()
 
@@ -138,21 +136,15 @@ export { customRender as render }
 
 export const mswServer = setupServer()
 
-// Removes the long DOM output from failed queries
-// the DOM output is usually too short to show anything useful but also so large that it floods the console
 function getElementError(message: any) {
   const error = new Error(message)
-  // Remove this function from the stack trace so the trace points
-  // to where the test actually failed (in the testing library code)
   if (Error.captureStackTrace) {
     Error.captureStackTrace(error, getElementError)
   } else {
-    // Fallback: remove frames related to getElementError
     const stack = error.stack?.split('\n') || []
-    // Keep the first line (error message) and filter out getElementError frames
     const filteredStack = stack.filter(
       (line, index) =>
-        index === 0 || // Keep error message line
+        index === 0 ||
         (!line.includes('getElementError') && !line.includes('test-utils.tsx'))
     )
     error.stack = filteredStack.join('\n')
@@ -164,13 +156,6 @@ configure({
   getElementError
 })
 
-/**
- * Saves the current document DOM (or a provided node) to an HTML file.
- *
- * @param filename  Optional filename (defaults to timestamped file)
- * @param node      Optional specific node (defaults to document.body)
- * @param maxLength Max number of characters to include (default: 10_000)
- */
 export function saveDomToFile(
   filename?: string,
   node?: HTMLElement | DocumentFragment
@@ -199,10 +184,6 @@ export function saveDomToFile(
   console.log(`🧾 DOM snapshot written to: ${filePath}`)
 }
 
-/**
- * Wrapper around vitest's it() to add a feature that automatically capture DOM snapshots on test failure.
- * The snapshot filename is based on the test name (sanitized for filesystem).
- */
 function createItWrapper(): typeof vitestIt {
   const itWrapper = (
     name: string,
@@ -214,7 +195,6 @@ function createItWrapper(): typeof vitestIt {
           try {
             return await fn()
           } catch (error) {
-            // Capture DOM before cleanup happens
             const sanitizedName = name
               .toLowerCase()
               .replace(/\s+/g, '-')
@@ -229,22 +209,17 @@ function createItWrapper(): typeof vitestIt {
     return vitestIt(name, wrappedFn, timeout)
   }
 
-  // Use a Proxy to forward all property access to vitestIt
-  // This ensures all methods (skip, only, todo, concurrent, fails, each, withContext, etc.) are available
   return new Proxy(itWrapper, {
     get(target, prop) {
-      // If the property exists on our wrapper function, return it
       if (prop in target) {
         return (target as any)[prop]
       }
-      // Otherwise, forward to vitestIt
       return (vitestIt as any)[prop]
     },
     has(target, prop) {
       return prop in target || prop in vitestIt
     },
     ownKeys(target) {
-      // Combine keys from both target and vitestIt
       const targetKeys = Reflect.ownKeys(target)
       const vitestKeys = Reflect.ownKeys(vitestIt)
       return Array.from(new Set([...targetKeys, ...vitestKeys]))

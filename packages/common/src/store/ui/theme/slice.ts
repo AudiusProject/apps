@@ -12,9 +12,7 @@ import { Nullable } from '../../../utils'
 export type ThemeState = {
   /** @deprecated Use themePalette + themeMode. Legacy - when MATRIX, palette is matrix. */
   theme: Nullable<Theme>
-  /** Palette selected in dropdown: default, classic, matrix */
   themePalette: Nullable<ThemePalette>
-  /** Mode selected in segmented control: auto, light, dark. Ignored when palette is matrix. */
   themeMode: Nullable<ThemeMode>
   frostedSurfaceIntensity: Nullable<FrostedSurfaceIntensity>
   systemAppearance: Nullable<SystemAppearance>
@@ -54,7 +52,6 @@ const themeSlice = createSlice({
   reducers: {
     setTheme: (state, action: SetThemeAction) => {
       state.theme = action.payload.theme
-      // Sync legacy theme to new format for backward compat
       if (action.payload.theme === Theme.MATRIX) {
         state.themePalette = ThemePalette.MATRIX
       } else {
@@ -64,7 +61,6 @@ const themeSlice = createSlice({
             : action.payload.theme === Theme.DARK
               ? ThemeMode.DARK
               : ThemeMode.AUTO
-        // Preserve palette when updating mode; default to default (Neue) for all users
         if (state.themePalette === null) {
           state.themePalette = ThemePalette.DEFAULT
         }

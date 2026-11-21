@@ -1,8 +1,3 @@
-/**
- * Hook for managing bidirectional swap calculations
- * Handles the core calculation logic with proper state management
- */
-
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { FixedDecimal } from '@audius/fixed-decimal'
@@ -21,9 +16,6 @@ export type BidirectionalCalculatorResult = {
   clearAmounts: () => void
 }
 
-/**
- * Hook that manages bidirectional calculations with exchange rates
- */
 export const useBidirectionalCalculator = ({
   exchangeRate,
   source,
@@ -41,7 +33,6 @@ export const useBidirectionalCalculator = ({
   const [outputAmount, setOutputAmountState] = useState('')
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Safely parse numeric values using FixedDecimal
   const numericInputAmount = useMemo(() => {
     if (!inputAmount || inputAmount === '') return 0
     try {
@@ -62,7 +53,6 @@ export const useBidirectionalCalculator = ({
     }
   }, [outputAmount, outputDecimals])
 
-  // Calculate when exchange rate or source changes
   useEffect(() => {
     if (!exchangeRate || exchangeRate <= 0 || isUpdateInProgress || !source) {
       return
@@ -103,19 +93,16 @@ export const useBidirectionalCalculator = ({
     isUpdateInProgress
   ])
 
-  // Handle input amount changes
   const setInputAmount = useCallback((value: string) => {
     setInputAmountState(value)
     // Source is managed externally by the state machine
   }, [])
 
-  // Handle output amount changes
   const setOutputAmount = useCallback((value: string) => {
     setOutputAmountState(value)
     // Source is managed externally by the state machine
   }, [])
 
-  // Clear all amounts
   const clearAmounts = useCallback(() => {
     setInputAmountState('')
     setOutputAmountState('')

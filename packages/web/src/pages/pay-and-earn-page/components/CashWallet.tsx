@@ -41,7 +41,6 @@ export const CashWallet = () => {
 
   const styles = useCashWalletStyles()
 
-  // We still need useMedia for responsive conditionals
   const { isSmall: isMobile, isExtraSmall: isSmallMobile } = useMedia()
 
   const handleWithdraw = () => {

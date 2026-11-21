@@ -102,7 +102,6 @@ export const LibraryCategorySelectionMenu = () => {
       ? ALL_CATEGORIES
       : CATEGORIES_WITHOUT_PURCHASED
 
-  // Auto-switch to "All" if the selected category is not available for the current tab
   useEffect(() => {
     const availableCategoryValues = categories.map((category) => category.value)
     if (!availableCategoryValues.includes(selectedCategory)) {

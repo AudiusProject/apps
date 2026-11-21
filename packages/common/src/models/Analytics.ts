@@ -28,55 +28,34 @@ export type AnalyticsEvent = {
 }
 
 export enum Name {
-  // Account creation
-  // When the user opens the create account page
   CREATE_ACCOUNT_OPEN = 'Create Account: Open',
-  // When the user continues past the email page
   CREATE_ACCOUNT_COMPLETE_EMAIL = 'Create Account: Complete Email',
-  // When the user uploads a profile photo in signup
   CREATE_ACCOUNT_UPLOAD_PROFILE_PHOTO = 'Create Account: Upload Profile Photo',
-  // When the user has an error uploading their profile photo
   CREATE_ACCOUNT_UPLOAD_PROFILE_PHOTO_ERROR = 'Create Account: Upload Profile Photo Error',
-  // When the user uploads a cover photo in signup
   CREATE_ACCOUNT_UPLOAD_COVER_PHOTO = 'Create Account: Upload Cover Photo',
-  // When the user has an error uploading their cover photo
   CREATE_ACCOUNT_UPLOAD_COVER_PHOTO_ERROR = 'Create Account: Upload Cover Photo Error',
-  // When the user selects a genre
   CREATE_ACCOUNT_SELECT_GENRE = 'Create Account: Select Genre',
-  // When the user clicks follow on a specific user on the follow artists page
   CREATE_ACCOUNT_FOLLOW_ARTIST = 'Create Account: Follow Artist',
-  // When the user clicks to preview a song from an artist on the follow artists page
   CREATE_ACCOUNT_ARTIST_PREVIEWED = 'Create Account: Artist Previewed',
-  // When the user continues past the loading page
   CREATE_ACCOUNT_COMPLETE_CREATING = 'Create Account: Complete Creating',
-  // When the user creates a guest account
   CREATE_ACCOUNT_COMPLETE_GUEST_CREATING = 'Create Account: Complete Guest Creating',
-  // When the user completes a guest profile for a full user
   CREATE_ACCOUNT_COMPLETE_GUEST_PROFILE = 'Create Account: Complete Guest Profile',
-  // When the user gets rate limited during signup auth
   CREATE_ACCOUNT_RATE_LIMIT = 'Create Account: Rate Limit',
-  // When the user gets blocked by AAO during the signup path
   CREATE_ACCOUNT_BLOCKED = 'Create Account: Blocked',
-  // When the welcome modal gets shown to the user
   CREATE_ACCOUNT_WELCOME_MODAL = 'Create Account: Welcome Modal',
-  // When the user clicks the "Upload Track" CTA in the welcome modal
   CREATE_ACCOUNT_WELCOME_MODAL_UPLOAD_TRACK = 'Create Account: Welcome Modal Upload Track Clicked',
-  // Sign in
   SIGN_IN_START = 'Sign In: Start',
   SIGN_IN_FINISH = 'Sign In: Finish',
   SIGN_IN_WITH_INCOMPLETE_ACCOUNT = 'Sign In: Incomplete Account',
   SIGN_IN_WITH_DEACTIVATED_ACCOUNT = 'Sign In: Deactivated Account',
 
-  // Audius OAuth Login Page
   AUDIUS_OAUTH_START = 'Audius Oauth: Open Login (authenticate)',
   AUDIUS_OAUTH_SUBMIT = 'Audius Oauth: Submit Login (authenticate)',
   AUDIUS_OAUTH_COMPLETE = 'Audius Oauth: Login (authenticate) Success',
   AUDIUS_OAUTH_ERROR = 'Audius Oauth: Login (authenticate) Failed',
 
-  // Profile completion
   ACCOUNT_HEALTH_METER_FULL = 'Account Health: Meter Full',
 
-  // Social actions
   SHARE = 'Share',
   SHARE_TO_TWITTER = 'Share to Twitter',
   REPOST = 'Repost',
@@ -86,41 +65,28 @@ export enum Name {
   FOLLOW = 'Follow',
   UNFOLLOW = 'Unfollow',
 
-  // Folders
   FOLDER_DELETE = 'Folder: Delete Playlist Folder',
 
-  // Embed
   EMBED_COPY = 'Embed: Copy',
 
-  // Upload funnel / conversion
   TRACK_UPLOAD_OPEN = 'Track Upload: Open',
   TRACK_UPLOAD_START_UPLOADING = 'Track Upload: Start Upload',
-  // Note that upload is considered complete if it is explicitly rejected
-  // by the node receiving the file (HTTP 403).
   TRACK_UPLOAD_COMPLETE_UPLOAD = 'Track Upload: Complete Upload',
   TWEET_FIRST_UPLOAD = 'Tweet First Upload',
 
-  // Upload success tracking
   TRACK_UPLOAD_SUCCESS = 'Track Upload: Success',
   TRACK_UPLOAD_FAILURE = 'Track Upload: Failure',
 
-  // Gated Track Uploads
   TRACK_UPLOAD_USDC_GATED = 'Track Upload: USDC Gated',
-  // Download-Only Gated Track Uploads
   TRACK_UPLOAD_USDC_GATED_DOWNLOAD = 'Track Upload: USDC Gated Download',
 
-  // Unlocked Gated Tracks
   USDC_PURCHASE_GATED_TRACK_UNLOCKED = 'USDC Gated: Track Unlocked',
   USDC_PURCHASE_GATED_COLLECTION_UNLOCKED = 'USDC Gated: Collection Unlocked',
-  // Unlocked Download-Only Gated Tracks
   USDC_PURCHASE_GATED_DOWNLOAD_TRACK_UNLOCKED = 'USDC Gated: Download Track Unlocked',
 
-  // Feed
   FEED_CHANGE_VIEW = 'Feed: Change view',
 
-  // Notifications
   NOTIFICATIONS_OPEN = 'Notifications: Open',
-  /** Mobile: push open; also used in web dev to seed Amplitude event properties */
   NOTIFICATIONS_OPEN_PUSH_NOTIFICATION = 'Notifications: Open Push Notification',
   NOTIFICATIONS_CLICK_TILE = 'Notifications: Clicked Tile',
   NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE = 'Notifications: Clicked Milestone Twitter Share',
@@ -134,12 +100,10 @@ export enum Name {
   NOTIFICATIONS_CLICK_USDC_PURCHASE_TWITTER_SHARE = 'Notifications: Clicked USDC Purchase Twitter Share',
   BROWSER_NOTIFICATION_SETTINGS = 'Browser Push Notification',
 
-  // Playback
   PLAYBACK_PLAY = 'Playback: Play',
   PLAYBACK_PAUSE = 'Playback: Pause',
   PLAYLIST_PLAY = 'Playlist: Play',
 
-  // Play Queue
   PLAY_QUEUE_OPEN = 'Play Queue: Open',
   PLAY_QUEUE_CLOSE = 'Play Queue: Close',
   PLAY_QUEUE_ADD_TRACK = 'Play Queue: Add Track',
@@ -148,42 +112,32 @@ export enum Name {
   PLAY_QUEUE_PLAY_TRACK = 'Play Queue: Play Track',
   PLAY_QUEUE_CLEAR = 'Play Queue: Clear',
 
-  // Navigation
   PAGE_VIEW = 'Page View',
 
-  // Modals
   MODAL_OPENED = 'Modal Opened',
   MODAL_CLOSED = 'Modal Closed',
 
-  // Explore
   EXPLORE_SECTION_CLICK = 'Explore: Section Click',
 
-  // Weekly Rotation
   WEEKLY_ROTATION_BANNER_VIEW = 'Weekly Rotation: Banner View',
   WEEKLY_ROTATION_BANNER_CLICK = 'Weekly Rotation: Banner Click',
   WEEKLY_ROTATION_PAGE_VIEW = 'Weekly Rotation: Page View',
   WEEKLY_ROTATION_PLAY_ALL = 'Weekly Rotation: Play All',
 
-  // Errors
   ERROR_PAGE = 'Error Page',
 
-  // Remixes
   STEM_COMPLETE_UPLOAD = 'Stem: Complete Upload',
 
-  // $AUDIO
   SEND_AUDIO_SUCCESS = 'Send $AUDIO: Success',
   SEND_AUDIO_FAILURE = 'Send $AUDIO: Failure',
 
-  // Playlist library
   PLAYLIST_LIBRARY_MOVE_PLAYLIST_INTO_FOLDER = 'Playlist Library: Move Playlist Into Folder',
   PLAYLIST_LIBRARY_ADD_PLAYLIST_TO_FOLDER = 'Playlist Library: Add Playlist To Folder',
   PLAYLIST_LIBRARY_MOVE_PLAYLIST_OUT_OF_FOLDER = 'Playlist Library: Move Playlist Out of Folder',
 
-  // Rewards
   REWARDS_CLAIM_ALL_REQUEST = 'Rewards Claim All: Request',
   REWARDS_CLAIM_ALL_SUCCESS = 'Rewards Claim All: Success',
 
-  // Buy USDC
   BUY_USDC_ON_RAMP_OPENED = 'Buy USDC: On Ramp Opened',
   BUY_USDC_ON_RAMP_CANCELED = 'Buy USDC: On Ramp Canceled',
   BUY_USDC_ON_RAMP_FAILURE = 'Buy USDC: On Ramp Failed',
@@ -217,7 +171,6 @@ export enum Name {
   WITHDRAW_USDC_FAILURE = 'Withdraw USDC: Failure',
   WITHDRAW_USDC_TRANSACTION_LINK_CLICKED = 'Withdraw USDC: Transaction Link Clicked',
 
-  // Stripe Tracking
   STRIPE_SESSION_CREATION_ERROR = 'Stripe: Session Creation Error',
   STRIPE_SESSION_CREATED = 'Stripe Session: Created',
   STRIPE_MODAL_INITIALIZED = 'Stripe Modal: Initialized',
@@ -235,7 +188,6 @@ export enum Name {
   PURCHASE_CONTENT_TOS_CLICKED = 'Purchase Content: Terms of Service Link Clicked',
   PURCHASE_CONTENT_USDC_USER_BANK_COPIED = 'Purchase Content: USDC User Bank Copied',
 
-  // Chat
   CHAT_BLAST_MESSAGE_SENT = 'Chat Blast: Message Sent',
   SEND_MESSAGE_SUCCESS = 'Send Message: Success',
   MESSAGE_UNFURL_TRACK = 'Message Unfurl: Track',
@@ -244,13 +196,10 @@ export enum Name {
   CHAT_ENTRY_POINT = 'Chat Entry Point',
   CHAT_WEBSOCKET_ERROR = 'Chat Websocket Error',
 
-  // Export Private Key
   EXPORT_PRIVATE_KEY_LINK_CLICKED = 'Export Private Key: Settings Link Clicked',
 
-  // Comments
   COMMENTS_NOTIFICATION_OPEN = 'Comments: Notification Open',
 
-  // Fan Club Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
   LAUNCHPAD_HAS_EXISTING_FAN_CLUB = 'Launchpad: Has Existing Artist Coin',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
@@ -296,7 +245,6 @@ type PageView = {
   route: string
 }
 
-// Create Account
 export type CreateAccountOpen = {
   eventName: Name.CREATE_ACCOUNT_OPEN
   source:
@@ -366,7 +314,6 @@ type CreateAccountWelcomeModalUploadTrack = {
   emailAddress: string
   handle: string
 }
-// Sign In
 type SignInStart = {
   eventName: Name.SIGN_IN_START
 }
@@ -380,7 +327,6 @@ type SignInWithIncompleteAccount = {
   handle: string
 }
 
-// Error
 type ErrorPage = {
   eventName: Name.ERROR_PAGE
   error: string
@@ -390,7 +336,6 @@ type ErrorPage = {
 type AccountHealthMeterFull = {
   eventName: Name.ACCOUNT_HEALTH_METER_FULL
 }
-// Social
 export enum ShareSource {
   TILE = 'tile',
   PAGE = 'page',
@@ -425,9 +370,6 @@ export enum FavoriteSource {
   TRACK_LIST = 'track list',
   SIGN_UP = 'sign up',
   OFFLINE_DOWNLOAD = 'offline download',
-  // Favorite triggered by some implicit action, e.g.
-  // you had a smart collection and it was favorited so it
-  // shows in your left-nav.
   IMPLICIT = 'implicit',
   NAVIGATOR = 'navigator',
   WEEKLY_ROTATION = 'weekly rotation'
@@ -502,7 +444,6 @@ type TweetFirstUpload = {
   handle: string
 }
 
-// Playlist
 export enum CreatePlaylistSource {
   NAV = 'nav',
   CREATE_PAGE = 'create page',
@@ -510,8 +451,6 @@ export enum CreatePlaylistSource {
   LIBRARY_PAGE = 'library page',
   PROFILE_PAGE = 'profile page'
 }
-
-// Folder
 
 type FolderDelete = {
   eventName: Name.FOLDER_DELETE
@@ -524,7 +463,6 @@ type EmbedCopy = {
   size: 'card' | 'compact' | 'tiny'
 }
 
-// Track Upload
 type TrackUploadOpen = {
   eventName: Name.TRACK_UPLOAD_OPEN
   source: 'nav' | 'profile' | 'signup' | 'library' | 'dashboard'
@@ -567,7 +505,6 @@ type TrackUploadUSDCGatedDownload = {
   lossless: boolean
 }
 
-// Unlocked Gated Tracks
 type USDCGatedTrackUnlocked = {
   eventName: Name.USDC_PURCHASE_GATED_TRACK_UNLOCKED
   count: number
@@ -578,13 +515,11 @@ type USDCGatedDownloadTrackUnlocked = {
   count: number
 }
 
-// Feed
 type FeedChangeView = {
   eventName: Name.FEED_CHANGE_VIEW
   view: FeedFilter | FeedTab
 }
 
-// Notifications
 type NotificationsOpen = {
   eventName: Name.NOTIFICATIONS_OPEN
   source: 'button' | 'push notifications'
@@ -594,16 +529,13 @@ type NotificationsOpenPushNotification = {
   title?: string
   body?: string
   notificationCampaignId?: string
-  /** The push payload's `data.type`, e.g. `WeeklyRotation` */
   type?: string
-  /** The push payload's `data.id`, when it has one */
   id?: string
 }
 type NotificationsClickTile = {
   eventName: Name.NOTIFICATIONS_CLICK_TILE
   kind: string
   link_to: string
-  /** Internal campaign id when kind is announcement */
   notificationCampaignId?: string
 }
 type NotificationsClickMilestone = {
@@ -642,7 +574,6 @@ type NotificationsClickTastemaker = {
   eventName: Name.NOTIFICATIONS_CLICK_TASTEMAKER_TWITTER_SHARE
   text: string
 }
-// Playback
 export enum PlaybackSource {
   PLAYBAR = 'playbar',
   NOW_PLAYING = 'now playing',
@@ -670,11 +601,7 @@ type PlaybackPlay = {
   isPreview?: boolean
   source: PlaybackSource
   collectionId?: string
-  // Which feed view the play originated from (matches FEED_CHANGE_VIEW's
-  // `view` values). Only present for plays coming from the feed lineup.
   feed_type?: FeedTab
-  // Owner of the Weekly Rotation mix the track was queued from. Set on
-  // passive plays so auto-advance through a mix is attributable to it.
   weeklyRotationOwnerId?: string
 }
 type PlaybackPause = {
@@ -692,7 +619,6 @@ type PlaylistPlay = {
   isPreview?: boolean
 }
 
-// Play Queue
 type PlayQueueOpen = {
   eventName: Name.PLAY_QUEUE_OPEN
   source: 'queue'
@@ -748,16 +674,14 @@ export enum ModalSource {
   OverflowMenu = 'overflow menu',
   TrackLibrary = 'track library',
   Comment = 'comment',
-  // Should never be used, but helps with type-checking
   Unknown = 'unknown'
 }
 
-// Modals
 type ModalOpened = {
   eventName: Name.MODAL_OPENED
   source: ModalSource | ShareSource
   name: string
-} & Record<string, any> // For passing state values
+} & Record<string, any>
 
 type ModalClosed = {
   eventName: Name.MODAL_CLOSED
@@ -769,7 +693,6 @@ export type SearchSource =
   | 'search results page'
   | 'more results page'
 
-// Explore
 export type ExploreSectionName =
   | 'Recommended Tracks'
   | 'Artist Coin Tracks'
@@ -805,15 +728,12 @@ type ExploreSectionClick = {
   link?: string
 }
 
-/** Surface the banner was rendered on, so events can be split by entry point. */
 export type WeeklyRotationSurface = 'explore' | 'feed'
 
 type WeeklyRotationMixProperties = {
   source: 'web' | 'mobile'
   trackCount: number
-  /** The mix's period, e.g. `2026-38` (see getWeeklyRotationPeriod) */
   period: string
-  /** Whether the viewer is looking at their own mix rather than a shared one */
   isOwnMix: boolean
   ownerUserId?: string
 }
@@ -851,7 +771,6 @@ type StemCompleteUpload = {
   category: string
 }
 
-/** Where in the app the send was initiated (for analytics parity with legacy Tip Audio) */
 export type SendAudioSource =
   | 'send_tokens_modal'
   | 'oauth_pay_page'
@@ -906,7 +825,7 @@ type AudiusOauthStart = {
   eventName: Name.AUDIUS_OAUTH_START
   redirectUriParam: string | string[]
   originParam: string | string[] | undefined | null
-  appId: string | string[] // App name or API Key
+  appId: string | string[]
   responseMode: string | string[] | undefined | null
   scope: string | string[]
 }
@@ -933,7 +852,6 @@ type AudiusOauthError = {
   error: string
 }
 
-// Buy USDC
 type BuyUSDCOnRampOpened = {
   eventName: Name.BUY_USDC_ON_RAMP_OPENED
   vendor: string
@@ -1022,10 +940,7 @@ type BuySellAddFundsClicked = {
   source: 'insufficient_balance_hint' | 'input_screen'
 }
 
-// Withdraw USDC
-
 export type WithdrawUSDCEventFields = {
-  /** Balance in dollars */
   currentBalance: number
 }
 
@@ -1061,10 +976,8 @@ export type WithdrawUSDCFailure = WithdrawUSDCTransferEventFields & {
   eventName: Name.WITHDRAW_USDC_FAILURE
   error?: unknown
   errorName?: string
-  /** HTTP status code, when the failure was a non-2xx SDK response. */
   httpStatus?: number
   httpStatusText?: string
-  /** Truncated response body, when the failure was a non-2xx SDK response. */
   responseBody?: string
 }
 export type WithdrawUSDCCancelled = WithdrawUSDCTransferEventFields & {
@@ -1086,10 +999,8 @@ export type WithdrawUSDCCreateDestAccountFailure =
     eventName: Name.WITHDRAW_USDC_CREATE_DEST_TOKEN_ACCOUNT_FAILED
     error?: unknown
     errorName?: string
-    /** HTTP status code, when the failure was a non-2xx SDK response. */
     httpStatus?: number
     httpStatusText?: string
-    /** Truncated response body, when the failure was a non-2xx SDK response. */
     responseBody?: string
   }
 
@@ -1119,7 +1030,6 @@ export type WithdrawUSDCTxLinkClicked = WithdrawUSDCTransferEventFields & {
   signature: string
 }
 
-// Stripe Tracking
 export type StripeEventFields = {
   amount: string
   destinationCurrency: string
@@ -1159,8 +1069,6 @@ type StripeError = StripeEventFields & {
 type StripeRejected = StripeEventFields & {
   eventName: Name.STRIPE_REJECTED
 }
-
-// Content Purchase
 
 type ContentPurchaseMetadata = {
   price: number
@@ -1234,7 +1142,6 @@ type ChatReportUser = {
 type ChatEntryPoint = {
   eventName: Name.CHAT_ENTRY_POINT
   source: 'banner' | 'navmenu' | 'share' | 'profile'
-  /** What was shared, when source is `share` */
   kind?:
     | 'profile'
     | 'album'
@@ -1249,7 +1156,6 @@ type ChatWebsocketError = {
   code?: string
 }
 
-// Export Private Key
 type ExportPrivateKeyLinkClicked = {
   eventName: Name.EXPORT_PRIVATE_KEY_LINK_CLICKED
   handle?: string
@@ -1262,7 +1168,6 @@ export type CommentsNotificationOpen = {
   notificationType: 'comment' | 'reaction' | 'thread' | 'mention'
 }
 
-// Fan Club Launchpad
 export type LaunchpadSplashGetStarted = {
   eventName: Name.LAUNCHPAD_SPLASH_GET_STARTED
 }

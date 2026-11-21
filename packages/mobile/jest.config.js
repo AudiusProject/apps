@@ -1,18 +1,12 @@
 const path = require('path')
 
-// Resolve from this package so the mapping works whether npm hoists these to
-// the repo root or keeps them under packages/mobile/node_modules.
 const resolvePackageDir = (name) =>
   path.dirname(require.resolve(`${name}/package.json`, { paths: [__dirname] }))
 
 module.exports = {
   preset: 'react-native',
-  // Use the JS implementation of Worklets instead of the native one, which
-  // needs the native runtime.
   resolver: 'react-native-worklets/jest/resolver',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  // A screen's first render loads its whole module tree, which can take
-  // longer than the 5s default on CI runners.
   testTimeout: 30000,
   moduleNameMapper: {
     '^react-native$': resolvePackageDir('react-native'),

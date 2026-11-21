@@ -8,20 +8,8 @@ import { FeatureFlags } from '~/services/remote-config/feature-flags'
 import { useFeatureFlag } from './useFeatureFlag'
 
 const QUEUE_NEW_BADGE_DISMISSED_KEY = '@queue-new-feature-badge-dismissed'
-// Mirrors the IDENTIFY action type in common/store/analytics/actions.
-// Dispatching this triggers the analytics saga to forward traits to Amplitude
-// as user properties, so the A/B variation can be sliced in Amplitude charts.
 const ANALYTICS_IDENTIFY = 'ANALYTICS/IDENTIFY'
 
-/**
- * Drives the "New" indicator on the play queue button.
- *
- * `showBadge` is true only when:
- *   1. Remote config feature flag is loaded AND enabled (treatment cohort), and
- *   2. The user has not dismissed the badge before (per local storage).
- *
- * `dismiss` permanently hides the badge for this user/device.
- */
 export const useQueueNewFeatureBadge = () => {
   const { localStorage } = useAppContext()
   const { isLoaded, isEnabled } = useFeatureFlag(

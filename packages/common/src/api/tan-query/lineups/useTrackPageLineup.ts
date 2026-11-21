@@ -94,13 +94,9 @@ export const useTrackPageLineup = (
       tracks.push(heroTrack as UserTrackMetadata)
       indices.mainTrackIndex = 0
 
-      // If hero track is a remix, get the parent track
       const heroTrackRemixParentTrackId =
         heroTrack.remix_of?.tracks?.[0]?.parent_track_id
 
-      // Fire every request at once instead of one after another. Recommended
-      // tracks are only shown when there are no remixes, but requesting them
-      // up front saves a round trip in the common case.
       const remixParentPromise = heroTrackRemixParentTrackId
         ? sdk.tracks.getTrack({
             trackId: Id.parse(heroTrackRemixParentTrackId),
@@ -126,7 +122,6 @@ export const useTrackPageLineup = (
         genre: heroTrack.genre,
         limit: pageSize
       })
-      // Only awaited (and so only fails the query) when it's needed
       trendingPromise.catch(() => {})
 
       const [remixParentTrack, remixesData, { data = [] }] = await Promise.all([
@@ -145,7 +140,6 @@ export const useTrackPageLineup = (
           indices.remixParentSection.pageSize = 1
         }
       } else {
-        // If hero track is remixable (not a remix), show its remixes
         if (remixesData?.data?.tracks) {
           const processedRemixes = transformAndCleanList(
             remixesData.data.tracks,
@@ -159,7 +153,6 @@ export const useTrackPageLineup = (
         }
       }
 
-      // More tracks by the artist
       const processedTracks = transformAndCleanList(
         data,
         userTrackMetadataFromSDK
@@ -178,7 +171,6 @@ export const useTrackPageLineup = (
         indices.moreBySection.pageSize = processedTracks.length
       }
 
-      // If there are no remixes, get recommended tracks based on genre
       if (indices.remixesSection.index === undefined) {
         const { data: trendingData } = await trendingPromise
 
@@ -217,16 +209,13 @@ export const useTrackPageLineup = (
   const trackIds = firstPage?.trackIds ?? []
   const indices = firstPage?.indices
 
-  // Expose as `data` for lineup-data consumers (list of { id, type }).
   const data = trackIds.map((id) => ({ id, type: EntityType.TRACK }))
 
   return {
-    // Raw data
     data,
     trackIds,
     indices,
 
-    // Query state
     isPending: query.isPending,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
@@ -237,25 +226,10 @@ export const useTrackPageLineup = (
     fetchNextPage: query.fetchNextPage,
     loadNextPage: makeLoadNextPage(query),
 
-    // Identity
     queryKey
   }
 }
 
-/**
- * Warms the track page lineup ("more by", remixes, "you might also like") as
- * early as possible so the lineup renders from cache instead of starting its
- * fetch only once `TrackScreenLineup` mounts — which on mobile is gated behind
- * the screen-ready / nav-animation delay in `ScreenSecondaryContent`.
- *
- * Unlike comments, this query genuinely depends on the hero track and its
- * owner's handle (see the `enabled` guard in `useTrackPageLineup`), so it can't
- * fire from a bare trackId before the track resolves. But hoisting it above the
- * secondary content gate lets it fire the instant those deps are ready —
- * overlapping the push transition instead of waiting for it to finish. Keeps a
- * live observer so the warmed data is shared with `TrackScreenLineup`'s own
- * query.
- */
 export const usePrefetchTrackPageLineup = (trackId: ID | null | undefined) => {
   useTrackPageLineup({ trackId })
 }

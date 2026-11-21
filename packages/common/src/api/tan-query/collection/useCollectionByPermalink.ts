@@ -38,7 +38,6 @@ export const getCollectionByPermalinkQueryFn = async (
   const collection = userCollectionMetadataFromSDK(data[0])
 
   if (collection) {
-    // Prime related entities
     primeCollectionData({
       collections: [collection],
       queryClient

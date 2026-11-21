@@ -21,7 +21,6 @@ function removeAudiusDelegator(
     try {
       await aud.Delegate.requestRemoveDelegator(serviceProvider, delegator)
 
-      // Repull for user information and pending transactions
       const state = getState()
       const wallet = getAccountWallet(state)
       if (wallet === serviceProvider)

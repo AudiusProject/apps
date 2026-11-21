@@ -28,7 +28,6 @@ export const useManagers = <TResult = UserManagerMetadata[] | undefined>(
         id: Id.parse(userId)
       })
       const { data: rawData = [] } = managers
-      // Only include approved or pending (not explicitly false)
       const data = rawData.filter((g: any) => g.grant.isApproved !== false)
       return userManagerListFromSDK(data) as TResult
     },

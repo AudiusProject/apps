@@ -27,8 +27,6 @@ import { UserNameLink } from './components/UserNameLink'
 const messages = {
   title: 'Track Collaboration Invite',
   invitedYou: 'invited you to collaborate on',
-  // The track may be private — a pending collaborator can't load it yet, so fall
-  // back to a generic noun rather than blocking the whole notification.
   aTrack: 'a track',
   accept: 'Accept',
   decline: 'Decline',
@@ -57,7 +55,6 @@ export const TrackCollaboratorInviteNotification = (
     data: isCollaborationAccepted,
     isPending: isCollaborationStatusPending
   } = useTrackCollaborationStatus(trackId, currentUserId)
-  // Best-effort: private tracks won't load for a pending collaborator.
   const { data: track } = useTrack(trackId)
   const { mutate: acceptCollaboration, isPending: isAccepting } =
     useAcceptTrackCollaboration()
@@ -114,9 +111,6 @@ export const TrackCollaboratorInviteNotification = (
     [rejectCollaboration, trackId, toast]
   )
 
-  // Only the inviter (a public user) is required to render; the track itself
-  // may be unavailable (private) without breaking accept/decline, which act on
-  // the trackId carried by the notification.
   if (!inviter) return null
 
   return (

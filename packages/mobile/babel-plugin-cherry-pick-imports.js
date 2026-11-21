@@ -1,6 +1,3 @@
-// Metro can't tree-shake, so `import { debounce } from 'lodash'` bundles all
-// of lodash and `import { useAsync } from 'react-use'` bundles every hook.
-// Rewrite named imports to per-member modules.
 const path = require('path')
 
 const packages = {

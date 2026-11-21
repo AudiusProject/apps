@@ -53,7 +53,6 @@ export const usePinComment = () => {
     },
     onMutate: ({ commentId, isPinned, trackId, currentSort }) => {
       if (isPinned) {
-        // Loop through the sort list and move the newly pinned comment
         queryClient.setQueryData(
           getTrackCommentListQueryKey({ trackId, sortMethod: currentSort }),
           (prevCommentData) => {
@@ -62,11 +61,9 @@ export const usePinComment = () => {
               pageParams: [0]
             }
             let commentPages = newCommentData.pages
-            // Filter out the comment from its current page
             commentPages = commentPages.map((page: ID[]) =>
               page.filter((id: ID) => id !== commentId)
             )
-            // Insert our pinned comment id at the top of page 0
             if (commentPages.length > 0 && Array.isArray(commentPages[0])) {
               commentPages[0].unshift(commentId)
             } else if (commentPages.length === 0) {
@@ -90,7 +87,6 @@ export const usePinComment = () => {
     onError: (error: Error, args) => {
       const { trackId, currentSort, previousPinnedCommentId } = args
       console.error(error)
-      // Toast standard error message
       dispatch(toast({ content: messages.mutationError('pinning') }))
       queryClient.setQueryData(
         getTrackQueryKey(trackId),
@@ -100,7 +96,6 @@ export const usePinComment = () => {
             pinned_comment_id: previousPinnedCommentId ?? null
           }
       )
-      // Since this mutationx handles sort data, its difficult to undo the optimistic update so we just re-load everything
       queryClient.resetQueries({
         queryKey: getTrackCommentListQueryKey({
           trackId,

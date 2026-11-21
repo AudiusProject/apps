@@ -1,14 +1,14 @@
 import type { TextStyle } from 'react-native'
 
 export type FontWeight =
-  | 'heavy' // 900
-  | 'bold' // 700
-  | 'demiBold' // 600
-  | 'medium' // 500
-  | 'regular' // 400
-  | 'light' // 300
-  | 'thin' // 200
-  | 'ultraLight' // 100
+  | 'heavy'
+  | 'bold'
+  | 'demiBold'
+  | 'medium'
+  | 'regular'
+  | 'light'
+  | 'thin'
+  | 'ultraLight'
 
 export const fontByWeight: Record<FontWeight, string> = {
   heavy: 'AvenirNextLTPro-Heavy',

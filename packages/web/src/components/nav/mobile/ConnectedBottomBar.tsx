@@ -34,7 +34,6 @@ const ConnectedBottomBar = () => {
   })
   const { handle, isGuestAccount } = accountData ?? {}
 
-  // Memoize navRoutes to avoid recreating Set on every render
   const navRoutes = useMemo(() => {
     return new Set([
       FEED_PAGE,
@@ -45,14 +44,9 @@ const ConnectedBottomBar = () => {
     ])
   }, [])
 
-  // Use ref to track last nav route synchronously (avoids render loops)
-  // This is critical for React Router v7 compatibility where location updates
-  // can happen before component re-renders
   const lastNavRouteRef = useRef(FEED_PAGE)
   const currentRoute = getPathname(location)
 
-  // Compute current page synchronously: use current route if it's a nav route,
-  // otherwise keep the last nav route. Update ref during computation to avoid useEffect.
   const currentPage = useMemo(() => {
     if (navRoutes.has(currentRoute)) {
       lastNavRouteRef.current = currentRoute
@@ -64,7 +58,6 @@ const ConnectedBottomBar = () => {
   const goToRoute = useCallback(
     (route: string) => {
       const currentPath = getPathname(location)
-      // Prevent navigating to the same route
       if (currentPath === route) {
         return
       }

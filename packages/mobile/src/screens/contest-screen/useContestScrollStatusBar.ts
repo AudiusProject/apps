@@ -10,13 +10,6 @@ import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { CONTEST_NAV_SCROLL_FADE_PX } from './ContestNavOverlay'
 
-/**
- * Status bar / nav bar style for the contest screen: light icons over the
- * hero cover at the top, then switch to icons that contrast with the
- * blurred `ContestNavOverlay` surface once the hero has scrolled up — dark
- * icons on the light-blur surface in light mode, light icons on the
- * dark-blur surface in dark mode. Mirrors `useProfileScrollStatusBar`.
- */
 export const useContestScrollStatusBar = (scrollY: SharedValue<number>) => {
   const statusBarEntryRef = useRef<StatusBarProps | null>(null)
   const navigationBarEntryRef = useRef<StatusBarProps | null>(null)
@@ -57,7 +50,6 @@ export const useContestScrollStatusBar = (scrollY: SharedValue<number>) => {
         barStyle: 'light-content'
       })
 
-      // Align with restored scroll position (reaction only fires on change).
       requestAnimationFrame(() => {
         const barStyle =
           scrollY.value < CONTEST_NAV_SCROLL_FADE_PX
@@ -94,9 +86,6 @@ export const useContestScrollStatusBar = (scrollY: SharedValue<number>) => {
     [applyBarStyle, scrolledBarStyle]
   )
 
-  // Re-apply when the theme changes while the screen is already scrolled —
-  // otherwise the status bar stays on the previous mode's content style
-  // until the user scrolls across the fade threshold again.
   useEffect(() => {
     if (scrollY.value < CONTEST_NAV_SCROLL_FADE_PX) return
     applyBarStyle(scrolledBarStyle)

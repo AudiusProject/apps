@@ -14,20 +14,14 @@ import { usePortal } from 'hooks/usePortal'
 import styles from './Drawer.module.css'
 const animatedAny = animated as any
 
-// Fraction of swipe up to fade (1 / FADE_FRACTION_DENOMINATOR)
 const FADE_FRACTION_DENOMINATOR = 2
 
-// Cut off where an open is considered an open
 const OPEN_CUTOFF = 0.2
-// Cut off where a close is considered a close
 const CLOSE_CUTOFF = 0.7
-// Cut off where velocity trumps open/close cut offs
 const VELOCITY_CUTOFF = 0.5
 
-// Controls the amount of friction in swiping when overflowing up or down
 const OVERFLOW_FRICTION = 4
 
-// The opacity of the background when the drawer is open
 const BACKGROUND_OPACITY = 0.5
 
 const wobble = {
@@ -46,7 +40,6 @@ const stiff = {
   friction: 40
 }
 
-// Interpolates a single y-value into a string translate3d
 const interpY = (y: number) => `translate3d(0, ${y}px, 0)`
 
 export type DrawerProps = {
@@ -70,11 +63,8 @@ const DraggableDrawer = ({
 }: DrawerProps) => {
   const Portal = usePortal({})
 
-  // Stores the initial translation of the drawer
   const [initialTranslation] = useInstanceVar(0)
-  // Stores the last transition
   const [currentTranslation, setCurrentTranslation] = useInstanceVar(0)
-  // isBackgroundVisible will be true until the close animation finishes
   const [isBackgroundVisible, setIsBackgroundVisible] = useState(false)
 
   const [contentRef, { height: contentHeight }] = useMeasure<HTMLDivElement>()
@@ -166,10 +156,8 @@ const DraggableDrawer = ({
     onClose
   ])
 
-  // Handle the "controlled" component
   useEffect(() => {
     if (isOpen) {
-      // Ensure that our drawer knows the height of its inner contents
       setImmediate(open)
     }
   }, [open, isOpen])
@@ -192,22 +180,17 @@ const DraggableDrawer = ({
 
       let newY = memo + my
 
-      // Overflow dragging up: the height of the drawer drag is > window height
-      // Add friction
       const topOverflow = Math.abs(newY) - height
       if (topOverflow > 0) {
         newY = -1 * height - topOverflow / OVERFLOW_FRICTION
       }
 
-      // Overflow dragging down: the height of the drawer < playbar height
-      // Add friction
       const bottomOverflow = newY
       if (bottomOverflow > 0) {
         newY = bottomOverflow / OVERFLOW_FRICTION
       }
 
       if (last) {
-        // If this is the last touch event, potentially open or close the drawer
         if (vy === 0) {
           if (Math.abs(newY) > height * OPEN_CUTOFF) {
             open()
@@ -216,7 +199,6 @@ const DraggableDrawer = ({
           }
           // Click, do nothing
         } else if (vy < 0) {
-          // swipe up
           if (
             Math.abs(newY) > height * OPEN_CUTOFF ||
             Math.abs(vy) > VELOCITY_CUTOFF
@@ -226,7 +208,6 @@ const DraggableDrawer = ({
             close()
           }
         } else {
-          // swipe down
           if (Math.abs(newY) < height * CLOSE_CUTOFF || vy > VELOCITY_CUTOFF) {
             close()
           } else {
@@ -234,7 +215,6 @@ const DraggableDrawer = ({
           }
         }
       } else if (!first) {
-        // Otherwise track the touch events with the drawer
         setDrawerSlideProps({
           to: {
             y: newY
@@ -253,7 +233,6 @@ const DraggableDrawer = ({
         }
         setContentFadeProps({
           to: {
-            // Animate from opacity 1 to 0 at 1/FADE_FRACTION_DENOMINATOR the height
             opacity: Math.max(0, newFade)
           },
           immediate: true,
@@ -311,8 +290,6 @@ const DraggableDrawer = ({
 }
 
 const interpolateBorderRadius = (r: number) => {
-  // multiply R by some constant and then clamp so that for the majority
-  // of the transition, it stays at it's initial value
   const r2 = Math.max(Math.min(r * 10, 40), 0)
   return `${r2}px ${r2}px 0px 0px`
 }
@@ -326,7 +303,6 @@ const FullscreenDrawer = ({
   'aria-labelledby': ariaLabelledBy
 }: DrawerProps) => {
   const drawerRef = useRef<HTMLDivElement | null>(null)
-  // Lock to prevent double scrollbars
   useEffect(() => {
     setImmediate(() => {
       if (drawerRef.current && isOpen) {

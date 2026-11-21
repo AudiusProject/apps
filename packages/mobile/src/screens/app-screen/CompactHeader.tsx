@@ -17,29 +17,15 @@ import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
 
-/** Height of the compact title pill. */
 const COMPACT_TITLE_HEIGHT = 36
-/** Height of the glass bar holding a screen's pinned controls: large pills. */
 const COMPACT_CONTROLS_HEIGHT = 44
-/** Gap between the status bar and the pinned chrome. */
 const COMPACT_TOP_GAP = 4
-/** Closest the controls bar gets to the screen edges. */
 const COMPACT_SIDE_GAP = 8
 
-/** Page-colored tint so pill text stays readable over the list. */
 const useCompactTint = () => `${useThemeColors().background.slice(0, 7)}B3`
 
-/** How far compact chrome drifts down as it fades in. */
 const FADE_DRIFT = 6
 
-/**
- * Fades compact chrome in as the in-flow header scrolls away.
- *
- * iOS 26 glass stops rendering under a parent that fades from 0, so there
- * only the content fades with scroll, and the glass itself materializes
- * natively (its `effect` switches on) once the chrome is half formed.
- * Everywhere else the whole pill fades.
- */
 const useCompactFade = (progress: SharedValue<number>) => {
   const [isShown, setIsShown] = useState(false)
   useAnimatedReaction(
@@ -90,11 +76,6 @@ type CompactTitlePillProps = {
   progress: SharedValue<number>
 }
 
-/**
- * The small glass pill a root screen's header contracts to once its title row
- * has scrolled away. Pinned just under the status bar. Only for screens with
- * no controls row; those pin their controls instead.
- */
 export const CompactTitlePill = (props: CompactTitlePillProps) => {
   const { title, progress } = props
   const styles = useStyles()
@@ -133,11 +114,6 @@ type CompactControlsProps = {
   progress: SharedValue<number>
 }
 
-/**
- * A screen's controls (tab pills, filter) in a glass bar pinned under the
- * status bar. Rendered by the screen so tab state changes don't rebuild the
- * navigation header.
- */
 export const CompactControls = (props: CompactControlsProps) => {
   const { children, progress } = props
   const styles = useStyles()
@@ -186,8 +162,6 @@ const layout = StyleSheet.create({
   },
   capsule: {
     alignSelf: 'center',
-    // GlassCapsule insets itself 16px from each edge while floating; centered
-    // pills size to their content instead.
     marginHorizontal: 0
   }
 })

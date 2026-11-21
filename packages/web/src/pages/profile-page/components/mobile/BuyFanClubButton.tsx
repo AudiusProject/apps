@@ -22,7 +22,6 @@ export const BuyFanClubButton = ({ userId }: BuyFanClubButtonProps) => {
     }
   }
 
-  // Don't render if user doesn't own a coin
   if (!fanClub?.mint || isFanClubLoading) {
     return null
   }

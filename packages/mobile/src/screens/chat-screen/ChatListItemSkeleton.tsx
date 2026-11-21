@@ -31,15 +31,12 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   }
 }))
 
-// When the ChatList is loading for the first time we want to show a fading out effect
-// for the skeleton items. But on subsequent loads, we want to show the skeleton items
-// at full opacity and set shouldFade = false.
 export const ChatListItemSkeleton = ({
   shouldFade = false,
   index = 0
 }: {
   shouldFade?: boolean
-  index?: number // Required when shouldFade = true
+  index?: number
 }) => {
   const styles = useStyles()
 
@@ -51,10 +48,7 @@ export const ChatListItemSkeleton = ({
       backgroundColor='white'
       borderBottom='default'
       w='100%'
-      style={[
-        // Only the first 4 items will be visible and have decreasing opacity.
-        shouldFade ? { opacity: (4 - index) * 0.25 } : null
-      ]}
+      style={[shouldFade ? { opacity: (4 - index) * 0.25 } : null]}
     >
       <Flex row justifyContent='space-between' w='100%' gap='s'>
         <Flex row flex={1} justifyContent='space-between'>

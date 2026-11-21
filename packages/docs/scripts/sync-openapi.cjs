@@ -11,9 +11,7 @@ const SERVERS_BLOCK = `servers:
     description: Production`
 
 function replaceServers(yaml) {
-  // Remove any existing servers block
   const stripped = yaml.replace(/^servers:[\s\S]*?(?=^\S)/m, '')
-  // Insert servers block immediately after the info: block
   return stripped.replace(/^(info:[\s\S]*?)(?=^\S)/m, `$1${SERVERS_BLOCK}\n`)
 }
 

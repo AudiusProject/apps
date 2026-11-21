@@ -26,12 +26,6 @@ export const getEmailInUseQueryKey = (email: string | null | undefined) => {
   return [QUERY_KEYS.emailInUse, email] as unknown as QueryKey<EmailInUse>
 }
 
-/**
- * Email-in-use lookup for zod form validators.
- * Returns null without a request until the email is complete, and returns an
- * error message instead of throwing because zod-formik-adapter crashes on
- * non-zod errors.
- */
 export const fetchEmailInUseForValidation = async (
   email: string,
   queryContext: QueryContextType,
@@ -54,9 +48,6 @@ export const fetchEmailInUseForValidation = async (
   }
 }
 
-/**
- * Hook to check if an email is already registered
- */
 export const useEmailInUse = <TResult = EmailInUse>(
   email: string | null | undefined,
   options?: SelectableQueryOptions<EmailInUse, TResult>

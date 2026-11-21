@@ -15,7 +15,6 @@ import styles from './WhoUsesAudius2026.module.css'
 
 const { profilePage } = route
 
-/** Artists and labels from Figma 2026 rebrand – name and handle; images from API. */
 const ARTISTS: { name: string; handle: string }[] = [
   { name: 'Disclosure', handle: 'disclosure' },
   { name: 'Ookay', handle: 'ookay' },

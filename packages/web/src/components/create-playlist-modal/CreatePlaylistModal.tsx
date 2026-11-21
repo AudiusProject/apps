@@ -111,7 +111,6 @@ export const CreatePlaylistModal = () => {
         {
           playlist_name: playlistName,
           description: trimmedDescription || undefined,
-          // Cast: optimisticallySavePlaylist accepts the form-shape artwork.
           ...(artwork ? { artwork: artwork as any } : {})
         },
         CreatePlaylistSource.NAV,

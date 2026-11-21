@@ -21,37 +21,13 @@ function getUserId(item: UserListDataItem): ID {
 }
 
 type UserListProps<T> = {
-  /**
-   * The list of users to display
-   */
   data: T[] | undefined
-  /**
-   * If the number of users is known, use this prop to display the correct number of skeletons
-   */
   totalCount?: number
-  /**
-   * Whether there are more users to load
-   */
   hasNextPage: boolean
-  /**
-   * Whether we're loading more users
-   */
   isFetchingNextPage: boolean
-  /**
-   * Whether we're loading the initial data
-   */
   isPending: boolean
-  /**
-   * Function to load more users
-   */
   fetchNextPage?: () => void
-  /**
-   * Whether to show ranks (1, 2, 3, etc.) next to users
-   */
   showRank?: boolean
-  /**
-   * Function to render the right content for each user row
-   */
   renderRightContent?: (item: T, index: number) => ReactNode
 }
 

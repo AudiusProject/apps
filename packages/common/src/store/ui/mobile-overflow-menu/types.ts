@@ -1,6 +1,5 @@
 import { ID } from '../../../models/Identifiers'
 
-// OverflowActions users can take
 export enum OverflowAction {
   REPOST = 'REPOST',
   UNREPOST = 'UNREPOST',
@@ -60,8 +59,7 @@ export type OverflowActionCallbacks = {
 }
 
 export type MobileOverflowModalState = {
-  id: ID | string | null /* Notification IDs can be strings */
-  /** For track overflow menus to be able to remove from playlist */
+  id: ID | string | null
   contextPlaylistId: ID | null
   source: OverflowSource
   overflowActions: OverflowAction[]

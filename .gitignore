@@ -214,5 +214,6 @@ packages/identity-service/emailCache
 test-results
 
 # Local agent state
-.claude/
+.claude/*
+!.claude/skills/
 .aider*

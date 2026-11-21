@@ -117,7 +117,6 @@ const FeedPageMobileContent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setHeader, feedTab, feedFilter, isForYou])
 
-  // Set Nav-Bar Menu
   useMainPageHeader()
 
   const lineupProps = isForYou

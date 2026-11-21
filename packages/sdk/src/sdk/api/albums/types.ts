@@ -35,7 +35,6 @@ export type AlbumsApiServicesConfig = {
   logger?: LoggerService
 }
 
-// Album request body types that wrap playlist types but use album field names
 export type CreateAlbumRequestBody = Omit<
   CreatePlaylistRequestBody,
   'playlistName'
@@ -50,7 +49,6 @@ export type UpdateAlbumRequestBody = Omit<
   albumName?: string
 }
 
-// Album request types that wrap playlist request types
 export type CreateAlbumRequest = {
   userId: string
   albumId?: string

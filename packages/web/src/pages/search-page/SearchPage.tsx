@@ -29,7 +29,6 @@ export const SearchPage = () => {
   const showSearchResults = useShowSearchResults()
   const { color } = useTheme()
 
-  // Set nav header
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
     setLeft(LeftPreset.BACK)

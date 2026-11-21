@@ -29,7 +29,6 @@ export const NewEmailField = (props: NewEmailFieldProps) => {
   const isGuest = error === emailSchemaMessages.guestAccountExists
   const hasError = emailInUse || isGuest
 
-  // Track which specific error was shown last
   const lastShownError = usePrevious(error)
 
   useEffect(() => {

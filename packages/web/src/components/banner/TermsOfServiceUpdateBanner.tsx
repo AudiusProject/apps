@@ -12,9 +12,6 @@ const messages = {
 
 const TOS_BANNER_LOCAL_STORAGE_KEY = 'dismissTermsOfServiceBanner10.5.25'
 
-/**
- * Displays a CTA Banner announcing ToS Updates
- */
 export const TermsOfServiceUpdateBanner = () => {
   const hasDismissed = window.localStorage.getItem(TOS_BANNER_LOCAL_STORAGE_KEY)
   const [isVisible, setIsVisible] = useState(!hasDismissed)

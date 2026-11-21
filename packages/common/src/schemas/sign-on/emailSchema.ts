@@ -42,7 +42,6 @@ export const emailSchema = (
             message: emailSchemaMessages.somethingWentWrong
           })
         } else if (isGuest) {
-          // complete guest accounts only
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: emailSchemaMessages.guestAccountExists
@@ -54,6 +53,6 @@ export const emailSchema = (
             message: emailSchemaMessages.emailInUse
           })
         }
-        return z.NEVER // The return value is not used, but we need to return something to satisfy the typing
+        return z.NEVER
       })
   })

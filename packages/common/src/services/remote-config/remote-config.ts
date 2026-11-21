@@ -15,11 +15,8 @@ import {
 } from './feature-flags'
 import { IntKeys, StringKeys, AllRemoteConfigKeys } from './types'
 
-// Constants
-// All optimizely feature keys are lowercase_snake
 const REMOTE_CONFIG_FEATURE_KEY = 'remote_config'
 
-// Internal State
 type State = {
   didInitialize: boolean
   didInitializeUser: boolean
@@ -27,13 +24,8 @@ type State = {
 }
 
 type MobileClientInfo = {
-  /** This is the type of Platform.OS, but we only expect ios or android here */
   mobilePlatform: 'ios' | 'android' | 'web' | 'windows' | 'macos'
   mobileAppVersion: string
-  /**
-   * Running CodePush bundle label (e.g. "v17"), or "native" when the app is
-   * running the binary's embedded bundle with no OTA applied.
-   */
   otaVersion?: string
 }
 
@@ -74,17 +66,14 @@ export const remoteConfig = <
 
   setLogLevel()
 
-  // Optimizely client
   let client: Client | undefined
 
-  /** Mobile app info if platform is mobile */
   let mobileClientInfo: MobileClientInfo | undefined
 
   const emitter = new EventEmitter()
   emitter.setMaxListeners(1000)
 
   async function init() {
-    // Set sessionId for feature flag bucketing
     const savedSessionId = await getFeatureFlagSessionId()
     if (!savedSessionId) {
       const newSessionId = generateSessionId()
@@ -104,9 +93,6 @@ export const remoteConfig = <
     })
   }
 
-  /**
-   * Register a callback for client ready.
-   */
   function onClientReady(cb: () => void) {
     if (state.didInitialize) {
       cb()
@@ -120,9 +106,6 @@ export const remoteConfig = <
     }
   }
 
-  /**
-   * Register a callback for user ready.
-   */
   function onUserReady(cb: () => void) {
     if (state.didInitializeUser) {
       cb()
@@ -135,40 +118,24 @@ export const remoteConfig = <
     }
   }
 
-  // API
-
-  /**
-   * Set the userId for calls to Optimizely.
-   * Prior to calling, uses session ID
-   */
   function setUserId(userId: ID) {
     state.id = userId
     state.didInitializeUser = true
     emitter.emit('setUserId')
   }
 
-  /**
-   * API for listening to setUser events
-   */
   function listenForUserId(cb: () => void | Promise<void>) {
     emitter.addListener('setUserId', cb)
   }
 
-  /**
-   * API to unlisten to setUser events
-   */
   function unlistenForUserId(cb: () => void | Promise<void>) {
     emitter.removeListener('setUserId', cb)
   }
 
-  /**
-   * Access a remotely configured value.
-   */
   function getRemoteVar(key: StringKeys): string | null
   function getRemoteVar(key: IntKeys): number | null
   function getRemoteVar(key: AllRemoteConfigKeys): number | string | null
   function getRemoteVar(key: AllRemoteConfigKeys): number | string | null {
-    // If the client is not ready yet, return early with `null`
     if (!client || !state.id) return null
 
     const id = state.id
@@ -190,15 +157,10 @@ export const remoteConfig = <
     )
   }
 
-  /**
-   * Gets whether a given feature flag is enabled.
-   * Accepts a fallback flag which will be checked if the primary flag is disabled
-   */
   function getFeatureEnabled(flag: FeatureFlags, fallbackFlag?: FeatureFlags) {
     const defaultVal =
       environmentFlagDefaults[environment][flag] ?? flagDefaults[flag]
 
-    // If the client is not ready yet, return early with `null`
     if (!client || !state.id) return defaultVal
 
     const id = state.id
@@ -237,24 +199,14 @@ export const remoteConfig = <
     await new Promise<void>(onClientReady)
   }
 
-  /**
-   * Need this function for feature flags that depend on user id.
-   * This is because the waitForRemoteConfig does not ensure that
-   * user id is available before its promise resolution, meaning
-   * that it will sometimes fallback to the session id
-   * that is set during initialization
-   */
   const waitForUserRemoteConfig = async () => {
     await new Promise<void>(onUserReady)
   }
 
-  // Type predicates
   function isIntKey(key: AllRemoteConfigKeys): key is IntKeys {
     return !!Object.values(IntKeys).find((x) => x === key)
   }
 
-  // Removes some boilerplate around getting values, falling back to defaults,
-  // calling the correct client fn.
   function getValue<T>(
     defaults: { [id: string]: T },
     varKey: string,
@@ -287,7 +239,6 @@ export const remoteConfig = <
     unlistenForUserId
   }
 
-  // Generate negative ints for session IDs
   function generateSessionId() {
     return Math.floor(Math.random() * Number.MIN_SAFE_INTEGER)
   }

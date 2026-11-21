@@ -43,7 +43,6 @@ export const useEventIdsByEntityId = (
 
       const events = await batchGetEvents.fetch(entityId!)
 
-      // Prime the events in the cache
       events.forEach((event) => {
         queryClient.setQueryData(getEventQueryKey(event.eventId), event)
       })

@@ -10,7 +10,6 @@ const messages = {
 }
 
 export enum Layout {
-  // Nothing special
   NORMAL = 'normal',
   TWO_COLUMN_DYNAMIC_WITH_LEADING_ELEMENT = 'two-column-dynamic-with-leading-element',
   TWO_COLUMN_DYNAMIC_WITH_DOUBLE_LEADING_ELEMENT = 'two-column-dynamic-with-double-leading-element'

@@ -8,7 +8,7 @@ describe('Advanced release date calendar', () => {
     [2026, 9, 31],
     [2026, 11, 31],
     [2026, 2, 8], // Daylight saving begins in Los Angeles.
-    [2026, 10, 1] // Daylight saving ends in Los Angeles.
+    [2026, 10, 1]
   ])('allows today and earlier but rejects tomorrow (%i-%i-%i)', (y, m, d) => {
     for (const hour of [0, 12, 23]) {
       const now = new Date(y, m, d, hour, 30)

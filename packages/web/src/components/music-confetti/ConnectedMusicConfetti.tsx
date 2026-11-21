@@ -13,10 +13,6 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { useSelector } from 'utils/reducer'
 import zIndex from 'utils/zIndex'
 
-// Re-enable for easy debugging
-// import useHotkeys from 'hooks/useHotkey'
-// const { show } = musicConfettiActions
-
 const { getTheme } = themeSelectors
 const { hide } = musicConfettiActions
 const { getIsVisible } = musicConfettiSelectors
@@ -26,11 +22,6 @@ const ConnectedMusicConfetti = () => {
   const onConfettiFinished = useCallback(() => {
     dispatch(hide())
   }, [dispatch])
-
-  // Re-enable for easy debugging
-  // useHotkeys({
-  //   88: () => dispatch(show())
-  // })
 
   const isVisible = useSelector(getIsVisible)
   const isMobile = useIsMobile()

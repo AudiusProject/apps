@@ -37,11 +37,8 @@ type TrackTableLineupProps = Omit<
   playingSource?: PlaybackSource
   favoriteSource?: FavoriteSource
   repostSource?: RepostSource
-  // Source tag for the playback queue (also used for stable UID generation).
   source: string
-  // Ordered list of track IDs to display.
   trackIds: ID[]
-  // Fetch state from the underlying tanquery hook.
   isPending?: boolean
   isFetching?: boolean
   isInitialLoading?: boolean
@@ -73,7 +70,6 @@ export const TrackTableLineup = ({
     playbackSelectors.getCurrentTrackId
   )
 
-  // Build playback queue entries keyed to this lineup's source.
   const playbackQueue: PlaybackTrack[] = useMemo(
     () =>
       trackIds.map((id) => ({
@@ -83,7 +79,6 @@ export const TrackTableLineup = ({
     [trackIds, source]
   )
 
-  // Build rows: track metadata + user + stable UID.
   const entries = useMemo(() => {
     if (!tracks || tracks.length === 0) {
       return hasNextPage

@@ -10,26 +10,12 @@ interface SegmentedProgressBarProps {
 const COMPACT_SEGMENT_WIDTH = 144
 const SEGMENT_WIDTH = 206
 
-/**
- * `SegmentedProgressBar` displays a configurable amount of progress segments
- * indicating progress through some task.
- */
 export const SegmentedProgressBar = ({
   numSteps,
   stepsComplete,
   isCompact = false
 }: SegmentedProgressBarProps) => {
   const { color, spacing } = useTheme()
-  /**  Div hierarchy explanation:
-   *
-   * - Outermost div .container provides the grey border
-   *
-   * - Middle div .segmentContainerMask is inset from .container, providing the white 'gap' between the grey border
-   *   and the segments, as well as masking the overflowing child .segment_conatiner div with `overflow: hidden`
-   *
-   * - Innermost div .segmentContainer contains the segments (wow!) and is slightly wider than the .segmentContainerMask
-   *  so that the segments can 'fill out' the rounded corners of the .segmentContainerMask
-   */
   return (
     <Flex
       borderRadius={isCompact ? 'm' : 'l'}
@@ -47,7 +33,6 @@ export const SegmentedProgressBar = ({
         borderRadius={isCompact ? 'm' : 'l'}
         css={{
           background: color.special.gradient,
-          // To keep the first segment from being cut off
           marginLeft: -1
         }}
       >
@@ -60,7 +45,6 @@ export const SegmentedProgressBar = ({
           h={isCompact ? spacing.unit6 : spacing.unit9}
           css={{
             position: 'absolute',
-            // To offset the first segments width inside the container
             left: -1 * spacing.unit1
           }}
         >
@@ -76,7 +60,6 @@ export const SegmentedProgressBar = ({
                   backgroundColor: isComplete ? 'transparent' : 'white',
                   borderRight: isLast ? 'none' : '3px solid white',
                   transition: 'background-color 0.25s ease-out',
-                  // To help with aliasing on the skew
                   marginLeft: -1,
                   marginRight: -1
                 }}

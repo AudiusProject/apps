@@ -29,7 +29,6 @@ const TAB_TO_PATH: Record<LibraryPageTabs, string> = {
   [LibraryPageTabs.PLAYLISTS]: LIBRARY_PLAYLISTS_PAGE
 }
 
-/** URL filter values: all, favorites, reposts, premium (premium = purchase) */
 export const FILTER_URL_VALUES = [
   'all',
   'favorites',

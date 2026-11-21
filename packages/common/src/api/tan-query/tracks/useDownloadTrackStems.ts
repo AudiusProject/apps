@@ -8,22 +8,10 @@ import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 import { useTrack } from './useTrack'
 
-/**
- * Builds a signed url for a zip of the track's stems. The API streams the zip
- * as it fetches each file, so callers hand the url to the platform's
- * downloader instead of waiting on a job.
- */
 export const useDownloadTrackStems = ({ trackId }: { trackId: ID }) => {
   const { audiusSdk, audiusBackend } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Whether the parent track can be bundled into the zip. Two separate
-  // conditions, and both matter:
-  //   - `is_downloadable` — the artist actually offers the full track. If
-  //     this is false there is no downloadable parent file at all.
-  //   - `access.download` — the *gating* check ("this user is allowed to
-  //     download"), which is `true` for any ungated track regardless of
-  //     whether a downloadable file exists.
   const { data: parentDownloadability } = useTrack(trackId, {
     select: (track) => ({
       isDownloadable: track?.is_downloadable === true,

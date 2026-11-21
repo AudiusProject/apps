@@ -23,15 +23,8 @@ import { useContestScrollY } from './ContestScrollContext'
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
-// Height of the nav controls row. The outer ContestScreen uses this
-// value to reserve space via `minHeaderHeight` so the overlay never
-// overlaps the tab bar at full collapse.
 export const CONTEST_NAV_CONTROLS_HEIGHT = 56
 
-// Scroll distance (in px) over which the blur background fades in,
-// the title slides into view, and the button icons transition from
-// `staticWhite` (on the hero) to the neutral theme color (on the
-// blurred white). Kept in sync with the profile nav overlay.
 export const CONTEST_NAV_SCROLL_FADE_PX = 140
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -54,9 +47,6 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   title: {
     ...StyleSheet.absoluteFillObject,
-    // Leave space for the icon buttons on either side of the row so
-    // long contest titles don't visually collide with them when they
-    // fade in.
     paddingHorizontal: spacing(14),
     alignItems: 'center',
     justifyContent: 'center',
@@ -73,27 +63,9 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 type ContestNavOverlayProps = {
   title: string
-  /**
-   * Tap handler for the top-right share icon. Replaces the previous
-   * kebab/overflow drawer entry — Follow now lives next to "Enter
-   * Contest" in the scrolling header so the only persistent overlay
-   * action is Share.
-   */
   onPressShare?: () => void
 }
 
-/**
- * Floating nav bar that sits on top of the contest hero. Starts
- * transparent with `staticWhite` back / share icons so they read on
- * top of the cover image; as the user scrolls the hero out of view
- * a blurred background fades in along with the contest title in the
- * center and neutral-colored icons replace the white ones. Mirrors
- * the profile screen's `ProfileNavOverlay` pattern so both screens
- * share the same header feel.
- *
- * Reads the active tab's scroll position from `ContestScrollContext`
- * (populated by `ContestScrollBridge` inside the collapsible header).
- */
 export const ContestNavOverlay = ({
   title,
   onPressShare

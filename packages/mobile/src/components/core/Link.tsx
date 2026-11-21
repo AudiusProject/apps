@@ -22,8 +22,6 @@ export const useOnOpenLink = () => {
       }
 
       try {
-        // On iOS canOpenURL needs mailto in LSApplicationQueriesSchemes;
-        // openURL does not
         if (url.startsWith('mailto:')) {
           await Linking.openURL(url)
           return

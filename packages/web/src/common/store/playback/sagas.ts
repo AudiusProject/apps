@@ -90,8 +90,6 @@ const { getNftAccessSignatureMap } = gatedContentSelectors
 const { getIsReachable } = reachabilitySelectors
 const { getTrackId: getTrackPageTrackId } = trackPageSelectors
 
-// ===== Engine: load + play the audio for a queued track =====
-
 export const getMirrorStreamUrl = (
   track: Track,
   shouldPreview: boolean,
@@ -111,7 +109,6 @@ export const getMirrorStreamUrl = (
   return streamObj?.url ?? null
 }
 
-// Cascading: each phase tries primary + all mirrors with growing timeouts.
 const getStreamUrlAndTimeout = (
   streamObj: { url?: string; mirrors?: string[] } | null | undefined,
   retries: number
@@ -159,7 +156,6 @@ function* watchPlay() {
         if (!track) return
 
         if (!isReachable && isNativeMobile) {
-          // Offline playback on mobile — engine handles via cache.
           audioPlayer.play()
           yield* put(
             playbackActions.playSucceeded({ trackId, index: queueIndex })
@@ -269,7 +265,6 @@ function* watchPlay() {
         )
 
         if (isLongFormContent) {
-          // Restore podcast/audiobook position if in progress.
           const playbackRate = yield* select(getPlaybackRate)
           audioPlayer.setPlaybackRate(playbackRate)
           const trackPlaybackInfo = yield* select((state: any) => {
@@ -308,7 +303,6 @@ function* watchPlay() {
         }
       }
 
-      // Final: gate skip on access, then fire engine.
       const track = yield* queryTrack(trackId)
       const { shouldSkip, shouldPreview } = calculatePlayerBehavior(
         track,
@@ -440,8 +434,6 @@ function watchAudio(audio: HTMLAudioElement) {
   })
 }
 
-// Engine play/pause emitted via the <audio> element (e.g. browser controls)
-// — sync redux to whatever the engine actually did.
 function* setAudioListeners() {
   const audioPlayer = yield* getContext('audioPlayer')
   const chan = yield* call(watchAudio, audioPlayer.audio)
@@ -507,7 +499,6 @@ function* handleAudioErrors() {
   }
 }
 
-// Polls audio position to record a listen once playback crosses the threshold.
 function* recordListenWorker() {
   const isNativeMobile = yield* getContext('isNativeMobile')
   if (isNativeMobile) return
@@ -526,8 +517,6 @@ function* recordListenWorker() {
   }
 }
 
-// ===== Queue management: drive engine from playback queue events =====
-
 function* maybePaginate(queueLen: number, index: number) {
   if (index + PAGINATE_THRESHOLD < queueLen) return
   const querySource = yield* select(getQuerySource)
@@ -543,8 +532,6 @@ function* maybePaginate(queueLen: number, index: number) {
   }
 }
 
-// Issue a play action for whatever's at queue[index]. Used by playFrom,
-// playTrackAt, next, previous.
 function* playCurrent() {
   const current = yield* select(getCurrentPlaybackTrack)
   if (!current) return
@@ -560,7 +547,6 @@ function* playCurrent() {
   yield* call(maybePaginate, queue.length, index)
 }
 
-// Subscribe queue tracks to the cache and fire autoplay when nearing the end.
 function* watchPlayFrom() {
   yield* takeLatest(
     playbackActions.playFrom.type,
@@ -629,8 +615,6 @@ function* watchTogglePlay() {
   })
 }
 
-// Recommendation autoplay: if we're near the end of a non-shuffle, non-repeat
-// queue, append genre-matched recommendations so the user keeps listening.
 function* handleQueueAutoplay({
   skip,
   ignoreSkip,
@@ -680,8 +664,6 @@ function* handleQueueAutoplay({
   }
 }
 
-// Inlined from the legacy `recommendation/sagas.ts` — autoplay was the only
-// caller of `getRecommendedTracks`, so the helper saga has been folded in here.
 function* fetchRecommendedAutoplayTracks(
   genre: string,
   exclusionList: number[],
@@ -731,7 +713,6 @@ function* watchQueueAutoplay() {
   )
 }
 
-// Skip-deleted/owner-deactivated/locked tracks on next, then play current.
 function* watchNext() {
   yield* takeEvery(
     playbackActions.next.type,
@@ -768,8 +749,6 @@ function* watchNext() {
       if (track) {
         const repeatMode = yield* select(getRepeat)
         if (repeatMode === RepeatMode.SINGLE) {
-          // Replay current via the engine directly to avoid re-running the
-          // queue cycle.
           yield* call(playCurrent)
         } else {
           yield* call(playCurrent)

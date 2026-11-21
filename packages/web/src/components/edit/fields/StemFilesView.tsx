@@ -82,7 +82,6 @@ export const StemFilesView = ({
   onSelectCategoryForStems,
   onDeleteStem
 }: StemFilesViewProps) => {
-  // Multi-select so a batch of stems can be given one type at once.
   const [selectedKeys, setSelectedKeys] = useState<
     Set<ReturnType<typeof makeStemKey>>
   >(() => new Set())
@@ -198,13 +197,11 @@ export const StemFilesView = ({
     const atCapacity = stems.length >= MAX_ROWS
     const [duplicateStems, setDuplicateStems] = useState<string[]>([])
 
-    // Trim out stems > MAX_ROWS on add
     const onAdd = useCallback(
       (toAdd: any[]) => {
         const remaining = MAX_ROWS - stems.length
         setDuplicateStems([])
 
-        // Filter out stems that already exist
         const newStems = []
         const duplicateStems = []
 

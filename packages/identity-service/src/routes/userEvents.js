@@ -26,7 +26,6 @@ module.exports = function (app) {
         return successResponse(userEvents)
       } catch (e) {
         req.logger.error(e)
-        // no-op. No user events.
         return successResponse({})
       }
     })
@@ -61,8 +60,6 @@ module.exports = function (app) {
             }
           )
         } else {
-          // Note: The field `hasSignedInNativeMobile` defaults to false on create, but if already
-          // true, do not convert to false.
           await models.sequelize.query(
             `
             INSERT INTO "UserEvents" ("walletAddress", "createdAt", "updatedAt")

@@ -129,7 +129,6 @@ export const audiusBackend = ({
       solanaBackendPromise = import('./solanaBackend').then(
         ({ createSolanaBackend }) => createSolanaBackend({ env, reportError }),
         (e) => {
-          // Allow a retry after a failed chunk load
           solanaBackendPromise = null
           throw e
         }
@@ -315,7 +314,6 @@ export const audiusBackend = ({
       })
       return { data, signature }
     } catch (e) {
-      // Don't log an error for HedgehogWalletNotFoundError as it's expected when user is logged out
       if (!(e instanceof HedgehogWalletNotFoundError)) {
         console.error(e)
         reportError({ error: e as Error })
@@ -338,15 +336,11 @@ export const audiusBackend = ({
   }: {
     sdk: AudiusSdkWithServices
   }) {
-    const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+    const unixTs = Math.round(new Date().getTime() / 1000)
     const data = `Click sign to authenticate with identity service: ${unixTs}`
     return await signData({ sdk, data })
   }
 
-  /**
-   * Records a first-party internal notification campaign push open via the validator node API.
-   * Fire-and-forget; failures are logged and swallowed.
-   */
   async function reportNotificationCampaignPushOpen({
     sdk,
     userId,
@@ -425,7 +419,7 @@ export const audiusBackend = ({
     if (input) {
       data = input
     } else {
-      const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+      const unixTs = Math.round(new Date().getTime() / 1000)
       data = `Click sign to authenticate with API: ${unixTs}`
     }
     return await signData({ sdk, data })
@@ -728,12 +722,6 @@ export const audiusBackend = ({
     }
   }
 
-  /**
-   * Make a request to fetch the eth AUDIO balance of the the user
-   * @params {bool} bustCache
-   * @params {string} ethAddress - Optional ETH wallet address. Defaults to hedgehog wallet
-   * @returns {Promise<AudioWei | null>} balance or null if failed to fetch balance
-   */
   async function getBalance({
     ethAddress,
     sdk
@@ -757,11 +745,6 @@ export const audiusBackend = ({
     }
   }
 
-  /**
-   * Make a request to fetch the sol wrapped audio balance of the the user
-   * @params {string} ethAddress - Optional ETH wallet address to derive user bank. Defaults to hedgehog wallet
-   * @returns {Promise<AudioWei>} balance or null if failed to fetch balance
-   */
   async function getWAudioBalance({
     ethAddress,
     sdk
@@ -793,12 +776,6 @@ export const audiusBackend = ({
     }
   }
 
-  /**
-   * Make a request to fetch the balance, staked and delegated total of the wallet address
-   * @param address The wallet address to fetch the balance for
-   * @param bustCache
-   * @returns balance or null if error
-   */
   async function getAddressTotalStakedBalance(
     address: string,
     sdk: AudiusSdkWithServices

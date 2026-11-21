@@ -19,13 +19,11 @@ import { RewardsManagerError } from './errors'
 import type { TransactionHandler } from './transactionHandler'
 import { getBankAccountAddress } from './userBank'
 
-// Various prefixes used for rewards
 const SENDER_SEED_PREFIX = 'S_'
 const VERIFY_TRANSFER_SEED_PREFIX = 'V_'
 const TRANSFER_PREFIX = 'T_'
 const ADD_SENDER_MESSAGE_PREFIX = 'add'
 
-// Enum cases for instructions
 const CREATE_SENDER_PUBLIC_ENUM_VALUE = 4
 const SUBMIT_INSTRUCTION_ENUM_VALUE = 6
 const EVALUATE_INSTRUCTION_ENUM_VALUE = 7
@@ -151,10 +149,8 @@ export async function submitAttestations({
   instructionsPerTransaction = ATTESTATION_INSTRUCTIONS_PER_TRANSACTION,
   logger = console
 }: SubmitAttestationsConfig) {
-  // Construct combined transfer ID
   const transferId = SolanaUtils.constructTransferId(challengeId, specifier)
 
-  // Derive the message account we'll use to store the attestations
   const [rewardManagerAuthority, derivedMessageAccount] =
     await deriveMessageAccount(
       transferId,
@@ -169,9 +165,6 @@ export async function submitAttestations({
     oracleAttestation.ethAddress
   )
 
-  // Add instructions from DN attestations - each attestation
-  // needs a pairing of SECP recovery instruction and submit
-  // attestation instruction.
   let instructions: TransactionInstruction[] = await Promise.all(
     attestations.reduce<Array<Promise<TransactionInstruction>>>(
       (instructions, meta, i) => {
@@ -203,7 +196,6 @@ export async function submitAttestations({
     transferId
   )
 
-  // Add instructions from oracle attestation
   const oracleSecp = generateAttestationSecpInstruction({
     attestationMeta: oracleAttestation,
     instructionIndex: instructions.length % instructionsPerTransaction,
@@ -220,7 +212,6 @@ export async function submitAttestations({
     feePayer
   })
 
-  // Break the instructions up into multiple transactions as per `instructionsPerTransaction`
   instructions = [...instructions, oracleSecp, oracleTransfer]
   const bucketedInstructions: TransactionInstruction[][] = instructions.reduce<
     TransactionInstruction[][]
@@ -261,7 +252,6 @@ export async function submitAttestations({
     )}`
   )
 
-  // If there's any error in any of the transactions, just return that one
   for (const res of results) {
     if (res.error ?? res.errorCode) {
       return res
@@ -281,9 +271,6 @@ export type CreateSenderParams = {
   transactionHandler: TransactionHandler
 }
 
-/**
- * Creates a new rewards signer (one that can attest)
- */
 export async function createSender({
   rewardManagerProgramId,
   rewardManagerAccount,
@@ -351,9 +338,6 @@ export type EvaluateAttestationsConfig = {
   logger: Logger
 }
 
-/**
- * Evaluates previously submitted attestations, disbursing if successful.
- */
 export const evaluateAttestations = async ({
   rewardManagerProgramId,
   rewardManagerAccount,
@@ -368,51 +352,31 @@ export const evaluateAttestations = async ({
   transactionHandler,
   logger = console
 }: EvaluateAttestationsConfig) => {
-  // Get transfer ID
   const transferId = SolanaUtils.constructTransferId(challengeId, specifier)
 
-  // Derive the messages account we previously stored attestations in
   const [rewardManagerAuthority, verifiedMessagesAccount] =
     await deriveMessageAccount(
       transferId,
       rewardManagerProgramId,
       rewardManagerAccount
     )
-  // Derive the transfer account we'll use to represent + dedupe
-  // the disbursement.
   const transferAccount = await deriveTransferAccount(
     transferId,
     rewardManagerProgramId,
     rewardManagerAccount
   )
-  // Derive the recipient's Solana Userbank account
-  // from their eth key
   const recipientBankAccount = await getBankAccountAddress(
     recipientEthAddress,
     userBankProgramAccount,
     TOKEN_PROGRAM_ID
   )
 
-  // Derive the AAO's Solana pubkey from it's eth address
   const derivedAAOAddress = await deriveSolanaSenderFromEthAddress(
     oracleEthAddress,
     rewardManagerProgramId,
     rewardManagerAccount
   )
 
-  // Construct the requried accounts
-
-  ///   0. `[]` Verified messages
-  ///   1. `[]` Reward manager
-  ///   2. `[]` Reward manager authority
-  ///   3. `[]` Reward token source
-  ///   4. `[]` Reward token recipient
-  ///   5. `[]` Transfer account
-  ///   6. `[]` Bot oracle
-  ///   7. `[]` Payer
-  ///   8. `[]` Sysvar rent
-  ///   9. `[]` Token program id
-  ///  10. `[]` System program id
   const accounts = [
     {
       pubkey: verifiedMessagesAccount,
@@ -471,7 +435,6 @@ export const evaluateAttestations = async ({
     }
   ]
 
-  // Construct the instruction data
   const instructionData = new ValidateAttestationsInstructionData({
     amount: tokenAmount.toNumber(),
     id: transferId,
@@ -505,10 +468,6 @@ export const evaluateAttestations = async ({
   })
 }
 
-// Helpers
-
-// Generate particular instructions
-
 type GenerateSubmitAttestationInstructionParams = {
   attestationMeta: AttestationMeta
   derivedMessageAccount: PublicKey
@@ -519,10 +478,6 @@ type GenerateSubmitAttestationInstructionParams = {
   transferId: string
 }
 
-/**
- *
- * Helper function to generate a submit attestation instruction.
- */
 const generateSubmitAttestationInstruction = async ({
   attestationMeta,
   derivedMessageAccount,
@@ -532,22 +487,12 @@ const generateSubmitAttestationInstruction = async ({
   feePayer,
   transferId
 }: GenerateSubmitAttestationInstructionParams) => {
-  // Get the DN's derived Solana address from the eth pubkey
   const derivedSender = await deriveSolanaSenderFromEthAddress(
     attestationMeta.ethAddress,
     rewardManagerProgramId,
     rewardManagerAccount
   )
 
-  ///   Submit attestations
-  ///   0. `[writable]` Verified messages - New or existing account PDA storing verified messages
-  ///   1. `[]` Reward manager
-  ///   2. `[]` Reward manager authority
-  ///   3. `[signer]` Funder
-  ///   4. `[]` Sender
-  ///   5. `[]` Sysvar rent
-  ///   6. `[]` Instruction info
-  ///   7. `[]` System program id
   const verifyInstructionAccounts = [
     {
       pubkey: derivedMessageAccount,
@@ -607,23 +552,11 @@ const generateSubmitAttestationInstruction = async ({
   })
 }
 
-/**
- * Encodes a given signature to a 64 byte array for SECP recovery
- */
 const encodeSignature = (signature: string) => {
-  // Perform signature manipulations:
-  // - remove the 0x prefix for BN
-  // - lose the final byte / recovery ID: the secp instruction constructor
-  //   requires only 'r', 's' from the signature, while 'v', the recovery ID,
-  //   is passed as a separate argument.
-  //   https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7
-  //
   let strippedSignature = signature.replace('0x', '')
   const recoveryIdStr = strippedSignature.slice(strippedSignature.length - 2)
   const recoveryId = new BN(recoveryIdStr, 'hex').toNumber()
   strippedSignature = strippedSignature.slice(0, strippedSignature.length - 2)
-  // Pad to 64 bytes - otherwise, signatures starting with '0' would result
-  // in < 64 byte arrays
   const encodedSignature = Uint8Array.of(
     ...new BN(strippedSignature, 'hex').toArray('be', 64)
   )
@@ -687,10 +620,6 @@ type GenerateCreateSenderInstructionConfig = {
   signerEthAddresses: string[]
 }
 
-/**
- *
- * Helper function generate a create sender instruction.
- */
 const generateCreateSenderInstruction = async ({
   senderEthAddress,
   operatorEthAddress,
@@ -700,7 +629,6 @@ const generateCreateSenderInstruction = async ({
   feePayer,
   signerEthAddresses
 }: GenerateCreateSenderInstructionConfig) => {
-  // Get the DN's derived Solana address from the eth pubkey
   const derivedSenderSolanaAddress = await deriveSolanaSenderFromEthAddress(
     senderEthAddress,
     rewardManagerProgramId,
@@ -718,11 +646,6 @@ const generateCreateSenderInstruction = async ({
     )
   )
 
-  /// 0. `[]` Reward manager
-  /// 1. `[]` Reward manager authority
-  /// 2. `[signer]` Funder
-  /// 3. `[writable]` new_sender
-  /// 4. `[]` Bunch of senders which prove creating another one
   const createSenderInstructionAccounts = [
     {
       pubkey: rewardManagerAccount,
@@ -786,11 +709,6 @@ const generateCreateSenderInstruction = async ({
   })
 }
 
-// Misc
-
-/**
- * Derives the Solana account associated with a given sender Eth address.
- */
 export const deriveSolanaSenderFromEthAddress = async (
   ethAddress: string,
   rewardManagerProgramId: PublicKey,
@@ -807,11 +725,6 @@ export const deriveSolanaSenderFromEthAddress = async (
   return derivedSender
 }
 
-/**
- * Constructs a create signer message for an existing "signer" eth address
- * @param {string} ethAddress
- * @returns {Uint8Array}
- */
 const constructCreateSenderMessage = (
   ethAddress: string,
   rewardManagerAccount: PublicKey
@@ -827,10 +740,6 @@ const constructCreateSenderMessage = (
   return res
 }
 
-/**
- * Derives the 'transfer account' - the account which represents a single successful disbursement
- * and is used to dedupe - from the transferId and other info
- */
 const deriveTransferAccount = async (
   transferId: string,
   rewardProgramId: PublicKey,
@@ -848,9 +757,6 @@ const deriveTransferAccount = async (
   return derivedAddress
 }
 
-/**
- * Derives the account to store messages for a single challenge
- */
 const deriveMessageAccount = async (
   transferId: string,
   rewardsProgramId: PublicKey,

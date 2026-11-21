@@ -74,29 +74,17 @@ const messages = {
   reorderStale: 'This collection was updated elsewhere. Try again.'
 }
 
-/** Tracks the user deliberately hid, as opposed to pre-releases. */
 const getHiddenTracks = (playlistTracks: Track[] | null | undefined) =>
   (playlistTracks ?? []).filter(
     (track) => track.is_unlisted && !track.is_scheduled_release
   )
 
-/**
- * Asks whether deliberately-hidden tracks should be published along with their
- * collection. Resolves to true when there is nothing to ask about.
- *
- * Ask before kicking off the write: the publish path applies the result inside
- * a confirmer callback, which serializes writes for the collection, so blocking
- * there would hold that queue for as long as the modal is up.
- */
 export function* confirmPublishHiddenTracks(
   hiddenTrackCount: number,
   isAlbum: boolean
 ) {
   if (hiddenTrackCount === 0) return true
 
-  // Mobile renders no drawer for this modal yet, so prompting there would block
-  // the publish forever. Until the drawer lands it keeps the previous
-  // publish-everything behavior.
   const isNativeMobile = yield* getContext('isNativeMobile')
   if (isNativeMobile) return true
 
@@ -115,15 +103,6 @@ export function* confirmPublishHiddenTracks(
   return !!confirmed
 }
 
-/**
- * Publishes the hidden tracks of a collection that is being made public.
- *
- * Deliberately-hidden tracks are published only when `publishHiddenTracks` is
- * set, which the caller obtains from `confirmPublishHiddenTracks`. Scheduled
- * releases are separate: they are published only as an early release, which
- * requires the collection itself to be a scheduled release whose tracks are all
- * scheduled.
- */
 export function* publishHiddenChildTracks(
   playlist: Collection,
   playlistTracks: Track[] | null | undefined,
@@ -146,7 +125,6 @@ export function* publishHiddenChildTracks(
   }
 }
 
-/** Counts instances of trackId in a playlist. */
 const countTrackIds = (
   playlistContents: PlaylistContents | undefined,
   trackId: ID
@@ -160,8 +138,6 @@ const countTrackIds = (
         }, 0)
     : 0
 }
-
-/** EDIT PLAYLIST */
 
 function* watchEditPlaylist() {
   yield* takeLatest(collectionActions.EDIT_PLAYLIST, editPlaylistAsync)
@@ -180,7 +156,6 @@ function* editPlaylistAsync(
 
     formFields.description = squashNewLines(formFields.description) ?? null
 
-    // Updated the stored account playlist shortcut
     yield* put(
       accountActions.renameAccountPlaylist({
         collectionId: playlistId,
@@ -200,7 +175,6 @@ function* editPlaylistAsync(
       )
     )).filter(removeNullable)
 
-    // If the collection is a newly premium album, this will populate the premium metadata (price/splits/etc)
     if (
       playlist.is_album &&
       isContentUSDCPurchaseGated(playlist.stream_conditions)
@@ -211,7 +185,6 @@ function* editPlaylistAsync(
       )
     }
 
-    // Optimistic update #1 to quickly update metadata and track lineup
     if (isNative) {
       yield* call(optimisticUpdateCollection, playlist)
     }
@@ -224,7 +197,6 @@ function* editPlaylistAsync(
       { generateImage: generatePlaylistArtwork }
     )
 
-    // Optimistic update #2 to update the artwork
     const playlistBeforeEdit = yield* queryCollection(playlistId)
     yield* call(optimisticUpdateCollection, playlist)
 
@@ -319,8 +291,6 @@ function* confirmEditPlaylist(
   )
 }
 
-/** REMOVE TRACK FROM PLAYLIST */
-
 function* watchRemoveTrackFromPlaylist() {
   yield* takeEvery(
     collectionActions.REMOVE_TRACK_FROM_PLAYLIST,
@@ -352,7 +322,6 @@ function* removeTrackFromPlaylistAsync(
     { generateImage: generatePlaylistArtwork }
   )
 
-  // Find the index of the track based on the track's id and timestamp
   const index = updatedPlaylist.playlist_contents.track_ids.findIndex((t) => {
     if (t.track !== trackId) return false
 
@@ -378,7 +347,6 @@ function* removeTrackFromPlaylistAsync(
     ...updatedPlaylist,
     track_count: count
   })
-  // UI already dispatches lineup remove - skip full refresh to preserve scroll
   yield* call(
     confirmRemoveTrackFromPlaylist,
     userId,
@@ -420,9 +388,6 @@ function* confirmRemoveTrackFromPlaylist(
       function* (_confirmedPlaylistId: ID) {
         const done = yield* isPlaylistConfirmerDone(playlistId)
         if (!done) return
-        // Don't refetch - the backend may not have propagated yet, and a refetch
-        // would overwrite our optimistic cache with stale data (tracks reappearing).
-        // Our playlist state is correct since we just sent it to the API.
         yield* call(updateCollectionData, [playlist])
         yield* put(manualClearToast({ key: `remove-track-${trackId}` }))
         yield* put(
@@ -432,7 +397,6 @@ function* confirmRemoveTrackFromPlaylist(
         )
       },
       function* ({ error, timeout, message }) {
-        // Fail Call
         yield* put(
           collectionActions.removeTrackFromPlaylistFailed(
             error,
@@ -453,8 +417,6 @@ function* confirmRemoveTrackFromPlaylist(
     )
   )
 }
-
-/** ORDER PLAYLIST */
 
 function* watchOrderPlaylist() {
   yield* takeEvery(collectionActions.ORDER_PLAYLIST, orderPlaylistAsync)
@@ -481,13 +443,11 @@ function* orderPlaylistAsync(
   const freshTracks =
     freshPlaylist?.playlist_contents.track_ids.map(({ track }) => track) ?? []
 
-  // If the lengths don't match or tracks are in a different order, the collection is stale
   const isStale =
     freshTracks.length !== oldTracks.length ||
     !freshTracks.every((t, i) => t === oldTracks[i])
 
   if (isStale) {
-    // Collection has been modified elsewhere - fail the operation
     yield* put(
       toast({
         content: messages.reorderStale
@@ -535,8 +495,6 @@ function* orderPlaylistAsync(
   )
 }
 
-/** PUBLISH PLAYLIST */
-
 function* watchPublishPlaylist() {
   yield* takeEvery(collectionActions.PUBLISH_PLAYLIST, publishPlaylistAsync)
 }
@@ -555,7 +513,6 @@ function* publishPlaylistAsync(
   if (!playlist) return
   const playlistWithPublishing = { ...playlist, _is_publishing: true }
 
-  // Ask before the write starts, so the modal never holds the confirmer queue.
   const tracksBeforePublish = yield* call(
     queryCollectionTracks,
     action.playlistId
@@ -636,7 +593,6 @@ function* confirmPublishPlaylist(
         )
       },
       function* ({ error, timeout, message }) {
-        // Fail Call
         yield* put(
           collectionActions.publishPlaylistFailed(
             error,

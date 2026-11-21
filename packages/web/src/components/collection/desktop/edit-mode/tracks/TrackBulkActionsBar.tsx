@@ -42,7 +42,6 @@ const messages = {
 type Props = {
   collectionId: ID
   orderedTrackIds: ID[]
-  /** Albums only hold the owner's tracks, so they can be bulk edited. */
   isAlbum?: boolean
 }
 
@@ -58,8 +57,6 @@ export const TrackBulkActionsBar = (props: Props) => {
   const canEditTracks = !!isAlbum && isBulkEditEnabled
   const [isEditTracksOpen, setIsEditTracksOpen] = useState(false)
 
-  // Tracks already staged for removal are hidden from the table and should not
-  // be re-selected (e.g. by Select all).
   const selectableTrackIds = useMemo(
     () => orderedTrackIds.filter((id) => !editMode.removedTrackIds.has(id)),
     [orderedTrackIds, editMode]
@@ -106,7 +103,6 @@ export const TrackBulkActionsBar = (props: Props) => {
   const removeSelected = useCallback(() => {
     const trackIds = selectedIds
     if (trackIds.length === 0) return
-    // Stage the removal — it isn't persisted until Apply is pressed.
     editMode.stageRemoval(trackIds)
     dispatch(toast({ content: messages.removed(trackIds.length) }))
     selection.clear()
@@ -120,10 +116,8 @@ export const TrackBulkActionsBar = (props: Props) => {
     editMode.redoRemoval()
   }, [editMode])
 
-  // Keyboard shortcuts: only active while in edit mode
   useEffect(() => {
     if (!editMode.isEditMode || editMode.collectionId !== collectionId) return
-    // The edit modal owns the keyboard while it is open.
     if (isEditTracksOpen) return
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
@@ -182,7 +176,6 @@ export const TrackBulkActionsBar = (props: Props) => {
   if (!editMode.isEditMode || editMode.collectionId !== collectionId) {
     return null
   }
-  // Rendered apart from the bar, which hides once the selection clears.
   const editTracksModal = canEditTracks ? (
     <BulkEditTracksModal
       isOpen={isEditTracksOpen}

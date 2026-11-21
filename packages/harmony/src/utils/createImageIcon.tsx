@@ -46,7 +46,6 @@ export const createImageIcon = (src: string) => {
       />
     )
 
-    // If not hexagonal, return the image as-is
     if (!hex) {
       return (
         <img
@@ -63,7 +62,6 @@ export const createImageIcon = (src: string) => {
       )
     }
 
-    // For hexagonal icons, wrap with border
     return (
       <Flex
         className={className}

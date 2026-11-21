@@ -5,19 +5,14 @@ import { readImage } from './image/rgbaImage'
 const DEFAULT_RGB = '#7e1bcc'
 const SAMPLE_RATE = 20
 const NUM_DOMINANT_COLORS = 3
-// Based off this site: https://app.contrast-finder.org/result.html?foreground=%23FFFFFF&background=%23cdc8c8&ratio=4.5&isBackgroundTested=true&algo=Rgb
-// the brightest color we want to support, given white text, is
-// #CDC8C8, which works out to a luminance of 201.
 const LUMINANCE_THRESHOLD = 201
 
-const clampedRGBColor = (rgbString: string /* string of 'r,g,b' */) => {
+const clampedRGBColor = (rgbString: string) => {
   const rgb = rgbString.split(',').map((x) => parseInt(x, 10))
   const r = rgb[0]
   const g = rgb[1]
   const b = rgb[2]
 
-  // Luminance in [0, 255]
-  // https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
   const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
   if (luminance < LUMINANCE_THRESHOLD) {
@@ -60,13 +55,11 @@ const findIndexOfMaxEuclideanDistance = (
 }
 
 const calculateVibrancy = (color: Color) => {
-  // Reference: https://stackoverflow.com/questions/61705774/mathematically-calculate-vibrancy-of-a-color
   const max = Math.max(color.r, color.g, color.b)
   const min = Math.min(color.r, color.g, color.b)
   return ((max + min) * (max - min)) / max
 }
 
-/**  Picks the two most dominant colors that meet a min threshold of colorfulness. */
 export const pickTwoMostDominantAndVibrant = (colors) => {
   const vibrantColors = colors.filter((c) => {
     return calculateVibrancy(c) >= 50.0
@@ -81,7 +74,6 @@ export const pickTwoMostDominantAndVibrant = (colors) => {
   return vibrantColors
 }
 
-/** Same as jimp's posterize(n) on the RGB channels. */
 const posterize = (pixels: Uint8Array, n: number) => {
   for (let i = 0; i < pixels.length; i += 4) {
     for (let c = i; c < i + 3; c++) {
@@ -104,10 +96,6 @@ const findDominantColors = (selectFrom: Color[]) => {
   return domColors
 }
 
-/**
- * Returns the 3 dominant RGB colors of an image.
- * @param imageUrl url of the image to use
- */
 export const getDominantRgb = async (imageUrl: string) => {
   try {
     const imageData = await readImage(imageUrl)

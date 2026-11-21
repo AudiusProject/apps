@@ -28,9 +28,6 @@ test('should persist collection edits', async ({ page }) => {
   await priceAndAudienceModal.setPremium({ price: newPrice })
   await priceAndAudienceModal.save()
 
-  // We warned the user about changing the audience if this is the first attempt
-  // But if it's the second attempt, we might not be warned again
-  // So we try to click the confirmation button, but if it doesn't exist, we just continue
   try {
     await page.getByRole('button', { name: /update audience/i }).click()
   } catch (e) {
@@ -42,35 +39,26 @@ test('should persist collection edits', async ({ page }) => {
   const confirmationPromise = waitForConfirmation(page)
   await editAlbumPage.save()
 
-  // Assert title changed (might take a bit for art to upload)
   await expect(
     page.getByRole('heading', { name: newTitle, level: 1 })
   ).toBeVisible({ timeout: 30 * 1000 })
 
-  // Assert description changed
   await expect(page.getByText(newDescription)).toBeVisible()
 
-  // Assert gated
   await expect(page.getByText(/premium album/i)).toBeVisible()
 
-  // Assert price change
   await expect(page.getByText(newPrice)).toBeVisible()
 
-  // Check it all persists upon reload
   await confirmationPromise
   await page.reload()
 
-  // Assert title changed
   await expect(
     page.getByRole('heading', { name: newTitle, level: 1 })
   ).toBeVisible({ timeout: 30_000 })
 
-  // Assert description changed
   await expect(page.getByText(newDescription)).toBeVisible()
 
-  // Assert gated
   await expect(page.getByText(/premium album/i)).toBeVisible()
 
-  // Assert price change
   await expect(page.getByText(newPrice)).toBeVisible()
 })

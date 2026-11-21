@@ -21,7 +21,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const supabase = getSupabase()
 
-  // Conditionally flip pending → approved so a double-approval is a no-op.
   const { data: claimed, error: claimError } = await supabase
     .from(TABLE)
     .update({

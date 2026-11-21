@@ -7,7 +7,6 @@ import {
 
 import { AccessConditions } from '~/models'
 
-/** Accepts default API AccessGate (e.g. from playlists). */
 export const accessConditionsFromSDK = (
   input: AccessGate
 ): AccessConditions | null => {

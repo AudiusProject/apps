@@ -1,10 +1,5 @@
 import type { PrivateKey } from '@audius/common/src/services/auth/hedgehogLib/types'
 
-/**
- * Runs scrypt in a worker so login doesn't freeze the page. The worker is
- * bundled inline and started from a blob URL, which also works under the
- * desktop app's custom scheme.
- */
 export const createKey = async (encryptStr: string, ivHex: string) => {
   const { default: CreateKeyWorker } = await import(
     './createKey.worker?worker&inline'

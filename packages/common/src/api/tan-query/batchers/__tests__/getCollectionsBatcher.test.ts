@@ -158,17 +158,14 @@ describe('getCollectionsBatcher', () => {
     const batcher = getCollectionsBatcher(mockContext)
     const ids = [1, 2, 3]
 
-    // Make concurrent requests
     const results = await Promise.all(ids.map((id) => batcher.fetch(id)))
 
-    // Verify single bulk request was made
     expect(mockSdk.playlists.getBulkPlaylists).toHaveBeenCalledTimes(1)
     expect(mockSdk.playlists.getBulkPlaylists).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
 
-    // Verify each caller got their correct collection data
     results.forEach((result, index) => {
       expect(result).toMatchObject({
         ...(omit(
@@ -183,22 +180,18 @@ describe('getCollectionsBatcher', () => {
   it('creates separate batches when requests are not concurrent', async () => {
     const batcher = getCollectionsBatcher(mockContext)
 
-    // First batch of requests
     const firstBatchIds = [1, 2]
     const firstBatchResults = await Promise.all(
       firstBatchIds.map((id) => batcher.fetch(id))
     )
 
-    // Wait longer than the batch window
     await new Promise((resolve) => setTimeout(resolve, 20))
 
-    // Second batch of requests
     const secondBatchIds = [3, 4]
     const secondBatchResults = await Promise.all(
       secondBatchIds.map((id) => batcher.fetch(id))
     )
 
-    // Verify two separate bulk requests were made
     expect(mockSdk.playlists.getBulkPlaylists).toHaveBeenCalledTimes(2)
     expect(mockSdk.playlists.getBulkPlaylists).toHaveBeenNthCalledWith(1, {
       id: firstBatchIds.map((id) => Id.parse(id)),
@@ -209,7 +202,6 @@ describe('getCollectionsBatcher', () => {
       userId: OptionalId.parse(null)
     })
 
-    // Verify results for first batch
     firstBatchResults.forEach((result, index) => {
       expect(result).toMatchObject({
         ...(omit(
@@ -222,7 +214,6 @@ describe('getCollectionsBatcher', () => {
       })
     })
 
-    // Verify results for second batch
     secondBatchResults.forEach((result, index) => {
       expect(result).toMatchObject({
         ...(omit(
@@ -240,7 +231,6 @@ describe('getCollectionsBatcher', () => {
     const existingId = 1
     const missingId = 999
 
-    // Mock API to only return data for existingId
     const mockBulkPlaylists = mockSdk.playlists
       .getBulkPlaylists as unknown as MockInstance<
       [GetBulkPlaylistsRequest],
@@ -262,7 +252,6 @@ describe('getCollectionsBatcher', () => {
       batcher.fetch(existingId)
     ])
 
-    // Verify existing collection is returned correctly
     expect(existingResult).toMatchObject({
       ...(omit(
         userCollectionMetadataFromSDK(createMockSdkCollection(existingId)),
@@ -271,10 +260,8 @@ describe('getCollectionsBatcher', () => {
       ) ?? {})
     })
 
-    // Verify missing collection returns null
     expect(missingResult).toBeNull()
 
-    // Verify single batch request was made with both IDs
     expect(mockSdk.playlists.getBulkPlaylists).toHaveBeenCalledTimes(1)
     expect(mockSdk.playlists.getBulkPlaylists).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),

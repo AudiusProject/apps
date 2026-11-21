@@ -50,7 +50,6 @@ const defaultColumns: PurchasesTableColumn[] = [
   'spacerRight'
 ]
 
-// Cell Render Functions
 const renderContentNameCell = (cellInfo: PurchaseCell) => {
   const { contentId, contentType, sellerUserId } = cellInfo.row.original
   return (
@@ -76,7 +75,6 @@ const renderValueCell = (cellInfo: PurchaseCell) => {
   })
 }
 
-// Columns
 const tableColumnMap = {
   contentName: {
     id: 'contentName',
@@ -123,7 +121,6 @@ const tableColumnMap = {
   }
 }
 
-/** Renders a table of `USDCPurchaseDetails` records with details intended for the Buyer */
 export const PurchasesTable = ({
   columns = defaultColumns,
   data,

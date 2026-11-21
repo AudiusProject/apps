@@ -30,19 +30,9 @@ type ShareToStoryStickerProps = {
   >
   artist: Pick<User, 'user_id' | 'name' | 'is_verified'>
   style?: StyleProp<ViewStyle>
-  /** Called once the image loads successfully */
   onLoad: () => void
   omitLogo?: boolean
-  /**
-   * Pre-resolved artwork source (e.g. from useTrackImage with mirror fallback).
-   * When provided, use this instead of TrackImage so the sticker always has a working image URL for capture.
-   */
   artworkSource?: ImageSourcePropType
-  /**
-   * Stat shown over the artwork for milestone cards, e.g. 1,000 / Plays.
-   * Overlaid so the sticker keeps the size the story pipeline hardcodes for
-   * Snapchat and TikTok.
-   */
   headline?: { value: string; label: string }
 }
 

@@ -14,8 +14,6 @@ module.exports = {
     })
   },
 
-  // Only the default is restored. Users moved from daily to weekly can't be
-  // told apart from users who picked weekly, so the update is not reversed.
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
       await queryInterface.sequelize.query(

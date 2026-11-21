@@ -17,10 +17,8 @@ import { useCoinBalance } from './useCoinBalance'
 export type SendCoinsParams = {
   recipientWallet: SolanaWalletAddress
   amount: bigint
-  recipientEthAddress?: string // Optional: when sending to a user, provide their ETH address to derive user-bank ATA
-  /** Where the send was initiated (for analytics parity with legacy Tip Audio) */
+  recipientEthAddress?: string
   source?: string
-  /** Recipient handle when sending to a known user (for analytics) */
   recipientHandle?: string
 }
 
@@ -29,12 +27,6 @@ export type SendCoinsResult = {
   success: boolean
 }
 
-/**
- * Hook for sending coins on Solana blockchain.
- * This hook handles only Solana transfers, not ETH transfers.
- *
- * @returns Mutation object with sendCoins function and status
- */
 export const useSendCoins = ({ mint }: { mint: string }) => {
   const queryClient = useQueryClient()
   const { audiusBackend, audiusSdk, analytics, env } = useQueryContext()
@@ -76,7 +68,7 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
           ethAddress: currentUser,
           sdk,
           mint: new PublicKey(mint) as any, // TODO: Fix type mismatch between string and MintName | PublicKey
-          recipientEthAddress // Optional: when provided, derives user-bank ATA instead of regular ATA
+          recipientEthAddress
         })
 
         return {
@@ -97,7 +89,6 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         ) {
           throw new Error(errorMessage)
         }
-        // Preserve network-related error messages
         if (
           errorMessage.includes('Failed to connect to Solana network') ||
           errorMessage.includes('Failed to get recent blockhash') ||
@@ -134,12 +125,11 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         })
       }
 
-      // For AUDIO, also optimistically update the audio balance queries
       if (isAudioMint && currentUser?.spl_wallet) {
         updateAudioBalanceOptimistically({
           queryClient,
           splWallet: currentUser.spl_wallet,
-          changeLamports: -amount // Negative because we're sending coins
+          changeLamports: -amount
         })
       }
 
@@ -176,7 +166,6 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         queryClient.setQueryData(queryKey, context.previousBalance)
       }
 
-      // For AUDIO, invalidate the audio balance queries to refetch the correct balance
       if (isAudioMint && currentUser?.spl_wallet) {
         invalidateAudioBalance({
           queryClient,

@@ -73,7 +73,6 @@ export const usePurchaseContentFormConfiguration = ({
   const isGuestCheckout = !currentUser || (currentUser && !currentUser.handle)
 
   useEffect(() => {
-    // check if feature flag loaded to set the page
     if (isGuestCheckout) {
       dispatch(setPurchasePage({ page: PurchaseContentPage.GUEST_CHECKOUT }))
     }

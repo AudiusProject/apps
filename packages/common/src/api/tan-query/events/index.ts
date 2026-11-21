@@ -1,4 +1,3 @@
-// Queries
 export * from './useAllEvents'
 export * from './useAllRemixContests'
 export * from './useUserRemixContests'
@@ -11,12 +10,10 @@ export * from './useRemixContest'
 export * from './useRemixContestWinners'
 export * from './useUserHasRemixContest'
 
-// Mutations
 export * from './useCreateEvent'
 export * from './useUpdateEvent'
 export * from './useDeleteEvent'
 
-// Query key helpers (needed by tests and for manual cache priming).
 export {
   getEventQueryKey,
   getEventIdsByEntityIdQueryKey,

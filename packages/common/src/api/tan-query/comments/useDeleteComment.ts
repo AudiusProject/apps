@@ -17,7 +17,7 @@ import {
 export type DeleteCommentArgs = {
   commentId: ID
   userId: ID
-  trackId: ID // track id
+  trackId: ID
   currentSort: any
   parentCommentId?: ID
 }
@@ -37,9 +37,7 @@ export const useDeleteComment = () => {
       return await sdk.comments.deleteComment(commentData)
     },
     onMutate: ({ commentId, trackId, currentSort, parentCommentId }) => {
-      // Subtract from the comment count
       subtractCommentCount(queryClient, trackId)
-      // If reply, filter it from the parent's list of replies
       if (parentCommentId) {
         queryClient.setQueryData(
           getCommentQueryKey(parentCommentId),
@@ -74,7 +72,6 @@ export const useDeleteComment = () => {
               }) as Comment & { userId?: undefined }
           )
         } else {
-          // If not a reply & has no replies, remove from the sort list
           queryClient.setQueryData(
             getTrackCommentListQueryKey({
               trackId,
@@ -83,14 +80,12 @@ export const useDeleteComment = () => {
             (prevCommentData) => {
               const newCommentData = cloneDeep(prevCommentData)
               if (!newCommentData) return
-              // Filter out the comment from its current page
               newCommentData.pages = newCommentData.pages.map((page: ID[]) =>
                 page.filter((id: ID) => id !== commentId)
               )
               return newCommentData
             }
           )
-          // Remove the individual comment
           queryClient.removeQueries({
             queryKey: getCommentQueryKey(commentId),
             exact: true
@@ -102,10 +97,7 @@ export const useDeleteComment = () => {
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
       console.error(error)
-      // Toast standard error message
       dispatch(toast({ content: messages.mutationError('deleting') }))
-      // Since this mutation handles sort data, its difficult to undo the optimistic update so we just re-load everything
-      // TODO: avoid hard reset here by checking if cache changed?
       queryClient.resetQueries({
         queryKey: getTrackCommentListQueryKey({
           trackId,

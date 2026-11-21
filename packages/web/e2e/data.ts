@@ -74,7 +74,6 @@ export const getRemix = () => {
   }
 
   return {
-    // TODO: this track has been deleted and should be replaced
     url: 'df/probers_remix_do_not_delete-2859',
     name: 'probers_remix_do_not_delete'
   }
@@ -110,7 +109,6 @@ export const getEditableAlbum = () => {
     return album2() as Pick<Playlist, 'playlistName' | 'permalink'>
   }
 
-  // TODO: Find one for stage or eliminate stage testing
   return {
     permalink: '',
     playlistName: ''

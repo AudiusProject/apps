@@ -9,8 +9,6 @@ test('should favorite/unfavorite a track', async ({ page }) => {
   await page.goto(url)
 
   const socialActions = new SocialActions(page)
-  // On initial load, the favorite button will be showing. Make sure to wait for
-  // the unfavorite button in case it comes, but allow failure.
   await expect(
     socialActions.unfavoriteButton,
     'Check for unfavorite (ok if fails)'
@@ -32,8 +30,6 @@ test('should repost/unrepost a track', async ({ page }) => {
   await page.goto(url)
 
   const socialActions = new SocialActions(page)
-  // On initial load, the repost button will be showing. Make sure to wait for
-  // the unrepost button in case it comes, but continue if it doesn't.
   await expect(socialActions.unrepostButton, 'Check for unrepost (ok if fails)')
     .toBeVisible()
     .catch(() => {})

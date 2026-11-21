@@ -41,13 +41,11 @@ export const WEB3_MODAL_METADATA = {
 }
 
 export const ETHERS_CONFIG = defaultConfig({
-  /* Required */
   metadata: WEB3_MODAL_METADATA,
 
-  /* Optional */
   enableEIP6963: true, // true by default
   enableInjected: true, // true by default
   enableCoinbase: true, // true by default
   rpcUrl: ETH_PROVIDER_URL, // used for the Coinbase SDK
-  defaultChainId: chainIdNumber // used for the Coinbase SDK
+  defaultChainId: chainIdNumber
 })

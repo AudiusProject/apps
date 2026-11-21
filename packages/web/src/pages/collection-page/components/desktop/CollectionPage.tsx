@@ -162,8 +162,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     [favoriteTrack, unfavoriteTrack]
   )
 
-  // Compute values needed for useMemo (handle undefined collection case)
-  // These need to be computed before the conditional return to ensure hooks are always called
   const isAlbum = collection?.is_album ?? false
   const areAllTracksPremium =
     collection && tracks.entries.length > 0
@@ -174,7 +172,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
         )
       : false
 
-  // useMemo must be called before any conditional returns
   const tracksTableColumns = useMemo(() => {
     const columns = [
       isAlbum ? 'playButton' : undefined,
@@ -188,13 +185,11 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     return columns.filter(removeNullable)
   }, [areAllTracksPremium, isAlbum])
 
-  // Now we can do conditional returns after all hooks
   if (!collection) return null
 
   const metadata = collection
   const statusValue = status
 
-  // TODO: Consider dynamic lineups, esp. for caching improvement.
   const [dataSource, activeIndex] =
     tracks.status === Status.SUCCESS
       ? getFilteredData(tracks.entries)
@@ -234,11 +229,9 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   } = computeCollectionMetadataProps(metadata, tracks)
   const numTracks = tracks.entries.length
   const areAllTracksDeleted = tracks.entries.every((track) => track.is_delete)
-  // areAllTracksPremium and isAlbum are already computed above for useMemo
 
   const isPlayable = !areAllTracksDeleted && numTracks > 0
 
-  // Handle deleted collections
   if ((metadata?.is_delete || metadata?._marked_deleted) && user) {
     return (
       <DeletedPage
@@ -279,7 +272,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       saves={playlistSaveCount}
       playing={queuedAndPlaying}
       previewing={queuedAndPreviewing}
-      // Actions
       onPlay={onPlay}
       onPreview={onPreview}
       onClickReposts={onClickReposts}

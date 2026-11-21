@@ -19,16 +19,12 @@ export const getIsRedirectValid = ({
 }) => {
   if (redirectUri) {
     if (parsedRedirectUri == null) {
-      // This means the redirect uri is not a string (and is thus invalid) or the URI format was invalid
       return false
     }
     if (parsedRedirectUri === 'postmessage') {
       return true
     }
     const { protocol } = parsedRedirectUri
-    // Only block schemes that could execute code directly in the browser.
-    // All other validation (allowed domains, path, etc.) is enforced server-side
-    // via the registered redirect URI list for the OAuth client.
     const dangerousSchemes = ['javascript:', 'data:', 'vbscript:']
     if (dangerousSchemes.includes(protocol)) {
       return false
@@ -153,11 +149,9 @@ export const exchangeForAuthorizationCode = async ({
   scope: string
   onError: () => void
 }): Promise<string | null> => {
-  // 1. Build JWT (same as implicit flow — proves user identity to API)
   const jwt = await formOAuthResponse({ account, userEmail, apiKey, onError })
   if (!jwt) return null
 
-  // 2. Exchange JWT + PKCE params for authorization code
   try {
     const res = await fetch(`${env.API_URL}/v1/oauth/authorize`, {
       method: 'POST',
@@ -262,7 +256,6 @@ export const validateDashboardWalletParams = ({
       wallet: rawParams.wallet
     }
   } else {
-    // Unknown 'tx' value
     error = messages.txError
   }
   return { error, txParams }
@@ -339,7 +332,6 @@ export const handleAuthorizeConnectDashboardWallet = async ({
   }
   window.addEventListener('message', walletSignatureListener, false)
 
-  // Send chosen logged in user info back to origin
   window.opener.postMessage(
     {
       state,
@@ -349,12 +341,10 @@ export const handleAuthorizeConnectDashboardWallet = async ({
     originUrl.origin
   )
 
-  // Listen for message from origin containing wallet signature
   onWaitForWalletSignature()
   const walletSignature = await receiveWalletSignaturePromise
   onReceivedWalletSignature()
   window.removeEventListener('message', walletSignatureListener)
-  // Send the transaction
   try {
     const sdk = await audiusSdk()
     await sdk.dashboardWalletUsers.connectUserToDashboardWallet({

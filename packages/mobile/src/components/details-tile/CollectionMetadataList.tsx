@@ -9,9 +9,6 @@ type CollectionMetadataProps = {
   collectionId: ID
 }
 
-/**
- * The additional metadata shown at the bottom of the Collection Screen Header
- */
 export const CollectionMetadataList = (props: CollectionMetadataProps) => {
   const { collectionId } = props
   const metadataItems = useCollectionMetadata({ collectionId })

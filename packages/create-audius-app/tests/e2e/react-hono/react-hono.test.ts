@@ -6,7 +6,6 @@ test('auths, fetches tracks, and favorites a track', async ({
 }) => {
   test.slow()
 
-  // Set entropy so we don't need to do OTP
   const entropy = process.env.CREATE_AUDIUS_APP_TEST_ENTROPY ?? ''
   await context.addInitScript((entropy) => {
     if (window.location.hostname === 'audius.co') {
@@ -19,7 +18,6 @@ test('auths, fetches tracks, and favorites a track', async ({
   const pagePromise = context.waitForEvent('page')
   await page.getByRole('button', { name: 'Continue With Audius' }).click()
 
-  // Oauth popup
   const authPage = await pagePromise
   await authPage.waitForLoadState()
   await authPage.getByRole('button', { name: 'Continue' }).click()
@@ -28,11 +26,9 @@ test('auths, fetches tracks, and favorites a track', async ({
     timeout: 10000
   })
 
-  // Fetch tracks
   await page.getByRole('textbox').fill('createaudiusapptracks')
   await page.getByRole('button', { name: 'Get Tracks' }).click()
 
-  // Set up block_confirmation response listener
   const responsePromise = page.waitForResponse(async (response) => {
     if (
       response.url().includes('favorite') ||
@@ -50,7 +46,6 @@ test('auths, fetches tracks, and favorites a track', async ({
     .getByRole('button', { name: 'Unfavorite', exact: true })
     .first()
 
-  // Either favorite or unfavorite the track
   const favoriteButtonExists = await Promise.any([
     favoriteButton.waitFor().then(() => true),
     unfavoriteButton.waitFor().then(() => false)
@@ -66,6 +61,5 @@ test('auths, fetches tracks, and favorites a track', async ({
     await expect(favoriteButton).toBeVisible()
   }
 
-  // Confirm track is updated
   await responsePromise
 })

@@ -71,7 +71,6 @@ const messages = {
   collapseLabel: 'Collapse suggested tracks panel',
   trackAdded: (isAlbum: boolean) =>
     `Added to ${isAlbum ? 'Album' : 'Playlist'}`,
-  // Add-by-URL paste field
   urlPlaceholder: 'Paste an Audius track URL to add',
   urlLabel: 'Add by URL',
   noValidLinks: 'No valid Audius track links found.',
@@ -116,11 +115,6 @@ type ParseResult = {
   invalidCount: number
 }
 
-/**
- * Split pasted/typed text into Audius track permalinks. Accepts one URL per
- * line, or comma/tab separated. Mirrors the previous AddTracksByUrlModal's
- * parser exactly.
- */
 const parseTrackUrls = (raw: string): ParseResult => {
   const lines = raw
     .split(/[\n\r,\t]+/)
@@ -280,10 +274,6 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
   const { motion } = useTheme()
   const isDraft = isDraftCollection(collectionId)
 
-  // The set of track IDs already in the collection — used to filter
-  // duplicates and compute remaining capacity before resolving pasted URLs.
-  // Works for draft collections too: draftCollectionCache writes into the
-  // same useCollection query key so playlist_contents stays in sync.
   const { data: existingTrackIdSet } = useCollection(collectionId, {
     select: (c) =>
       new Set<number>(c?.playlist_contents.track_ids.map((t) => t.track) ?? [])
@@ -292,18 +282,14 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
   const [urlInput, setUrlInput] = useState('')
   const [isAdding, setIsAdding] = useState(false)
 
-  // Preserve scroll position when adding track - prevents scroll-to-top on
-  // optimistic update (e.g. from focus loss when Add button becomes disabled)
   const onAddTrack = useCallback(
     (trackId: ID) => {
       const scrollTop = mainContentRef?.current?.scrollTop ?? 0
       if (isDraft) {
-        // Unsaved create flow: mutate the local draft, not the backend.
         addTrackToDraftCollection(queryClient, collectionId, trackId)
       } else {
         originalOnAddTrack(trackId)
       }
-      // Restore scroll after React has committed the update
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (mainContentRef?.current != null) {
@@ -315,12 +301,6 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
     [originalOnAddTrack, mainContentRef, isDraft, queryClient, collectionId]
   )
 
-  // Resolve pasted/typed URLs into track IDs and add them. Mirrors the
-  // now-removed AddTracksByUrlModal: same parser, same SDK call, same
-  // dedupe + capacity checks, same summary toast. Routes to the draft
-  // cache when the collection is unsaved (create flow), or dispatches the
-  // backend save action otherwise — same branching the suggested-row Add
-  // button uses.
   const addTracksFromText = useCallback(
     async (raw: string) => {
       if (!raw.trim()) return
@@ -377,8 +357,6 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
             dispatch(
               addTrackToPlaylist(track.track_id, collectionId, { silent: true })
             )
-            // Space out backend dispatches so each saga's optimistic update
-            // lands before the next one reads the playlist state.
             // eslint-disable-next-line no-await-in-loop
             await new Promise((resolve) =>
               setTimeout(resolve, INTER_DISPATCH_DELAY_MS)
@@ -420,14 +398,9 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
     (e: ClipboardEvent<HTMLInputElement>) => {
       const pasted = e.clipboardData.getData('text')
       const { permalinks } = parseTrackUrls(pasted)
-      // Only intercept the paste when the clipboard contains at least one
-      // valid Audius track URL — otherwise let the user type/edit freely.
       if (permalinks.length === 0) return
       e.preventDefault()
       setUrlInput('')
-      // addTracksFromText catches its own errors and toasts; the floating
-      // promise is intentional. ESLint's no-void rule disallows the `void`
-      // operator here, so we just let it float.
       addTracksFromText(pasted)
     },
     [addTracksFromText]

@@ -120,12 +120,10 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
     select: selectIsAccountComplete
   })
 
-  // Reset form on track change
   useEffect(() => {
     resetForm()
   }, [contentId, resetForm])
 
-  // Navigate to track on successful purchase behind the modal
   useEffect(() => {
     if (stage === PurchaseContentStage.FINISH && permalink) {
       const pathname = getPathname(location)
@@ -265,8 +263,6 @@ export const PremiumContentPurchaseModal = NiceModal.create(() => {
   const handleFormSubmit = useCallback(
     (values: z.input<typeof validationSchema>) => {
       if (values.guestEmail && guestEmail !== values.guestEmail) {
-        // only create guest account if email has changed
-        // enable multiple purchases with same guest email
         dispatch(createGuestAccount(values.guestEmail))
         setGuestEmailInLocalStorage(values.guestEmail)
         dispatch(
@@ -290,8 +286,6 @@ export const PremiumContentPurchaseModal = NiceModal.create(() => {
     }
   }, [showGuestCheckout, dispatch])
 
-  // On form mount, pre-create user bank if needed and check for any usdc stuck
-  // in root wallet from an aborted withdrawal
   useEffect(() => {
     if (showGuestCheckout) return
     dispatch(eagerCreateUserBank())
@@ -299,7 +293,6 @@ export const PremiumContentPurchaseModal = NiceModal.create(() => {
   }, [dispatch, showGuestCheckout])
 
   const handleClose = useCallback(() => {
-    // Don't allow closing if we're in the middle of a purchase
     if (!isUnlocking || stage === PurchaseContentStage.START) {
       onClose()
     }

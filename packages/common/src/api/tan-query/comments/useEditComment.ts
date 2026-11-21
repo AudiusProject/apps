@@ -63,19 +63,15 @@ export const useEditComment = () => {
     onError: (error: Error, args, context) => {
       const { commentId } = args
       console.error(error)
-      // Toast standard error message
       dispatch(toast({ content: messages.mutationError('editing') }))
 
-      // Note: context could be undefined if the onMutate threw before returning
       if (context) {
         const { prevComment } = context
-        // Revert our optimistic cache change
         queryClient.setQueryData(
           getCommentQueryKey(commentId),
           (prevData: CommentOrReply | undefined) =>
             ({
               ...prevData,
-              // NOTE: intentionally only reverting the pieces we changed in case another mutation happened in between this mutation start->error
               isEdited: prevComment?.isEdited,
               message: prevComment?.message,
               mentions: prevComment?.mentions

@@ -34,10 +34,6 @@ type AppTabNavigationProviderProps = { children: ReactNode }
 
 const checkNavReadyInterval = 1000
 
-/**
- * Context that provides the AppTabNavigation to any components
- * that need it outside of the AppTabScreen stack context
- */
 export const AppTabNavigationProvider = (
   props: AppTabNavigationProviderProps
 ) => {

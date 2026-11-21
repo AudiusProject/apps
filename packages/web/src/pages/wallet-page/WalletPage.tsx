@@ -28,7 +28,6 @@ export const WalletPage = () => {
     setLeft(LeftPreset.BACK)
   }, [setLeft])
 
-  // Set up mobile header with icon
   useMobileHeader({
     title: messages.title
   })

@@ -12,16 +12,9 @@ import {
   usePlaylistEditMode
 } from './PlaylistEditModeContext'
 
-/**
- * The subset of collection form values that PriceAndAudienceField reads and
- * writes. Mirrors the shape the dedicated edit page's Formik form provides so
- * the field behaves identically here (confirmation modal included).
- */
 type AccessFormValues = PlaylistAccessDraft & {
   is_private: boolean
   is_scheduled_release: boolean
-  // PriceAndAudienceField also writes the download-gate fields; albums don't
-  // persist them, so they live only in this local form.
   is_download_gated: Nullable<boolean>
   download_conditions: Nullable<AccessConditions>
   is_downloadable: boolean
@@ -33,11 +26,6 @@ type AccessFormValues = PlaylistAccessDraft & {
 
 const noop = () => {}
 
-/**
- * Pushes the access fields from the local Formik form into the inline
- * edit-mode draft whenever PriceAndAudienceField commits a change, so that
- * Apply persists them alongside the other staged edits.
- */
 const AccessDraftSync = () => {
   const { values } = useFormikContext<AccessFormValues>()
   const { setField } = usePlaylistEditMode()
@@ -45,8 +33,6 @@ const AccessDraftSync = () => {
   const { is_stream_gated, stream_conditions } = values
 
   useEffect(() => {
-    // The initial values are the collection's current values; only sync once
-    // the user has actually changed something.
     if (isFirstRender.current) {
       isFirstRender.current = false
       return
@@ -62,10 +48,6 @@ type InlineAlbumPriceAndAudienceProps = {
   collectionId: ID
 }
 
-/**
- * Album "Price & Audience" settings (free vs. pay-to-unlock) for the inline
- * collection editor.
- */
 export const InlineAlbumPriceAndAudience = (
   props: InlineAlbumPriceAndAudienceProps
 ) => {

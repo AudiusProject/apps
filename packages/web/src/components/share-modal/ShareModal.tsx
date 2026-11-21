@@ -45,8 +45,6 @@ export const ShareModal = NiceModal.create(() => {
   const onClose = useCallback(() => {
     modal.hide()
   }, [modal])
-  // NiceModal handles unmount via `remove()` after the close animation;
-  // there's no separate "fully closed" callback, so reuse onClose here.
   const onClosed = onClose
   const sendShareAction = useShareAction()
 
@@ -69,7 +67,6 @@ export const ShareModal = NiceModal.create(() => {
     if (!content) return
     onClose()
     openCreateChatModal({
-      // Just care about the link
       presetMessage: (await getXShareText(content, false)).link,
       onCancelAction: setVisibility({ modal: 'Share', visible: true }),
       defaultUserList: 'chats'
@@ -98,9 +95,6 @@ export const ShareModal = NiceModal.create(() => {
         dispatch(shareTrack(content.track.track_id, source))
         break
       case 'contest':
-        // Contest copy-link uses the dedicated `shareContest` saga,
-        // which writes the contest URL (`{permalink}/contest`) to
-        // the clipboard rather than the track permalink.
         dispatch(shareContest(content.track.track_id, source))
         break
       case 'profile':
@@ -113,8 +107,6 @@ export const ShareModal = NiceModal.create(() => {
         dispatch(shareCollection(content.playlist.playlist_id, source))
         break
       case 'weeklyRotation': {
-        // No saga for weekly rotation shares; copy the link and record the
-        // event here.
         const link = weeklyRotationPage(content.user.handle)
         copyLinkToClipboard(link)
         record(
@@ -155,7 +147,6 @@ export const ShareModal = NiceModal.create(() => {
     }
   }, [content, dispatch, onClose])
 
-  // Trigger share action on mount with new content
   useEffect(() => {
     if (!content) return
     switch (content.type) {
@@ -173,7 +164,6 @@ export const ShareModal = NiceModal.create(() => {
   const shareProps = {
     isOpen,
     isOwner,
-    // Disable DM share in manager mode since we can't do that as a managed user
     onShareToDirectMessage: isManagerMode
       ? undefined
       : handleShareToDirectMessage,

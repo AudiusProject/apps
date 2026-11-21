@@ -50,13 +50,9 @@ type AddTrackToPlaylistAction = ReturnType<
   typeof cacheCollectionsActions.addTrackToPlaylist
 >
 
-// Returns current timestamp in seconds, which is the expected
-// format for client-generated playlist entry timestamps
 const getCurrentTimestamp = () => {
   return Math.floor(Date.now() / 1000)
 }
-
-/** ADD TRACK TO PLAYLIST */
 
 export function* watchAddTrackToPlaylist() {
   yield* takeEvery(
@@ -96,12 +92,7 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
   playlist.playlist_contents = {
     track_ids: playlist.playlist_contents.track_ids.concat({
       track: action.trackId,
-      // Replaced in indexing with block timestamp
-      // Represents the server time seen when track was added to playlist
       time: 0,
-      // Represents user-facing timestamp when the user added the track to the playlist.
-      // This is needed to disambiguate between tracks added at the same time/potentiall in
-      // the same block.
       metadata_time: getCurrentTimestamp(),
       uid: trackUid
     })
@@ -110,7 +101,6 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
   const count = playlist.track_count + 1
   playlist.track_count = count
 
-  // Optimistic update #1 to show track in playlist quickly
   if (isNative) {
     yield* call(optimisticUpdateCollection, playlist)
   }
@@ -125,7 +115,6 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
     }
   )
 
-  // Optimistic update #2 to show updated artwork
   yield* call(optimisticUpdateCollection, updatedPlaylist)
 
   yield* call(
@@ -191,12 +180,9 @@ function* confirmAddTrackToPlaylist(
       function* (_confirmedPlaylistId: ID) {
         const done = yield* isPlaylistConfirmerDone(playlistId)
         if (!done) return
-        // Don't refetch - the backend may not have propagated yet, and a refetch
-        // would overwrite our optimistic cache with stale data.
         yield* call(updateCollectionData, [playlist])
       },
       function* ({ error, timeout, message }) {
-        // Fail Call
         yield* put(
           cacheCollectionsActions.addTrackToPlaylistFailed(
             error,

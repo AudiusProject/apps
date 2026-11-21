@@ -41,7 +41,6 @@ export const copy = async (
         ? path.join(destRelativeToCwd, dirname, basename)
         : path.join(destRelativeToCwd, basename)
 
-      // Ensure the destination directory exists
       await fs.promises.mkdir(path.dirname(to), { recursive: true })
 
       return fs.promises.copyFile(from, to)

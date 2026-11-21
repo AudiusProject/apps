@@ -11,15 +11,11 @@ import {
   useCanCreateChat
 } from '~/store/pages/chat/selectors'
 
-/**
- * Returns whether or not the current user can send messages to the current chat
- */
 export const useCanSendMessage = (
   currentChatId?: string
 ): {
   canSendMessage: boolean
   callToAction: ChatPermissionAction
-  // Explicitly define type as undefinable since users could be empty
   firstOtherUser: User | undefined
 } => {
   const users = useOtherChatUsers(currentChatId)
@@ -39,7 +35,6 @@ export const useCanSendMessage = (
     getRecheckPermissions(state, currentChatId)
   )
 
-  // Any group member can post; blocks only hide messages per reader.
   if (!userId || isGroup) {
     return {
       canSendMessage: true,

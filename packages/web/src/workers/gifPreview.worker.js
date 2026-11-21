@@ -1,11 +1,6 @@
 /* globals Jimp */
 
 export default () => {
-  /**
-   * Returns a jpeg of a gif
-   * @param {string} key identifies this computation
-   * @param {string} imageUrl url of the image to use
-   */
   const gifPreview = ({ key, imageUrl }) => {
     Jimp.read({
       url: imageUrl
@@ -28,7 +23,7 @@ export default () => {
   }
 
   // eslint-disable-next-line
-  self.addEventListener('message', e => {
+  self.addEventListener('message', (e) => {
     if (!e) return
     gifPreview(JSON.parse(e.data))
   })

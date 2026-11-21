@@ -1,6 +1,3 @@
-// For all routes except the explicitly defined ones
-// simply render the SPA without SSR
-
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'

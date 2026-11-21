@@ -90,7 +90,6 @@ export const PriceAndAudienceScreen = () => {
 
   const previousStreamConditions = useMemo(
     () => streamConditions ?? initialStreamConditions,
-    // we only care about what the initial value was here
     // eslint-disable-next-line
     []
   )
@@ -99,7 +98,6 @@ export const PriceAndAudienceScreen = () => {
   const [{ value: preview }, { error: previewError }] = useField(TRACK_PREVIEW)
 
   const usdcGateIsInvalid = useMemo(() => {
-    // first time user selects usdc purchase option
     const priceNotSet = price === null
     const previewNotSet = preview === null
     return (
@@ -115,17 +113,11 @@ export const PriceAndAudienceScreen = () => {
     [streamConditions]
   )
 
-  /**
-   * Do not navigate back if:
-   * - track is token gated and user has not selected a token, or
-   * - track is usdc purchase gated and user has not selected a valid price or preview
-   */
   const isFormInvalid = usdcGateIsInvalid || tokenGateHasNoSelectedToken
 
   const navigation = useNavigation()
   const [usersMayLoseAccess, setUsersMayLoseAccess] = useState(false)
 
-  // Check if users may lose access based on the new audience.
   useEffect(() => {
     setUsersMayLoseAccess(
       getUsersMayLoseAccess({
@@ -136,7 +128,7 @@ export const PriceAndAudienceScreen = () => {
   }, [availability, initialStreamConditions])
 
   const handleSubmit = useCallback(() => {
-    validateForm() // Fixes any erroneous errors that haven't been revalidated
+    validateForm()
     if (!isUpload && usersMayLoseAccess) {
       onOpenEditAccessConfirmationModal({
         confirmCallback: navigation.goBack,

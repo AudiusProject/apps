@@ -60,7 +60,6 @@ const messages = {
     'Explore Artist Fan Clubs on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
 }
 
-// Desktop version
 const DesktopFanClubsExplorePage = () => {
   const navigate = useNavigate()
   const { motion, spacing } = useTheme()
@@ -277,7 +276,6 @@ const DesktopFanClubsExplorePage = () => {
   )
 }
 
-// Main component that conditionally renders desktop or mobile version
 export const FanClubsExplorePage = () => {
   return isMobile() ? (
     <MobileFanClubsExplorePage />

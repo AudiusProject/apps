@@ -49,16 +49,13 @@ export const track = async (
     if (!IS_PRODUCTION_BUILD) {
       console.info(`Amplitude | track`, eventName, properties)
     }
-    // stop tracking analytics after we reach session limit
     if (trackCounter++ >= TRACK_LIMIT) return
 
-    // Add generic track event context for every event
     const propertiesWithContext = {
       ...properties,
       clientVersion: version
     }
 
-    // TODO: This can be removed when the the web layer is removed from mobile
     await didInit
     return await amplitude.track(eventName, propertiesWithContext, callback)
   } catch (err) {
@@ -85,12 +82,6 @@ export const identify = async (
   }
 }
 
-/**
- * NOTE: Do not use as an action creator. This is to be in parity with mobile for sagas in common
- * Use:
- * `import { make } from 'common/store/analytics/actions'`
- * to dispatch actions
- */
 export const make = (event: AllTrackingEvents) => {
   const { eventName, ...props } = event
   return {

@@ -169,10 +169,6 @@ export const useUpload = (
     audiusSdk,
     analytics: { make, track }
   } = useQueryContext()
-  // Uploads carry this user's id so the validator can attest on chain who the
-  // bytes were uploaded for, which is what makes the resulting cids claimable
-  // on a track. The SDK requires it, so a missing account fails loudly here
-  // rather than producing an unclaimable upload.
   const { data: account } = useCurrentAccount()
   const userId = account?.userId ?? undefined
   const requireUserId = useCallback(() => {
@@ -186,18 +182,14 @@ export const useUpload = (
   const { mutateAsync: publishCollectionAsync } = usePublishCollection()
   const uploadFiles = useUploadFiles()
 
-  // Holds the upload promise so that uploading tracks can start immediately
-  // and then be awaited on the finish step.
   const trackUploadPromise = useRef<ReturnType<typeof uploadTrackFiles>>(
     Promise.resolve([])
   )
 
-  // Tracks individual track files so they can be replaced if needed
   const trackFiles = useRef<
     Map<string, NonNullable<UploadFormState['tracks']>[number]['file']>
   >(new Map())
 
-  // Tracks individual file upload tasks so they can be aborted if needed
   const uploadTasks = useRef<Map<string, UploadTrackFilesTask>>(new Map())
 
   const uploadTrackFiles = useCallback(
@@ -212,7 +204,6 @@ export const useUpload = (
         requireUserId()
       )
 
-      // Store the upload tasks for potential aborting later
       tasks.forEach((task, i) => {
         uploadTasks.current.set(tracks[i]!.clientId, task)
       })
@@ -222,20 +213,14 @@ export const useUpload = (
     [audiusSdk, dispatch, uploadFiles, requireUserId]
   )
 
-  /**
-   * Replaces track files that have been changed in the edit form
-   * by aborting their previous upload and re-uploading the new file
-   */
   const replaceTrackFiles = useCallback(
     (tracks: TrackForUpload[]) => {
-      // Check if any track files were replaced (same clientId, different File)
       const tracksWithReplacedFiles =
         tracks?.filter((track) => {
           const existingFile = trackFiles.current.get(track.clientId)
           return existingFile && existingFile !== track.file
         }) ?? []
 
-      // Abort and remove upload tasks for removed or replaced files
       for (const key of uploadTasks.current.keys()) {
         const isRemoved = !tracks.find((t) => t.clientId === key)
         const isReplaced = !!tracksWithReplacedFiles.find(
@@ -247,7 +232,6 @@ export const useUpload = (
         }
       }
 
-      // Keep the existing uploads and add the new uploads for replaced files
       if (tracksWithReplacedFiles.length > 0) {
         trackUploadPromise.current = Promise.all([
           uploadTrackFiles(tracksWithReplacedFiles),
@@ -286,7 +270,6 @@ export const useUpload = (
       }
       const sdk = await audiusSdk()
 
-      // Finish the audio progress for the collection (there is none)
       dispatch(
         updateProgress({
           clientId: 'collection-artwork',
@@ -364,7 +347,6 @@ export const useUpload = (
       const tracks = formState.tracks ?? []
       const uploadType = formState.uploadType
 
-      // Track start of upload
       track(
         make({
           eventName: Name.TRACK_UPLOAD_START_UPLOADING,
@@ -375,7 +357,6 @@ export const useUpload = (
 
       dispatch(uploadTracksRequested(formState))
 
-      // Replace tracks as necessary
       replaceTrackFiles(tracks)
 
       let stemUploads: Awaited<ReturnType<typeof uploadStemFiles>> = []
@@ -387,7 +368,6 @@ export const useUpload = (
         trackUploadPromise.current
       ])
 
-      // If every track file failed to upload, fail the entire upload
       if (trackUploads.every((tu) => tu.error)) {
         const error = new Error('All track uploads failed')
         console.error(error.message)
@@ -444,7 +424,6 @@ export const useUpload = (
             throw new Error('Some tracks failed to publish')
           }
 
-          // Track complete upload analytics
           track(
             make({
               eventName: Name.TRACK_UPLOAD_COMPLETE_UPLOAD,
@@ -505,7 +484,6 @@ export const useUpload = (
             })
           })
 
-          // Track complete upload analytics
           track(
             make({
               eventName: Name.TRACK_UPLOAD_COMPLETE_UPLOAD,

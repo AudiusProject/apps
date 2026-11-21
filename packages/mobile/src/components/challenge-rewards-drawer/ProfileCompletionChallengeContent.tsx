@@ -28,7 +28,6 @@ const messages = {
   claiming: 'Claiming',
   close: 'Close',
   viewProfile: 'View Your Profile',
-  // Profile completion checks
   profileCheckNameAndHandle: 'Name & Handle',
   profileCheckProfilePicture: 'Profile Picture',
   profileCheckCoverPhoto: 'Cover Photo',

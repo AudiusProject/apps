@@ -25,8 +25,6 @@ export function* queryTracksForCollections(
 
   const tracks = chunkedTracks.flat(1)
 
-  // If any tracks failed to be retrieved for some reason,
-  // remove them from their collection.
   const unfetchedIdSet = new Set()
   for (let i = 0; i < tracks.length; i++) {
     if (!tracks[i]) {
@@ -35,14 +33,11 @@ export function* queryTracksForCollections(
   }
 
   return collections.map((c) => {
-    // Filter out unfetched tracks
     const filteredIds = c.playlist_contents.track_ids.filter(
       (t) => !unfetchedIdSet.has(t.track)
     )
-    // Add UIDs
     const withUids = filteredIds.map((t) => ({
       ...t,
-      // Make a new UID if one doesn't already exist
       uid: t.uid || makeUid(Kind.TRACKS, t.track, `collection:${c.playlist_id}`)
     }))
 

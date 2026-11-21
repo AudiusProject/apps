@@ -11,7 +11,6 @@ const messages = {
     `${isAlbum ? 'Album' : 'Playlist'} Created`,
   view: 'View'
 }
-// Either route user to created playlist page, or post a toast
 export function* createPlaylistRequestedSaga() {
   yield* takeEvery(
     cacheCollectionsActions.CREATE_PLAYLIST_REQUESTED,

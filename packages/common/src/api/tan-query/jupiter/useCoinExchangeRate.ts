@@ -15,7 +15,6 @@ import { useQueryContext } from '../utils/QueryContext'
 
 import { getCoinPoolState, getIsDirectSwappable } from './utils'
 
-// AUDIO mint address for use as intermediary token in double swaps
 const AUDIO_MINT = TOKEN_LISTING_MAP.AUDIO.address
 const AUDIO_DECIMALS = TOKEN_LISTING_MAP.AUDIO.decimals
 
@@ -42,16 +41,10 @@ export type CoinExchangeRateResponse = {
   quote: QuoteResponse
 }
 
-// Default slippage is 200 basis points (2%)
 export const SLIPPAGE_BPS = 200
 
-// Maximum safe amount for exchange rate queries to prevent API errors
-// This corresponds to 1 trillion tokens, which is well above any realistic amount
 const MAX_SAFE_EXCHANGE_RATE_AMOUNT = 1000000000000
 
-/**
- * Calculates the exchange rate between two amounts
- */
 export const calculateExchangeRate = (
   outputUiAmount: number,
   inputUiAmount: number
@@ -59,18 +52,12 @@ export const calculateExchangeRate = (
   return outputUiAmount / inputUiAmount
 }
 
-/**
- * Calculates price impact percentage, handling undefined values
- */
 export const calculatePriceImpact = (
   priceImpactPct?: number | string
 ): number => {
   return priceImpactPct !== undefined ? Number(priceImpactPct) : 0
 }
 
-/**
- * Creates a standardized CoinExchangeRateResponse object
- */
 export const createExchangeRateResponse = ({
   rate,
   inputAmount,
@@ -99,9 +86,6 @@ export const createExchangeRateResponse = ({
   }
 }
 
-/**
- * Gets a direct quote between two tokens
- */
 export const getDirectQuote = async (
   params: {
     inputMint: string
@@ -158,9 +142,6 @@ export const getDirectQuote = async (
   })
 }
 
-/**
- * Gets an indirect quote via AUDIO token when direct route is not available
- */
 export const getIndirectQuoteViaAudio = async (
   params: {
     inputMint: string
@@ -181,7 +162,6 @@ export const getIndirectQuoteViaAudio = async (
     params.outputMint,
     queryClient
   )
-  // Get first quote: InputToken -> AUDIO
   let firstQuote: JupiterQuoteResult | undefined
   if (inputHasPool) {
     firstQuote = await getQuoteViaMeteoraDBC(
@@ -212,7 +192,6 @@ export const getIndirectQuoteViaAudio = async (
     })
   }
 
-  // Get second quote: AUDIO -> OutputToken
   let secondQuote: JupiterQuoteResult | undefined
 
   if (outputHasPool) {
@@ -244,14 +223,11 @@ export const getIndirectQuoteViaAudio = async (
     })
   }
 
-  // Calculate combined exchange rate
-
   const rate = calculateExchangeRate(
     secondQuote?.outputAmount?.uiAmount ?? params.amountUi,
     firstQuote?.inputAmount?.uiAmount ?? params.amountUi
   )
 
-  // Combine price impacts (additive approximation)
   const firstPriceImpact = calculatePriceImpact(
     firstQuote?.quote?.priceImpactPct ?? 0
   )
@@ -265,7 +241,7 @@ export const getIndirectQuoteViaAudio = async (
     inputAmount: firstQuote?.inputAmount ?? secondQuote!.inputAmount,
     outputAmount: secondQuote?.outputAmount ?? firstQuote!.outputAmount,
     priceImpactPct: combinedPriceImpact,
-    quote: secondQuote?.quote ?? firstQuote!.quote // Use the final quote for transaction purposes
+    quote: secondQuote?.quote ?? firstQuote!.quote
   })
 }
 
@@ -286,22 +262,18 @@ export const getQuoteViaMeteoraDBC = async (
   const direction = inputMint === AUDIO_MINT ? 'audioToCoin' : 'coinToAudio'
   const coinMint = inputMint === AUDIO_MINT ? outputMint : inputMint
 
-  // Get a quote from the Meteora DBC via solana relay
   const { outputAmount } = await sdk.services.solanaRelay.getSwapCoinQuote({
     inputAmount: new FixedDecimal(amountUi, inputDecimals).value.toString(),
     coinMint,
     swapDirection: direction
   })
 
-  // Convert the output amount string to BigInt
   const outputAmountBigInt = BigInt(outputAmount)
 
-  // Calculate input amount in lamports
   const inputAmountBigInt = BigInt(
     new FixedDecimal(amountUi, inputDecimals).value.toString()
   )
 
-  // Match the same format as Jupiter quotes, but there's not as much detail as Jupiter
   const mockQuote: QuoteResponse = {
     inputMint,
     inAmount: inputAmountBigInt.toString(),
@@ -331,7 +303,6 @@ export const getQuoteViaMeteoraDBC = async (
   }
 }
 
-// Define exchange rate query key
 export const getCoinExchangeRateQueryKey = ({
   inputMint,
   outputMint,
@@ -350,23 +321,14 @@ export const getCoinExchangeRateQueryKey = ({
     swapMode ?? 'ExactIn'
   ] as unknown as QueryKey<CoinExchangeRateResponse>
 
-/**
- * Hook to get the exchange rate between two tokens using Jupiter
- *
- * @param params Parameters for the token exchange rate query
- * @param options Optional query configuration
- * @returns The exchange rate data
- */
 export const useCoinExchangeRate = (
   params: CoinExchangeRateParams,
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
-  // Default to 1 unit of input token if no amount specified
   const inputAmount = params.inputAmount ?? 1
 
-  // Validate input amount to prevent API errors with extremely large numbers
   const safeInputAmount = useMemo(() => {
     if (inputAmount > MAX_SAFE_EXCHANGE_RATE_AMOUNT) {
       console.warn(
@@ -389,7 +351,6 @@ export const useCoinExchangeRate = (
     }),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      // If AUDIO is involved
       const isDirectSwap = getIsDirectSwappable(
         params.inputMint,
         params.outputMint

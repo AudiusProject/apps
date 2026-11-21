@@ -76,10 +76,6 @@ export const NavProvider = memo((props: { children: JSX.Element }) => {
   return props.children
 })
 
-/**
- * Sets the nav for a "main" or "root" level page.
- * Notifications on the left, logo in the middle, search on the right.
- */
 export const useMainPageHeader = () => {
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
@@ -89,10 +85,6 @@ export const useMainPageHeader = () => {
   }, [setLeft, setCenter, setRight])
 }
 
-/**
- * Sets the nav for a generic sub-page.
- * Back button on the left, logo in the middle, search on the right.
- */
 export const useSubPageHeader = () => {
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
@@ -102,16 +94,6 @@ export const useSubPageHeader = () => {
   }, [setLeft, setCenter, setRight])
 }
 
-/**
- * Rather than setting the context directly, electing to `useTemproraryNavContext`
- * will allow a component to (on mount) set the NavContext in such a way that when
- * that component unmounts, the nav context is reset to whatever it was set to last.
- *
- * This is useful in cases like Playlist-Creation, which can be done from many
- * contexts and when the page is closed, the previous context should be displayed.
- *
- * The hook returns a callback that can be called to manually reset the nav state.
- */
 export const useTemporaryNavContext = (
   setters: () => {
     left: LeftElement

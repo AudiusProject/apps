@@ -21,10 +21,6 @@ const INPUT_HEIGHT = 40
 type FilterInputProps = Omit<FlexProps, 'children'> &
   Pick<RNTextInputProps, 'onChangeText' | 'placeholder' | 'value' | 'autoFocus'>
 
-/**
- * A search-style text field for narrowing a list in place. Sits flush on the
- * page above the list it filters, with no card around it.
- */
 export const FilterInput = (props: FilterInputProps) => {
   const {
     onChangeText,
@@ -35,7 +31,6 @@ export const FilterInput = (props: FilterInputProps) => {
   } = props
   const { color, typography, spacing } = useTheme()
 
-  // Mirror the text so the clear button works for uncontrolled callers too.
   const [internalValue, setInternalValue] = useState(valueProp ?? '')
   const value = valueProp ?? internalValue
 

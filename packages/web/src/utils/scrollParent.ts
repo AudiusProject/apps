@@ -1,9 +1,3 @@
-/**
- * Gets the scroll parent of an HTML element
- * From SO: https://stackoverflow.com/a/42543908/11435157
- * @param node
- * @returns the scroll parent
- */
 export const getScrollParent = (node: HTMLElement) => {
   const regex = /(auto|scroll)/
   const parents = (_node: HTMLElement, ps: HTMLElement[]): HTMLElement[] => {

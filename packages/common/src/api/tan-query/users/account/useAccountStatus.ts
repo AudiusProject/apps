@@ -11,7 +11,6 @@ export const getAccountStatusQueryKey = () =>
 export const useAccountStatus = () => {
   return useQuery({
     queryKey: getAccountStatusQueryKey(),
-    // This query data will get updated by the useCurrentAccount hook - it should not hit this query fn so we treat this as an error
     queryFn: () => Status.IDLE,
     staleTime: Infinity,
     gcTime: Infinity

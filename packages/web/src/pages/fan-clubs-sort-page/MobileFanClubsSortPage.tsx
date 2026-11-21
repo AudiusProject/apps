@@ -62,7 +62,6 @@ export const MobileFanClubsSortPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Remove the mobile header title entirely
   useMobileHeader({ title: '' })
 
   const { sortMethod, sortDirection } =

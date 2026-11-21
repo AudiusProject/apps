@@ -11,7 +11,7 @@ export type ExploreCollection = {
   gradient: string
   shadow: string
   icon?: ComponentType<SVGProps<SVGSVGElement>>
-  incentivized?: boolean // Whether we reward winners with Audio
+  incentivized?: boolean
   link: string
   cardSensitivity?: number
 }

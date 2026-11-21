@@ -23,8 +23,6 @@ export type LineupEntry<T> = { uid: UID; kind: Kind; id: ID } & T
 
 export type Order = Record<UID, number>
 
-// Add possibility of attaching extra metadata to entries with type `T`
-// e.g. DateAdded
 export type LineupState<T> = {
   entries: Array<LineupEntry<T>>
   order: Order

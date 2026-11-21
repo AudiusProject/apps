@@ -75,7 +75,6 @@ export const AlbumResults = (props: AlbumResultsProps) => {
     [dispatch]
   )
 
-  // Only show pagination skeletons when we're not loading the first page & still under the limit
   const shouldShowMoreSkeletons =
     isFetching && !isPending && (limit === undefined || data?.length < limit)
 

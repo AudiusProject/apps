@@ -10,7 +10,6 @@ export type SearchItem = {
   id: ID
 }
 
-// TODO: Can remove this once SearchV2 has been fully rolled out
 export type SearchItemBackwardsCompatible = string | SearchItem
 
 export type SearchState = {

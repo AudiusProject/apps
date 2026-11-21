@@ -47,9 +47,6 @@ export const getContentUrl = (content: ShareContent) => {
       return getTrackRoute(track, true)
     }
     case 'contest': {
-      // Contest shares point at the parent track's contest page —
-      // `{permalink}/contest` — so sharing copies the contest URL
-      // rather than the underlying track.
       const { track } = content
       return getContestRoute(track, true)
     }

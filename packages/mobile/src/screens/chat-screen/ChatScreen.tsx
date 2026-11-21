@@ -104,8 +104,6 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   keyboardAvoiding: {
     justifyContent: 'space-between'
   },
-  // Weird RN bug? flex: 1 did not appear to set flexGrow: 1 as expected,
-  // so had to set manually instead.
   listContainer: {
     flexGrow: 1,
     flexShrink: 1
@@ -178,9 +176,6 @@ const getAutoscrollThreshold = ({ top, bottom }: ContainerLayoutStatus) => {
   return (bottom - top) / 4
 }
 
-// On iOS, the user will be auto-scrolled on new messages if they are within a certain
-// distance of the beginning. We don't need a toast in those scenarios.
-// In all others, use a fixed threshold
 const getNewMessageToastThreshold = (
   containerLayout: ContainerLayoutStatus
 ) => {
@@ -189,7 +184,6 @@ const getNewMessageToastThreshold = (
     : NEW_MESSAGE_TOAST_SCROLL_THRESHOLD
 }
 
-// Gets latest messages on both initial render and when app state changes
 const useGetLatestMessages = (
   chatId: string,
   dispatch: ReturnType<typeof useDispatch>
@@ -200,14 +194,11 @@ const useGetLatestMessages = (
     }
   }, [dispatch, chatId])
 
-  // Refresh messages on first render
   useEffect(() => {
     console.debug('Fetching latest messages on first render')
     fetchLatestMessagesCallback()
   }, [fetchLatestMessagesCallback])
 
-  // Also listen to app state changes to refresh messages,
-  // in case this page was previously in the background
   useEffect(() => {
     const handle = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
@@ -218,7 +209,6 @@ const useGetLatestMessages = (
       }
     })
 
-    // Remove listener on unmount
     return () => handle.remove()
   }, [fetchLatestMessagesCallback])
 }
@@ -252,15 +242,11 @@ const ChatScreenContent = () => {
   const userIdEncoded = OptionalId.parse(userId)
   const chat = useSelector((state) => getChat(state, chatId ?? ''))
   const { is_blast: isBlast } = chat ?? {}
-  // Need additional bottom padding for composer for chat blasts
-  // because there is an extra screen header.
   const chatBlastWithContentOffset = isBlast ? spacing(6) : 0
   const chatMessages = useSelector((state) =>
     getChatMessages(state, chatId ?? '')
   )
   const isLoading = (chat?.messagesStatus ?? 'PENDING') === 'PENDING'
-  // Only show the end reached indicator if there are no previous messages, more than 10 messages,
-  // and the flatlist is scrollable.
   const shouldShowEndReachedIndicator =
     !(chat?.messagesSummary?.prev_count ?? true) &&
     chatMessages.length > END_REACHED_MIN_MESSAGES &&
@@ -273,28 +259,22 @@ const ChatScreenContent = () => {
     useCanSendMessage(chatId)
   const isGroup = useIsGroupChat(chatId)
 
-  // A ref so that the unread separator doesn't disappear immediately when the chat is marked as read
-  // Using a ref instead of state here to prevent unwanted flickers.
-  // The chat/chatId selectors will trigger the rerenders necessary.
   const chatFrozenRef = useRef(chat)
 
   useGetLatestMessages(chatId, dispatch)
 
   useEffect(() => {
-    // Update chatFrozenRef when entering a new chat screen.
     if (chat && chatId !== chatFrozenRef.current?.chat_id) {
       chatFrozenRef.current = chat
     }
   }, [chatId, chat])
 
-  // Mark chat as read when user enters this screen.
   useEffect(() => {
     if (chatId) {
       dispatch(markChatAsRead({ chatId }))
     }
   }, [chatId, dispatch])
 
-  // Fetch all permissions, blockers/blockees, and recheck_permissions flag
   useEffect(() => {
     dispatch(fetchBlockees())
     dispatch(fetchBlockers())
@@ -303,7 +283,6 @@ const ChatScreenContent = () => {
     }
   }, [chatId, dispatch, otherUser?.user_id, isGroup])
 
-  // Find earliest unread message to display unread tag correctly
   const earliestUnreadIndex = useMemo(
     () =>
       chatMessages?.findIndex((item, index) =>
@@ -323,8 +302,6 @@ const ChatScreenContent = () => {
   const earliestUnreadMessageId = earliestUnreadMessage?.message_id
 
   useEffect(() => {
-    // Scroll to earliest unread index, but only the first time
-    // entering this chat.
     if (
       earliestUnreadIndex &&
       chatMessages &&
@@ -341,8 +318,6 @@ const ChatScreenContent = () => {
     }
   }, [earliestUnreadIndex, chatMessages])
 
-  // Scroll to bottom when user navigates to this screen and there are no unread
-  // messages, because if there are we want to scroll to the earliest unread message.
   useFocusEffect(
     useCallback(() => {
       if (chat?.unread_message_count === 0) {
@@ -351,15 +326,12 @@ const ChatScreenContent = () => {
     }, [chat?.unread_message_count])
   )
 
-  // Mark chat as read when user leaves this screen
   useFocusEffect(
     useCallback(() => {
       return () => {
         if (chatId) {
           dispatch(markChatAsRead({ chatId }))
         }
-        // Hacky way to get unread indicator to disappear when user navigates away
-        // then returns to this screen while staying in the same navigation stack.
         if (chatFrozenRef.current) {
           chatFrozenRef.current.unread_message_count = 0
         }
@@ -369,12 +341,9 @@ const ChatScreenContent = () => {
 
   const latestMessage = chatMessages.length > 0 ? chatMessages[0] : null
 
-  // If most recent message changes and we are scrolled up, fire a toast
   useEffect(() => {
     if (latestMessage && latestMessage.message_id !== latestMessageId.current) {
       latestMessageId.current = latestMessage.message_id
-      // Only fire toasts for received messages, which we can only compute if
-      // we have a valid userId
       const isReceivedMessage =
         userIdEncoded && latestMessage.sender_user_id !== userIdEncoded
       if (
@@ -413,7 +382,6 @@ const ChatScreenContent = () => {
         chat?.messagesSummary?.prev_count
       )
     ) {
-      // Fetch more messages when user reaches the top
       dispatch(fetchMoreMessages({ chatId }))
     }
   }, [chat?.messagesStatus, chat?.messagesSummary, chatId, dispatch])
@@ -452,10 +420,7 @@ const ChatScreenContent = () => {
         return
       }
 
-      // Measure position of selected message to create a copy of it on top
-      // of the dimmed background inside the portal.
       messageRef.measure((x, y, width, height, pageX, pageY) => {
-        // Need to subtract spacing(2) to account for padding in message View.
         messageTop.current = pageY - spacing(2)
         messageHeight.current = height
         dispatch(setReactionsPopupMessageId({ messageId: id }))
@@ -471,12 +436,8 @@ const ChatScreenContent = () => {
     </TouchableOpacity>
   ) : null
 
-  // Only groups need the neighbor message, so 1:1 rows don't rerender on new messages
   const groupMessages = isGroup ? chatMessages : undefined
 
-  // When reaction popup opens, hide reaction here so it doesn't
-  // appear underneath the reaction of the message clone inside the
-  // portal.
   const renderItem = useCallback(
     ({ item, index }) => (
       <>
@@ -487,7 +448,6 @@ const ChatScreenContent = () => {
           isPopup={false}
           onLongPress={handleMessagePress}
           isGroup={isGroup}
-          // The list is newest first, so the older neighbor is index + 1
           previousMessageId={groupMessages?.[index + 1]?.message_id}
         />
         {item.message_id === earliestUnreadMessageId &&
@@ -543,9 +503,7 @@ const ChatScreenContent = () => {
     flatListInnerHeight.current = event.nativeEvent.layout.height
   }, [])
 
-  // Scroll to the bottom if the user sends a message
   const handleMessageSent = useCallback(() => {
-    // Set a timeout to ensure the full render happened and we got the final height
     setTimeout(() => {
       flatListRef.current?.scrollToOffset({ offset: 0, animated: true })
     }, 0)
@@ -616,8 +574,6 @@ const ChatScreenContent = () => {
                   renderItem={renderItem}
                   onEndReached={handleScrollToTop}
                   inverted
-                  // Enough to show the screen and reach the earliest unread
-                  // message, without rendering the whole cached history
                   initialNumToRender={Math.max(
                     INITIAL_MESSAGES_TO_RENDER,
                     (earliestUnreadIndex ?? 0) + INITIAL_MESSAGES_TO_RENDER
@@ -631,11 +587,6 @@ const ChatScreenContent = () => {
                     maintainVisibleContentPosition
                   }
                   ListEmptyComponent={
-                    // Wrap the EmptyChatMessages in a view here rather than within the component
-                    // For some reason, this prevents this inversion bug:
-                    // https://github.com/facebook/react-native/issues/21196
-                    // This is better than doing a rotation transform because when the react bug is fixed,
-                    // our workaround won't re-introduce the bug!
                     !chat?.is_blast ? (
                       <View style={styles.emptyContainer}>
                         <EmptyChatMessages />
@@ -686,5 +637,4 @@ const ChatScreenContent = () => {
   )
 }
 
-// DMs act as the signed-in wallet, so they're off while managing an account
 export const ChatScreen = withManagedAccountRestriction(ChatScreenContent)

@@ -20,8 +20,6 @@ function runMigrations() {
 }
 
 async function clearDatabase() {
-  // clear and recreate database schema, which cascades to all tables and rows in tables
-  // for use in testing only - will delete all data in the database!!
   await sequelize.query('DROP SCHEMA IF EXISTS public CASCADE')
   await sequelize.query('CREATE SCHEMA public')
 }

@@ -61,7 +61,6 @@ const getExternalWalletBalanceQueryFn =
       throw new Error('Wallet address and mint are required')
     }
     try {
-      // Call Jupiter API to get balances
       const response = await fetch(
         `https://lite-api.jup.ag/ultra/v1/holdings/${walletAddress}`
       )
@@ -74,21 +73,18 @@ const getExternalWalletBalanceQueryFn =
 
       const balances: ExternalWalletBalanceResponse = await response.json()
 
-      // Solana balance is at the top of the balances, no need to drill into the token accounts
       if (mint === TOKEN_LISTING_MAP.SOL.address) {
         return new FixedDecimal(
           balances.uiAmount,
           TOKEN_LISTING_MAP.SOL.decimals
         )
       }
-      // Find the balance for the specific mint
       const tokenBalance = mint ? balances?.tokens?.[mint]?.[0] : undefined
 
       if (!tokenBalance) {
         return new FixedDecimal(0)
       }
 
-      // Convert raw balance to FixedDecimal with proper decimals
       return new FixedDecimal(tokenBalance.uiAmount, tokenBalance.decimals)
     } catch (error) {
       console.error(

@@ -13,7 +13,6 @@ type KeySelectFieldProps = {
 }
 
 const getValueFromKey = (key: string) =>
-  // If the key is an enharmonic equivalent (e.g. C# and Db), use the flat as the value
   key.includes('/') ? key.split('/')[1] : key
 
 export const KeySelectField = (props: KeySelectFieldProps) => {

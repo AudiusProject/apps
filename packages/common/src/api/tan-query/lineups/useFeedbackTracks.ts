@@ -19,8 +19,6 @@ import { primeTrackData } from '../utils/primeTrackData'
 
 const DEFAULT_PAGE_SIZE = 10
 
-// Tracks whose artists are asking for feedback, newest request first.
-
 type UseFeedbackTracksArgs = {
   pageSize?: number
 }

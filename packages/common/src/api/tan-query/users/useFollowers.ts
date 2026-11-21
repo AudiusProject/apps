@@ -28,10 +28,6 @@ export const getFollowersQueryKey = ({ userId, pageSize }: UseFollowersArgs) =>
     InfiniteData<ID[]>
   >
 
-/**
- * Hook to fetch followers for a user with infinite query support.
- * This version supports infinite scrolling and maintains the full list of followers.
- */
 export const useFollowers = (
   { userId, pageSize = DEFAULT_PAGE_SIZE }: UseFollowersArgs,
   options?: QueryOptions

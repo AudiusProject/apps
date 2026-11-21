@@ -67,14 +67,13 @@ export async function startListener() {
       pending.userIds.add(row.user_id)
     },
     aggregate_plays: (row: AggregatePlayRow) => {
-      if (!row.play_item_id) return // when could this happen?
+      if (!row.play_item_id) return
       pending.trackIds.add(row.play_item_id)
     },
     aggregate_track: (row: AggregateTrackRow) => {
-      if (!row.track_id) return // when could this happen?
+      if (!row.track_id) return
       pending.trackIds.add(row.track_id)
     },
-    // TODO: can we do trigger on agg playlist matview?
     saves: (save: SaveRow) => {
       pending.saves.push(save)
       if (save.save_type == 'track') {
@@ -93,24 +92,16 @@ export async function startListener() {
     },
     follows: (follow: FollowRow) => {
       pending.follows.push(follow)
-      // followee follower_count comes from aggregate_user
-      // which is update async...
-      // marking followee_user_id stale here is likely to result in a noop
-      // as aggregate_user hasn't been updated yet...
-      // so instead we listen for update on that table to ensure follower_count gets updated.
-      // pending.userIds.add(follow.followee_user_id)
       pending.userIds.add(follow.follower_user_id)
     },
     users: async (user: UserRow) => {
       pending.userIds.add(user.user_id)
-      // re-index any playlists owned by this user
       const playlists = await client.query(
         `select playlist_id from playlists where playlist_owner_id = ${user.user_id}`
       )
       for (const r of playlists.rows) {
         pending.playlistIds.add(r.playlist_id)
       }
-      // re-index any tracks owned by this user
       const tracks = await client.query(
         `select track_id from tracks where owner_id = ${user.user_id}`
       )
@@ -120,14 +111,12 @@ export async function startListener() {
     },
     tracks: async (track: TrackRow) => {
       pending.trackIds.add(track.track_id)
-      // re-index any playlists containing this track
       const playlists = await client.query(
         `select playlist_id from playlist_tracks where track_id = ${track.track_id}`
       )
       for (const r of playlists.rows) {
         pending.playlistIds.add(r.playlist_id)
       }
-      // re-index any tracks this is a stem of
       const tracks = await client.query(
         `select parent_track_id from stems where child_track_id = ${track.track_id}`
       )

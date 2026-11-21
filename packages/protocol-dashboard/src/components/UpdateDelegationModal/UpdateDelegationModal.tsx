@@ -141,7 +141,6 @@ const UpdateDelegationModal: React.FC<UpdateDelegationModalProps> = ({
     updateDelegation(wallet, inputNumberValue)
   }, [updateDelegation, wallet, inputNumberValue])
 
-  // Close All modals on success status
   useEffect(() => {
     if (status === Status.Success) {
       reset()

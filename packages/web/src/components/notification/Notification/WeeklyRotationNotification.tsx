@@ -24,10 +24,6 @@ type WeeklyRotationNotificationProps = {
   notification: WeeklyRotationNotificationType
 }
 
-/**
- * Weekly Rotation ready notification (sent Wednesdays); opens the viewer's
- * mix. Hidden when the flag is off, since the server sends it regardless.
- */
 export const WeeklyRotationNotification = (
   props: WeeklyRotationNotificationProps
 ) => {

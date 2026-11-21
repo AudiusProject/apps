@@ -24,7 +24,6 @@ const renderLink = ({ attributes, content }: IntermediateRepresentation) => {
   )
 }
 
-// Simple squashNewLines implementation to avoid importing formatUtil which pulls in dayjs
 const squashNewLines = (
   str: string | null | undefined,
   newlineMax: number = 2

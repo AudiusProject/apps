@@ -17,13 +17,12 @@ export function generateTestUser() {
   }
 }
 
-// Simulates dragging and dropping a file onto your target locator
 export const dragAndDropFile = async (
   page: Page,
   target: Locator,
   filePath: string,
   fileName: string,
-  fileType: string // TODO: is there a standard mime TS type to go here?
+  fileType: string
 ) => {
   const buffer = readFileSync(filePath).toString('base64')
 
@@ -55,7 +54,6 @@ export const openCleanBrowser = async ({ browser }: { browser: Browser }) => {
 
   const newPage = await newBrowser.newPage()
   const context = await newPage.context()
-  // Clear out auth state
   context.addInitScript(() => {
     window.localStorage.clear()
   })

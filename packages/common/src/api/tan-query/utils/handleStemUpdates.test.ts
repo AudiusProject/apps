@@ -9,13 +9,11 @@ const TRACK_ID = 100
 
 const existingStem = (track_id: number) => ({ track_id })
 
-/** A stem already published on the track, as the edit form re-submits it. */
 const submittedExistingStem = (track_id: number) => ({
   metadata: { track_id },
   category: StemCategory.OTHER
 })
 
-/** A newly dropped file that hasn't been uploaded yet. */
 const submittedNewStem = (name: string) => ({
   file: new File([], name),
   metadata: { title: name },
@@ -67,8 +65,6 @@ describe('handleStemUpdates', () => {
   })
 
   it('does nothing when stems are absent from the submitted metadata', () => {
-    // Partial updates that never touch stems (e.g. toggling downloadability)
-    // must not be read as "the artist removed everything".
     const { deleteTrack, dispatch } = run({
       stems: undefined,
       existingStems: [existingStem(1), existingStem(2)]
@@ -79,8 +75,6 @@ describe('handleStemUpdates', () => {
   })
 
   it('cannot detect removals when the existing stem list is unknown', () => {
-    // The safe failure mode: an empty server view means we skip deletions
-    // rather than guessing.
     const { deleteTrack } = run({ stems: [], existingStems: [] })
 
     expect(deleteTrack).not.toHaveBeenCalled()
@@ -112,8 +106,6 @@ describe('handleStemUpdates', () => {
   })
 
   it('handles a same-name replacement as one delete plus one upload', () => {
-    // The artist's actual workflow: swap a published stem for a smaller file
-    // of the same name.
     const { deleteTrack, dispatch } = run({
       stems: [submittedNewStem('Pads.wav')],
       existingStems: [existingStem(7)]

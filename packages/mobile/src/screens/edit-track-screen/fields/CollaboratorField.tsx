@@ -19,11 +19,6 @@ const messages = {
   search: 'Search Users'
 }
 
-/**
- * Mobile track-upload field for tagging collaborator artists. Self-contained
- * inline search + removable chips; the upload adapter maps the selected users
- * to numeric ids for the on-chain metadata.
- */
 export const CollaboratorField = () => {
   const [{ value }, , { setValue }] = useField<UserMetadata[] | undefined>(name)
   const collaborators = useMemo(() => value ?? [], [value])

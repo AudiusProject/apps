@@ -41,7 +41,6 @@ export const PlaylistLibrary = () => {
         <Droppable
           className={css({
             position: 'relative',
-            // Drop Background
             '::before': {
               content: '""',
               position: 'absolute',

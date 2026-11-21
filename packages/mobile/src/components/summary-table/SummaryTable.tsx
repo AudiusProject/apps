@@ -28,7 +28,7 @@ export type SummaryTableItem = {
   label: ReactNode
   value: ReactNode
   icon?: React.FC
-  content?: ReactNode // expandable content
+  content?: ReactNode
   disabled?: boolean
   color?: TextColors
 }
@@ -47,7 +47,6 @@ export type SummaryTableProps = {
   summaryLabelColor?: TextColors
   summaryValueColor?: TextColors
   renderBody?: (items: SummaryTableItem[]) => ReactNode
-  /** Enables an expand/collapse interaction. Only the title shows when collapsed. */
   collapsible?: boolean
   onHideExtraItems?: () => void
   showExtraItemsCopy?: string
@@ -81,7 +80,6 @@ export const SummaryTable = ({
     setIsExpanded((expanded) => !expanded)
   }, [])
 
-  // Extra items are collapsed by default
   const [showExtraItems, setShowExtraItems] = useState(false)
   const onToggleExtraItems = useCallback(
     () => setShowExtraItems((val) => !val),

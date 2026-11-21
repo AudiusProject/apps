@@ -1,12 +1,10 @@
 import WebWorker from 'services/WebWorker'
 
-// Lazy-load worker modules to reduce initial bundle size
 let dominantColorWorkerPromise: Promise<WebWorker> | null = null
 let gifPreviewWorkerPromise: Promise<WebWorker> | null = null
 let generatePlaylistArtworkWorkerPromise: Promise<WebWorker> | null = null
 let jimpPromise: Promise<any> | null = null
 
-// Shared jimp dependency - only load once
 const getJimp = async () => {
   if (!jimpPromise) {
     // @ts-ignore - jimp is a raw-loaded to have workers called directly with it.
@@ -78,7 +76,6 @@ export const resizeImage = async (
     throw new Error('invalid file type')
   }
   const imageUrlBlob = URL.createObjectURL(imageFile)
-  // Lazy-load worker modules
   const [resizeImageWorkerFile, jimp] = await Promise.all([
     import('workers/resizeImage.worker.js').then((m) => m.default),
     getJimp()

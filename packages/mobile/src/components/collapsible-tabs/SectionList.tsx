@@ -10,24 +10,15 @@ import {
   useSharedAnimatedRef,
   useTabNameContext,
   useTabsContext,
-  useUpdateScrollViewContentSize,
+  useUpdateScrollViewContentSize
 } from './hooks'
 
-/**
- * Used as a memo to prevent rerendering too often when the context changes.
- * See: https://github.com/facebook/react/issues/15156#issuecomment-474590693
- */
 const SectionListMemo = React.memo(
   React.forwardRef<
     RNSectionList,
     React.PropsWithChildren<SectionListProps<unknown>>
   >((props, passRef) => {
-    return (
-      <AnimatedSectionList
-        ref={passRef}
-        {...props}
-      />
-    )
+    return <AnimatedSectionList ref={passRef} {...props} />
   })
 )
 
@@ -48,15 +39,13 @@ function SectionListImpl<R>(
   const { scrollHandler, enable } = useScrollHandlerY(name)
   const onLayout = useAfterMountEffect(rest.onLayout, () => {
     'worklet'
-    // we enable the scroll event after mounting
-    // otherwise we get an `onScroll` call with the initial scroll position which can break things
     enable(true)
   })
 
   const {
     style: _style,
     contentContainerStyle: _contentContainerStyle,
-    progressViewOffset,
+    progressViewOffset
   } = useCollapsibleStyle()
 
   React.useEffect(() => {
@@ -64,7 +53,7 @@ function SectionListImpl<R>(
   }, [name, ref, setRef])
 
   const scrollContentSizeChange = useUpdateScrollViewContentSize({
-    name,
+    name
   })
 
   const scrollContentSizeChangeHandlers = useChainCallback(
@@ -79,7 +68,7 @@ function SectionListImpl<R>(
       refreshControl &&
       React.cloneElement(refreshControl, {
         progressViewOffset,
-        ...refreshControl.props,
+        ...refreshControl.props
       }),
     [progressViewOffset, refreshControl]
   )
@@ -120,9 +109,6 @@ function SectionListImpl<R>(
   )
 }
 
-/**
- * Use like a regular SectionList.
- */
 export const SectionList = React.forwardRef(SectionListImpl) as <T>(
   p: SectionListProps<T> & { ref?: React.Ref<RNSectionList<T>> }
 ) => React.ReactElement

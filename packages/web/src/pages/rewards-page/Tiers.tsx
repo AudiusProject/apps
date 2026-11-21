@@ -52,7 +52,6 @@ const messages = {
 
 const BADGE_SIZE = 24
 
-// Tiers as they are listed here, in order
 const tiers: AudioTiers[] = ['bronze', 'silver', 'gold', 'platinum']
 const displayTiers: BadgeTier[] = [
   'none',
@@ -64,7 +63,6 @@ const displayTiers: BadgeTier[] = [
 type TierFeature = keyof typeof featureMessages
 const featureKeys = Object.keys(featureMessages) as TierFeature[]
 
-// Mapping for large icons
 const audioTierMapSvg: {
   [tier in AudioTiers]: Nullable<ReactElement>
 } = {
@@ -79,17 +77,14 @@ const BADGE_LOCAL_STORAGE_KEY = 'last_badge_tier'
 const LEARN_MORE_URL = 'https://help.audius.co'
 
 const useShowConfetti = (tier: BadgeTier) => {
-  // No tier or no local storage, never show confetti
   if (tier === 'none' || !window.localStorage) return false
 
   const lastBadge = window.localStorage.getItem(BADGE_LOCAL_STORAGE_KEY) as
     | BadgeTier
     | undefined
 
-  // set last tier
   window.localStorage.setItem(BADGE_LOCAL_STORAGE_KEY, tier)
 
-  // if we just got our first tier, always show confetti
   if (!lastBadge) return true
 
   const [oldTierNum, newTierNum] = [
@@ -100,7 +95,6 @@ const useShowConfetti = (tier: BadgeTier) => {
   return newTierNum > oldTierNum
 }
 
-/** Renders out the level # associated with a given tier */
 export const TierNumber = ({ tier }: { tier: AudioTiers }) => {
   const tierNumber = tiers.findIndex((t) => t === tier) + 1
   return (
@@ -110,7 +104,6 @@ export const TierNumber = ({ tier }: { tier: AudioTiers }) => {
   )
 }
 
-/** Renders out level of audio required for a tier - e.g. '1000+ $AUDIO */
 export const TierLevel = ({ tier }: { tier: AudioTiers }) => {
   const minAudio = useMemo(
     () =>
@@ -239,7 +232,7 @@ const TierColumn = ({
           minWidth: '84px'
         }
       }}
-      mt={current ? '-49px' : undefined} // Move current tier up to align columns
+      mt={current ? '-49px' : undefined}
     >
       {current && (
         <Paper
@@ -461,7 +454,6 @@ const TierTable = ({
   )
 }
 
-/** Tile with multiple tiers */
 const Tiers = () => {
   const { data: accountUserId } = useCurrentUserId()
   const getDiscordOAuthLink = useGetDiscordOAuthLink('AUDIO')

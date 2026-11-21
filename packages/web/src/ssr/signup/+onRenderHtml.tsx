@@ -1,6 +1,3 @@
-// Signup page SSR - meta tags only
-// Supports referral links via ?ref= or ?rf= query params
-
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
@@ -20,7 +17,6 @@ export default function render(pageContext: SignupPageContext) {
   const { urlParsed } = pageContext
   const { ref, rf } = urlParsed.search ?? {}
 
-  // If there's a referral param, use the signup ref context
   const hasReferral = ref ?? rf
   const context = hasReferral
     ? getSignupRefContext(ref ?? rf)

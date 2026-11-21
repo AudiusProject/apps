@@ -24,7 +24,6 @@ export const useDeleteEvent = () => {
     onMutate: async (args: DeleteEventArgs) => {
       const { eventId } = args
 
-      // Get the current event from cache
       const currentEvent = queryClient.getQueryData(getEventQueryKey(eventId))
       if (!currentEvent) return
 
@@ -36,10 +35,8 @@ export const useDeleteEvent = () => {
         updatedAt: new Date().toISOString()
       }
 
-      // Update the event cache
       queryClient.setQueryData(getEventQueryKey(eventId), deletedEvent)
 
-      // Remove event from the list of events for the entity
       let prevEntityState: ID[] = []
       if (entityId) {
         queryClient.setQueryData(
@@ -53,7 +50,6 @@ export const useDeleteEvent = () => {
         )
       }
 
-      // Remove event from the list of events for the entity by event type
       let prevEventTypeState: ID[] = []
       if (entityId) {
         queryClient.setQueryData(
@@ -67,7 +63,6 @@ export const useDeleteEvent = () => {
         )
       }
 
-      // Return context for rollback
       return {
         previousEvent: currentEvent,
         prevEntityState,
@@ -75,7 +70,6 @@ export const useDeleteEvent = () => {
       }
     },
     onError: (error: Error, args, context) => {
-      // Revert the optimistic update
       if (context?.previousEvent) {
         queryClient.setQueryData(
           getEventQueryKey(args.eventId),
@@ -87,7 +81,6 @@ export const useDeleteEvent = () => {
       const prevEntityState = context?.prevEntityState
       const prevEventTypeState = context?.prevEventTypeState
 
-      // Get the current event from cache
       const currentEvent = queryClient.getQueryData(getEventQueryKey(eventId))
 
       if (prevEntityState && currentEvent) {

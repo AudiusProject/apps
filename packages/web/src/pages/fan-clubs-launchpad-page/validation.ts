@@ -97,7 +97,6 @@ export const setupFormSchema = ({
       [FIELDS.coinName]: coinNameSchema.shape.coinName,
       [FIELDS.coinSymbol]: coinSymbolSchema.shape.coinSymbol.superRefine(
         async (ticker, context) => {
-          // Only validate if ticker has at least 2 characters and passes basic format validation
           if (ticker && ticker.length >= 2) {
             try {
               const result = await queryClient.fetchQuery({
@@ -116,12 +115,10 @@ export const setupFormSchema = ({
                 return z.NEVER
               }
             } catch (error: any) {
-              // This should rarely happen, and likely not a fatal error
               console.error(
                 'Launchpad Ticker Validation Error',
                 error instanceof Error ? error : new Error(error as string)
               )
-              // For other errors, show unknown error
               context.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: coinSymbolErrorMessages.unknownError
@@ -148,9 +145,7 @@ export const setupFormSchema = ({
       })
     })
     .superRefine((values, context) => {
-      // Only validate buy fields if user wants to buy
       if (values.wantsToBuy === 'yes') {
-        // Validate payAmount
         if (
           values.payAmount &&
           values.payAmount !== '' &&
@@ -180,7 +175,6 @@ export const setupFormSchema = ({
           }
         }
 
-        // Validate receiveAmount
         if (
           values.receiveAmount &&
           values.receiveAmount !== '' &&

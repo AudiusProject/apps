@@ -56,27 +56,16 @@ type UserBadgesProps = {
   anchorOrigin?: Origin
   transformOrigin?: Origin
 
-  // Normally, user badges is not a controlled component and selects
-  // badges off of the store. The override allows for it to be used
-  // in a controlled context where the desired store state is not available.
   isVerifiedOverride?: boolean
   overrideTier?: BadgeTier
 
-  // Optional mint address for displaying specific fan club
-  // If provided, shows the fan club badge for that token
   mint?: string
 
-  // Optional flag to hide the fan club badge
   hideFanClubBadge?: boolean
 
-  // Disable hover/click handling when badges are rendered inside a larger
-  // interactive surface.
   disableInteraction?: boolean
 }
 
-/**
- * A component that renders user badges (verified and audio tier) with appropriate hover cards
- */
 const UserBadges = ({
   userId,
   size = 'xs',
@@ -100,7 +89,6 @@ const UserBadges = ({
   const { fanClubBadge: userFanClubBadge } = user ?? {}
 
   const displayMint = useMemo(() => {
-    // Priority: explicit mint prop > user's fan_club_badge > null
     if (mint) return mint
     if (userFanClubBadge?.mint) return userFanClubBadge.mint
     return null
@@ -110,12 +98,10 @@ const UserBadges = ({
   const isUserVerified = isVerifiedOverride ?? isVerified
   const hasContent = isUserVerified || tier !== 'none' || !!displayMint
 
-  // Create a handler to stop event propagation
   const handleStopPropagation = useCallback((e: MouseEvent) => {
     e.stopPropagation()
   }, [])
 
-  // Wrap the verified badge with a HoverCard
   const verifiedBadge = useMemo(() => {
     if (!isUserVerified) return null
 
@@ -146,7 +132,6 @@ const UserBadges = ({
     )
   }, [isUserVerified, size])
 
-  // Get the tier badge and wrap it with AudioHoverCard if user has a tier
   const tierBadge = useMemo(() => {
     if (tier === 'none') return null
 

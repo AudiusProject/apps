@@ -1,21 +1,11 @@
 import type { EthWallet } from './types'
 import { bufferFromHexString, bytesToHexString } from './utils'
 
-/**
- * Minimal replacement for the ethereumjs-wallet `Wallet` returned by
- * @audius/hedgehog. String getters use the same formats (0x-prefixed,
- * lowercase hex).
- */
 export class HedgehogWallet implements EthWallet {
   private readonly privateKey: Uint8Array
   private readonly publicKeyHex: string
   private readonly checksumAddress: string
 
-  /**
-   * @param privateKey 32-byte secp256k1 private key
-   * @param publicKey 0x04-prefixed uncompressed public key hex
-   * @param checksumAddress EIP-55 address
-   */
   constructor(
     privateKey: Uint8Array,
     publicKey: string,

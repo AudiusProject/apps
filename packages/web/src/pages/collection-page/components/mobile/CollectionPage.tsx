@@ -74,13 +74,11 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     structuredData
   } = useCollectionPage(type, true)
 
-  // All hooks must be called before any conditional returns
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   const { setHeader } = useContext(HeaderContext)
 
   useEffect(() => {
     if (collection) {
-      // If the collection is deleted, don't update the nav
       if (collection.is_delete || collection._marked_deleted) {
         return
       }
@@ -94,15 +92,12 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     setHeader(null)
   }, [setHeader])
 
-  // useGatedContentAccessMap must be called before conditional returns
   const trackAccessMap = useGatedContentAccessMap(tracks.entries)
 
-  // Now we can do conditional returns after all hooks
   if (!collection) return null
 
   const metadata = collection
 
-  // TODO: Consider dynamic lineups, esp. for caching improvement.
   const collectionLoading = status === Status.LOADING
   const queuedAndPlaying = playing && isQueued()
   const queuedAndPreviewing = previewing && isQueued()
@@ -141,10 +136,8 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   } = computeCollectionMetadataProps(metadata, tracks)
 
   const togglePlay = (uid: string, trackId: ID) => {
-    // Find the actual track record from tracks.entries
     const trackRecord = tracks.entries.find((entry) => entry.uid === uid)
     if (trackRecord) {
-      // Format it as CollectionPageTrackRecord
       const formattedRecord = {
         ...trackRecord,
         key: `${trackRecord.title}_${trackRecord.uid}_0`,
@@ -193,7 +186,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   const areAllTracksDeleted = trackList.every((track) => track.isDeleted)
   const isPlayable = !areAllTracksDeleted && numTracks > 0
 
-  // Handle deleted collections
   if ((metadata?.is_delete || metadata?._marked_deleted) && user) {
     return (
       <DeletedPage
@@ -251,7 +243,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
             isStreamGated={metadata?.is_stream_gated ?? null}
             streamConditions={metadata?.stream_conditions ?? null}
             ownerId={playlistOwnerId}
-            // Actions
             onPlay={onPlay}
             onPreview={onPreview}
             onShare={onHeroTrackShare}

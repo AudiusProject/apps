@@ -80,8 +80,6 @@ const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
 
-// If the top screen inset is greater than this,
-// the status bar will be hidden when the drawer is open
 const INSET_STATUS_BAR_HIDE_THRESHOLD = 20
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -95,9 +93,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     width: '100%',
     top: 0
   },
-  // With the floating tab bar the collapsed drawer is see-through, so content
-  // shows around the play bar and tab bar pills. The background fades in as
-  // the drawer opens.
   floatingDrawer: {
     overflow: 'visible',
     backgroundColor: 'transparent'
@@ -125,8 +120,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   scrubberContainer: {
     marginHorizontal: spacing(6)
   },
-  // Room for the comment bubble, which floats under the waveform, so it
-  // clears the play button.
   commentBubbleSpace: {
     height: spacing(8)
   }
@@ -136,10 +129,6 @@ type NowPlayingDrawerProps = {
   translationAnim: Animated.Value
 }
 
-/**
- * Memoized to prevent rerender during bottom-bar navigation.
- * It's rerendering because bottomTab render function rerenders a lot.
- */
 export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   props: NowPlayingDrawerProps
 ) {
@@ -155,8 +144,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const { isOpen, onOpen, onClose } = useDrawer('NowPlaying')
   const tabBarHidden = useTabBarHiddenProgress()
-  // Defer to the comments bottom-sheet while it's presented: its swipe-to-dismiss
-  // gesture would otherwise leak through and also close this drawer underneath.
   const { isOpen: isCommentDrawerOpen } = useCommentDrawer()
   const playCounter = useSelector(getCounter)
   const currentTrackId = useSelector(getTrackId)
@@ -170,14 +157,11 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const { drawerNavigation } = useContext(AppDrawerContext)
 
-  // Don't show shadow when we're in chat screen, so that the drawer appears
-  // at same level as the chat screen textinput
   const isInChatScreen = useNavigationState((state) => {
     const routes = state.routes[0].state?.routes?.[0].state?.routes
     return routes?.some((route) => route.name === 'Chat')
   })
 
-  // When audio starts playing, open the playbar to the initial offset
   useEffect(() => {
     if (isPlaying && !isPlayBarShowing) {
       setIsPlayBarShowing(true)
@@ -204,16 +188,11 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   )
 
   useEffect(() => {
-    // The top inset can be 0 initially
-    // Need to get the actual value but preserve it when the
-    // status bar is hidden
     if (staticTopInset.current === 0 && insets.top > 0) {
       staticTopInset.current = insets.top
     }
   }, [staticTopInset, insets.top])
 
-  // Use static insets when drawer is open to prevent layout shift from notification panel
-  // When drawer is fully open (or mostly open), use static insets to maintain fullscreen layout
   const isDrawerFullyOpen = drawerPercentOpen.current > 0.8
   const effectiveTopInset =
     isOpen && isDrawerFullyOpen ? staticTopInset.current : insets.top
@@ -221,13 +200,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const floating = useFloatingTabBar()
 
-  // When the tab bar hides, the collapsed play bar drops into its place rather
-  // than leaving with it, so what's playing and play/pause stay on screen.
-  // Floating, it drops level with the collapsed tab bar, between the
-  // active-tab and search buttons; classic, down onto the safe area.
-  // Translates the whole drawer because the play bar's background belongs to
-  // the drawer root. Pinned to 0 while open, since the open drawer is the
-  // full-screen player.
   const playBarDrop = floating
     ? FLOATING_BAR_HEIGHT +
       FLOATING_BAR_TOP_GAP -
@@ -241,8 +213,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             ? 0
             : playBarDrop *
               (floating
-                ? // Drops once the tab bar has shrunk out of the way.
-                  interpolate(
+                ? interpolate(
                     tabBarHidden.value,
                     [COLLAPSE_DROP_START, 1],
                     [0, 1],
@@ -255,7 +226,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     [isOpen, playBarDrop, floating]
   )
 
-  // Collapsed, with the play bar resting on the tab bar.
   const collapsedPosition =
     FULL_DRAWER_HEIGHT - insets.bottom - BOTTOM_BAR_HEIGHT - PLAY_BAR_HEIGHT
   const fullPlayerOpacity = useMemo(
@@ -281,24 +251,17 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     }
   }, [isOpen])
 
-  // Attach to the pan responder of the drawer so that we can animate away
-  // the status bar
   const onPanResponderMove = useCallback(
     (e: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-      // Do not hide the status bar for smaller insets
-      // This is to prevent layout shift which breaks the animation
       if (
         Platform.OS === 'ios' &&
         staticTopInset.current > INSET_STATUS_BAR_HIDE_THRESHOLD
       ) {
         if (gestureState.vy > 0) {
-          // Dragging downwards
           if (drawerPercentOpen.current < STATUS_BAR_FADE_CUTOFF) {
             StatusBar.setHidden(false, 'fade')
           }
         } else if (gestureState.vy < 0) {
-          // Dragging upwards
-
           if (drawerPercentOpen.current > STATUS_BAR_FADE_CUTOFF) {
             StatusBar.setHidden(true, 'fade')
           }
@@ -310,9 +273,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const onPanResponderRelease = useCallback(
     (e: GestureResponderEvent, _gestureState: PanResponderGestureState) => {
-      // Immediately after the pan responder is released, disable the notifications drawer.
-      // Allow the effect attached to the open state changing to re-define whether it can be
-      // interacted with.
       drawerNavigation?.setOptions({ swipeEnabled: false })
     },
     [drawerNavigation]
@@ -333,7 +293,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const { isEnabled: isWaveformEnabled } = useFeatureFlag(
     FeatureFlags.NOW_PLAYING_WAVEFORM
   )
-  // Feeds the artwork's colored glow.
   useDominantArtworkColors(trackId, isWaveformEnabled && isOpen)
   const timestampedComments = useTimestampedComments(
     trackId,
@@ -415,8 +374,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   )
 
   return (
-    // The wrapper is a new stacking context, so restate the drawer's z-order.
-    // `box-none` lets touches reach the screen behind it.
     <Reanimated.View
       pointerEvents='box-none'
       style={[
@@ -426,7 +383,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
       ]}
     >
       <Drawer
-        // Appears below bottom bar whereas normally drawers appear above
         zIndex={zIndex.NOW_PLAYING_DRAWER}
         isOpen={isOpen}
         onClose={onClose}
@@ -444,7 +400,6 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
         isGestureSupported={isGestureEnabled}
         gesturesDisabled={isCommentDrawerOpen}
         translationAnim={translationAnim}
-        // Disable safe area view edges because they are handled manually
         disableSafeAreaView
       >
         {floating ? (

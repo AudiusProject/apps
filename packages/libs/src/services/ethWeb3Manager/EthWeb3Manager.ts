@@ -16,10 +16,10 @@ import {
 } from '../../utils'
 import type { IdentityService, RelayTransaction } from '../identity'
 
-const MIN_GAS_PRICE = Math.pow(10, 9) // 1 GWei, ETH minimum allowed gas price
-const HIGH_GAS_PRICE = 250 * MIN_GAS_PRICE // 250 GWei
-const DEFAULT_GAS_PRICE = 100 * MIN_GAS_PRICE // 100 Gwei is a reasonably average gas price
-const MAX_GAS_LIMIT = 5000000 // We've seen prod tx's take up to 4M. Set to the highest we've observed + a buffer
+const MIN_GAS_PRICE = Math.pow(10, 9)
+const HIGH_GAS_PRICE = 250 * MIN_GAS_PRICE
+const DEFAULT_GAS_PRICE = 100 * MIN_GAS_PRICE
+const MAX_GAS_LIMIT = 5000000
 
 export type EthWeb3Config = {
   ownerWallet: Wallet | string
@@ -37,7 +37,6 @@ type EthWeb3ManagerConfig = {
   hedgehog?: Nullable<Hedgehog>
 }
 
-/** Singleton state-manager for Audius Eth Contracts */
 export class EthWeb3Manager {
   web3Config: EthWeb3Config
   web3: Web3Type
@@ -50,7 +49,6 @@ export class EthWeb3Manager {
     if (!web3Config.providers)
       throw new Error('missing web3Config property: providers')
 
-    // MultiProvider implements a web3 provider with fallback.
     let provider: MultiProvider | string
     if (!web3Config.disableMultiProvider) {
       provider = new MultiProvider(web3Config.providers)
@@ -65,7 +63,6 @@ export class EthWeb3Manager {
     if (this.web3Config.ownerWallet) {
       this.ownerWallet = this.web3Config.ownerWallet
     } else if (this.hedgehog) {
-      // Hedgehog might not exist (in the case of @audius/sdk)
       const storedWallet = this.hedgehog.getWallet()
       if (storedWallet) {
         this.ownerWallet = storedWallet
@@ -85,9 +82,6 @@ export class EthWeb3Manager {
     throw new Error('Owner wallet not set')
   }
 
-  /**
-   * Signs provided string data (should be timestamped).
-   */
   async sign(data: string) {
     // @ts-expect-error TODO: sign expected to take a password as 3rd argument
     return await this.web3.eth.personal.sign(
@@ -117,7 +111,6 @@ export class EthWeb3Manager {
       if (isNaN(gasPrice) || gasPrice > HIGH_GAS_PRICE) {
         gasPrice = DEFAULT_GAS_PRICE
       } else if (gasPrice === 0) {
-        // If the gas is zero, the txn will likely never get mined.
         gasPrice = MIN_GAS_PRICE
       }
       const gasPriceStr = '0x' + gasPrice.toString(16)
@@ -138,14 +131,11 @@ export class EthWeb3Manager {
       tx.sign(privateKeyBuffer)
       const signedTx = '0x' + tx.serialize().toString('hex')
 
-      // Send the tx with retries
       const response = await retry(
         async () => {
           return await this.web3.eth.sendSignedTransaction(signedTx)
         },
         {
-          // Retry function 5x by default
-          // 1st retry delay = 500ms, 2nd = 1500ms, 3rd...nth retry = 4000 ms (capped)
           minTimeout: 500,
           maxTimeout: 4000,
           factor: 3,
@@ -167,11 +157,7 @@ export class EthWeb3Manager {
     const block = await this.web3.eth.getBlock('latest')
     const baseFee = Number(block.baseFeePerGas)
 
-    const feeHistory = await this.web3.eth.getFeeHistory(
-      5,
-      'latest',
-      [50] // 50th percentile (medium priority)
-    )
+    const feeHistory = await this.web3.eth.getFeeHistory(5, 'latest', [50])
 
     const priorityFee = Number(feeHistory?.reward?.[0]?.[0] ?? MIN_GAS_PRICE)
     const gasPrice = baseFee + priorityFee
@@ -182,11 +168,6 @@ export class EthWeb3Manager {
     })
   }
 
-  /**
-   * Relays an eth transaction via the identity service with retries
-   * The relay pays for the transaction fee on behalf of the user
-   * The gas Limit is estimated if not provided
-   */
   async relayTransaction(
     contractMethod: ContractMethod,
     contractAddress: string,
@@ -220,17 +201,13 @@ export class EthWeb3Manager {
         } catch (e) {
           const error = e as AxiosError
           if (error.response?.status === 429) {
-            // Don't retry in the case we are getting rate limited
             bail(new Error('Please wait before trying again'))
             return
           }
-          // Trigger a retry
           throw error
         }
       },
       {
-        // Retry function 5x by default
-        // 1st retry delay = 500ms, 2nd = 1500ms, 3rd...nth retry = 4000 ms (capped)
         minTimeout: 500,
         maxTimeout: 4000,
         factor: 3,

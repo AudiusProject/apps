@@ -11,9 +11,6 @@ import { handleError as handleErrorAction } from 'store/errors/actions'
 
 interface ComponentWithErrorBoundaryOptions {
   fallback?: ReactNode | null
-  /**
-   * Debugging name (for logs, error reporting)
-   */
   name?: string
 }
 

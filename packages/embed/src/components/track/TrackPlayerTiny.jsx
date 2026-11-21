@@ -36,13 +36,10 @@ const TrackPlayerTiny = ({
   const infoRef = useRef(null)
   const containerRef = useRef(null)
 
-  // Whether not the marquee animation should run
   const [animating, setAnimating] = useState(false)
 
-  // How wide the info section is (computed from rendered text box size)
   const [infoWidth, setInfoWidth] = useState(null)
 
-  // On first mount, record the computed width of the info section (title + artist)
   useEffect(() => {
     if (infoRef.current) {
       const computedInfoWidth = infoRef.current.getBoundingClientRect().width
@@ -50,8 +47,6 @@ const TrackPlayerTiny = ({
     }
   }, [infoRef, containerRef, setInfoWidth])
 
-  // When playing and the info text is larger than the container, start the
-  // marquee animation
   useEffect(() => {
     if (playingState === PlayingState.Playing) {
       if (infoRef.current && containerRef.current) {

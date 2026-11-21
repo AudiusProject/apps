@@ -117,11 +117,9 @@ export const YourCoins = () => {
     ...(otherCoins ?? [])
   ].filter(removeNullable)
 
-  // Show audio coin card when no coins are available
   const coins =
     orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
 
-  // Add cash card at the beginning, and discover fan clubs card at the end
   const cards = ['cash' as const, ...coins, 'discover-fan-clubs' as const]
 
   const handleDiscoverFanClubs = useCallback(() => {

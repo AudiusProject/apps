@@ -67,12 +67,10 @@ export const CashPage = () => {
     setLeft(LeftPreset.BACK)
   }, [setLeft])
 
-  // Set up mobile header
   useMobileHeader({
     title: messages.title
   })
 
-  // Initialize table options based on account type
   useState(() => {
     if (isArtist || isGuest) {
       const tableOptions = isArtist

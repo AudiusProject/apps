@@ -219,9 +219,6 @@ export class EthContracts {
       this.ServiceProviderFactoryClient
     ]
 
-    // Whether or not we are running in `regressed` mode, meaning we were
-    // unable to select a discovery provider that was up-to-date. Clients may
-    // want to consider blocking writes.
     this._regressedMode = false
   }
 
@@ -240,9 +237,6 @@ export class EthContracts {
     }
   }
 
-  /**
-   * Estabilishes that connection to discovery providers has regressed
-   */
   enterRegressedMode() {
     console.info('Entering regressed mode')
     this._regressedMode = true
@@ -257,7 +251,6 @@ export class EthContracts {
   }
 
   async getRegistryAddressForContract(contractName: string) {
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#Computed_property_names
     this.contracts = this.contracts ?? { [this.registryAddress]: 'registry' }
     this.contractAddresses = this.contractAddresses ?? {
       registry: this.registryAddress
@@ -282,9 +275,6 @@ export class EthContracts {
     }
   }
 
-  /*
-   * Determine the latest version for deployed services such as discovery provider and cache
-   */
   async getExpectedServiceVersions() {
     const versions = await Promise.all(
       serviceTypeList.map(
@@ -302,12 +292,6 @@ export class EthContracts {
     return expectedVersions
   }
 
-  /**
-   * Determine whether major and minor versions match for two version strings
-   * Version string 2 must have equivalent major/minor versions and a patch >= version1
-   * @param version1 string 1
-   * @param version2 string 2
-   */
   isValidSPVersion(version1: string, version2: string) {
     return (
       semver.major(version1) === semver.major(version2) &&
@@ -335,12 +319,6 @@ export class EthContracts {
   }
 }
 
-/**
- * Determines whether version2's major/minor versions are greater than or
- * equal to version1's major/minor.
- * @param version1 string 1
- * @param version2 string 2
- */
 export const isVersionAtLeastSameMajorMinor = (
   version1: string,
   version2: string

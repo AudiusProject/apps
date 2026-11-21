@@ -49,7 +49,6 @@ import {
   signMessage
 } from './wallet-connect/slice'
 
-// Wallet sagas load on first use
 const tokenDashboardSagas = lazySagas({
   pattern: [
     tokenDashboardPageActions.fetchAssociatedWallets.type,
@@ -64,29 +63,22 @@ const walletsSagas = lazySagas({
 
 export default function* rootSaga() {
   const sagas = [
-    // Config
     ...backendSagas(),
     ...analyticsSagas(),
     ...confirmerSagas(),
 
-    // Account
     ...accountSagas(),
 
-    // Cache
     ...collectionsSagas(),
     ...savedCollectionsSagas(),
 
-    // Playback
     ...playbackEngineSagas(),
 
-    // Sign in / Sign out
     ...signOnSagas(),
     ...signOutSagas(),
 
-    // Sign up
     ...signUpSagas(),
 
-    // Premium content
     ...gatedContentSagas(),
     ...purchaseContentSagas(),
     ...buyUSDCSagas(),
@@ -96,7 +88,6 @@ export default function* rootSaga() {
     ...modalsSagas(),
     ...niceModalBridgeSagas(),
 
-    // Pages
     ...trackPageSagas(),
     ...chatSagas(),
     ...mobileChatSagas(),
@@ -106,10 +97,8 @@ export default function* rootSaga() {
     ...rewardsPageSagas(),
     ...settingsSagas(),
 
-    // Cast
     ...castSagas(),
 
-    // Application
     ...addToCollectionSagas(),
 
     ...overflowMenuSagas(),

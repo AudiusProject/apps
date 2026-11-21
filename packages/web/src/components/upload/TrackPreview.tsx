@@ -38,7 +38,6 @@ const messages = {
   select: (name: string) => `Select ${name}`
 }
 
-// Used https://mimetype.io to see the list of related mime types to have a more comprehensive list.
 const fileTypeIcon = (type: string) => {
   switch (type) {
     case 'audio/mpeg':

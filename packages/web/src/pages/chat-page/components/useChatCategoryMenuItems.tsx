@@ -12,11 +12,6 @@ const messages = {
   moveToGeneral: 'Move to General'
 }
 
-/**
- * Popup menu items for moving a chat between the Priority and General inbox
- * tabs. Only the tab the chat is not already shown in is offered. Blasts
- * (and unknown chats) get no items.
- */
 export const useChatCategoryMenuItems = (
   chat: UserChat | ChatBlast | undefined
 ): PopupMenuItem[] => {

@@ -3,8 +3,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import { UserListModalState, UserListType, UserListEntityType } from './types'
 
-// Types
-
 const initialState: UserListModalState = {
   userListType: UserListType.REPOST,
   isOpen: false,
@@ -15,8 +13,6 @@ type SetUsersPayload = {
   userListType: UserListType
   entityType: UserListEntityType
 } & ({ id: ID } | { entity?: any })
-
-// Slice
 
 const slice = createSlice({
   name: 'application/ui/userListModal',

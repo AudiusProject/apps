@@ -33,7 +33,6 @@ export const getCollectionSyncStatus = (
 export const getIsFavoritesDownloadsEnabled = (state: AppState) =>
   Boolean(state.offlineDownloads.collectionStatus[DOWNLOAD_REASON_FAVORITES])
 
-// TODO: This should verify that the status is correct
 export const getIsCollectionMarkedForDownload =
   (collectionId?: string | ID) => (state: AppState) =>
     !!(collectionId && state.offlineDownloads.collectionStatus[collectionId])
@@ -66,9 +65,7 @@ export const getOfflineQueue = (state: AppState) =>
 
 export const getQueueStatus = (state: AppState) =>
   state.offlineDownloads.queueStatus
-// Computed Selectors
 
-// Get ids for successfully downloaded tracks
 export const getOfflineTrackIds = (state: AppState) =>
   Object.entries(state.offlineDownloads.trackStatus)
     .filter(

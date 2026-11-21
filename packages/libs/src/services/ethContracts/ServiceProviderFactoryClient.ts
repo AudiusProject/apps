@@ -1,5 +1,3 @@
-// TODO: a lot of extra parseInt's that result in incorrect (as unknown as string) typecasting
-
 import axios, { AxiosRequestConfig } from 'axios'
 import type BN from 'bn.js'
 import { range } from 'lodash'
@@ -91,14 +89,12 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
       }
     }
 
-    // Approve token transfer operation
     const contractAddress = await this.stakingProxyClient.getAddress()
     const tx0 = await this.audiusTokenClient.approve(
       contractAddress,
       amount as BN
     )
 
-    // Register and stake
     const method = await this.getMethod(
       'register',
       Utils.utf8ToHex(serviceType),
@@ -283,7 +279,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     }))
   }
 
-  // Get the deregistered service's most recent endpoint and delegate owner wallet
   async getDeregisteredService({
     serviceType,
     spID,
@@ -367,11 +362,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     }
   }
 
-  /**
-   * Makes a request to decrease stake
-   * @param amount
-   * @returns decrease stake lockup expiry block
-   */
   async requestDecreaseStake(amount: BN) {
     const requestDecreaseMethod = await this.getMethod(
       'requestDecreaseStake',
@@ -388,10 +378,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     return parseInt(lockupExpiryBlock as unknown as string)
   }
 
-  /**
-   * Gets the pending decrease stake request for a given account
-   * @param account wallet address to fetch for
-   */
   async getPendingDecreaseStakeRequest(account: string) {
     const requestInfoMethod = await this.getMethod(
       'getPendingDecreaseStakeRequest',
@@ -404,9 +390,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     }
   }
 
-  /**
-   * Gets the pending decrease stake lockup duration
-   */
   async getDecreaseStakeLockupDuration() {
     const requestInfoMethod = await this.getMethod(
       'getDecreaseStakeLockupDuration'
@@ -415,9 +398,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     return parseInt(info)
   }
 
-  /**
-   * Gets the deployer cut lockup duration
-   */
   async getDeployerCutLockupDuration() {
     const requestInfoMethod = await this.getMethod(
       'getDeployerCutLockupDuration'
@@ -426,10 +406,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     return parseInt(info)
   }
 
-  /**
-   * Cancels the pending decrease stake request
-   * @param account wallet address to cancel request for
-   */
   async cancelDecreaseStakeRequest(account: string) {
     const requestCancelDecreaseMethod = await this.getMethod(
       'cancelDecreaseStakeRequest',
@@ -442,10 +418,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     )
   }
 
-  /**
-   * Fetches the pending decrease stake lockup expiry block for a user
-   * @param account wallet address to fetch for
-   */
   async getLockupExpiry(account: string) {
     const { lockupExpiryBlock } =
       await this.getPendingDecreaseStakeRequest(account)
@@ -462,11 +434,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     }
   }
 
-  /**
-   * Deregisters a service
-   * @param serviceType
-   * @param endpoint
-   */
   async deregister(serviceType: string, endpoint: string) {
     const method = await this.getMethod(
       'deregister',
@@ -503,8 +470,6 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
     return parseInt(info)
   }
 
-  // TODO: Remove this method after all consumers are using
-  // `getServiceEndpointInfo` directly
   async getServiceProviderInfo(serviceType: string, serviceId: number) {
     return await this.getServiceEndpointInfo(serviceType, serviceId)
   }
@@ -579,15 +544,10 @@ export class ServiceProviderFactoryClient extends GovernedContractClient {
       serviceType
     )
 
-    // cast this as an array for backwards compatibility because everything expects an array
     const spInfo = [await this.getServiceEndpointInfo(serviceType, spId)]
     return spInfo
   }
 
-  /**
-   * Returns all service providers of requested `serviceType`
-   * Returns array of objects with schema { blockNumber, delegateOwnerWallet, endpoint, owner, spID, type }
-   */
   async getServiceProviderList(serviceType: string) {
     const numberOfProviders =
       await this.getTotalServiceTypeProviders(serviceType)

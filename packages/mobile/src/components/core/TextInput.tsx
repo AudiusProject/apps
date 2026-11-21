@@ -76,7 +76,6 @@ const useStyles = makeStyles(({ typography, palette, spacing }) => ({
     fontFamily: typography.fontByWeight.medium,
     minWidth: 40,
     flexGrow: 1,
-    // Needed for android
     padding: 0
   },
   icon: {
@@ -91,22 +90,12 @@ const useStyles = makeStyles(({ typography, palette, spacing }) => ({
 }))
 
 export type TextInputProps = RNTextInputProps & {
-  // Needed to set up accessibility
   id?: string
   label?: string
-  /**
-   * Default icon to show at the right side of the input
-   */
   Icon?: ComponentType<SvgProps>
   startAdornment?: ReactNode
   endAdornment?: ReactNode
-  /**
-   * Whether or not the search input should show a clear icon
-   */
   clearable?: boolean
-  /**
-   * What happens when the user clicks the clear icon
-   */
   onClear?: () => void
   styles?: StylesProp<{
     root: ViewStyle
@@ -119,15 +108,7 @@ export type TextInputProps = RNTextInputProps & {
   error?: boolean
   TextInputComponent?: typeof RNTextInput
   maxLength?: number
-  /**
-   * 0-1 number representating a percentage threshold to show the max character text. Default is 0.7 (70%)
-   * @default 0.7
-   */
   showMaxLengthThreshold?: number
-  /**
-   * 0-1 number representating a percentage threshold to turn the character limit text orange. Default is 0.9 (90%)
-   * @default 0.9
-   */
   maxLengthWarningThreshold?: number
   children?: ReactNode
 }
@@ -190,7 +171,6 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
 
     const characterCount = value !== undefined ? `${value}`.length : 0
 
-    // Turn the maxlength text to the warning color whenever we hit a certain threshold (default 90%)
     let maxLengthTextColor: TextColors = 'default'
     if (maxLength && characterCount > maxLength) {
       maxLengthTextColor = 'danger'
@@ -201,13 +181,11 @@ export const TextInput = forwardRef<RNTextInput, TextInputProps>(
       maxLengthTextColor = 'warning'
     }
 
-    // Show the maxlength text whenever we hit a certain threshold (default 70%) + the input is focused
     const shouldShowMaxLengthText =
       isFocused &&
       maxLength &&
       characterCount >= showMaxLengthThreshold * maxLength
 
-    // Trigger label animation on mount if value is prefilled
     useEffect(() => {
       if (isLabelActive) {
         const labelYAnimation = Animated.spring(labelY.current, {

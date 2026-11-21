@@ -38,10 +38,6 @@ const getLaunchpadConfigQueryFn =
     } as LaunchpadConfigHookResponse
   }
 
-/**
- * Helper function to get the query options for fetching launchpad config.
- * Useful for getting the query key tagged with the data type stored in the cache.
- */
 const getLaunchpadConfigOptions = (context: FetchLaunchpadConfigContext) => {
   return queryOptions({
     queryKey: getLaunchpadConfigQueryKey(),

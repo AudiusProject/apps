@@ -15,7 +15,6 @@ export const useSanitizePlaylistLibrary = () => {
 
     const newLibrary = { ...library }
 
-    // checks for issue where folders are incorrectly represented as playlists
     newLibrary.contents = newLibrary.contents.map((content) => {
       if ('contents' in content && content.type !== 'folder') {
         hasIssue = true

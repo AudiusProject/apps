@@ -60,7 +60,6 @@ export const ConfirmSwapScreen = (props: ConfirmSwapScreenProps) => {
     [activeTab, selectedPair]
   )
 
-  // balance isn't needed so we pass 0
   const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     isStablecoin: !!payTokenInfo.isStablecoin,

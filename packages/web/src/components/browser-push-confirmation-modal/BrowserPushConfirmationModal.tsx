@@ -50,9 +50,6 @@ const messages = {
   confirm: 'Enable Browser Notifications!'
 }
 
-/**
- * A modal that asks the user to condfirm browser notifications
- */
 const ConnectedBrowserPushConfirmationModal = ({
   isOpen,
   onClose,
@@ -71,8 +68,6 @@ const ConnectedBrowserPushConfirmationModal = ({
         subscribeBrowserPushNotifications()
         if (permission === Permission.GRANTED) onClose()
       } else if (isSafariPushAvailable) {
-        // NOTE: The request browser permission must be done directly
-        // b/c safari requires the user action to trigger the permission request
         if (permission === Permission.GRANTED) {
           subscribeBrowserPushNotifications()
         } else {
@@ -108,7 +103,6 @@ const ConnectedBrowserPushConfirmationModal = ({
     setBrowserNotificationPermission
   ])
 
-  // If permission changed, close modal
   useEffect(() => {
     if (permission && pushPermission && permission !== pushPermission) {
       onClose()

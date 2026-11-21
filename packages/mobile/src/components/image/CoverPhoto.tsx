@@ -43,8 +43,6 @@ export const useCoverPhoto = ({
       pick(user, 'cover_photo', 'updatedCoverPhoto', 'is_deactivated')
   })
   const { cover_photo, updatedCoverPhoto, is_deactivated } = partialUser ?? {}
-  // Deactivated/deleted accounts must not expose their cover photo
-  // (privacy/GDPR) — force the default placeholder instead.
   const coverPhoto = is_deactivated ? undefined : cover_photo
   const { imageUrl, onError: onImageError } = useImageSize({
     artwork: coverPhoto,

@@ -60,7 +60,6 @@ export const SendTokensSuccess = ({
     )
   }
 
-  // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo) {
     return (
       <Flex gap='xl' ph='xl' pb='xl'>

@@ -38,7 +38,7 @@ type TrackListItemProps = {
   forceSkeleton?: boolean
   isLastTrack?: boolean
   noShimmer?: boolean
-} & ({ track?: CollectionTrack } | { isLoading: true }) // either a track must be passed or loading must be true
+} & ({ track?: CollectionTrack } | { isLoading: true })
 
 const TrackListItem = (props: TrackListItemProps) => {
   const {
@@ -118,12 +118,6 @@ const TrackListItem = (props: TrackListItemProps) => {
 
   const onPlayTrack = (e?: MouseEvent) => {
     e?.stopPropagation()
-    // Skip toggle play if click event happened within track menu container
-    // because clicking on it should not affect corresponding track.
-    // We have to do this instead of stopping the event propagation
-    // because we need it to bubble up to the document to allow
-    // the document click listener to close other track/playlist tile menus
-    // that are already open.
     const shouldSkipTogglePlay = isDescendantElementOf(
       e?.target,
       menuRef.current

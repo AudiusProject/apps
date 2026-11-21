@@ -11,10 +11,6 @@ const blockRelayAbuseErrorCodes = new Set([0, 8, 10, 13, 15, 18])
 const blockNotificationsErrorCodes = new Set([7, 9])
 const blockEmailsErrorCodes = new Set([0, 1, 2, 3, 4, 8, 10, 13, 15])
 
-/**
- * Gets IP of a user by using the leftmost forwarded-for entry
- * or defaulting to req.ip
- */
 const getIP = (req) => {
   const forwardedFor = req.get('X-Forwarded-For')
   if (forwardedFor) {
@@ -24,9 +20,6 @@ const getIP = (req) => {
   return req.ip
 }
 
-/**
- * Records or updates the last seen IP for `handle`
- */
 const recordIP = async (userIP, handle) => {
   const record = await models.UserIPs.findOne({ where: { handle } })
   if (!record) {
@@ -35,7 +28,6 @@ const recordIP = async (userIP, handle) => {
       userIP
     })
   } else {
-    // update even if IP has not changed so that we can later use updatedAt value if necessary
     await record.update({ userIP, updatedAt: Date.now() })
   }
 }
@@ -96,7 +88,6 @@ const detectAbuse = async (user, reqIP, abbreviated = false) => {
   let appliedRules = null
 
   try {
-    // Write out the latest user IP to Identity DB - AAO will request it back
     await recordIP(reqIP, user.handle)
 
     // Perform abuse check conditional on environment
@@ -118,11 +109,9 @@ const detectAbuse = async (user, reqIP, abbreviated = false) => {
     )
   } catch (e) {
     logger.warn(`detectAbuse: aao request failed ${e.message}`)
-    // If it failed, don't update anything
     return
   }
 
-  // Use !! for nullable columns :(
   if (
     !!user.isBlockedFromRelay !== blockedFromRelay ||
     !!user.isBlockedFromNotifications !== blockedFromNotifications ||

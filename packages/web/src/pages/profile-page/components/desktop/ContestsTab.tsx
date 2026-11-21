@@ -18,15 +18,6 @@ type ContestsTabProps = {
   isOwner: boolean
 }
 
-/**
- * Profile "Contests" tab. Lists the contests hosted by this profile as a
- * grid of `ContestCard`s that link out to the dedicated contest page.
- * Matches Figma 2864-13286.
- *
- * Calls `GET /v1/users/{id}/contests` (via `useUserRemixContests`), which
- * returns only this artist's contests with active first (by soonest-ending
- * end_date) followed by ended.
- */
 export const ContestsTab = ({ profile }: ContestsTabProps) => {
   const { user_id: hostUserId, name } = profile
 
@@ -64,11 +55,6 @@ export const ContestsTab = ({ profile }: ContestsTabProps) => {
       wrap='wrap'
       className={styles.cardLineup}
       css={{
-        // Tile grid sized like the Contests page hero/grid: each card
-        // claims at least 280px and grows up to 480px. Stacks naturally
-        // on narrower profile main columns without a JS breakpoint.
-        // When the artist hosts a single contest the tile expands edge
-        // to edge — capping it at 480px left an awkward gap.
         '> *': {
           flex: '1 1 280px',
           minWidth: 0,

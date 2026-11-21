@@ -44,18 +44,15 @@ export const useDeleteCollection = () => {
         throw new Error('User ID is required')
       }
 
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: getCollectionQueryKey(collectionId)
       })
 
-      // Snapshot the previous values
       const previousCollection = queryClient.getQueryData(
         getCollectionQueryKey(collectionId)
       )
       if (!previousCollection) throw new Error('Collection not found')
 
-      // Optimistic updates - mark as deleted in cache
       primeCollectionData({
         collections: [
           {
@@ -67,17 +64,14 @@ export const useDeleteCollection = () => {
         forceReplace: true
       })
 
-      // Remove from account playlists
       dispatch(accountActions.removeAccountPlaylist({ collectionId }))
 
       return { previousCollection }
     },
     onError: (error, _args, context?: MutationContext) => {
-      // Roll back optimistic updates if the mutation fails
       if (context?.previousCollection) {
         const collection = context.previousCollection
 
-        // Restore collection data
         primeCollectionData({
           collections: [collection],
           queryClient,
@@ -88,12 +82,10 @@ export const useDeleteCollection = () => {
       console.error(error)
     },
     onSuccess: async (_, { collectionId }) => {
-      // Invalidate and refetch collection queries to ensure cache consistency
       queryClient.invalidateQueries({
         queryKey: getCollectionQueryKey(collectionId)
       })
 
-      // Invalidate library collections to remove from user's library
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.libraryCollections
       })

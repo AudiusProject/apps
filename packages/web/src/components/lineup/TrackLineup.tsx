@@ -29,54 +29,30 @@ import styles from './Lineup.module.css'
 import { LineupVariant } from './types'
 
 const NARROW_CONTAINER_THRESHOLD_PX = 600
-// Fallback used until the scroll parent has been measured. Sized so the next
-// page request fires well before the user reaches the literal bottom of the
-// list. Effective threshold is `LOAD_MORE_VIEWPORTS * scrollParent.clientHeight`
-// once measured.
 const DEFAULT_LOAD_MORE_THRESHOLD = 1600
-// Number of viewports of "remaining content" that should trigger loading the
-// next page. Larger values give a bigger buffer for fast desktop scrolling so
-// skeletons paint comfortably before the user reaches the bottom. Matches the
-// effect of mobile's `onEndReachedThreshold` but on the larger desktop viewport
-// we need more headroom to keep up with fling scrolls.
 const LOAD_MORE_VIEWPORTS = 2
 
 const { getPlaying: getPlayerPlaying } = playbackSelectors
 const { makeGetCurrent } = playbackSelectors
 
 export type TrackLineupProps = {
-  // Ordered list of track IDs to render. Tiles read full track data from the
-  // tanquery cache (primed by whatever hook produced this list).
   trackIds: ID[]
 
-  // Optional mixed track/collection list. When provided, the lineup renders
-  // collection tiles inline for `PLAYLIST`/`ALBUM` entries and track tiles
-  // for `TRACK` entries (the For You feed uses this). When omitted the
-  // lineup behaves as a pure track lineup driven by `trackIds`.
   lineupItems?: LineupData[]
 
-  // Opaque string that tags the queue entries this lineup produces. Must
-  // match the source used by the playback saga's shadow into legacy queue
-  // so PlayBar-style comparisons continue working.
   source: string
 
-  // Optional tanquery source so the playback saga can paginate when the
-  // queue approaches its end during continuous playback.
   querySource?: PlaybackQuerySource
 
-  // Loading state (from the tanquery hook driving this lineup).
   isPending?: boolean
   isFetching?: boolean
   isError?: boolean
   hasNextPage?: boolean
   loadNextPage?: () => void
 
-  // Render config.
   pageSize?: number
   initialPageSize?: number
   variant?: LineupVariant
-  // 'row' renders each track as a dense single-line TrackRow instead of a
-  // tile. Desktop only; narrow and mobile layouts keep the tile.
   tileVariant?: 'tile' | 'row'
   ordered?: boolean
   isTrending?: boolean
@@ -101,17 +77,9 @@ export type TrackLineupProps = {
 
   playbackSource?: PlaybackSource
 
-  // The feed view (FOR_YOU / LATEST) this lineup renders, when it's the
-  // feed. Stamped onto queue entries and attached to PLAYBACK_PLAY events
-  // as `feed_type` so plays can be attributed to a feed view.
   feedType?: FeedTab
 }
 
-/**
- * Tanquery-first replacement for the legacy `<Lineup>` / `<TanQueryLineup>`
- * components. Takes an array of track IDs and dispatches through the new
- * playback slice on tile interactions. No redux lineup state.
- */
 export const TrackLineup = ({
   trackIds,
   lineupItems,
@@ -168,22 +136,14 @@ export const TrackLineup = ({
     ? MobileCollectionTile
     : DesktopCollectionTile
 
-  // Playback state is read when a tile is clicked rather than subscribed to,
-  // so play/pause/skip don't rebuild every tile. Tiles select their own
-  // active/playing state.
   const store = useStore<CommonState>()
   const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
 
-  // Build a single ordered list of mixed track/collection entries. When the
-  // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
-  // wrap the legacy `trackIds` so the rest of the component is uniform.
   const items: LineupData[] = useMemo(
     () => lineupItems ?? trackIds.map((id) => ({ id, type: EntityType.TRACK })),
     [lineupItems, trackIds]
   )
 
-  // Playback queue is track-only. Collection tiles handle their own
-  // play/pause via the playback slice (see `playTrack`/`pauseTrack` below).
   const playbackTrackIds = useMemo(
     () => items.filter((i) => i.type === EntityType.TRACK).map((i) => i.id),
     [items]
@@ -207,8 +167,6 @@ export const TrackLineup = ({
       const currentTrackId = currentLegacy?.trackId ?? null
       const currentSource = currentLegacy?.source ?? null
       const isSameTile = currentTrackId === trackId && currentSource === source
-      // LineupProvider-style semantics: if we're already the playing track
-      // and playing, pause; otherwise start / resume this tile.
       if (isSameTile && isPlaying) {
         dispatch(playbackActions.togglePlay())
         dispatch(
@@ -257,17 +215,11 @@ export const TrackLineup = ({
     ]
   )
 
-  // Collection tiles drive their own internal track playback (one of the
-  // playlist's tracks at a time) through the playback slice — same hooks
-  // the chat-unfurled CollectionTile uses.
   const playTrack = usePlayTrack()
   const handlePlayCollectionTrack = useCallback(
     (trackId: ID) => {
       playTrack({
         id: trackId,
-        // `source` on the lineup is an opaque string that tags queue entries;
-        // it lines up with `QueueSource` values for well-known lineups
-        // (DISCOVER_FEED here). The saga treats it as a string identifier.
         entries: [{ id: trackId, source: source as QueueSource }]
       })
     },
@@ -275,7 +227,6 @@ export const TrackLineup = ({
   )
   const pauseTrack = usePauseTrack()
 
-  // Tile sizing mirrors the legacy component.
   let tileSize: TrackTileSize = TrackTileSize.LARGE
   let statSize: 'small' | 'large' = 'large'
   let containerClassName: string | undefined
@@ -284,7 +235,6 @@ export const TrackLineup = ({
   } else if (variant === LineupVariant.GRID) {
     tileSize = TrackTileSize.SMALL
     statSize = 'small'
-    // Rows are full width; the two-column grid is for small tiles only.
     containerClassName = isRowLayout
       ? undefined
       : styles.searchTrackTileContainer
@@ -302,8 +252,6 @@ export const TrackLineup = ({
     return items.slice(0, end)
   }, [items, maxEntries])
 
-  // Track the scroll parent's viewport height so the load-more threshold is a
-  // multiple of one full viewport. Falls back to the constant until measured.
   const [scrollParentHeight, setScrollParentHeight] = useState<number | null>(
     null
   )
@@ -319,16 +267,10 @@ export const TrackLineup = ({
     return () => observer.disconnect()
   }, [externalScrollParent])
 
-  // How many viewports below the user's current bottom edge we want loadMore
-  // to fire. Passed to the IntersectionObserver as a bottom rootMargin.
   const loadMoreRootMargin = scrollParentHeight
     ? scrollParentHeight * LOAD_MORE_VIEWPORTS
     : loadMoreThreshold
 
-  // Synchronous "load more was triggered" flag — set the moment the trigger
-  // fires so skeletons render on the next frame, without waiting for
-  // tanquery's `isFetching` to round-trip back through the parent. Cleared
-  // once the parent either delivers more entries or finishes fetching.
   const [isLoadMoreTriggered, setIsLoadMoreTriggered] = useState(false)
   const prevEntriesLengthRef = useRef(visibleItems.length)
   useEffect(() => {
@@ -348,13 +290,6 @@ export const TrackLineup = ({
     loadNextPage()
   }, [hasNextPage, isFetching, isLoadMoreTriggered, loadNextPage])
 
-  // IntersectionObserver-based trigger. A 1px sentinel <li> is rendered just
-  // below the last loaded tile (above the persistent skeleton block); when it
-  // enters the viewport — extended downward by `loadMoreRootMargin` — we fire
-  // loadMore. Using IO instead of react-infinite-scroller's scroll-listener
-  // means the trigger geometry is anchored to a specific DOM element and is
-  // immune to scrollHeight fluctuations from the skeleton block or anywhere
-  // else in the layout.
   const sentinelRef = useRef<HTMLLIElement>(null)
   useEffect(() => {
     const el = sentinelRef.current
@@ -380,11 +315,6 @@ export const TrackLineup = ({
               <Flex
                 direction='column'
                 gap={isRowLayout ? undefined : 'm'}
-                // Position-based key so a skeleton's React identity matches
-                // its absolute position in the lineup. Without this, the same
-                // DOM node would change its rendered order number every time
-                // a page resolves (skeleton-0 reused but now showing tileOrder
-                // for a higher index), which reads as the numbers jumping.
                 key={`skeleton-${indexOffset + index}`}
                 w='100%'
                 as='li'
@@ -476,12 +406,6 @@ export const TrackLineup = ({
   const isEmpty =
     tiles.length === 0 && !isFetching && !isInitialLoad && !isLoadMoreTriggered
 
-  // Persistent skeletons render below the loaded tiles whenever more pages are
-  // available, so scrollHeight grows monotonically across fetches (no
-  // mount/unmount churn on the bottom block). A stable count keeps the block
-  // height invariant across renders — important because the scrollbar thumb is
-  // sized relative to scrollHeight. `pageSize` is too small on its own (e.g.
-  // trending uses 4) so we floor by a small constant.
   const loadingSkeletonCount = Math.min(
     Math.max(0, maxEntries - tiles.length),
     Math.max(pageSize, 10)

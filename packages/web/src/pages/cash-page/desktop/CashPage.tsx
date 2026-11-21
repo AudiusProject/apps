@@ -50,7 +50,6 @@ export const CashPage = () => {
   const [tableOptions, setTableOptions] = useState<TableType[] | null>(null)
   const [selectedTable, setSelectedTable] = useState<TableType | null>(null)
 
-  // Initialize table options based on account type
   useState(() => {
     const tableOptions = isArtist
       ? [TableType.SALES, TableType.PURCHASES, TableType.WITHDRAWALS]

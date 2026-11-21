@@ -5,7 +5,6 @@ import { Id } from '@audius/sdk'
 import { useCurrentUserId } from '~/api/tan-query/users/account/useCurrentUserId'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 
-/** Sends an EntityManager share action. Fire and forget. Logs to console if it fails. */
 export const useShareAction = () => {
   const { audiusSdk } = useQueryContext()
   const { data: userId } = useCurrentUserId()

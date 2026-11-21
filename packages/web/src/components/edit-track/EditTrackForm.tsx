@@ -90,7 +90,6 @@ type EditTrackFormProps = {
   onSubmit: (values: TrackEditFormValues) => void | Promise<void>
   hideContainer?: boolean
   disableNavigationPrompt?: boolean
-  /** Rendered inside the Formik context, e.g. a draft autosaver. */
   children?: ReactNode
 }
 
@@ -131,7 +130,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
         !isUpload && initiallyHidden && !values.trackMetadatas[0].is_unlisted
 
       if (replaceFile) {
-        // Replace audio confirmation is handled in the edit track page if needed
         return onSubmit(values)
       } else if (usersMayLoseAccess) {
         openHideContentConfirmation({ confirmCallback })
@@ -244,8 +242,6 @@ const TrackEditForm = (
   const getArtworkUrl = (artwork: typeof updatedArtwork) => {
     if (!artwork) return undefined
     if ('url' in artwork) return artwork.url
-    // For the case where it's a record of sizes, we can return undefined
-    // or potentially return one of the size URLs if needed
     return undefined
   }
   const fileName = values.trackMetadatas[trackIdx].orig_filename
@@ -277,7 +273,6 @@ const TrackEditForm = (
 
         const newFile = files[0]
 
-        // Preserve clientId for upload tracking
         const track = formValues.tracks[trackIdx]
         if ('clientId' in track) {
           newFile.clientId = track.clientId

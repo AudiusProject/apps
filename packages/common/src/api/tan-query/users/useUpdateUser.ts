@@ -44,13 +44,10 @@ export const useUpdateUser = () => {
       )
     },
     onMutate: async ({ userId, metadata }): Promise<MutationContext> => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: getUserQueryKey(userId) })
 
-      // Snapshot the previous values
       const previousUser = queryClient.getQueryData(getUserQueryKey(userId))
 
-      // Optimistically update user
       if (previousUser) {
         const updatedUser = {
           ...previousUser,
@@ -63,11 +60,9 @@ export const useUpdateUser = () => {
         })
       }
 
-      // Return context with the previous user
       return { previousUser }
     },
     onError: (_err, _, context?: MutationContext) => {
-      // If the mutation fails, roll back user data
       if (context?.previousUser) {
         primeUserData({
           users: [context.previousUser],

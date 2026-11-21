@@ -10,7 +10,6 @@ export type ResumableSignOnScreen =
   | 'PickHandle'
   | 'FinishProfile'
 
-/** Maps shared sign-on state to the equivalent native navigation screen. */
 export const getSignOnScreen = ({
   page,
   hasHandle

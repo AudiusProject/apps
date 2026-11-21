@@ -89,8 +89,6 @@ export type ProfilePageAction =
   | SetProfileFieldAction
   | DismissProfileMeterAction
 
-// Either handle or userId is required
-// TODO: Move this to redux toolkit
 export function fetchProfile(
   handle: Nullable<string>,
   userId: Nullable<ID> | undefined,

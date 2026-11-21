@@ -13,7 +13,6 @@ import { useSelector } from 'react-redux'
 
 import { getLottieThemeColors } from '../lottieTheme'
 
-/** Re-export for Lottie theming - palette + mode map to design system colors */
 export { getLottieThemeColors }
 
 export const THEME_KEY = 'theme'
@@ -42,7 +41,6 @@ export const getTheme = (): Theme | null => {
 
   const storedTheme = window.localStorage.getItem(THEME_KEY)
 
-  // Handle legacy "default" value - treat as AUTO
   if (storedTheme === LEGACY_THEME_DEFAULT) {
     return Theme.AUTO
   }
@@ -54,7 +52,6 @@ export const getTheme = (): Theme | null => {
   return Theme.AUTO
 }
 
-/** Derive themePalette from stored theme (for migration from legacy) */
 export const getThemePaletteFromStorage = (): ThemePalette | null => {
   if (typeof window === 'undefined') return null
   const stored = window.localStorage.getItem(THEME_PALETTE_KEY)
@@ -66,7 +63,6 @@ export const getThemePaletteFromStorage = (): ThemePalette | null => {
   return null
 }
 
-/** Derive themeMode from stored theme (for migration from legacy) */
 export const getThemeModeFromStorage = (): ThemeMode | null => {
   if (typeof window === 'undefined') return null
   const stored = window.localStorage.getItem(THEME_MODE_KEY)
@@ -130,7 +126,6 @@ export const useThemeMode = () => {
   return useSelector(themeSelectors.getThemeMode)
 }
 
-/** Theme colors for Lottie - respects palette (default/classic/matrix) and light/dark mode */
 export const useLottieThemeColors = () => {
   const palette = useSelector(themeSelectors.getThemePalette)
   const theme = useSelector(themeSelectors.getTheme)

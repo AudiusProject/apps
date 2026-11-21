@@ -87,16 +87,13 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
   }
 
   const processFile = async (file: File) => {
-    // Clear any previous errors
     setImageError(null)
 
-    // Check file type
     if (!ALLOWED_IMAGE_FILE_TYPES.includes(file.type)) {
       setImageError(messages.errors.invalidFileType)
       return
     }
 
-    // Check file size (15MB limit)
     if (file.size > MAX_IMAGE_SIZE) {
       setImageError(messages.errors.fileTooLarge)
       return
@@ -104,7 +101,6 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
 
     setIsProcessingImage(true)
     try {
-      // Process the image with resizeImage (converts to JPEG, resizes to 1000x1000)
       const processedFile = await resizeImage(file, 1000, true)
       setFieldValue('coinImage', processedFile)
       // Hook will automatically create blob URL from processed file

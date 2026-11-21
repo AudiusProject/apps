@@ -151,18 +151,15 @@ export abstract class BaseIndexer<RowType> {
     const { es, logger } = this
     const took: Record<string, number> = {}
 
-    // with batch
     let before = performance.now()
     await this.withBatch(rows)
     took.withBatch = performance.now() - before
 
-    // with row
     rows.forEach((r) => this.withRow(r))
 
     const chunks = chunk(rows, this.batchSize)
 
     for (let chunk of chunks) {
-      // index to es
       const body = this.buildIndexOps(chunk)
       let attempt = 1
 
@@ -173,7 +170,6 @@ export abstract class BaseIndexer<RowType> {
             got.items[0],
             `bulk indexing error.  Attempt #${attempt}`
           )
-          // linear backoff 5s increments
           await new Promise((r) => setTimeout(r, 5000 * attempt))
         } else {
           break

@@ -38,12 +38,10 @@ export const useFormattedAudioBalance = ({
   const hasFetchedAudioBalance = !isNullOrUndefined(totalBalance)
   const audioBalance = hasFetchedAudioBalance ? totalBalance : null
 
-  // Format AUDIO balance with dynamic decimal places (minimum 2)
   const audioBalanceFormatted = hasFetchedAudioBalance
     ? formatAudioBalance(totalBalance)
     : null
 
-  // Calculate dollar value of user's AUDIO balance
   const audioDollarValue = useMemo(() => {
     if (!audioPrice || !audioBalance) return '$0.00'
 

@@ -3,11 +3,7 @@ import type { HTMLProps } from 'react'
 import type { TextProps } from '../text'
 
 export type TextLinkProps = Omit<TextProps, 'variant' | 'onClick' | 'color'> &
-  Omit<
-    HTMLProps<HTMLAnchorElement>,
-    // Props from Text that don't match anchor props
-    'size' | 'color' | 'ref'
-  > & {
+  Omit<HTMLProps<HTMLAnchorElement>, 'size' | 'color' | 'ref'> & {
     /**
      * Change the default rendered element for the one passed as a child,
      *  merging their props and behavior.

@@ -61,7 +61,6 @@ export class AlbumsApi {
     this.solanaClient = servicesConfig.solanaClient
   }
 
-  // READS
   async getAlbum(params: getAlbumRequest) {
     const { userId, albumId } = params
     return await this.playlistsApi.getPlaylist({ userId, playlistId: albumId })
@@ -76,8 +75,6 @@ export class AlbumsApi {
     const { albumId } = params
     return await this.playlistsApi.getPlaylistTracks({ playlistId: albumId })
   }
-
-  // WRITES
 
   /** @hidden
    * Create an album from existing tracks
@@ -98,7 +95,6 @@ export class AlbumsApi {
         metadataTimestamp: timestamp
       }))
 
-    // Transform album request to playlist request
     const playlistParams = {
       imageFile,
       onProgress,
@@ -154,7 +150,6 @@ export class AlbumsApi {
     const { metadata, albumId, ...rest } = params
     const { albumName, ...playlistMetadata } = metadata
 
-    // Transform album request to playlist request
     const playlistParams = {
       ...rest,
       playlistId: albumId,
@@ -250,14 +245,12 @@ export class AlbumsApi {
     const contentType = 'album'
     const mint = 'USDC'
 
-    // Fetch album
     this.logger.debug('Fetching album...', { albumId })
     const { data: album } = await this.playlistsApi.getPlaylistAccessInfo({
       userId: params.userId, // use hashed userId
-      playlistId: params.albumId // use hashed albumId
+      playlistId: params.albumId
     })
 
-    // Validate purchase attempt
     if (!album) {
       throw new Error('Album not found.')
     }
@@ -274,7 +267,6 @@ export class AlbumsApi {
     let centPrice: number
     const accessType: 'stream' | 'download' = 'stream'
 
-    // Get conditions
     if (
       album.streamConditions &&
       instanceOfExtendedPurchaseGate(album.streamConditions)
@@ -286,12 +278,10 @@ export class AlbumsApi {
       throw new Error('Album is not available for purchase.')
     }
 
-    // Check if already purchased
     if (accessType === 'stream' && album.access?.stream) {
       throw new Error('Album already purchased')
     }
 
-    // Check if price changed
     if (USDC(priceNumber).value < USDC(centPrice / 100).value) {
       throw new Error('Track price increased.')
     }
@@ -352,7 +342,6 @@ export class AlbumsApi {
     )(params)
 
     const {
-      // only send the base params to getPurchaseInstructions
       wallet: ignoredWallet,
       walletAdapter: ignoredWalletAdapter,
       ...baseParams
@@ -373,7 +362,6 @@ export class AlbumsApi {
       this.logger.debug('Using provided wallet to purchase...', {
         wallet: wallet.toBase58()
       })
-      // Use the specified Solana wallet
       const transferInstruction =
         await this.paymentRouterClient.createTransferInstruction({
           sourceWallet: wallet,
@@ -390,7 +378,6 @@ export class AlbumsApi {
         ].filter(Boolean) as TransactionInstruction[]
       })
     } else {
-      // Use the authed wallet's userbank and relay
       this.logger.debug(
         `Using userBank ${await this.claimableTokensClient.deriveUserBank({
           mint: 'USDC'

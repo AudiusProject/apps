@@ -39,13 +39,8 @@ const queueablesToPlaybackTracks = (entries: Queueable[]) =>
       playerBehavior: e.playerBehavior
     }))
 
-/**
- * Returns a function that plays a track. Used by chat track / playlist tiles
- * which build their own queue from the message contents.
- */
 export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
   const dispatch = useDispatch()
-  // Read at call time so the callback doesn't change on every track change
   const store = useStore<CommonState>()
 
   const playTrack = useCallback(
@@ -70,7 +65,6 @@ export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
   return playTrack
 }
 
-/** Returns a function that pauses playback and optionally records analytics. */
 export const usePauseTrack = (recordAnalytics?: RecordAnalytics) => {
   const dispatch = useDispatch()
   return useCallback(
@@ -84,11 +78,6 @@ export const usePauseTrack = (recordAnalytics?: RecordAnalytics) => {
   )
 }
 
-/**
- * Hook that exposes a togglePlay function and an isTrackPlaying flag for
- * a single track. Leverages usePlayTrack / usePauseTrack and records
- * play/pause analytics events.
- */
 export const useToggleTrack = ({
   id,
   source,

@@ -73,7 +73,6 @@ const getMessages = ({
 
 const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   const {
-    // Profile data
     profile,
     status,
     isArtist,
@@ -96,15 +95,12 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updatedCoverPhoto,
     updatedProfilePicture,
 
-    // Lineups (legacy redux lineups — no longer read here; tanquery below)
     handleLower,
     tracksLineupOrder,
 
-    // State
     hasMadeEdit,
     areArtistRecommendationsVisible,
 
-    // Handlers
     goToRoute,
     setFollowingUserId,
     setFollowersUserId,
@@ -126,10 +122,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     onCloseArtistRecommendations
   } = useProfilePage()
 
-  // Map twitterHandle to xHandle for mobile
   const xHandle = twitterHandle
   const updateXHandle = updateTwitterHandle
-  const followers: User[] = [] // TODO: Add followers fetching if needed
+  const followers: User[] = []
 
   const { setHeader } = useContext(HeaderContext)
   useEffect(() => {
@@ -157,8 +152,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     () => ({ handle: handleLower ?? '' }),
     [handleLower]
   )
-  // Artists land on Tracks, so once we know the profile is an artist's, only
-  // fetch reposts when that tab is opened. Everyone else lands on Reposts.
   const userRepostsQuery = useProfileReposts(repostsArgs, {
     enabled:
       !!handleLower &&
@@ -178,9 +171,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   const showContestsTab = profileHasContest
 
   const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
-  // Fall back to the default tab when the URL points at /contests but the
-  // tab itself is hidden (this host runs no contests). Keeps the body in
-  // sync with the (now conditional) tab list.
   const rawTab = activeTab ?? defaultTab
   const currentTab =
     rawTab === ProfilePageTabs.CONTESTS && !showContestsTab
@@ -289,7 +279,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
           </div>
         )
       }
-      // Default: Tracks
       return (
         <div className={styles.tracksLineupContainer}>
           {profile.track_count === 0 ? (
@@ -323,7 +312,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
       )
     }
 
-    // Non-artist user
     if (currentTab === ProfilePageTabs.PLAYLISTS) {
       return (
         <div className={styles.cardLineupContainer}>
@@ -331,7 +319,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         </div>
       )
     }
-    // Default: Reposts
     return (
       <div className={styles.tracksLineupContainer}>
         {profile.repost_count === 0 ? (
@@ -362,7 +349,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     )
   })()
 
-  // Set Nav-Bar Menu
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
     let leftNav
@@ -431,8 +417,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   }
 
   if (profile.is_deactivated) {
-    // Rendered as a direct child of the page container (a flex column) so the
-    // tombstone's `flex: 1` can claim the space left below the header.
     content = <DeactivatedProfileTombstone isMobile />
   } else if (!isLoading && !isEditing) {
     content = (

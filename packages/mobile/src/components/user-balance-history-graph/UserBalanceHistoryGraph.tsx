@@ -169,12 +169,10 @@ export const UserBalanceHistoryGraph = ({
     )
   }
 
-  // TypeScript guard: we know chartData is not empty here because of the check above
   if (chartData.length === 0) {
     return null
   }
 
-  // Wait for layout measurement before rendering the chart
   if (containerWidth === 0) {
     return (
       <Flex pv='xs' onLayout={handleLayout} style={{ minHeight: height }} />

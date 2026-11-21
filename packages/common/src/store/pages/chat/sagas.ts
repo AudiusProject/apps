@@ -46,7 +46,6 @@ import * as chatSelectors from './selectors'
 import { actions as chatActions } from './slice'
 import { makeChatId } from './utils'
 
-// Attach ulid to window object for debugging DMs
 if (typeof window !== 'undefined') {
   // @ts-ignore
   window.ulid = ulid
@@ -113,9 +112,6 @@ const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 const CHAT_PAGE_SIZE = 30
 const MESSAGES_PAGE_SIZE = 50
 
-/**
- * Helper to dispatch actions for fetching chat users
- */
 function* fetchUsersForChats(chats: UserChat[]) {
   const userIds = chats.reduce((acc, chat) => {
     chat.chat_members.forEach((member) => {
@@ -127,11 +123,6 @@ function* fetchUsersForChats(chats: UserChat[]) {
   yield* call(queryUsers, Array.from(userIds.values()))
 }
 
-/**
- * Fetches the per-category unread breakdown used by the inbox tab dots.
- * Failure is non-fatal (older nodes don't serve it); the dots then fall back
- * to the chats loaded in state.
- */
 function* fetchUnreadMessagesCountByCategory(
   sdk: Awaited<ReturnType<CommonStoreContext['audiusSdk']>>
 ) {
@@ -168,9 +159,6 @@ function* doFetchUnreadMessagesCount() {
   }
 }
 
-/**
- * Gets all chats fresher than what we currently have
- */
 export function* doFetchLatestChats() {
   try {
     const audiusSdk = yield* getContext('audiusSdk')
@@ -197,8 +185,6 @@ export function* doFetchLatestChats() {
         firstResponse = response
       }
       lastResponse = response
-      // Advance using the response cursor so subsequent pages walk newer chats.
-      // Mirrors the pagination pattern used in doFetchLatestMessages below.
       const nextBefore = response.summary?.prev_cursor
       const prevCount = response.summary?.prev_count ?? 0
       hasMoreChats =
@@ -255,9 +241,6 @@ function* doFetchMoreChats() {
   }
 }
 
-/**
- * Gets all messages newer than what we currently have
- */
 function* doFetchLatestMessages(
   action: ReturnType<typeof fetchLatestMessages>
 ) {
@@ -266,13 +249,10 @@ function* doFetchLatestMessages(
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
 
-    // Update the chat too to keep everything in sync
     yield* call(doFetchChat, { chatId })
     const chat = yield* select((state) => getChat(state, chatId))
     const after = chat?.messagesSummary?.next_cursor
 
-    // On first fetch of messages, we won't have an after cursor.
-    // Do `fetchMoreMessages` instead for initial fetch of messages and get all up to the first unread
     if (!after) {
       yield* call(doFetchMoreMessages, action)
       return
@@ -283,8 +263,6 @@ function* doFetchLatestMessages(
     let before: string | undefined
     let firstResponse: TypedCommsResponse<ChatMessage[]> | undefined
     while (hasMoreUnread) {
-      // This will get all messages sent after what we currently got, starting at the most recent,
-      // and batching by MESSAGE_PAGE_SIZE. Sends one extra request to get the 0 response but oh well
       const response = yield* call([sdk.chats, sdk.chats.getMessages], {
         chatId,
         isBlast: chat.is_blast,
@@ -293,7 +271,6 @@ function* doFetchLatestMessages(
         limit: MESSAGES_PAGE_SIZE
       })
       data = data.concat(response.data)
-      // If we have no more messages with our after filter, we're done
       hasMoreUnread = response.data.length > 0
       before = response.summary?.prev_cursor
       if (!firstResponse) {
@@ -315,20 +292,15 @@ function* doFetchLatestMessages(
   }
 }
 
-/**
- * Get older messages than what we currently have for a chat
- */
 function* doFetchMoreMessages(action: ReturnType<typeof fetchMoreMessages>) {
   const { chatId } = action.payload
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
 
-    // Ensure we get a chat so we can check the unread count
     yield* call(doFetchChatIfNecessary, { chatId })
     const chat = yield* select((state) => getChat(state, chatId))
 
-    // Paginate through messages until we get to the unread indicator
     let lastResponse: TypedCommsResponse<ChatMessage[]> | undefined
     let before = chat?.messagesSummary?.prev_cursor
     let hasMoreUnread = true
@@ -340,11 +312,8 @@ function* doFetchMoreMessages(action: ReturnType<typeof fetchMoreMessages>) {
         before,
         limit: MESSAGES_PAGE_SIZE
       })
-      // Only save the last response summary. Pagination is one-way
       lastResponse = response
       data = data.concat(response.data)
-      // If the unread count is greater than the previous fetched messages (next_cursor)
-      // plus this batch, we should keep fetching
       hasMoreUnread =
         !!chat?.unread_message_count &&
         chat.unread_message_count >
@@ -411,7 +380,6 @@ export function* doCreateChat(action: ReturnType<typeof createChat>) {
     if (!currentUserId) {
       throw new Error('User not found')
     }
-    // Groups get a new random id unless one with exactly these members exists
     const isGroup = userIds.length > 1
     let chatId = makeChatId([currentUserId, ...userIds])
     if (isGroup) {
@@ -429,7 +397,6 @@ export function* doCreateChat(action: ReturnType<typeof createChat>) {
       chatId = existingGroup?.chat_id ?? makeGroupChatId()
     }
 
-    // Optimistically go to the chat. If we fail to create it, we'll toast
     if (!skipNavigation) {
       yield* put(goToChat({ chatId, presetMessage, replaceNavigation }))
     }
@@ -439,7 +406,6 @@ export function* doCreateChat(action: ReturnType<typeof createChat>) {
     } catch {}
     const existingChat = yield* select((state) => getChat(state, chatId))
     if (!existingChat) {
-      // Create new chat
       yield* call([sdk.chats, sdk.chats.create], {
         userId: Id.parse(currentUserId),
         invitedUserIds: userIds.map((id) => Id.parse(id)),
@@ -456,8 +422,6 @@ export function* doCreateChat(action: ReturnType<typeof createChat>) {
   } catch (e) {
     const isForbiddenError = isResponseError(e) && e.response?.status === 403
     if (isForbiddenError && userIds.length === 1) {
-      // Refresh chat permissions and block state so InboxUnavailable can show
-      // the right next action for the target user.
       yield* put(fetchBlockees())
       yield* put(fetchBlockers())
       yield* put(fetchPermissions({ userIds }))
@@ -468,7 +432,6 @@ export function* doCreateChat(action: ReturnType<typeof createChat>) {
         })
       )
     } else if (userIds.length > 1) {
-      // Back out of the optimistic navigation to a chat that doesn't exist
       if (!skipNavigation) {
         yield* put(goToChat({}))
       }
@@ -516,7 +479,6 @@ function* doCreateChatBlast(action: ReturnType<typeof createChatBlast>) {
       audienceContentType
     })
 
-    // Optimistically go to the chat. If we fail to create it, we'll toast
     if (!skipNavigation) {
       yield* put(goToChat({ chatId, presetMessage, replaceNavigation }))
     }
@@ -553,8 +515,6 @@ function* doMarkChatAsRead(action: ReturnType<typeof markChatAsRead>) {
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
-    // Use non-optimistic chat here so that the calculation of whether to mark
-    // the chat as read or not are consistent with values in backend
     const chat = yield* select((state) => getNonOptimisticChat(state, chatId))
     if (chat?.is_blast) return
 
@@ -570,9 +530,6 @@ function* doMarkAllChatsAsRead() {
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
-    // One server-side UPDATE clears every chat_member.unread_count for this
-    // user. The trailing fetchUnreadMessagesCount converges the global badge
-    // for chats not yet in local state.
     yield* call([sdk.chats, sdk.chats.readAll])
     yield* put(markAllChatsAsReadSucceeded())
     yield* put(fetchUnreadMessagesCount())
@@ -602,7 +559,6 @@ function* doSendMessage(action: ReturnType<typeof sendMessage>) {
       return
     }
 
-    // Optimistically add the message
     yield* put(
       addMessage({
         chatId,
@@ -649,9 +605,7 @@ function* doSendMessage(action: ReturnType<typeof sendMessage>) {
   } catch (e) {
     yield* put(sendMessageFailed({ chatId, messageId: messageIdToUse }))
 
-    // Fetch the chat to see if permissions need rechecking
     yield* call(doFetchChat, { chatId })
-    // Refetch blocking status to see if user was just blocked or has just blocked that user
     yield* put(fetchBlockees())
     yield* put(fetchBlockers())
     if (userId) {
@@ -661,7 +615,6 @@ function* doSendMessage(action: ReturnType<typeof sendMessage>) {
         const otherUsersMap = yield* call(queryUsers, otherUserIds)
         const otherUsers = Object.values(otherUsersMap)
         if (otherUsers) {
-          // Get permissions of ourselves and other users in the chat
           yield* put(
             fetchPermissions({
               userIds: [userId, ...otherUsers.map((u) => u.user_id)]
@@ -812,11 +765,8 @@ function* doDeleteChat(action: ReturnType<typeof deleteChat>) {
     yield* call([sdk.chats, sdk.chats.delete], {
       chatId
     })
-    // Go to chat root page
     yield* put(goToChat({}))
-    // Wait for render
     yield* delay(1)
-    // NOW delete the chat - otherwise we refetch it right away
     yield* put(deleteChatSucceeded({ chatId }))
   } catch (e) {
     console.error('Chats', e as Error)
@@ -830,7 +780,6 @@ export function* doLeaveChat(action: ReturnType<typeof leaveChat>) {
     const sdk = yield* call(audiusSdk)
     yield* call([sdk.chats, sdk.chats.leave], { chatId })
     yield* put(goToChat({}))
-    // Wait for render, as in doDeleteChat
     yield* delay(1)
     yield* put(deleteChatSucceeded({ chatId }))
     yield* put(toast({ content: 'You left the group' }))
@@ -947,7 +896,6 @@ export function* doSetChatCategory(action: ReturnType<typeof setChatCategory>) {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
     const chat = yield* select((state) => getNonOptimisticChat(state, chatId))
-    // Blasts are synthetic client-side chats and can't be categorized
     if (chat?.is_blast) return
     yield* call([sdk.chats, sdk.chats.setCategory], { chatId, category })
     yield* put(setChatCategorySucceeded({ chatId, category }))

@@ -148,7 +148,6 @@ const generateServicesConfig = async (
   const stmAddress = config.ethereum.addresses.serviceTypeManagerAddress
   const ermAddress = config.ethereum.addresses.ethRewardsManagerAddress
 
-  // Fetch service providers by type
   const getServiceEndpoints = async (serviceType: `0x${string}`) => {
     const count = await ethPublicClient.readContract({
       address: spfAddress,
@@ -194,16 +193,16 @@ const generateServicesConfig = async (
   const minVersion = hexToString(versionHex, { size: 32 })
 
   config.network.minVersion = minVersion
-  // Use the canonical Audius-operated storage node to improve upload success
-  // rates while avoiding lower-reliability third-party nodes.
   config.network.storageNodes = storageNodes
     .filter(([_ownerWallet, endpoint]: any) =>
       isAudiusStorageNodeEndpoint(endpoint)
     )
-    .map(([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
-      endpoint,
-      delegateOwnerWallet
-    }))
+    .map(
+      ([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
+        endpoint,
+        delegateOwnerWallet
+      })
+    )
   config.network.antiAbuseOracleNodes.registeredAddresses = [
     ...antiAbuseAddresses
   ]

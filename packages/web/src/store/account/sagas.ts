@@ -41,9 +41,6 @@ const hasPendingPasswordReset = () => {
   return Boolean(window.localStorage.getItem(PASSWORD_RESET_REQUIRED_KEY))
 }
 
-/**
- * Determine if the push notification modal should appear
- */
 function* showPushNotificationConfirmation() {
   while (hasPendingPasswordReset()) {
     yield* delay(500)
@@ -135,8 +132,6 @@ function* subscribeBrowserPushNotifications() {
       }
     }
   }
-  // Note: you cannot request safari permission from saga
-  // it must be initiated from a user action (in the component)
   if (isSafariPushAvailable) {
     const safariSubscription = yield* call(getSafariPushBrowser)
     if (safariSubscription.permission === Permission.GRANTED) {

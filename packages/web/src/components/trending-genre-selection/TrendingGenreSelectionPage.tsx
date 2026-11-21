@@ -26,9 +26,6 @@ type ConnectedTrendingGenreSelectionPageProps = {} & ReturnType<
 > &
   ReturnType<typeof mapDispatchToProps>
 
-// Mobile page for selecting a genre by which to filter trending.
-// Genre change triggers a fresh tanquery fetch (query key includes the
-// genre), so no explicit lineup reset is needed.
 const ConnectedTrendingGenreSelectionPage = ({
   setTrendingGenre,
   genre,

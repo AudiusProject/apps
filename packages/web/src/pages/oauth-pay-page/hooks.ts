@@ -94,7 +94,6 @@ const useParsedPayParams = () => {
     } else if (!amount || typeof amount !== 'string') {
       error = messages.missingParamsError
     } else {
-      // Validate amount is a valid bigint
       try {
         const amountBigInt = BigInt(amount)
         if (amountBigInt <= 0) {
@@ -164,15 +163,12 @@ export const useOAuthPaySetup = ({
   const { data: account } = useCurrentAccountUser()
   const isLoggedIn = Boolean(account?.user_id)
 
-  // Resolve handle to user if provided
   const { data: handleUser, isPending: handleUserPending } = useUserByHandle(
     handle ?? null,
     { enabled: !!handle }
   )
   const recipientEthAddress = handle ? handleUser?.erc_wallet : undefined
 
-  // Derive the recipient's user bank address (pure math, no RPC call).
-  // Actual account creation (if needed) happens at confirm time in a single tx.
   const { audiusSdk } = useQueryContext()
   const {
     data: recipientUserBank,
@@ -192,7 +188,6 @@ export const useOAuthPaySetup = ({
     enabled: !!recipientEthAddress && !!mint
   })
 
-  // Determine the effective recipient address
   const recipient = handle ? (recipientUserBank ?? undefined) : recipientParam
   const handleLoading =
     handle && (handleUserPending || recipientUserBankPending)
@@ -204,22 +199,18 @@ export const useOAuthPaySetup = ({
         : null
     : null
 
-  // Get the user-bank address for the specific mint (the one used to send tokens)
   const { userBankAddress } = useUserbank(mint ?? undefined)
   const currentUserWallet = userBankAddress
 
-  // Get token info
   const { data: coin } = useFanClub(mint ?? '')
   const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
-  // Get user balance for the mint
   const { data: tokenBalance, isLoading: balanceLoading } = useCoinBalance({
     mint: mint ?? '',
     includeExternalWallets: false,
     includeStaked: false
   })
 
-  // Send coins mutation
   const sendCoinsMutation = useSendCoins({ mint: mint ?? '' })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -227,7 +218,6 @@ export const useOAuthPaySetup = ({
     string | null
   >(null)
 
-  // Parse amount as bigint
   const amountBigInt = useMemo(() => {
     if (!amount) return null
     try {
@@ -237,10 +227,6 @@ export const useOAuthPaySetup = ({
     }
   }, [amount])
 
-  // Check if user has sufficient balance.
-  // The balance FixedDecimal may use different decimals (e.g. 18 for AUDIO)
-  // than the URL amount (which uses tokenInfo.decimals, e.g. 8). Convert
-  // the amount to the balance's decimal scale before comparing.
   const hasSufficientBalance = useMemo(() => {
     if (!tokenBalance || !amountBigInt || !tokenInfo) return false
     const amountFD = new FixedDecimal(amountBigInt, tokenInfo.decimals)
@@ -248,7 +234,6 @@ export const useOAuthPaySetup = ({
     return tokenBalance.balance.value >= normalizedAmount.value
   }, [tokenBalance, amountBigInt, tokenInfo])
 
-  // Check if user holds the mint at all
   const userHoldsMint = useMemo(() => {
     if (!tokenBalance) return false
     return tokenBalance.balance.value > BigInt(0)
@@ -284,7 +269,6 @@ export const useOAuthPaySetup = ({
             }
           }
         } else {
-          // URL redirect mode (used for fullScreen mode)
           if (responseMode && responseMode === 'query') {
             if (state != null) {
               parsedRedirectUri!.searchParams.append('state', state as string)
@@ -302,7 +286,6 @@ export const useOAuthPaySetup = ({
               parsedRedirectUri!.searchParams.append('error', result.error)
             }
           } else {
-            // Fragment mode (default for fullScreen)
             const statePart = state != null ? `state=${state}&` : ''
             const signaturePart = result.signature
               ? `signature=${result.signature}`
@@ -352,7 +335,6 @@ export const useOAuthPaySetup = ({
         source: 'oauth_pay_page'
       })
 
-      // Store signature to show success screen
       setTransactionSignature(signature)
       setIsSubmitting(false)
     } catch (error) {
@@ -374,14 +356,12 @@ export const useOAuthPaySetup = ({
     handle
   ])
 
-  // Handle closing after success screen is shown
   const handleSuccessClose = useCallback(async () => {
     if (transactionSignature && currentUserWallet) {
       await formResponseAndPostMessage({
         signature: transactionSignature,
         wallet: currentUserWallet
       })
-      // Small delay to ensure message is sent before closing
       setTimeout(() => {
         if (window.opener) {
           window.close()
@@ -391,7 +371,6 @@ export const useOAuthPaySetup = ({
   }, [transactionSignature, currentUserWallet, formResponseAndPostMessage])
 
   const handleCancel = useCallback(() => {
-    // Close the window when user cancels
     if (window.opener) {
       window.close()
     }

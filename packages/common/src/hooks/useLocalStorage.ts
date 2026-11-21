@@ -5,9 +5,6 @@ type CreateUseLocalStorageHookArguments<T> = {
   setLocalStorageItem: (key: string, value: T) => Promise<void> | void
 }
 
-/**
- * A hook creator that local storage hook
- */
 export const createUseLocalStorageHook = ({
   getLocalStorageItem,
   setLocalStorageItem

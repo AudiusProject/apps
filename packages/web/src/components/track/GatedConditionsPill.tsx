@@ -41,7 +41,6 @@ export const GatedConditionsPill = ({
 
   let message = null
   if (unlocking) {
-    // Show only spinner when unlocking a purchase
     message = isPurchase ? undefined : messages.unlocking
   } else {
     message = isPurchase
@@ -92,7 +91,6 @@ export const GatedConditionsPill = ({
       color={isPurchase ? 'lightGreen' : 'blue'}
       isLoading={unlocking}
       iconLeft={showIcon ? IconLock : undefined}
-      // TODO: Add 'xs' button size in harmony
       css={{ height: '24px' }}
     >
       {message}

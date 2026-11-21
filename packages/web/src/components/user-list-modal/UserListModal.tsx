@@ -63,7 +63,6 @@ export const UserListModal = () => {
 
   const onClose = useCallback(() => dispatch(setVisibility(false)), [dispatch])
 
-  // Close the modal when the user navigates to another page
   useEffect(() => {
     if (isOpen) {
       return () => {

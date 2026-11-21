@@ -70,7 +70,6 @@ export async function createApp({
     }
     throw new Error(isErrorLike(reason) ? reason.message : reason + '')
   }
-  // Copy `.gitignore`, needed because npm doesn't publish .gitignore
   const ignorePath = path.join(root, '.gitignore')
   if (!fs.existsSync(ignorePath)) {
     fs.copyFileSync(getExampleFile({ example, file: 'gitignore' }), ignorePath)

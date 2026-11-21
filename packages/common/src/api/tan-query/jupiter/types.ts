@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import type { User } from '~/models/User'
 
-// SDK TokenName enum values that are accepted by the SDK
 type TokenName = 'wAUDIO' | 'USDC'
 
 export enum SwapStatus {
@@ -49,7 +48,7 @@ export type SwapTokensResult = {
   error?: {
     type: SwapErrorType
     message: string
-    userCancelled?: boolean // applicable to external wallet swaps - the user can cancel the signing
+    userCancelled?: boolean
   }
   inputAmount?: {
     amount: number

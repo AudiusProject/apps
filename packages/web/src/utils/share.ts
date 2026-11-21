@@ -1,9 +1,5 @@
 import { copyLinkToClipboard, getCopyableLink } from 'utils/clipboardUtil'
 
-/**
- * Formats and shares a link with the system dialog if available and otherwise
- * copies to the clipboard.
- */
 export const getShare = (isMobile: boolean) => (url: string, text?: string) => {
   const shareableLink = getCopyableLink(url)
 

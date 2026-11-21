@@ -23,31 +23,21 @@ const useAnimatedIcons = makeAnimations(({ palette, type }) => {
   const primaryBG = palette.primary
 
   const ColorizedPlayIcon = colorize(IconPlay, {
-    // #playpause1.Group 1.Fill 1
     'layers.0.shapes.0.it.1.c.k': iconColor,
-    // #playpause2.Left.Fill 1
     'layers.1.shapes.0.it.1.c.k': iconColor,
-    // #playpause2.Right.Fill 1
     'layers.1.shapes.1.it.1.c.k': iconColor,
-    // #primaryBG.Group 2.Fill 1
     'layers.2.shapes.0.it.1.c.k': primaryBG
   })
 
   const ColorizedPauseIcon = colorize(IconPause, {
-    // #playpause1.Group 1.Fill 1
     'layers.0.shapes.0.it.1.c.k': iconColor,
-    // #playpause2.Left.Fill 1
     'layers.1.shapes.0.it.1.c.k': iconColor,
-    // #playpause2.Right.Fill 1
     'layers.1.shapes.1.it.1.c.k': iconColor,
-    // #primaryBG.Group 2.Fill 1
     'layers.2.shapes.0.it.1.c.k': primaryBG
   })
 
   const ColorizedSpinnerIcon = colorize(IconLoadingSpinner, {
-    // change color of the internal spinner
     'layers.0.shapes.1.c.k': iconColor,
-    // change color of the background circle
     'layers.1.shapes.0.it.2.c.k': primaryBG
   })
   return [ColorizedPlayIcon, ColorizedPauseIcon, ColorizedSpinnerIcon]
@@ -61,8 +51,6 @@ export const PlayButton = ({ isActive, ...props }: PlayButtonProps) => {
 
   const isBuffering = useSelector(getBuffering)
 
-  // To prevent "flashes" of buffering states & not show it at all when tracks are playing quickly,
-  // we only show the buffering spinner state if a minimum amount of time has passed
   useEffect(() => {
     let timeout
     if (isBuffering) {

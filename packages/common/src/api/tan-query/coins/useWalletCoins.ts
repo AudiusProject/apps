@@ -42,7 +42,6 @@ export const useWalletCoins = <TResult = UserCoin[]>(
         offset: params.offset ?? 0
       })
 
-      // Fetch Solana balance
       let solBalance = 0
       let solBalanceUsd = 0
       try {
@@ -51,7 +50,6 @@ export const useWalletCoins = <TResult = UserCoin[]>(
         const connection = await sdk.services.solanaClient.getConnection()
         const balance = await connection.getBalance(addressPubKey)
         solBalance = balance
-        // TODO: Calculate USD value if needed
         solBalanceUsd = 0
       } catch (e) {
         console.error('Error fetching SOL balance:', e)
@@ -60,7 +58,6 @@ export const useWalletCoins = <TResult = UserCoin[]>(
       if (response.data) {
         const coins = userCoinListFromSDK(response.data)
 
-        // Add SOL coin entry if there's a balance or if it's not already in the list
         const hasSolCoin = coins.some((coin) => coin.ticker === 'SOL')
         if (!hasSolCoin && solBalance > 0) {
           coins.unshift({

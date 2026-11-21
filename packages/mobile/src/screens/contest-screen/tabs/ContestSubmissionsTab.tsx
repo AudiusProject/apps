@@ -28,33 +28,6 @@ const SORT_OPTIONS = [
   { label: 'Most Favorites', value: 'likes' as const }
 ]
 
-/**
- * Submissions body — remix lineup for the parent track's contest.
- * `TanQueryLineup` renders a `SectionList` from `app/components/core`
- * which auto-switches to `CollapsibleSectionList` when hosted in a
- * `CollapsibleTabNavigator`, so the surrounding header slides away
- * as the user scrolls through submissions.
- *
- * The lineup now includes the original (parent) track at the top
- * (`includeOriginal: true`) so listeners can compare against the
- * source without jumping back out — same behaviour as the track-page
- * `RemixesPage` and the web contest page. A filter bar lives inside
- * the submissions delineator (rendered between winners and remixes)
- * with Co-Signed + sort controls (recent/plays/favorites). This
- * mirrors the legacy `TrackRemixesScreen` delineator pattern so the
- * lineup reads as: original → WINNERS label → winner tracks →
- * SUBMISSIONS (N) label + filter bar → remix entries.
- *
- * We manually call `loadCachedDataIntoLineup()` once the tan-query
- * page has data. `useRemixesLineup` opts out of automatic cache
- * handling (`disableAutomaticCacheHandling: true`), which means the
- * Redux lineup entries would otherwise lag behind tan-query for a
- * tick — during that gap `TanQueryLineup`'s skeletons stop
- * rendering but `lineup.entries` is still empty, so the whole list
- * momentarily goes blank before the real tiles arrive. Calling
- * `loadCachedDataIntoLineup` after the data resolves bridges that
- * gap by hydrating Redux from the tan-query cache immediately.
- */
 export const ContestSubmissionsTab = () => {
   const { trackId } = useContestPage()
   const { data: contest } = useRemixContest(trackId)
@@ -94,8 +67,6 @@ export const ContestSubmissionsTab = () => {
     [remixesLineupArgs]
   )
 
-  // Submissions total comes from a count-only API query so it matches
-  // the contest card total instead of growing as the user scrolls.
   const { data: submissionsCount = 0 } = useRemixesCount(
     { trackId, isContestEntry: true },
     { enabled: !!trackId, staleTime: 60_000 }
@@ -147,15 +118,6 @@ export const ContestSubmissionsTab = () => {
     [submissionsCount, isCosign, sortMethod, handleSortChange]
   )
 
-  // Lineup shape is [original, ...winners, ...remixes]. Delineator
-  // keys map to the index the label renders AFTER, so:
-  // - With winners: WINNERS after original (index 0), SUBMISSIONS
-  //   after the last winner (index `winnerCount`).
-  // - Without winners: SUBMISSIONS after original (index 0).
-  // Same pattern the legacy `TrackRemixesScreen` uses.
-  // Memoized so the reference stays stable across renders — the map
-  // feeds `TanQueryLineup`'s `renderItem` deps, and a fresh object
-  // each render would force the whole list to re-render.
   const delineatorMap = useMemo(
     () =>
       winnerCount > 0

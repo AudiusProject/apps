@@ -34,7 +34,6 @@ export const addAppInfoMiddleware = ({
   appName = providedAppName
   return {
     pre: async (context: RequestContext): Promise<FetchParams> => {
-      // If an app name is not provided, fetch the name from the dev app
       if (!providedAppName) {
         const apiClientConfig = new Configuration({
           fetchApi: fetch,

@@ -37,7 +37,6 @@ import { PauseContextProvider } from './pausedpopover/PauseProvider'
 import { ToastContextProvider } from './toast/ToastContext'
 import TrackPlayerContainer from './track/TrackPlayerContainer'
 
-// How long to wait before we show the loading screen
 const LOADING_WAIT_MSEC = 1
 const DEFAULT_DOMINANT_COLOR = '#7e1bcc'
 
@@ -59,14 +58,10 @@ export const PlayerFlavor = Object.seal({
   TINY: 'tiny'
 })
 
-// Attemps to parse a the window's url.
-// Returns null if the URL scheme is invalid.
 const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
-  // Get request type
   const requestType = pathComponentRequestTypeMap[type]
   if (!requestType) return null
 
-  // Get the flavor
   let playerFlavor
   if (flavor === PlayerFlavor.CARD) {
     playerFlavor = PlayerFlavor.CARD
@@ -82,11 +77,9 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
     case ID_ROUTE: {
       const { id, ownerId, isTwitter } = matches
 
-      // Validate the search params not null
       if ([id, ownerId].some((e) => e === null)) {
         return null
       }
-      // Parse them as ints
       const [intId, intOwnerId] = [parseInt(id, 10), parseInt(ownerId, 10)]
       if (isNaN(intId) || isNaN(intOwnerId)) {
         return null
@@ -113,7 +106,6 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
     case PERMALINK_ROUTE: {
       const { handle, slug, isTwitter } = matches
 
-      // Validate handle and slug are present
       if (!handle || !slug) {
         return null
       }
@@ -134,12 +126,11 @@ const getRequestDataFromURL = ({ path, type, flavor, matches }) => {
 const App = (props) => {
   const params = useParams()
   const searchParams = useSearchParams()
-  const [didError, setDidError] = useState(false) // General errors
-  const [did404, setDid404] = useState(false) // 404s indicate content was deleted
-  // Track reported as non-streamable by the API
+  const [didError, setDidError] = useState(false)
+  const [did404, setDid404] = useState(false)
   const [isUnavailable, setIsUnavailable] = useState(false)
-  const [requestState, setRequestState] = useState(null) // Parsed request state
-  const [isRetrying, setIsRetrying] = useState(false) // Currently retrying?
+  const [requestState, setRequestState] = useState(null)
+  const [isRetrying, setIsRetrying] = useState(false)
 
   const [tracksResponse, setTracksResponse] = useState(null)
   const [collectionsResponse, setCollectionsResponse] = useState(null)
@@ -148,17 +139,13 @@ const App = (props) => {
   const [dominantColor, setDominantColor] = useState(null)
   const playerContainerRef = useRef(null)
 
-  // Set up analytics
   useEffect(() => {
     initAnalytics()
   }, [])
 
-  // TODO: pull these out into separate functions?
-  // Request metadata, compute dominant color on success.
   const requestMetadata = useCallback(async (request) => {
     onGoingRequest.current = true
 
-    // Queue up the loading animation
     setTimeout(() => {
       if (onGoingRequest.current) {
         setShowLoadingAnimation(true)
@@ -182,7 +169,6 @@ const App = (props) => {
           setIsUnavailable(false)
           setTracksResponse(null)
         } else if (track.isStreamable === false) {
-          // `=== false`: older responses omit isStreamable
           setDid404(true)
           setIsUnavailable(true)
           setTracksResponse(null)
@@ -193,7 +179,6 @@ const App = (props) => {
           setTracksResponse({ ...track, events })
 
           const artworkUrl = await getArtworkUrl(track)
-          // Set dominant color
           let color
           if (artworkUrl) {
             try {
@@ -234,7 +219,6 @@ const App = (props) => {
           setCollectionsResponse(collection)
 
           const artworkUrl = await getArtworkUrl(collection)
-          // Set dominant color
           let color
           if (artworkUrl) {
             try {
@@ -267,11 +251,9 @@ const App = (props) => {
     }
   }, [])
 
-  // Perform initial request
   useEffect(() => {
     const request = getRequestDataFromURL({
       path: props.path,
-      // Type comes from the url if present, otherwise pull from the component props
       type: params.type || props.type,
       flavor: searchParams[0]?.get('flavor') ?? undefined,
       matches: params
@@ -286,12 +268,9 @@ const App = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Retries
   const retryRequestMetadata = async () => {
     if (isRetrying) return
     setIsRetrying(true)
-    // If we don't have a valid request state
-    // (e.g. URL params are invalid, just wait and then set it to retry failed)
     if (!requestState) {
       setTimeout(() => {
         setIsRetrying(false)
@@ -313,15 +292,11 @@ const App = (props) => {
     requestState.playerFlavor === PlayerFlavor.TINY
   const mobileWebTwitter = isMobileWebTwitter(requestState?.isTwitter)
 
-  // The idea is to show nothing (null) until either we
-  // get metadata back or we pass the loading threshold
-  // and display the loading screen.
   const renderPlayerContainer = () => {
     if (didError) {
       return <Error onRetry={retryRequestMetadata} isRetrying={isRetrying} />
     }
 
-    // Tiny variant renders its own deleted content
     if (did404) {
       return (
         <DeletedContent

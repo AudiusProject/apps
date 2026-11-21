@@ -23,24 +23,16 @@ const createRootReducer = () => {
   const commonStoreReducers = clientStoreReducers(persistStorage)
 
   return combineReducers({
-    // Common store
     ...commonStoreReducers,
-    // These also belong in common store reducers but are here until we move them to the @audius/common package.
     backend,
     signOn: signOnReducer,
 
-    // (End common store)
-
-    // Account
     passwordReset,
 
-    // UI Functions
     dragndrop,
 
-    // Error Page
     error,
 
-    // Remote config/flags
     remoteConfig,
     application: combineReducers({
       ui: combineReducers({

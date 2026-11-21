@@ -1,28 +1,11 @@
-/**
- * Extend the global array type to add the `flat` method which
- * is polyfilled via `array.protoype.flat`
- * */
-
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Array<T> {
-    /**
-     * Returns a new array with all sub-array elements concatenated into it recursively up to the
-     * specified depth.
-     *
-     * @param depth The maximum recursion depth
-     */
     flat<A, D extends number = 1>(this: A, depth?: D): FlatArray<A, D>[]
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ReadonlyArray<T> {
-    /**
-     * Returns a new array with all sub-array elements concatenated into it recursively up to the
-     * specified depth.
-     *
-     * @param depth The maximum recursion depth
-     */
     flat<A, D extends number = 1>(this: A, depth?: D): FlatArray<A, D>[]
   }
 }

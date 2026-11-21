@@ -5,7 +5,6 @@ import styles from './EmbedFrame.module.css'
 type EmbedFrameProps = {
   className?: string
   frameString: string
-  // Optional container width if provided
   width?: number
 }
 

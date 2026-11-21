@@ -1,6 +1,3 @@
-// For /cash route
-// Render the SPA with proper meta-tags for SEO
-
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'

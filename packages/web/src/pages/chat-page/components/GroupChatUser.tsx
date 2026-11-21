@@ -11,14 +11,12 @@ const messages = {
   members: (count: number) => `${count} ${count === 1 ? 'member' : 'members'}`
 }
 
-/** Group counterpart of ChatUser: avatars, member names and member count. */
 export const GroupChatUser = ({
   users,
   children,
   textClassName,
   onClick
 }: {
-  // Other members, not including the current user
   users: User[]
   children?: ReactNode
   textClassName?: string

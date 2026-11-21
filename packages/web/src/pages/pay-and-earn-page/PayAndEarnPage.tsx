@@ -13,7 +13,6 @@ export const PayAndEarnPage = (props: PayAndEarnPageProps) => {
   const isMobile = useIsMobile()
   const dispatch = useDispatch()
 
-  // Always check for recoverable USDC on page load
   useEffect(() => {
     dispatch(buyUSDCActions.startRecoveryIfNecessary())
   }, [dispatch])

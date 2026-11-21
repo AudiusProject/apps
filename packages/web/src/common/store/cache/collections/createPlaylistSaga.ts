@@ -46,7 +46,6 @@ export function* createPlaylistSaga() {
 function* createPlaylistWorker(
   action: ReturnType<typeof cacheCollectionsActions.createPlaylist>
 ) {
-  // Return early if this is an album
   if (action.isAlbum) return
 
   yield* waitForWrite()
@@ -195,8 +194,6 @@ function* createAndConfirmPlaylist(
       metadata
     })
 
-    // Merge the confirmed playlist with the optimistic playlist, preferring
-    // optimistic data in case other unconfirmed edits have been made.
     const { data: playlist } = yield* call(
       [sdk.playlists, sdk.playlists.getPlaylist],
       {

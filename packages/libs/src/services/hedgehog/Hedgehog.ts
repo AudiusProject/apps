@@ -22,14 +22,6 @@ export class Hedgehog {
   setUserFn: SetUserFn
   instance: HedgehogBase
 
-  // TODO - update this comment
-
-  // This is some black magic going on here. The audiusServiceEndpoint is passed in along with the
-  // requestToAudiusService function reference. When setFn and getFn call self.requestToAudiusService,
-  // the context of `this` that's used is the HedgehogWrapper class, not the AudiusWeb3 class.
-  // Therefore, we need to define this.audiusServiceEndpoint, to satisfy all the deps of the
-  // requestToAudiusService and make it execute correctly
-
   constructor({
     identityService,
     useLocalStorage = true,
@@ -59,9 +51,6 @@ export class Hedgehog {
       createKey
     )
 
-    /**
-     * Generate secure credentials to allow login
-     */
     // @ts-expect-error -- adding our own custom method to hedgehog
     hedgehog.generateRecoveryInfo = async () => {
       const entropy = await WalletManager.getEntropyFromLocalStorage(
@@ -70,7 +59,7 @@ export class Hedgehog {
       if (entropy === null) {
         throw new Error('generateRecoveryLink - missing entropy')
       }
-      let btoa // binary to base64 ASCII conversion
+      let btoa
       let currentHost
       if (typeof window !== 'undefined' && window && window.btoa) {
         btoa = window.btoa

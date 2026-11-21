@@ -9,7 +9,6 @@ import { all, call, put } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
 
-/** Records gated track uploads. */
 export function* recordGatedTracks(
   tracks: (TrackForUpload | TrackMetadataForUpload)[]
 ) {
@@ -76,14 +75,9 @@ export function* getUSDCMetadata(stream_conditions: USDCPurchaseConditions) {
   return conditionsWithMetadata
 }
 
-/**
- * Adds relevant premium metadata
- * Converts prices to WEI and adds splits for USDC purchasable content.
- */
 export function* addPremiumMetadata<T extends TrackMetadataForUpload>(
   track: T
 ) {
-  // download_conditions could be set separately from stream_conditions, so we check for them first
   if (isContentUSDCPurchaseGated(track.download_conditions)) {
     track.download_conditions = yield* call(
       getUSDCMetadata,
@@ -96,7 +90,6 @@ export function* addPremiumMetadata<T extends TrackMetadataForUpload>(
       getUSDCMetadata,
       track.stream_conditions
     )
-    // If stream_conditions are set, download_conditions should always match
     track.download_conditions = yield* call(
       getUSDCMetadata,
       track.stream_conditions

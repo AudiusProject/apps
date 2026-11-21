@@ -77,11 +77,6 @@ import { useDispatch } from 'react-redux'
 
 import { useNavigation } from './useNavigation'
 
-/**
- * Navigator for notifications
- *
- * Uses the useNavigation hook under the hood
- */
 export const useNotificationNavigation = () => {
   const navigation = useNavigation()
   const linkTo = useLinkTo()
@@ -91,7 +86,6 @@ export const useNotificationNavigation = () => {
     FeatureFlags.MOBILE_MANAGER_MODE
   )
 
-  // Pushes flagged with shareCard open the stat card over the track
   const openShareCard = useCallback(
     (trackId: ID, stat: ShareMilestoneStat) => {
       dispatch(
@@ -129,7 +123,6 @@ export const useNotificationNavigation = () => {
           navigation.navigate('Profile', { id: firstUserId })
         }
       } else {
-        // TODO: Need to handle the payload from identity when there are multiple users
         navigation.navigate('Profile', { id: notification.initiator })
       }
     },
@@ -188,12 +181,6 @@ export const useNotificationNavigation = () => {
       ) {
         navigation.navigate('Collection', { id: entityId })
       } else if (entityType === Entity.Event) {
-        // Event-typed comment notifications carry entityId = event_id.
-        // The Contest screen takes a track id (or handle/slug), so chase
-        // the cached event to find its underlying parent track. The row
-        // that triggered this navigation already mounted
-        // `useNotificationEntity`, which primes the event cache via
-        // `useEvent`, so this read is synchronous in the common case.
         const cachedEvent = queryClient.getQueryData(
           getEventQueryKey(entityId)
         ) as { entityId?: number | null } | undefined
@@ -232,7 +219,6 @@ export const useNotificationNavigation = () => {
       } else if (notification.type === PushNotificationType.MilestoneFollow) {
         navigation.navigate('Profile', { id: notification.initiator })
       } else if (notification.actions[0].actionEntityType === Entity.Track) {
-        // The push sends this id as a string, and iOS delivers it as is
         const trackId = Number(notification.entityId)
         navigation.navigate('Track', {
           trackId,
@@ -297,8 +283,6 @@ export const useNotificationNavigation = () => {
   const announcementHandler = useCallback(
     (notification: AnnouncementNotification | AnnouncementPushNotification) => {
       if (!notification.route) {
-        // fallback to linking to the coins explore screen
-        // TODO: Update this later, this will eventually be a bug
         navigation.navigate('CoinExploreScreen')
       } else {
         linkTo(notification.route)
@@ -307,9 +291,6 @@ export const useNotificationNavigation = () => {
     [navigation, linkTo]
   )
 
-  // All contest-related notifications carry the contest's host track in
-  // `entityId` and should land on that contest's screen. The Contest
-  // screen accepts `{ trackId }` and resolves its own event/comments.
   const contestHandler = useCallback(
     (
       notification:
@@ -349,26 +330,18 @@ export const useNotificationNavigation = () => {
           })
         }
       },
-      // Will handle NotificationType.Announcement and PushNotificationType.Announcement
       [NotificationType.Announcement]: announcementHandler,
       [NotificationType.ChallengeReward]: (
         notification: ChallengeRewardNotification
       ) => {
         navigation.navigate('RewardsScreen')
       },
-      // Handles both the in-app tile and the push payload (`type:
-      // 'WeeklyRotation'`); neither carries an entity, the mix is fetched on
-      // demand for the signed-in user.
       [NotificationType.WeeklyRotation]: () => {
         navigation.navigate('WeeklyRotationScreen')
       },
-      // The push carries no entity; the full recap is in Notifications.
       [NotificationType.WeeklyArtistRecap]: () => {
         navigation.navigate('notifications', { screen: 'Notifications' })
       },
-      // One featured track opens it; several open the artist's profile. The
-      // push says which via entityType. The tile only has the top track, so
-      // read its owner from the cache that its useNotificationEntity primed.
       [NotificationType.WeeklyRotationFeatured]: (
         notification:
           | WeeklyRotationFeaturedNotification
@@ -455,7 +428,6 @@ export const useNotificationNavigation = () => {
       [NotificationType.UserSubscription]: (
         notification: UserSubscriptionNotification
       ) => {
-        // TODO: Need to handle the payload from identity
         const multiUpload = notification.entityIds.length > 1
 
         if (notification.entityType === Entity.Track && multiUpload) {
@@ -515,9 +487,6 @@ export const useNotificationNavigation = () => {
       [NotificationType.FanRemixContestSubmission]: (
         notification: FanRemixContestSubmissionNotification
       ) => {
-        // The submission notification fires when a fan's remix is submitted
-        // to a contest — landing on the submitted track (not the contest)
-        // matches the web destination and lets the recipient play it.
         navigation.navigate('Track', {
           trackId: notification.submissionTrackId,
           canBeUnlisted: false

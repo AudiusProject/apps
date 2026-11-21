@@ -25,7 +25,6 @@ const CONCURRENCY = 3
 export type BulkUpdateTracksParams = {
   trackIds: ID[]
   edit: BulkTrackEdit
-  /** Uploaded once and applied to every track. */
   imageFile?: CrossPlatformFile
   onProgress?: (completed: number, total: number) => void
 }
@@ -112,9 +111,6 @@ export const useBulkUpdateTracks = () => {
             return
           }
 
-          // Send the full track like the edit form does, so the update can't
-          // reset fields this edit doesn't touch. Collaborators are left out:
-          // the indexer only reconciles invites when the list is sent.
           const metadata = addPremiumMetadata(userId, {
             ...track,
             collaborators: undefined,

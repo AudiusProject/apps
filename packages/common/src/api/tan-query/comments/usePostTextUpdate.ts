@@ -10,7 +10,7 @@ import { getCommentQueryKey } from './utils'
 
 export type PostTextUpdateArgs = {
   userId: ID
-  entityId: ID // artist user_id (coin owner)
+  entityId: ID
   body: string
   mint: string
   isMembersOnly?: boolean
@@ -61,10 +61,8 @@ export const usePostTextUpdate = () => {
         videoUrl
       }
 
-      // Prime the individual comment cache
       queryClient.setQueryData(getCommentQueryKey(newId), newComment)
 
-      // Optimistically prepend to the fan club feed
       const feedQueryKey = getFanClubFeedQueryKey({
         mint,
         sortMethod: 'newest'
@@ -84,7 +82,6 @@ export const usePostTextUpdate = () => {
       return { newId }
     },
     onSuccess: (_data, args) => {
-      // Invalidate the fan club feed to get fresh data from server
       queryClient.invalidateQueries({
         queryKey: getFanClubFeedQueryKey({
           mint: args.mint,
@@ -97,7 +94,6 @@ export const usePostTextUpdate = () => {
       toast({
         content: 'There was an error posting your update. Please try again.'
       })
-      // Invalidate to reset to server state
       queryClient.invalidateQueries({
         queryKey: getFanClubFeedQueryKey({
           mint: args.mint,

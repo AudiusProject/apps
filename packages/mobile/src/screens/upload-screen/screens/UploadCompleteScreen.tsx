@@ -72,7 +72,6 @@ export const UploadCompleteScreen = () => {
   const styles = useStyles()
   const trackId = useSelector((state: CommonState) => state.upload.completionId)
   const navigation = useNavigation()
-  // Profile and chat screens live in the tab stacks, not in the upload modal
   const tabNavigation = useAppTabNavigation()
   const dispatch = useDispatch()
   const { data: track } = useTrack(trackId)

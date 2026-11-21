@@ -37,8 +37,6 @@ const messages = {
   hidden: 'Hidden'
 }
 
-/** ------------------------ Tracks ------------------------ */
-
 const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
   return {
     ...metadata,
@@ -53,13 +51,6 @@ const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
   }
 }
 
-/** Returns the logged-in user's tracks (including hidden), formatted for the
- * Artist Dashboard tracks table. Download counts are not shown per-row; total
- * downloads are in the stats tile only.
- *
- * Backed by `useUserTracksByHandle` with `filterTracks: 'all'` — replaces the
- * legacy `dashboardActions.fetch/fetchTracks` saga + slice state.
- */
 export const useFormattedTrackData = () => {
   const { data: accountUser } = useCurrentAccountUser()
   const handle = accountUser?.handle
@@ -80,11 +71,6 @@ export const useFormattedTrackData = () => {
   return tracksFormatted
 }
 
-/**
- * Returns a set of arrays that contain the logged-in user's tracks filtered by
- * whether the tracks are public, follow-gated, hidden, or premium.
- * Also returns a boolean indicating whether the user has only one type of track.
- */
 const useSegregatedTrackData = () => {
   const tracks = useFormattedTrackData()
   const {
@@ -135,9 +121,6 @@ const useSegregatedTrackData = () => {
   }
 }
 
-/**
- * Returns the logged-in user's tracks, filtered by the selected filter and search text.
- */
 export const useFilteredTrackData = ({
   selectedFilter,
   filterText
@@ -189,10 +172,6 @@ export const useFilteredTrackData = ({
   return filteredData
 }
 
-/**
- * Returns a list of filter options for the logged-in user's tracks, eg.
- * the "hidden" option will only be available if the user has hidden tracks.
- */
 export const useArtistDashboardTrackFilters = () => {
   const { followGatedTracks, hiddenTracks, premiumTracks, hasOnlyOneSection } =
     useSegregatedTrackData()
@@ -236,8 +215,6 @@ export const useArtistDashboardTrackFilters = () => {
   return { filterButtonOptions, hasOnlyOneSection }
 }
 
-/** ------------------------ Albums ------------------------ */
-
 const formatAlbumMetadata = (album: Collection): DataSourceAlbum => {
   return {
     ...album,
@@ -249,7 +226,6 @@ const formatAlbumMetadata = (album: Collection): DataSourceAlbum => {
   }
 }
 
-/** Returns the logged-in user's albums, formatted for Artist Dashboard albums table */
 export const useFormattedAlbumData = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: albums } = useUserAlbums({
@@ -292,9 +268,6 @@ const useSegregatedAlbumData = () => {
   return { hasOnlyOneSection, publicAlbums, hiddenAlbums, premiumAlbums }
 }
 
-/**
- * Returns the logged-in user's albums, filtered by the selected filter and search text.
- */
 export const useFilteredAlbumData = ({
   selectedFilter,
   filterText
@@ -341,10 +314,6 @@ export const useFilteredAlbumData = ({
   return filteredData
 }
 
-/**
- * Returns a list of filter options for the logged-in user's albums, eg.
- * the "hidden" option will only be available if the user has hidden albums.
- */
 export const useArtistDashboardAlbumFilters = () => {
   const { hiddenAlbums, premiumAlbums, hasOnlyOneSection } =
     useSegregatedAlbumData()

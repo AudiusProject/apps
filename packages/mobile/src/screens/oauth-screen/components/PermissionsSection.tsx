@@ -14,7 +14,6 @@ import { messages } from '../messages'
 type PermissionsSectionProps = {
   scope: string | null
   userEmail: string | null
-  /** wallet address for write_once/disconnect flows */
   wallet?: string | null
 }
 

@@ -44,11 +44,6 @@ export type UpdateTrackParams = {
   imageFile?: CrossPlatformFile
 }
 
-/**
- * Edit-track formatting that lived in the legacy `editTrackAsync` saga:
- * normalize description, format musical key, coerce bpm, and recompute the
- * "is custom" flags. Mutates the metadata in place.
- */
 const applyEditTrackFormatting = (
   metadata: Partial<TrackMetadataForUpload>,
   previousTrack: Partial<Track> | undefined
@@ -102,9 +97,6 @@ export const useUpdateTrack = () => {
       if (!userId) {
         throw new Error('useUpdateTrack: missing current userId')
       }
-      // Apply legacy edit-track formatting (squash newlines, format musical
-      // key, coerce bpm, recompute is_custom flags). Replaces
-      // `editTrackAsync` saga preprocessing.
       applyEditTrackFormatting(metadata, previousMetadata)
 
       const metadataWithSplits = addPremiumMetadata(
@@ -132,11 +124,6 @@ export const useUpdateTrack = () => {
           })
       }
 
-      // A changed preview start needs a freshly sliced preview clip. The SDK
-      // only regenerates when asked (and skips it when a new audio file is
-      // uploaded, since transcoding produces the preview then); without this
-      // flag an edit updates preview_start_seconds in metadata while the
-      // track keeps streaming the old preview_cid's clip.
       const generatePreview =
         metadataWithSplits.preview_start_seconds != null &&
         metadataWithSplits.preview_start_seconds !==
@@ -161,15 +148,10 @@ export const useUpdateTrack = () => {
         }
       })
 
-      // TODO: migrate stem uploads to use tan-query
       const inProgressStemUploads = getCurrentUploads(
         store.getState() as CommonState,
         trackId
       )
-      // Server view of the track's stems. Anything not represented in the
-      // submitted metadata is treated as removed, so this has to come from the
-      // stems query rather than the cached track — the track's `_stems` field
-      // was never populated, which silently discarded every stem removal.
       const existingStems =
         queryClient.getQueryData(getStemsQueryKey(trackId)) ?? []
       handleStemUpdates(
@@ -189,7 +171,6 @@ export const useUpdateTrack = () => {
       audioFile,
       imageFile
     }): Promise<MutationContext> => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: getTrackQueryKey(trackId)
       })
@@ -203,12 +184,8 @@ export const useUpdateTrack = () => {
         })
       )
 
-      // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
 
-      // Only perform optimistic update if we're not uploading files
-      // When files are being uploaded, we can't accurately represent the new state
-      // until the upload completes
       if (previousTrack && !audioFile && !imageFile) {
         primeTrackData({
           tracks: [{ ...previousTrack, ...metadata }] as UserTrackMetadata[],
@@ -217,7 +194,6 @@ export const useUpdateTrack = () => {
         })
       }
 
-      // Return context with the previous track and metadata
       return { previousTrack }
     },
     onSuccess: (_, params) => {
@@ -227,7 +203,6 @@ export const useUpdateTrack = () => {
       dispatch(toast({ content: 'Changes saved!' }))
     },
     onError: (error, { trackId }, context?: MutationContext) => {
-      // If the mutation fails, roll back track data
       if (context?.previousTrack) {
         primeTrackData({
           tracks: [context.previousTrack],
@@ -236,7 +211,6 @@ export const useUpdateTrack = () => {
         })
       }
 
-      // Roll back all collections that contain this track
       queryClient.setQueriesData(
         { queryKey: [QUERY_KEYS.collection] },
         (oldData: any) => {

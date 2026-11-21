@@ -43,7 +43,6 @@ const useStyles = makeStyles(({ palette, typography, spacing }) => ({
     marginBottom: 0,
     color: palette.neutral,
     textAlign: 'center',
-    // needed to keep emojis from increasing text height
     lineHeight: 24,
     height: 24
   },

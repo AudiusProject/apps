@@ -117,7 +117,6 @@ export const publishTracks = async (
             })
           )
 
-          // Track success analytics for this individual track
           const analyticsKind =
             (kind ?? 'tracks') === 'tracks'
               ? params.length > 1
@@ -149,12 +148,6 @@ export const publishTracks = async (
         }
       }
 
-      // Publish the parent track first, then publish stems sequentially.
-      // Previously both ran concurrently via Promise.all, which caused a race
-      // condition: publishStem calls referenced the parent trackId before it
-      // was confirmed on-chain, so every stem publish failed. The UI then
-      // showed red ⚠ error icons on all stem rows even though the upload
-      // succeeded (reproducible on contest uploads: Burko, Andrew Lux, etc.)
       const trackResult = await publishParentTrack()
       const stemsResults = await publishStems(context, {
         clientId: param.clientId,
@@ -164,7 +157,6 @@ export const publishTracks = async (
             ?.map((stem, index) => {
               const audioUploadResponse = param.stemsUploadResponses?.[index]
 
-              // This should never be the case, but being defensive
               if (!audioUploadResponse) return null
               return {
                 metadata: stem,
@@ -221,19 +213,16 @@ export const usePublishTracks = (
         queryClient,
         dispatch: queryContext.dispatch
       })
-      // Prefetch the published tracks into the cache
       await Promise.all(
         data
           .filter((res) => !res.error && res.trackId)
           .map((res) => batchGetTracks.fetch(HashId.parse(res.trackId!)))
       )
 
-      // Invalidate the user's data to update track count
       queryClient.invalidateQueries({
         queryKey: getUserQueryKey(userId)
       })
 
-      // Invalidate the uploader's profile tracks cache
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.profileTracks, accountUser?.handle]
       })
@@ -241,10 +230,6 @@ export const usePublishTracks = (
   })
 }
 
-/*
- * Given a user's bank and USDC purchase conditions,
- * returns updated conditions with price in WEI and splits in the new array format.
- */
 export function getUSDCMetadata(
   userId: number,
   stream_conditions: USDCPurchaseConditions
@@ -266,15 +251,10 @@ export function getUSDCMetadata(
   }
 }
 
-/**
- * Adds relevant premium metadata
- * Converts prices to WEI and adds splits for USDC purchasable content.
- */
 export function addPremiumMetadata<T extends TrackMetadataForUpload>(
   userId: number,
   track: T
 ) {
-  // download_conditions could be set separately from stream_conditions, so we check for them first
   if (isContentUSDCPurchaseGated(track.download_conditions)) {
     track.download_conditions = getUSDCMetadata(
       userId,
@@ -284,7 +264,6 @@ export function addPremiumMetadata<T extends TrackMetadataForUpload>(
 
   if (isContentUSDCPurchaseGated(track.stream_conditions)) {
     track.stream_conditions = getUSDCMetadata(userId, track.stream_conditions)
-    // If stream_conditions are set, download_conditions should always match
     track.download_conditions = getUSDCMetadata(userId, track.stream_conditions)
   }
 

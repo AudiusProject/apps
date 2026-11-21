@@ -168,7 +168,6 @@ const QueueRow = ({
   }, [dispatch, trackId, toast])
 
   const items: PopupMenuItem[] = []
-  // Items not already in the queue (no onRemove) get queueing options.
   if (!onRemove) {
     items.push({ text: 'Play Next', onClick: handlePlayNext })
     items.push({ text: 'Add to Queue', onClick: handleAddToQueue })

@@ -16,12 +16,10 @@ const COIN_UPDATE_CONFIG: Record<
 }
 
 export const useCoinStates = (selectedPair: CoinPair | null) => {
-  // State for user-initiated token changes - only track overrides
   const [userOverrides, setUserOverrides] = useState<
     Partial<Record<BuySellTab, CoinOverride>>
   >({})
 
-  // Compute default tokens from selectedPair or fallback defaults
   const defaultTokens = useMemo<TabCoinMap>(() => {
     const baseSymbol = selectedPair?.baseToken?.symbol ?? 'AUDIO'
     const quoteSymbol = selectedPair?.quoteToken?.symbol ?? 'USDC'
@@ -67,7 +65,6 @@ export const useCoinStates = (selectedPair: CoinPair | null) => {
     }
   }, [userOverrides, defaultTokens])
 
-  // Get current tab's token symbols
   const getCurrentTabTokens = (activeTab: BuySellTab) =>
     resolvedTokens[activeTab]
 
@@ -92,7 +89,6 @@ export const useCoinStates = (selectedPair: CoinPair | null) => {
     [updateOverrides]
   )
 
-  // Handle token changes
   const handleInputTokenChange = useCallback(
     (symbol: string, activeTab: BuySellTab) => {
       handleCoinChange(activeTab, 'input', symbol)

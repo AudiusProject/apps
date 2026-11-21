@@ -102,7 +102,6 @@ const SendTokensInput = ({
   const externalWalletAccount = appkitModal.getAccount('solana')
   const isUsingExternalWallet = !!externalWalletAccount?.address
 
-  // Get available tokens
   const { coinsArray: availableCoins, isLoading: coinsLoading } =
     useTradeableCoins({
       includeSol: isUsingExternalWallet
@@ -112,7 +111,6 @@ const SendTokensInput = ({
     externalWalletAccount?.address
   )
 
-  // Get the coin data and balance for selected token
   const { data: coin } = useFanClub(selectedMint)
   const { data: tokenBalance } = useCoinBalance({
     mint: selectedMint,
@@ -122,7 +120,6 @@ const SendTokensInput = ({
   const { data: currentUserId } = useCurrentUserId()
   const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
-  // Calculate USD value for display
   const usdValueInfo = useMemo(() => {
     if (!amount || parseFloat(amount) <= 0 || !coin) return null
     const price =
@@ -136,29 +133,24 @@ const SendTokensInput = ({
     }
   }, [amount, coin])
 
-  // Find the selected token in owned coins for the dropdown
-  // If not found in owned coins, try to find it in available coins (for initial load)
   const selectedToken = useMemo(() => {
     const ownedToken = ownedCoins.find(
       (token) => token.address === selectedMint
     )
     if (ownedToken) return ownedToken
-    // Fallback to available coins if not in owned coins yet (during initial load)
     return availableCoins.find((token) => token.address === selectedMint)
   }, [ownedCoins, availableCoins, selectedMint])
 
   const handleTokenChange = useCallback((token: typeof selectedToken) => {
     if (token) {
       setSelectedMint(token.address)
-      setAmount('') // Reset amount when changing token
+      setAmount('')
       setAmountError(null)
     }
   }, [])
 
   const handleAmountChange = useCallback((value: string, weiAmount: bigint) => {
-    // Only allow numbers and a single decimal point
     const numericValue = value.replace(/[^0-9.]/g, '')
-    // Ensure only one decimal point
     const parts = numericValue.split('.')
     const filteredValue =
       parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : numericValue
@@ -177,8 +169,6 @@ const SendTokensInput = ({
   const handleUserChange = useCallback((user: User | null) => {
     setSelectedUser(user)
     setAddressError(null)
-    // When sending to a user, we derive their user-bank ATA from their ETH address on the backend
-    // But we still set spl_wallet for display purposes in the UI
     if (user?.spl_wallet) {
       setDestinationAddress(user.spl_wallet)
     } else {
@@ -196,7 +186,6 @@ const SendTokensInput = ({
   const validateInputs = (): boolean => {
     let isValid = true
 
-    // Validate amount
     if (!amount || parseFloat(amount) <= 0) {
       setAmountError('AMOUNT_REQUIRED')
       isValid = false
@@ -209,7 +198,6 @@ const SendTokensInput = ({
         setAmountError('INSUFFICIENT_BALANCE')
         isValid = false
       } else {
-        // Check minimum USD value ($0.50)
         const price =
           coin?.price === 0 ? coin?.dynamicBondingCurve?.priceUSD : coin?.price
         if (price && price > 0) {
@@ -220,21 +208,18 @@ const SendTokensInput = ({
             isValid = false
           }
         } else if (amountWei < BigInt(1000)) {
-          // Fallback to minimum token amount if price is not available
           setAmountError('AMOUNT_TOO_LOW')
           isValid = false
         }
       }
     }
 
-    // Validate recipient based on type
     if (recipientType === 'user') {
       if (!selectedUser) {
         setAddressError('USER_REQUIRED')
         isValid = false
       }
     } else {
-      // Validate wallet address
       if (!destinationAddress) {
         setAddressError('INVALID_ADDRESS')
         isValid = false
@@ -250,7 +235,6 @@ const SendTokensInput = ({
   const handleContinue = () => {
     if (validateInputs()) {
       const amountWei = new FixedDecimal(amount, tokenInfo?.decimals).value
-      // Use wallet address from user if sending to user, otherwise use input address
       const finalAddress =
         recipientType === 'user' && selectedUser?.spl_wallet
           ? selectedUser.spl_wallet
@@ -285,7 +269,6 @@ const SendTokensInput = ({
 
   const hasErrors = amountError || addressError
 
-  // Show loading state if we don't have tokenInfo yet
   if (!tokenInfo || coinsLoading || isOwnedCoinsLoading) {
     return <SendTokensInputSkeleton />
   }

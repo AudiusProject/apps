@@ -16,10 +16,6 @@ export const getTrackWaveformPeaksQueryKey = (trackId: ID | null | undefined) =>
     number[] | null
   >
 
-/**
- * Real waveform peaks (0-255) for a track, or null when no content node has
- * computed them yet. Not in the generated SDK until the endpoint ships there.
- */
 export const useTrackWaveformPeaks = (
   trackId: ID | null | undefined,
   enabled: boolean

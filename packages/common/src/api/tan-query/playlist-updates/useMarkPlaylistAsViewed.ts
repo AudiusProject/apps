@@ -13,13 +13,6 @@ type MutationContext = {
   previous: PlaylistUpdate[] | undefined
 }
 
-/**
- * Marks a playlist as viewed by the current user. Optimistically removes the
- * playlist from the local "has updates" cache so the badge clears immediately.
- *
- * Replaces the legacy `updatedPlaylistViewed` redux action + the
- * `watchUpdatedPlaylistViewedSaga` SDK call.
- */
 export const useMarkPlaylistAsViewed = () => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()

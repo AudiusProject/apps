@@ -6,9 +6,6 @@ import { useUser } from '../useUser'
 
 import { useCurrentAccount } from './useCurrentAccount'
 
-/**
- * Some helper utils that can be used to pass into the select option
- */
 export const selectIsGuestAccount = (user?: User | null) => {
   return Boolean(!user?.handle && !user?.name)
 }
@@ -20,9 +17,6 @@ export const selectIsAccountComplete = (user?: User | null) => {
   return Boolean(handle && name)
 }
 
-/**
- * Returns the account with collections sorted by name, separated into playlists and albums
- */
 export const selectNameSortedPlaylistsAndAlbums = (
   account: AccountState | undefined | null
 ) => {

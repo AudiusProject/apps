@@ -20,12 +20,6 @@ import { CommonState } from '../../commonStore'
 
 import { getUserCompletionStages } from './profile-progress'
 
-/**
- * Gets the state of a user challenge, with the most progress dominating
- * Mutually exclusive, eg: a challenge is only 'completed' if it is not also 'disbursed'
- * @param challenge
- * @returns The state of the challenge
- */
 const getUserChallengeState = (
   challenge: UserChallenge
 ): UserChallengeState => {
@@ -66,13 +60,6 @@ export const getOptimisticUserChallengeStepCounts = (
 
   return completion
 }
-/**
- * Converts a user challenge to an optimistic user challenge
- * @param challenge
- * @param stepCountOverrides the overrides to apply to challenge step counts
- * @param userChallengesOverrides the overrides to apply to other challenge states (currently used for disbursement)
- * @returns the optimistic state of that challenge
- */
 const toOptimisticChallenge = (
   challenge: UserChallenge,
   undisbursed: UndisbursedUserChallenge[],
@@ -90,8 +77,6 @@ const toOptimisticChallenge = (
     ...userChallengeOverrides
   }
 
-  // The client is more up to date than API, so override whenever possible.
-  // Don't override if the challenge is already marked as completed on API.
   if (
     !challenge.is_complete &&
     currentStepCountOverride !== undefined &&
@@ -102,17 +87,11 @@ const toOptimisticChallenge = (
       currentStepCountOverride >= challengeOverridden.max_steps
   }
 
-  // If we're on native mobile, we might not yet have the is_mobile user_event
-  // on API, so optimistically mark this challenge as complete so the client
-  // can start claiming
   if (challenge.challenge_id === 'mobile-install' && isNativeMobile) {
     challengeOverridden.is_complete = true
   }
 
   const state = getUserChallengeState(challengeOverridden)
-  // For aggregate challenges, we show the total amount
-  // you'd get when completing every step of the challenge
-  // -- i.e. for referrals, show 1 audio x 5 steps = 5 audio
   const totalAmount =
     challenge.challenge_type === 'aggregate' && challenge.max_steps !== null
       ? challenge.amount * challenge.max_steps
@@ -144,12 +123,6 @@ const toOptimisticChallenge = (
   }
 }
 
-/**
- * Returns all user challenges using an optimistic state and current_step_count
- * based on what the client tracks. Prevents UI oddness while waiting for API to index
- * @param challenge The user challenge to get the optimistic state for
- * @returns the same challenge with state and current_step_count overridden as necessary
- */
 export const getOptimisticUserChallenges = (
   state: CommonState,
   currentAccount: AccountState | undefined | null,

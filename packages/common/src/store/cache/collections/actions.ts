@@ -26,9 +26,6 @@ export const PUBLISH_PLAYLIST_FAILED = 'PUBLISH_PLAYLIST_FAILED'
 
 export const DUPLICATE_PLAYLIST = 'DUPLICATE_PLAYLIST'
 
-/**
- * @param initTrackId optional track id to pull artwork from.
- */
 export function createAlbum(
   formFields: Partial<Collection>,
   source: string,
@@ -45,9 +42,6 @@ export function createAlbum(
   }
 }
 
-/**
- * @param initTrackId optional track id to pull artwork from.
- */
 export function createPlaylist(
   formFields: Partial<Collection>,
   source: string,

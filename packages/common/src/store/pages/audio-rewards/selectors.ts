@@ -5,7 +5,6 @@ import { CommonState } from '../../commonStore'
 
 export const getTrendingRewardsModalType = (state: CommonState) => {
   const type = state.pages.audioRewards.trendingRewardsModalType as string
-  // 'playlists' is deprecated; treat as 'tracks'
   return type === 'playlists' ? 'tracks' : (type as 'tracks' | 'underground')
 }
 
@@ -15,13 +14,12 @@ export const getChallengeRewardsModalType = (state: CommonState) =>
 export const getUserChallengeSpecifierMap = (state: CommonState) =>
   state.pages.audioRewards.userChallenges
 
-// Returns just a single challenge per challengeId
 export const getUserChallenges = createSelector(
   [getUserChallengeSpecifierMap],
   (challenges) => {
     return Object.values(challenges).reduce((acc, cur) => {
       const challenge = Object.values(cur)[0]
-      if (!challenge) return acc // Shouldn't happen
+      if (!challenge) return acc
       return {
         ...acc,
         [challenge.challenge_id]: challenge

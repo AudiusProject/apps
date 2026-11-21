@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs'
 
-// postcss extracts this file; harmony.css is emitted as the Avenir font faces + this.
 export const NO_FONTS_CSS = 'harmony-no-fonts.css'
 
 const avenirCss = readFileSync(
@@ -11,8 +10,6 @@ const avenirCss = readFileSync(
   .replace(/\s+/g, ' ')
   .trim()
 
-// Emits harmony.css (with base64 Avenir) next to harmony-no-fonts.css so apps
-// that host the font files themselves can skip the inlined font data.
 export const harmonyCssWithFonts = () => ({
   name: 'harmony-css-with-fonts',
   generateBundle(_options, bundle) {

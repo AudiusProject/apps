@@ -91,9 +91,6 @@ export const ManagerListItem = ({
       onClick: goToProfile
     })
 
-    // Don't show DM/switch options if we're in manager mode as the
-    // logged in user won't have permission to do those things on behalf of a
-    // managed account.
     if (canCreateChat && !isManagerMode) {
       items.push({
         icon: <IconMessage />,

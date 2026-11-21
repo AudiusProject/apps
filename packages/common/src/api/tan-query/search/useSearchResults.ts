@@ -69,7 +69,6 @@ const getMinMaxFromBpm = (bpm?: string) => {
   const bpmMin = bpmParts[0] ? parseFloat(bpmParts[0]) : undefined
   const bpmMax = bpmParts[1] ? parseFloat(bpmParts[1]) : bpmMin
 
-  // Because we round the bpm display to the nearest whole number, we need to add a small buffer
   const bufferedBpmMin = bpmMin ? Math.round(bpmMin) - 0.5 : undefined
   const bufferedBpmMax = bpmMax ? Math.round(bpmMax) + 0.5 : undefined
 
@@ -136,7 +135,6 @@ const useSearchQueryProps = <T>(
     queryFn: async ({
       pageParam
     }: {
-      // Typing as number here breaks mobile ts specifically for some reason
       pageParam: any
     }): Promise<{
       tracks: UserTrackMetadata[]
@@ -214,10 +212,8 @@ const useSearchQueryProps = <T>(
         )
       }
 
-      // We only prime other caches when loading data into the all category
       const shouldPrimeCache = category === 'all'
 
-      // Prime entity cache data & the individual search slice data
       if (tracks?.length) {
         primeTrackData({ tracks, queryClient })
         if (shouldPrimeCache) {
@@ -296,8 +292,6 @@ export const useSearchAllResults = (
       },
       pages
     ) => {
-      // With the ALL category we don't do any pagination.
-      // If we did we would never know when we're "out of pages" so just keep returning the next offset indefinitely
       return pages.length * pageSize
     },
     select: (data) => {

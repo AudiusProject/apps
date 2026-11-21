@@ -31,7 +31,6 @@ type OwnProps = {
   className?: string
   header?: string
   proposal: ProposalType
-  // Whether or not to include voter information
   vote?: Vote
   onClick?: () => void
   isDisabled?: boolean

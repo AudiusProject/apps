@@ -29,16 +29,12 @@ const initialValues: SelectGenresValue = {
   genres: [] as Genre[]
 }
 
-/* Memoized SelectablePill to fix a performance issue.
- * The code below is arranged so that the pills don't need to re-render,
- * And the memoization here is just forcing it to never re-render. */
 const MemoSelectablePill = memo(
   SelectablePill,
   (prevProps, nextProps) => prevProps.isSelected === nextProps.isSelected
 )
 
 const SelectGenresFieldArray = () => {
-  // Storing values as state alongside Formik purely because setState provides access to the previous values
   const [formValues, setFormValues] = useState<SelectGenresValue['genres']>(
     initialValues.genres
   )
@@ -46,12 +42,10 @@ const SelectGenresFieldArray = () => {
 
   useTrackScreen('SelectGenre')
 
-  // Update formik state to match our React state
   useEffect(() => {
     setValue(formValues)
   }, [formValues, setValue])
 
-  // memoized handle press just handles the React state change
   const handlePress = (genreValue: Genre) => {
     setFormValues((prevValues) => {
       const newValues = [...prevValues]

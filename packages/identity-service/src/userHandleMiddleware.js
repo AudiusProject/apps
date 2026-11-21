@@ -27,14 +27,6 @@ const queryDiscprovForWalletAddressAndUserId = async (handle) => {
   return usersList[0]
 }
 
-/**
- * user handle middleware:
- * make sure a handle was passed as a query parameter
- * if user handle is in database, proceed
- * otherwise, query for the user with that handle in DP
- * if DP does not return a user or if wallet address of returned user is not found in the database, bad request
- * otherwise, update user for that wallet address with the handle and DP user id, then proceed
- */
 async function userHandleMiddleware(req, res, next) {
   try {
     const handle = req.query.handle

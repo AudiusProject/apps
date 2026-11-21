@@ -27,9 +27,6 @@ const EmbedScrubber = ({
   handleShadow = HANDLE_SHADOW,
   audioPlayer
 }) => {
-  // Gross hack:
-  // Stems relies on a :before pseudo selector to style
-  // the rail hover color. We manually set that here.
   useEffect(() => {
     const root = document.getElementById('app')
     if (!root) {

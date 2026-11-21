@@ -46,7 +46,6 @@ export const CollapsibleTabNavigator = ({
 
   const onTabChange = ({ tabName, index, prevIndex }) => {
     const target = tabName.toString()
-    // A swipe occured we need to navigate
     if (index !== prevIndex) {
       navigation.navigate(target)
     }
@@ -54,8 +53,6 @@ export const CollapsibleTabNavigator = ({
 
   const { color } = useTheme()
 
-  // `render` provides the navigator contexts (focused route, state listeners)
-  // that `useIsFocused` and `useNavigationState` read inside the tab screens.
   return render(
     <Tabs.Container
       ref={ref}

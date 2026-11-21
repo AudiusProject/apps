@@ -24,8 +24,6 @@ export const FlushPageContainer = (props: FlushPageContainerProps) => {
         css={{
           maxWidth: MAX_PAGE_WIDTH_PX,
           minWidth: contentMinWidthPx,
-          // Center content when viewport is wider than max content width
-          // Left-align when viewport is narrower than max content width
           margin: '0 auto'
         }}
       >

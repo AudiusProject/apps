@@ -25,8 +25,6 @@ export const useUsers = (
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Filter out duplicate IDs. Callers often pass a new array each render, so
-  // key on the ids themselves to keep the queries below stable.
   const userIdsKey = userIds?.join(',')
   const uniqueUserIds = useMemo(
     () =>
@@ -35,8 +33,6 @@ export const useUsers = (
     [userIdsKey]
   )
 
-  // Rebuilding these every render makes tanstack re-hash every key and
-  // re-sync every observer, so only rebuild when an input changes.
   const queries = useMemo(
     () =>
       uniqueUserIds?.map((userId) => ({

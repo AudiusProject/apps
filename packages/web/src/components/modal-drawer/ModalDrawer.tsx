@@ -47,7 +47,6 @@ type ModalDrawerProps = ModalProps &
  * ```
  */
 const ModalDrawer = (props: ModalDrawerProps) => {
-  // Show deprecation warning in development
   if (process.env.NODE_ENV !== 'production') {
     console.warn(
       'ModalDrawer is deprecated. Please use ResponsiveModal from components/modal/ResponsiveModal instead.'
@@ -82,7 +81,6 @@ const ModalDrawer = (props: ModalDrawerProps) => {
   }
 
   if (!props.newModal) {
-    // Show additional warning for old modal style
     if (process.env.NODE_ENV !== 'production') {
       console.warn(
         'Using ModalDrawer with newModal=false is deprecated. Please use ResponsiveModal with the new modal style.'

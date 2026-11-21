@@ -24,9 +24,6 @@ export const getFileSizesQueryKey = (args: {
   downloadQuality: DownloadQuality
 }) => [QUERY_KEYS.fileSizes, args] as unknown as QueryKey<FileSizeResponse>
 
-/**
- * Returns file sizes for given track ids and download quality (mp3 vs lossless)
- */
 export const useFileSizes = (
   { trackIds, downloadQuality }: UseFileSizesProps,
   options?: SelectableQueryOptions<FileSizeResponse>

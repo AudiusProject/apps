@@ -10,10 +10,6 @@ export const getUserTrackDownloadCountTotalQueryKey = (
   userId: string | null | undefined
 ) => [QUERY_KEYS.userTracksDownloadCount, userId] as unknown as QueryKey<number>
 
-/**
- * Total download count for all tracks (and stems) owned by the user.
- * Use for dashboard "Downloads" tile instead of summing per-track counts.
- */
 export const useUserTrackDownloadCountTotal = (
   userId: string | null | undefined,
   options?: QueryOptions<number>

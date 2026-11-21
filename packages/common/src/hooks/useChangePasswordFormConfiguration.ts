@@ -54,7 +54,6 @@ export const useChangePasswordFormConfiguration = (onComplete: () => void) => {
   const { authService } = useQueryContext()
   const [page, setPage] = useState(ChangePasswordPage.ConfirmPassword)
 
-  // Move schema initialization inside the hook to prevent initialization timing issues
   const passwordFormikSchema = toFormikValidationSchema(passwordSchema)
   const confirmPasswordFormikSchema = toFormikValidationSchema(
     z.object({
@@ -89,7 +88,6 @@ export const useChangePasswordFormConfiguration = (onComplete: () => void) => {
           otp: sanitizedOtp
         })
         if (confirmed) {
-          // Move "password" to "oldPassword" to prevent it from conflicting
           helpers.resetForm({
             values: { ...values, oldPassword: password, password: '' }
           })

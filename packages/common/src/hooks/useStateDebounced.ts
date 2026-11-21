@@ -4,11 +4,6 @@ import { debounce } from 'lodash'
 
 const DEFAULT_DEBOUNCE_TIME = 500
 
-/**
- * A debounced version of useState
- * @param initialValue
- * @param time
- */
 export function useStateDebounced<T>(
   initialValue: T,
   time: number = DEFAULT_DEBOUNCE_TIME

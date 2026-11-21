@@ -82,7 +82,6 @@ export const AlbumsTabPage = () => {
     )
   }
 
-  // TODO(nkang) - Add separate error state
   if (noResults || !albumIds) {
     return (
       <EmptyTable

@@ -52,15 +52,12 @@ export type UserGeneratedTextProps = Omit<TextProps, 'children'> &
   Pick<AutolinkProps, 'matchers'> & {
     children: string | null | undefined
     source?: 'profile page' | 'track page' | 'collection page'
-    // Pass touches through text elements
     allowPointerEventsToPassThrough?: boolean
     linkProps?: Partial<TextLinkProps>
     mentions?: CommentMention[]
 
-    // If true, only linkify Audius URLs
     internalLinksOnly?: boolean
 
-    // Suffix to append after the text. Used for "edited" text in comments
     suffix?: ReactNode
 
     navigation?: NavigationProp<ParamListBase>
@@ -212,16 +209,12 @@ export const UserGeneratedText = (props: UserGeneratedTextProps) => {
       let layouts = {}
       const linkKeys = Object.keys(links)
 
-      // Measure the layout of each link
       linkKeys.forEach((key) => {
         const linkRef = linkRefs[key]
         if (linkRef) {
-          // Need to use `measureInWindow` instead of `onLayout` or `measure` because
-          // android doesn't return the correct layout for nested text elements
           linkRef.measureInWindow((x, y, width, height) => {
             layouts = { ...layouts, [key]: { x, y, width, height } }
 
-            // If all the links have been measured, update state
             if (linkKeys.length === Object.keys(layouts).length) {
               setLinkLayouts(layouts)
             }
@@ -237,7 +230,6 @@ export const UserGeneratedText = (props: UserGeneratedTextProps) => {
     }
   }, [allowPointerEventsToPassThrough, links, linkRefs, linkContainerRef])
 
-  // We let Autolink lay out each link invisibly, and capture their position and data
   const renderHiddenLink = useCallback(
     (text: string, match: Match, index: number) => (
       <View
@@ -260,7 +252,6 @@ export const UserGeneratedText = (props: UserGeneratedTextProps) => {
             })
           }
         }}
-        // Negative margin needed to handle View overflow
         style={css({ opacity: 0, marginTop: -3 })}
       >
         <Text {...other}>{text}</Text>
@@ -336,7 +327,6 @@ export const UserGeneratedText = (props: UserGeneratedTextProps) => {
             style={[{ marginBottom: 3 }, style]}
             text={squashNewLines(children, 10) as string}
             matchers={[
-              // Handle matcher e.g. @handle
               ...(mentions
                 ? [
                     {
@@ -350,12 +340,9 @@ export const UserGeneratedText = (props: UserGeneratedTextProps) => {
                       renderLink: renderHandleLink
                     }
                   ]),
-              // URL match
-              // Intentionally not using the default URL matcher to avoid conflict with the handle matcher. See: https://github.com/joshswan/react-native-autolink/issues/78
               {
                 pattern: /(https?:\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\S]*)/g
               },
-              // custom matchers provided via props
               ...(matchers ?? [])
             ]}
           />

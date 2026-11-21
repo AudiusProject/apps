@@ -35,19 +35,6 @@ export class SchemaValidator {
   schemas: Schemas | undefined
 
   init() {
-    /**
-     * Fully formed schemas object looks like the below
-     * {
-     *   'TrackSchema': {
-     *     schema: <schemaJSON>,
-     *     baseDefinition: 'String', //name of base definition property in schema
-     *     validate: function // returns error if not validated correctly, otherwise null
-     *   },
-     *   'UserSchema': ...
-     * }
-     *
-     * validate works like this `this.UserSchema.validate(userObj)`
-     */
     this.schemas = {
       [trackSchemaType]: {
         schema: TrackSchema,
@@ -89,11 +76,8 @@ export class SchemaValidator {
     if (!this.schemas) {
       return
     }
-    // schema is the entire imporoted schema, including all the definitions for JSON fields
     const { schema, baseDefinition } = this.schemas[schemaType]
-    // schemaTypeObj is only the subset of the schema with only one definition for main schema type
     const schemaTypeObj = schema.definitions[baseDefinition]
-    // iterate through every required property, ensuring it exists or setting a default value
     if (schemaTypeObj && 'required' in schemaTypeObj) {
       schemaTypeObj.required.forEach((req) => {
         if (!Object.prototype.hasOwnProperty.call(obj, req)) {

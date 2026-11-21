@@ -46,29 +46,23 @@ async function start() {
   await ensureSaneCluterSettings()
   logger.info(`starting: health ${health.status}`)
 
-  // create indexes
   const indexers = Object.values(indexer)
   await Promise.all(
     indexers.map((ix) => ix.createIndex({ drop: cliFlags.drop }))
   )
 
-  // setup postgres trigger + listeners
   await startListener()
 
-  // backfill since last run
   const checkpoints = await getBlocknumberCheckpoints()
   logger.info(checkpoints, 'catchup from blocknumbers')
   await Promise.all(Object.values(indexer).map((i) => i.catchup(checkpoints)))
 
-  // refresh indexes before cutting over
   logger.info(checkpoints, 'refreshing indexes')
   await Promise.all(Object.values(indexer).map((i) => i.refreshIndex()))
 
-  // cutover aliases
   logger.info('catchup done... cutting over aliases')
   await Promise.all(indexers.map((ix) => ix.cutoverAlias()))
 
-  // drop old indices
   logger.info('alias cutover done... dropping any old indices')
   await Promise.all(indexers.map((ix) => ix.cleanupOldIndices()))
 
@@ -77,7 +71,6 @@ async function start() {
     process.exit(0)
   }
 
-  // process events
   logger.info('processing events')
   while (true) {
     const pending = takePending()
@@ -85,7 +78,6 @@ async function start() {
       await processPending(pending)
       logger.info('processed new updates')
     }
-    // free up event loop + batch queries to postgres
     await new Promise((r) => setTimeout(r, 500))
   }
 }

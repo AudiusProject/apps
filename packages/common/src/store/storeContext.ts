@@ -67,7 +67,6 @@ export type CommonStoreContext = {
   }
   isMobile: boolean
   dispatch: Dispatch<any>
-  /** The saga middleware's channel, used to replay actions to lazily loaded sagas */
   sagaChannel?: MulticastChannel<Action>
   queryClient: QueryClient
   mobileWalletActions?: {

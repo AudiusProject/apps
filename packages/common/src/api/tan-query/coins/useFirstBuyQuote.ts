@@ -13,11 +13,9 @@ const LAUNCHPAD_TOKEN_DECIMALS = 9
 
 export type UseFirstBuyQuoteParams =
   | {
-      /** The amount of AUDIO in  to get a quote for */
       audioUiInputAmount: string
     }
   | {
-      /** The amount of the launchpad token to get a quote for */
       tokenUiOutputAmount: string
     }
 
@@ -60,7 +58,7 @@ const getFirstBuyQuoteMutationFn =
 
     const audioAmountFD = new FixedDecimal(
       BigInt(firstBuyQuoteRes.audioInputAmount),
-      TOKEN_LISTING_MAP.AUDIO.decimals // 8 decimals for AUDIO
+      TOKEN_LISTING_MAP.AUDIO.decimals
     )
     const audioAmountUiString = audioAmountFD.toLocaleString('en-US', {
       maximumFractionDigits: 8, // 8 decimals is the max precision we allow in the token input field
@@ -69,7 +67,7 @@ const getFirstBuyQuoteMutationFn =
 
     const usdcAmountFD = new FixedDecimal(
       BigInt(firstBuyQuoteRes.usdcValue),
-      TOKEN_LISTING_MAP.USDC.decimals // 6 decimals for USDC
+      TOKEN_LISTING_MAP.USDC.decimals
     )
     const usdcAmountUiString = usdcAmountFD.toLocaleString('en-US', {
       maximumFractionDigits: 2,
@@ -79,7 +77,7 @@ const getFirstBuyQuoteMutationFn =
 
     const tokenAmountFD = new FixedDecimal(
       BigInt(firstBuyQuoteRes.tokenOutputAmount),
-      LAUNCHPAD_TOKEN_DECIMALS // 9 decimals for the launchpad token
+      LAUNCHPAD_TOKEN_DECIMALS
     )
     const tokenAmountUiString = tokenAmountFD.toLocaleString('en-US', {
       maximumFractionDigits: 0,
@@ -87,17 +85,14 @@ const getFirstBuyQuoteMutationFn =
     })
 
     return {
-      // ui formatted values
       usdcAmountUiString,
       tokenAmountUiString,
       audioAmountUiString,
-      // raw API repsonse values
       ...firstBuyQuoteRes
     } as FirstBuyQuoteHookResponse
   }
 
 type FirstBuyQuoteHookResponse = {
-  // Same response as API but adds UI friendly values
   usdcAmountUiString: string
   tokenAmountUiString: string
   audioAmountUiString: string

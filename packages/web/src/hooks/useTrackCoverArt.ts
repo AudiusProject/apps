@@ -48,16 +48,11 @@ export const useTrackCoverArt = ({
     preloadImageFn: preload
   })
 
-  // Return edited artwork from this session, if it exists
-  // TODO(PAY-3588) Update field once we've switched to another property name
-  // for local changes to artwork
   // @ts-expect-error - url is added for in-session edits, not on CoverArtSizesWithMirror type
   if (artwork?.url) return { imageUrl: artwork.url, hasNoArtwork: false }
 
   // @ts-expect-error - url is added for in-session edits
   const noArtwork = hasNoArtwork && !artwork?.url
-  // Don't pass a URL when track has no artwork, or when track data isn't loaded yet
-  // (artworkData undefined), so we never show the previous track's image.
   const safeImageUrl =
     noArtwork || artworkData === undefined ? undefined : imageUrl
   return {
@@ -85,12 +80,10 @@ export const useTrackCoverArtDominantColors = ({
     })
   })
 
-  // Pull existing dominant colors from redux
   const coverArtDominantColors = useSelector((state: CommonState) => {
     return getDominantColorsByTrack(state, { track })
   })
 
-  // Fetch dominant colors if we don't have them yet and set in redux
   useEffect(() => {
     if (
       !coverArtDominantColors &&

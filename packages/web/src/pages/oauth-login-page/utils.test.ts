@@ -5,8 +5,6 @@ import { getIsRedirectValid } from './utils'
 const url = (s: string) => new URL(s)
 
 describe('getIsRedirectValid', () => {
-  // ── null / missing redirect URI ────────────────────────────────────────────
-
   it('returns false when redirectUri is null', () => {
     expect(
       getIsRedirectValid({ parsedRedirectUri: null, redirectUri: null })
@@ -22,8 +20,6 @@ describe('getIsRedirectValid', () => {
     ).toBe(false)
   })
 
-  // ── postMessage ────────────────────────────────────────────────────────────
-
   it('returns true for postmessage', () => {
     expect(
       getIsRedirectValid({
@@ -32,8 +28,6 @@ describe('getIsRedirectValid', () => {
       })
     ).toBe(true)
   })
-
-  // ── dangerous schemes blocked ──────────────────────────────────────────────
 
   it('returns false for javascript: scheme', () => {
     expect(
@@ -62,8 +56,6 @@ describe('getIsRedirectValid', () => {
     ).toBe(false)
   })
 
-  // ── https / http allowed ───────────────────────────────────────────────────
-
   it('returns true for https redirect URI', () => {
     expect(
       getIsRedirectValid({
@@ -81,8 +73,6 @@ describe('getIsRedirectValid', () => {
       })
     ).toBe(true)
   })
-
-  // ── custom URI schemes allowed (required for native apps) ─────────────────
 
   it('returns true for custom URI scheme (mobile deep link)', () => {
     expect(

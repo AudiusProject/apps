@@ -35,7 +35,6 @@ const slice = createSlice({
       if ('status' in action.payload) state.status = action.payload.status
 
       if ('users' in action.payload) {
-        // Don't replace images and names if we already have them
         const newUsers = { ...action.payload.users }
         Object.keys(newUsers).forEach((wallet) => {
           if (wallet in state.accounts) {

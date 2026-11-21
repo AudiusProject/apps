@@ -18,7 +18,6 @@ export const primeUserData = ({
   skipQueryData?: boolean
 }) => {
   users.forEach((user) => {
-    // Update the user slice
     if (
       forceReplace ||
       (!skipQueryData &&
@@ -27,7 +26,6 @@ export const primeUserData = ({
       queryClient.setQueryData(getUserQueryKey(user.user_id), user)
     }
 
-    // Update user by handle slice
     if (
       forceReplace ||
       !queryClient.getQueryData(getUserByHandleQueryKey(user.handle))

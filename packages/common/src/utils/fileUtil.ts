@@ -3,7 +3,6 @@ import { Buffer } from 'buffer'
 import { Track, User } from '~/models'
 import { DownloadFile } from '~/services'
 
-/** Convert a base64 string to a file object */
 export const dataURLtoFile = async (
   dataUrl: string,
   fileName = 'Artwork'

@@ -36,7 +36,6 @@ type AccountHeaderProps = {
   formProfileImage?: ImageFieldValue
   onProfileImageChange?: (value: ImageFieldValue) => void
   onCoverPhotoChange?: (value: ImageFieldValue) => void
-  // If true, the banner will be rendered as a paper header
   isPaperHeader?: boolean
 }
 

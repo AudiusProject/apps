@@ -68,7 +68,6 @@ export const Text = (props: TextProps) => {
       },
       weight && {
         fontFamily: typography.fontByWeight[weight],
-        // Fix for demibold's weird positioning
         marginTop:
           weight === 'demiBold' && Platform.OS === 'ios'
             ? spacing(

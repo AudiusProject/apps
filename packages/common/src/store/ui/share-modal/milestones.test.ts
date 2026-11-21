@@ -10,7 +10,6 @@ describe('isShareCardPlayMilestone', () => {
     }
   )
 
-  // The other thresholds the play trigger mints notifications for
   it.each([10, 25, 50, 100, 250, 500, 2500, 25000, 250000])(
     'does not offer a card at %i plays',
     (threshold) => {

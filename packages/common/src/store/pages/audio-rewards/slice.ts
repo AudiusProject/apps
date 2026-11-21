@@ -106,15 +106,12 @@ const slice = createSlice({
 
       if (!userChallenge) return
 
-      // Update disbursed specifiers
       state.disbursedChallenges[challengeId] = ([] as string[]).concat(
         state.disbursedChallenges[challengeId] ?? [],
         specifiers.map((s) => s.specifier)
       )
 
-      // Keep track of individual challenges for rolled up aggregates
       if (userChallenge.challenge_type === 'aggregate') {
-        // All completed challenges that are disbursed are fully disbursed
         if (userChallenge?.is_complete) {
           state.userChallengesOverrides[challengeId] = {
             ...state.userChallengesOverrides[challengeId],

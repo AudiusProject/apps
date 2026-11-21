@@ -56,7 +56,6 @@ describe('privateKeyToAudiusAccount matches @noble/secp256k1', () => {
       await expect(
         account.getSharedSecret(Buffer.from(uncompressed).toString('hex'))
       ).resolves.toEqual(expected)
-      // Both sides derive the same secret
       expect(
         legacySecp.getSharedSecret(
           other,

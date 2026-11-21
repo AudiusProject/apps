@@ -29,11 +29,6 @@ import {
 } from './types'
 import { findTokenByAddress } from './utils'
 
-/**
- * Solana instruction/transaction helpers for swaps. Kept separate from
- * ./utils so the light helpers can be used without loading @solana/web3.js.
- */
-
 const USDC_MINT_ADDRESS = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 export async function addTransferFromUserBankInstructions({
   tokenInfo,
@@ -96,16 +91,6 @@ export async function addTransferFromUserBankInstructions({
   return ata
 }
 
-/**
- * Creates an Associated Token Account (ATA) for Jupiter when shared accounts are not supported.
- * This is used as a fallback when Jupiter's shared account system fails for simple AMMs.
- *
- * @param tokenConfig - The token configuration containing mint address
- * @param userPublicKey - The user's public key
- * @param feePayer - The fee payer's public key
- * @param instructions - Array to push the ATA creation instruction to
- * @returns The created ATA public key
- */
 export function addJupiterOutputAtaInstruction({
   tokenConfig,
   userPublicKey,
@@ -162,7 +147,6 @@ export const validateAndCreateTokenConfigs = (
       outputTokenConfig: UserBankManagedTokenInfo
     }
   | { error: SwapTokensResult } => {
-  // Find input and output tokens
   const inputToken = findTokenByAddress(tokens, inputMintAddress)
   const outputToken = findTokenByAddress(tokens, outputMintAddress)
 
@@ -178,7 +162,6 @@ export const validateAndCreateTokenConfigs = (
     }
   }
 
-  // Create token configs
   const inputTokenConfig = createTokenConfig(inputToken)
   const outputTokenConfig = createTokenConfig(outputToken)
 
@@ -213,7 +196,6 @@ export const getJupiterSwapInstructions = async (
       }
     })
 
-    // Add output ATA instruction if fallback is used and all required params are provided
     if (outputTokenConfig && userPublicKey && feePayer && instructions) {
       outputAtaForJupiter = addJupiterOutputAtaInstruction({
         tokenConfig: outputTokenConfig,
@@ -235,7 +217,6 @@ export const buildAndSendTransaction = async (
   addressLookupTableAddresses: string[],
   commitment?: Commitment
 ): Promise<string> => {
-  // Build transaction
   const swapTx: VersionedTransaction =
     await sdk.services.solanaClient.buildTransaction({
       feePayer,
@@ -245,7 +226,6 @@ export const buildAndSendTransaction = async (
         .concat([SWAP_LOOKUP_TABLE_ADDRESS])
     })
 
-  // Sign and send transaction
   swapTx.sign([keypair])
   const signature = await sdk.services.solanaClient.sendTransaction(swapTx)
 

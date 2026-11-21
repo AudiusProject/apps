@@ -39,8 +39,6 @@ export const Scrollbar = forwardRef(
     { children, className, id, forward, isHidden, ...props }: ScrollbarProps,
     forwardedRef: Ref<PerfectScrollbar>
   ) => {
-    // Do not remove:
-    // useMeasure ref is required for infinite scrolling to work
     const [ref] = useMeasure({ polyfill: ResizeObserver })
     const containerRef = useRef<HTMLElement | null>(null)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)

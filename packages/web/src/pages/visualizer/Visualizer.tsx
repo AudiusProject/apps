@@ -67,12 +67,11 @@ const Visualizer = ({
 
   const hotkeyMap = useMemo(
     () => ({
-      27 /* ESC */: onCloseVisualizer,
-      86 /* v */: onToggleVisibility,
-      // Space (32) intentionally omitted — conflicts with global play/pause hotkey
-      190 /* . */: onHistoryForward,
-      188 /* , */: onHistoryBack,
-      82 /* r */: onRandomPreset
+      27: onCloseVisualizer,
+      86: onToggleVisibility,
+      190: onHistoryForward,
+      188: onHistoryBack,
+      82: onRandomPreset
     }),
     [
       onCloseVisualizer,

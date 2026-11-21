@@ -131,8 +131,6 @@ export { default as IconPaperAirplane } from '@audius/harmony/src/assets/icons/P
 export { default as IconJupiterLogo } from '@audius/harmony/src/assets/icons/JupiterLogo.svg'
 export { default as IconFanClub } from '@audius/harmony/src/assets/icons/FanClub.svg'
 
-// Two Tone / Special Styling
-
 export { default as IconMultiselectRemove } from '@audius/harmony/src/assets/icons/MultiselectRemove.svg'
 export { default as IconPlaybackPause } from '@audius/harmony/src/assets/icons/PlaybackPause.svg'
 export { default as IconPlaybackPlay } from '@audius/harmony/src/assets/icons/PlaybackPlay.svg'
@@ -141,7 +139,6 @@ export const IconVerified = (props: IconProps) => (
   <IconVerifiedSvg color='active' colorSecondary='white' {...props} />
 )
 
-// VIP Tier Badges
 export { IconTokenBronze } from './components/IconTokenBronze'
 export { IconTokenPlatinum } from './components/IconTokenPlatinum'
 export { IconTokenSilver } from './components/IconTokenSilver'
@@ -151,15 +148,12 @@ export { IconTokenAUDIO } from './components/IconTokenAUDIO'
 export { IconTokenUSDC } from './components/IconTokenUSDC'
 export { IconTokenBonk } from './components/IconTokenBonk'
 
-// Creative Commons
-
 export { default as IconCcBy } from '@audius/harmony/src/assets/icons/ccBy.svg'
 export { default as IconCcCC } from '@audius/harmony/src/assets/icons/ccCC.svg'
 export { default as IconCcNC } from '@audius/harmony/src/assets/icons/ccNC.svg'
 export { default as IconCcND } from '@audius/harmony/src/assets/icons/ccND.svg'
 export { default as IconCcSA } from '@audius/harmony/src/assets/icons/ccSA.svg'
 
-// Logos
 export { default as IconAudiusLogo } from '@audius/harmony/src/assets/icons/AudiusLogo.svg'
 export { default as IconAudiusLogoHorizontal } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontal.svg'
 export { default as IconAudiusLogoHorizontalNew } from '@audius/harmony/src/assets/icons/AudiusLogoHorizontalNew.svg'
@@ -176,7 +170,6 @@ export { default as IconPhantomPlain } from '@audius/harmony/src/assets/icons/Lo
 
 export { default as SoundwaveCircle } from '@audius/harmony/src/assets/animations/SoundwaveCircle.json'
 
-// Playback Rate Icons
 export { default as IconPlaybackRate0_5x } from '@audius/harmony/src/assets/icons/iconPlaybackRate0_5x.svg'
 export { default as IconPlaybackRate0_8x } from '@audius/harmony/src/assets/icons/iconPlaybackRate0_8x.svg'
 export { default as IconPlaybackRate1x } from '@audius/harmony/src/assets/icons/iconPlaybackRate1x.svg'

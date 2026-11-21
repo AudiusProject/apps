@@ -20,18 +20,13 @@ const fixedDecimalPath = path.resolve(__dirname, '../../packages/fixed-decimal')
 const resolveModule = (module) =>
   path.resolve(__dirname, '../../node_modules', module)
 
-// Only the English BIP-39 wordlist is used. viem/accounts re-exports all ten
-// @scure/bip39 lists and the legacy bip39 package requires all of its JSON
-// lists, which together add ~550 KB to the bundle.
 const strippedBip39Wordlist = path.resolve(
   __dirname,
   'src/shims/stripped-bip39-wordlist.js'
 )
 const resolveStrippedBip39Wordlist = (moduleName, originModulePath) => {
-  // viem reads these lazily through getters, so an empty module is enough.
   const scure = moduleName.match(/^@scure\/bip39\/wordlists\/([\w-]+?)(\.js)?$/)
   if (scure && scure[1] !== 'english') return { type: 'empty' }
-  // bip39 requires each list inside a try/catch and skips the ones that throw.
   const legacy = moduleName.match(/^\.\/wordlists\/(\w+)\.json$/)
   if (
     legacy &&
@@ -43,12 +38,6 @@ const resolveStrippedBip39Wordlist = (moduleName, originModulePath) => {
   return null
 }
 
-// Packages installed more than once (nested copies with the same major
-// version) are bundled once each. Point every same-major copy at the newest
-// one. Copies with a different major version, or a missing canonical copy,
-// resolve normally. @noble/hashes is excluded: 1.7 renamed `_assert.bytes`
-// to `abytes`, and older consumers like @scure/bip32 (viem's HD derivation)
-// still call `bytes`.
 const rootModules = path.resolve(__dirname, '../../node_modules')
 const canonicalPackages = {
   '@noble/curves': `${rootModules}/@solana/wallet-standard-util/node_modules/@noble/curves`,
@@ -131,13 +120,11 @@ const config = {
   server: {
     enhanceMiddleware: (middleware) => {
       return (req, res, next) => {
-        // Android dev check expects this exact string for /status endpoint
         if (req.url === '/status') {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('packager-status:running')
           return
         }
-        // Handle CORS for Android requests in React Native 0.78
         const userAgent = req.headers['user-agent'] || ''
         const isAndroid =
           userAgent.includes('Android') || userAgent.includes('okhttp')
@@ -145,7 +132,6 @@ const config = {
           res.setHeader('Access-Control-Allow-Origin', '*')
           res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
           res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-          // Handle OPTIONS preflight requests
           if (req.method === 'OPTIONS') {
             res.writeHead(200)
             res.end()
@@ -187,14 +173,11 @@ const config = {
     extraNodeModules: {
       ...require('node-libs-react-native'),
 
-      // Alias for 'src' to allow for absolute paths
       app: path.resolve(__dirname, 'src'),
       '@audius/harmony-native': path.resolve(__dirname, 'src/harmony-native'),
       '~': path.resolve(__dirname, '../common/src'),
       '~harmony': path.resolve(__dirname, '../harmony/src'),
       '@audius/sdk': path.resolve(__dirname, '../sdk/src/index.ts'),
-      // Workspace packages used by SDK (and similar) whose package.json main is
-      // dist/* — Metro must point at source so CI/CodePush works without turbo build.
       '@audius/fixed-decimal': path.resolve(
         __dirname,
         '../fixed-decimal/src/index.ts'
@@ -202,8 +185,6 @@ const config = {
       '@audius/spl': path.resolve(__dirname, '../spl/src/index.ts'),
       '@audius/eth': path.resolve(__dirname, '../eth/src/index.ts'),
 
-      // The following imports are needed for @audius/common
-      // and @audius/web to compile correctly
       'react-redux': resolveModule('react-redux'),
       'react-native-svg': path.resolve(
         __dirname,
@@ -221,10 +202,8 @@ const config = {
       react: resolveModule('react'),
       'react-native': resolveModule('react-native'),
 
-      // Aliases for '@audius/web' to allow for absolute paths
       ...getClientAliases(),
 
-      // Various polyfills to enable @audius/sdk to run in react-native
       crypto: path.resolve(__dirname, 'src/shims/crypto.js'),
       child_process: emptyPolyfill,
       fs: resolveModule('@dr.pogodin/react-native-fs'),
@@ -238,8 +217,6 @@ const config = {
 }
 
 function resolveRequest(context, moduleName, platform) {
-  // TS packages often use NodeNext-style `./file.js` in source; Metro looks for
-  // that path literally. If only `./file.ts` exists, resolve to it.
   if (
     moduleName.startsWith('.') &&
     moduleName.endsWith('.js') &&

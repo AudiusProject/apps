@@ -89,7 +89,7 @@ export const PaymentMethod = ({
           disabled: isExistingBalanceDisabled,
           value: (
             <Text
-              tag='span' // Needed to avoid <p> inside <p> warning
+              tag='span'
               variant='title'
               color={
                 selectedMethod === PurchaseMethod.BALANCE ? 'accent' : undefined

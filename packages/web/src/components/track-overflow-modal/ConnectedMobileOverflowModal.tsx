@@ -66,7 +66,6 @@ type ConnectedMobileOverflowModalProps = {
   onClose: () => void
 } & ReturnType<typeof mapDispatchToProps>
 
-// A connected `MobileOverflowModal`. Builds and injects callbacks for it's contained MobileOverflowModal component.
 const ConnectedMobileOverflowModal = ({
   id,
   source,
@@ -98,7 +97,6 @@ const ConnectedMobileOverflowModal = ({
   )
   const navigate = useNavigate()
 
-  // Fetch data based on source
   const { data: track } = useTrack(
     source === OverflowSource.TRACKS ? (id as number) : null
   )
@@ -118,7 +116,6 @@ const ConnectedMobileOverflowModal = ({
     source: FavoriteSource.OVERFLOW
   })
 
-  // Create callbacks
   const {
     onRepost,
     onUnrepost,
@@ -260,13 +257,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
   return {
     onClose: () =>
       dispatch(setVisibility({ modal: 'Overflow', visible: false })),
-    // Tracks
     repostTrack: (trackId: ID) =>
       dispatch(repostTrack(trackId, RepostSource.OVERFLOW)),
     unrepostTrack: (trackId: ID) =>
       dispatch(undoRepostTrack(trackId, RepostSource.OVERFLOW)),
 
-    // Collections
     shareCollection: (collectionId: ID) =>
       dispatch(shareCollection(collectionId, ShareSource.OVERFLOW)),
     repostCollection: (collectionId: ID, metadata?: any) =>
@@ -281,7 +276,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
       dispatch(openDeletePlaylist({ playlistId })),
     publishPlaylist: (playlistId: ID) => dispatch(publishPlaylist(playlistId)),
 
-    // Users
     follow: (userId: ID) => dispatch(followUser(userId, FollowSource.OVERFLOW)),
     unfollow: (userId: ID) =>
       dispatch(unfollowUser(userId, FollowSource.OVERFLOW)),
@@ -294,7 +288,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
         })
       )
     },
-    // Routes
     addToCollection: (
       collectionType: 'album' | 'playlist',
       trackId: ID,

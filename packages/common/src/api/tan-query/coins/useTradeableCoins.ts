@@ -27,7 +27,6 @@ type TradeableCoinsResult = {
   error: Error | null
 }
 
-// Simple hook to get tokens from API without the complex pair logic
 export const useTradeableCoins = (
   params?: UseTradeableCoinsParams
 ): TradeableCoinsResult => {
@@ -48,13 +47,10 @@ export const useTradeableCoins = (
     { pageSize: TEMP_FAN_CLUBS_PAGE_SIZE },
     {
       select: (data: InfiniteData<Coin[], number>) => {
-        // First flatten the pages
         const coins = data.pages.flat()
 
-        // Transform to CoinInfo map
         const coinsMap = transformFanClubsToTokenInfoMap(coins)
 
-        // Add USDC manually since it's frontend-only and not from API
         coinsMap.USDC = {
           symbol: 'USDC',
           name: 'USD Coin',
@@ -74,10 +70,8 @@ export const useTradeableCoins = (
           }
         }
 
-        // Convert map to array for filtering
         let coinsArray = Object.values(coinsMap)
 
-        // Apply filters based on context and parameters
         if (excludeSymbols.length > 0) {
           coinsArray = coinsArray.filter(
             (coin) => !excludeSymbols.includes(coin.symbol)
@@ -91,7 +85,6 @@ export const useTradeableCoins = (
         }
 
         if (context === 'pay') {
-          // For pay context, filter out USDC (users pay with fan clubs)
           coinsArray = coinsArray.filter((coin) => coin.symbol !== 'USDC')
         }
         return coinsArray

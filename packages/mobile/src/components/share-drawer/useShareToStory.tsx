@@ -107,14 +107,12 @@ const PLATFORM_APP_NAMES: Record<ShareToStoryPlatform, string> = {
   snapchat: 'Snapchat'
 }
 
-// Schemes listed in LSApplicationQueriesSchemes, so canOpenURL can see them
 const IOS_APP_SCHEMES: Record<ShareToStoryPlatform, string[]> = {
   instagram: ['instagram-stories://'],
   tiktok: ['tiktokopensdk://', 'snssdk1233://', 'snssdk1180://', 'tiktok://'],
   snapchat: ['snapchat://']
 }
 
-// Android has no package visibility for every target, so only check on iOS
 const isAppInstalled = async (platform: ShareToStoryPlatform) => {
   if (Platform.OS !== 'ios') return true
   const results = await Promise.all(
@@ -129,9 +127,6 @@ const HANDOFF_TIMEOUT_MS = 8000
 const FFMPEG_ATTEMPTS = 2
 const ERROR_OUTPUT_LENGTH = 800
 
-// Resolves once the target app has opened: its SDK resolved or this app went
-// to the background. Some SDKs only resolve when the user comes back to
-// Audius (or time out natively), so don't wait for that.
 const waitForHandoff = (launch: Promise<unknown>) =>
   new Promise<void>((resolve, reject) => {
     let settled = false
@@ -197,7 +192,6 @@ export const useShareToStory = ({
   const [selectedPlatform, setSelectedPlatform] =
     useState<ShareToStoryPlatform | null>(null)
 
-  // Track and milestone shares both render a track into the story
   const storyContent =
     content?.type === 'track' || content?.type === 'milestone' ? content : null
   const trackTitle = storyContent?.track.title
@@ -214,7 +208,6 @@ export const useShareToStory = ({
   }, [])
 
   const trackId = storyContent?.track.track_id ?? null
-  // Reset when share content (track) changes so we wait for the new sticker to load
   useEffect(() => {
     if (trackId) {
       isStickerImageLoadedRef.current = false
@@ -237,7 +230,6 @@ export const useShareToStory = ({
         new Promise((resolve) => setTimeout(resolve, 5000))
       ])
       if (!isStickerImageLoadedRef.current) {
-        // onLoad may not fire on iOS (e.g. cached image, opacity:0); try capture anyway
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
@@ -268,7 +260,6 @@ export const useShareToStory = ({
     [dispatch]
   )
 
-  // Actions that should always be taken once the story generation is finished (cancelled, errored, or successful):
   const cleanup = useCallback(
     (reopenShareModal = true) => {
       dispatch(reset())
@@ -355,8 +346,6 @@ export const useShareToStory = ({
 
   const pasteToTikTokApp = useCallback(
     async (videoPath: string, platform: ShareToStoryPlatform) => {
-      // On Android, TikTok SDK expects file path (not file:// URI)
-      // The SDK will handle Content URI conversion via FileProvider internally
       const pathToShare =
         Platform.OS === 'android' ? videoPath : `file://${videoPath}`
       await TikTokShare.share([pathToShare], false)
@@ -396,7 +385,6 @@ export const useShareToStory = ({
           })
         )
 
-        // Reset any stale values:
         dispatch(reset())
         cancelRef.current = false
 
@@ -404,14 +392,11 @@ export const useShareToStory = ({
         toggleProgressDrawer(true, platform)
         dispatch(setProgress(10))
 
-        // Step 1: Render and take a screenshot of the sticker
         let stickerUri: string | undefined
 
-        // Step 2: Calculate the dominant colors of the cover art:
-        let rawDominantColorsResult: Color[] | string | undefined // `getDominantRgb` returns a string containing a single default color if it couldn't find dominant colors
+        let rawDominantColorsResult: Color[] | string | undefined
 
         try {
-          // Execute Steps 1 and 2 concurrently:
           ;[rawDominantColorsResult, stickerUri] = await Promise.all([
             trackImageUri
               ? getDominantRgb(trackImageUri)
@@ -456,10 +441,8 @@ export const useShareToStory = ({
         if (dominantColorHex2) {
           backgroundSegment = `gradients=s=540x960:x0=270:y0=2:x1=270:y1=958:c0=${dominantColorHex1}:c1=${dominantColorHex2}:duration=10:speed=0.042:rate=30`
         } else {
-          // Sometimes there is only one dominant color (if the cover art is literally just a solid color). In that case, just use that one color as the background.
           backgroundSegment = `color=c=${dominantColorHex1}:s=540x960`
         }
-        // For simplicity, assume that calculating dominant colors and generating the sticker takes 20% of the total loading time:
         dispatch(setProgress(20))
 
         let streamMp3Url: string
@@ -487,7 +470,6 @@ export const useShareToStory = ({
             ? '-ss 10 '
             : ''
 
-        // Step 3: Generate the background video using FFmpeg
         FFmpegKitConfig.enableStatisticsCallback((statistics) => {
           if (statistics.getTime() < 0) {
             return
@@ -495,12 +477,8 @@ export const useShareToStory = ({
           const totalVideoDuration = 10000
           const loadedSoFar = statistics.getTime()
           const percentageLoaded = (loadedSoFar * 80) / totalVideoDuration
-          // Pad the result by 10% so the progress bar gets full before we get to IG
           dispatch(setProgress(Math.min(20 + percentageLoaded + 10, 100)))
         })
-        // 36 bars mirrored around the bass, 504x128. showfreqs spans 120dB,
-        // so keep the loudest 64 rows. Each 14px column gets a 4px gap and a
-        // 2px floor so quiet bands still show.
         const WAVEFORM_SEGMENT =
           "aformat=channel_layouts=mono:sample_rates=16000,showfreqs=s=18x120:rate=30:fscale=log:win_size=1024:averaging=2:colors=white,crop=18:64:0:0,scale=252:64:flags=neighbor,split[r][l];[l]hflip[lf];[lf][r]hstack,geq=r=255:g=255:b=255:a='if(lt(mod(X,14),4),0,max(alpha(X,Y),255*gte(Y,H-2))*0.85)',split[t][b];[b]vflip[bf];[t][bf]vstack"
         const thirdLayerSegment =
@@ -509,8 +487,6 @@ export const useShareToStory = ({
             : ';'
         const stickerImageInput =
           platform === 'tiktok' ? ` -i ${stickerUri}` : ''
-        // ffmpeg streams the audio itself, so retry once on a dropped
-        // connection. -y lets the retry overwrite a partial file.
         let session: FFmpegSession | undefined
         for (let attempt = 1; attempt <= FFMPEG_ATTEMPTS; attempt++) {
           try {
@@ -522,13 +498,11 @@ export const useShareToStory = ({
             return
           }
           if (cancelRef.current) {
-            // The job was cancelled.
             cleanup()
             return
           }
           if (ReturnCode.isSuccess(await session.getReturnCode())) break
           if (attempt === FFMPEG_ATTEMPTS) {
-            // The start of the output is the version banner; the error is at the end
             const output = await session.getOutput()
             handleError(
               platform,
@@ -539,7 +513,6 @@ export const useShareToStory = ({
           }
         }
 
-        // Step 4: Put everything together and push to platform
         const videoUri = `file://${storyVideoPath}`
         let launch: Promise<unknown>
         if (platform === 'instagram') {
@@ -556,7 +529,6 @@ export const useShareToStory = ({
         try {
           await waitForHandoff(launch)
         } catch (error) {
-          // The TikTok SDK can't open TikTok, almost always because it isn't installed
           const isTikTokLaunchError =
             error instanceof Error &&
             error.message === 'Failed to launch TikTok share'
@@ -573,8 +545,6 @@ export const useShareToStory = ({
           return
         }
 
-        // Track before cleanup: Android pauses JS timers in the background,
-        // so anything deferred may never run if the user stays in the other app.
         track(
           make({
             eventName: SUCCESS_EVENT_NAMES_MAP[platform],
@@ -583,8 +553,6 @@ export const useShareToStory = ({
           })
         )
 
-        // Updating the UI while the other app is still opening can pull Audius
-        // back to the foreground on Android, so wait until the user returns.
         const reopenShareModal = Platform.OS === 'ios'
         if (AppState.currentState === 'active') {
           setTimeout(() => runWhenActive(() => cleanup(reopenShareModal)), 1500)
@@ -677,7 +645,6 @@ export const useShareToStory = ({
     handleShareToTikTok,
     selectedPlatform,
     cancelStory,
-    /** Pre-resolved artwork source (mirror fallback applied) for the share sticker. Use this so the sticker always has a working image URL. */
     stickerArtworkSource:
       storyContent && trackImage?.source != null && !trackImage.hasNoArtwork
         ? trackImage.source

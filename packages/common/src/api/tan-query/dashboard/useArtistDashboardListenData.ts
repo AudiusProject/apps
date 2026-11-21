@@ -39,13 +39,6 @@ export const getArtistDashboardListenDataQueryKey = (
     { start, end }
   ] as unknown as QueryKey<ArtistDashboardListenData>
 
-/**
- * Fetches monthly listen data for the current artist's tracks within the given
- * window and formats it into the `{ all, [trackId]: { labels, values } }`
- * shape consumed by `TotalPlaysChart`.
- *
- * Replaces the legacy `dashboardActions.fetchListenData` saga + slice state.
- */
 export const useArtistDashboardListenData = ({
   start,
   end

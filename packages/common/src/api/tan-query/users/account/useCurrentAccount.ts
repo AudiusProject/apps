@@ -40,8 +40,6 @@ const getLocalAccount = (
     ) {
       primeUserData({ users: [localAccountUser], queryClient })
     }
-    // feature-tan-query TODO: when removing account sagas,
-    //    need to add wallets and local account user from local storage
     return {
       collections: localAccount.collections,
       userId: localAccountUser.user_id,
@@ -59,10 +57,6 @@ const getLocalAccount = (
   return null
 }
 
-// Last placeholder result, keyed on the raw stored strings. Every entity hook
-// observes this query, and tanstack re-runs placeholderData on each render
-// while the account is pending (or disabled, when signed out), so reuse the
-// parsed account until the stored values change.
 let placeholderCache: {
   localStorage: LocalStorage
   account: string | null
@@ -91,7 +85,6 @@ const getLocalAccountPlaceholder = (
     placeholderCache.result?.userId &&
     !queryClient.getQueryData(getUserQueryKey(placeholderCache.result.userId))
   ) {
-    // Re-prime the cached user if its query was removed
     getLocalAccount(localStorage, queryClient)
   }
   return placeholderCache.result ?? undefined
@@ -104,7 +97,6 @@ export const getCurrentAccountQueryFn = async (
   queryClient: QueryClient
 ): Promise<AccountState | null | undefined> => {
   if (!currentUserWallet) {
-    // No wallet yet (bootstrap); fall back to cached account if present
     return getLocalAccount(localStorage, queryClient)
   }
 
@@ -140,7 +132,6 @@ export const getCurrentAccountQueryFn = async (
       guestEmail: null
     } as AccountState
   } catch (e) {
-    // On server error (e.g. offline), fall back to the cached account
     console.warn(
       'Failed to fetch current account, falling back to local cache',
       e
@@ -149,9 +140,6 @@ export const getCurrentAccountQueryFn = async (
   }
 }
 
-/**
- * Hook to get the currently logged in user's account
- */
 export const useCurrentAccount = <TResult = AccountState | null | undefined>(
   options?: SelectableQueryOptions<AccountState | null | undefined, TResult>
 ) => {
@@ -170,8 +158,6 @@ export const useCurrentAccount = <TResult = AccountState | null | undefined>(
         currentUserWallet!,
         queryClient
       ),
-    // Render cached account immediately while fresh data loads, so the UI
-    // doesn't flash empty but server data still wins once it arrives.
     placeholderData: () =>
       getLocalAccountPlaceholder(localStorage, queryClient),
     staleTime: Infinity,

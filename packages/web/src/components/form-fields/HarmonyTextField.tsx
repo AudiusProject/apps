@@ -6,19 +6,12 @@ import { useField, useFormikContext } from 'formik'
 
 export type HarmonyTextFieldProps = TextInputProps & {
   name: string
-  /**
-   * Clears out field errors while the input is being changed for a small UX improvement
-   * @default true
-   */
   clearErrorOnChange?: boolean
-  /** Function to transform the input value upon `onChange`.
-   * E.g. a function to trim whitespace */
   transformValueOnChange?: (value: string) => string
   transformValueOnBlur?: (value: string) => string
   debouncedValidationMs?: number
 }
 
-// TODO: rename to TextField and replace old usages
 export const HarmonyTextField = forwardRef(
   (props: HarmonyTextFieldProps, ref: Ref<HTMLInputElement>) => {
     const {

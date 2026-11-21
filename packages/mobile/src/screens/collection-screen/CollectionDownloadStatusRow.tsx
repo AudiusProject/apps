@@ -78,7 +78,6 @@ export const CollectionDownloadStatusRow = (
     (has_current_user_saved || playlist_owner_id === currentUserId) &&
     access?.stream
 
-  // Ensure removing or favoriting also triggers switch
   useLayoutEffect(() => {
     setDownloadSwitchValue(isMarkedForDownload)
   }, [isMarkedForDownload])

@@ -28,11 +28,6 @@ export type UserRemixContestStatus = GetContestsByUserStatusEnum
 type UseUserRemixContestsArgs = {
   userId: ID | null | undefined
   pageSize?: number
-  /**
-   * Filter by contest status. Defaults to `'all'`, which returns active
-   * contests first (ordered by soonest-ending end_date) followed by ended
-   * contests (most-recently-ended first).
-   */
   status?: UserRemixContestStatus
 }
 
@@ -47,17 +42,6 @@ export const getUserRemixContestsQueryKey = ({
     { pageSize, status }
   ] as unknown as QueryKey<ID[]>
 
-/**
- * Hook to fetch the remix contests hosted by a specific user with infinite
- * query support. Calls `GET /v1/users/{id}/contests` (SDK:
- * `users.getContestsByUser`), which returns events ordered with
- * currently-active contests first (by soonest-ending end_date) followed by
- * ended contests.
- *
- * Each page is mapped to the contest's parent track ID (`event.entityId`)
- * so consumers like `ContestCard` can take a `trackId` prop and resolve the
- * event internally via `useRemixContest`.
- */
 export const useUserRemixContests = (
   {
     userId,
@@ -85,20 +69,11 @@ export const useUserRemixContests = (
         limit: pageSize,
         offset: pageParam,
         status,
-        // Requester id so the backend personalizes embedded related.users
-        // (e.g. does_current_user_follow). Path `id` is the contest host;
-        // query `userId` is the current user viewing the page.
         userId: currentUserId ? Id.parse(currentUserId) : undefined
       })
 
-      // Prime related tracks + users (full objects, delivered alongside the
-      // event list). This turns ContestCard's useTrack / useUser into cache
-      // hits so the grid can paint with one network round-trip instead of
-      // N+1.
       primeRelatedData({ related, queryClient })
 
-      // Prime the dedicated `useRemixesCount` cache so ContestCard's
-      // entry-count badge doesn't fire a count-only request per card.
       const entryCounts = related?.entryCounts ?? {}
       for (const [hashedTrackId, count] of Object.entries(entryCounts)) {
         const trackId = OptionalHashId.parse(hashedTrackId)
@@ -115,11 +90,7 @@ export const useUserRemixContests = (
         .map((sdkEvent: SDKEvent) => {
           const event = eventMetadataFromSDK(sdkEvent)
           if (!event) return null
-          // Prime per-event cache so useEvent hits immediately downstream.
           queryClient.setQueryData(getEventQueryKey(event.eventId), event)
-          // useRemixContest resolves via useEventIdsByEntityId keyed by
-          // (entityId, entityType=Track, eventType=RemixContest). Prime that
-          // lookup too so the card doesn't have to re-fetch the event list.
           if (
             event.entityId &&
             event.entityType === EventEntityTypeEnum.Track

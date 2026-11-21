@@ -5,16 +5,9 @@ import { WebView } from 'react-native-webview'
 import { useTheme } from '@audius/harmony-native'
 
 type VideoEmbedProps = {
-  /** Raw YouTube or Vimeo URL. Anything else is ignored (renders nothing). */
   url: string | undefined | null
 }
 
-/**
- * Inline 16:9 video player for YouTube / Vimeo URLs on native. Wraps the
- * platform's embed URL in a `WebView` sized 16:9. Returns null when the
- * URL isn't a parseable YouTube / Vimeo link — keeps callers simple
- * ("show only if present"). Mirrors the web `VideoEmbed` component.
- */
 export const VideoEmbed = ({ url }: VideoEmbedProps) => {
   const { color, cornerRadius } = useTheme()
   const trimmed = url?.trim()

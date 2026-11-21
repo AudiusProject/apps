@@ -60,7 +60,6 @@ const { fetchBlockees, fetchBlockers } = chatActions
 const IP_STORAGE_KEY = 'user-ip-timestamp'
 const BLOCK_LIST_FETCH_DELAY_MS = 5000
 const TIMEZONE_STORAGE_KEY = 'user-timezone-sync'
-// Re-send the timezone at least this often even when it hasn't changed
 const TIMEZONE_REFRESH_MS = 7 * 24 * 60 * 60 * 1000
 
 function* handleFetchTrackCount() {
@@ -70,9 +69,6 @@ function* handleFetchTrackCount() {
 
   if (!currentUserId || !handle) return
 
-  // The account endpoint fetches the user as themselves, so track_count
-  // already includes their unlisted tracks (it excludes deleted tracks and
-  // stems, same as the tracks endpoint).
   if (typeof accountUser.track_count === 'number') {
     yield* put(setHasTracks(accountUser.track_count > 0))
     return
@@ -124,7 +120,6 @@ function* initializeMetricsForUser({
     let managerUserId
     let managerHandle
 
-    // If operating as a managed account, identify the manager user id
     if (web3User && web3User.user_id !== accountUser.user_id) {
       managerUserId = web3User.user_id
       managerHandle = web3User.handle
@@ -154,7 +149,6 @@ export function* fetchAccountAsync({
   const sdk = yield* getSDK()
   const queryClient = yield* getContext('queryClient')
 
-  // Don't revert successful local account fetch
   if (shouldMarkAccountAsLoading) {
     queryClient.setQueryData(getAccountStatusQueryKey(), Status.LOADING)
     yield* put(fetchAccountRequested())
@@ -224,14 +218,10 @@ export function* fetchAccountAsync({
     ? JSON.parse(guestEmailFromLocalStorage)
     : null
 
-  // Set the userId in the remoteConfigInstance
   remoteConfigInstance.setUserId(user.user_id)
 
   if (user.handle) {
-    // guest account don't have handles
     const handle = user.handle
-    // Not needed for the account to be usable, so don't block on identity.
-    // spawn, not fork: callers of fetchAccountAsync shouldn't wait on it.
     yield* spawn(function* () {
       try {
         yield* call(recordIPIfNotRecent, handle)
@@ -241,7 +231,6 @@ export function* fetchAccountAsync({
     })
   }
 
-  // Cache the account and put the signedIn action. We're done.
   yield* call(setLocalStorageAccountAndUser, accountData)
   const formattedAccount = {
     userId: user.user_id,
@@ -253,9 +242,6 @@ export function* fetchAccountAsync({
   yield* put(fetchAccountSucceeded(formattedAccount))
   queryClient.setQueryData(getAccountStatusQueryKey(), Status.SUCCESS)
 
-  // Fetch user's chat blockee and blocker list after fetching their account.
-  // Only chat send checks read these (and failed sends refetch them), so let
-  // the first screen load first.
   yield* spawn(function* () {
     yield* delay(BLOCK_LIST_FETCH_DELAY_MS)
     yield* put(fetchBlockees())
@@ -284,8 +270,6 @@ export function* fetchAccountAsync({
 
   yield* fork(syncUserTimezone, user.user_id)
 
-  // Fetch the profile so we get everything we need to populate
-  // the left nav / other site-wide metadata.
   yield* put(fetchProfile(user.handle, user.user_id, false, false, false, true))
 
   yield* put(signedIn({ account: user }))
@@ -336,8 +320,6 @@ function* fetchLocalAccountAsync() {
       users: [cachedAccountUser],
       queryClient
     })
-    // Set walletAddresses so useCurrentAccount/useWalletAddresses work correctly.
-    // Without this, components that depend on currentUserWallet stay disabled.
     const web3WalletAddress = wallet
     yield* put(
       setWalletAddresses({ currentUser: wallet, web3User: web3WalletAddress })
@@ -372,10 +354,6 @@ function* setLocalStorageAccountAndUser(
   }
 
   yield* call([localStorage, localStorage.setAudiusAccount], formattedAccount)
-  // Prefer cached user data (which may include recent optimistic mutations
-  // like profile_type changes) over the server-fetched response. This prevents
-  // setLocalStorageAccountAndUser from overwriting changes that haven't yet
-  // propagated to all validator nodes.
   const queryClient = yield* getContext('queryClient')
   const cachedUser = queryClient.getQueryData<UserMetadata>(
     getUserQueryKey(accountUser.user_id)
@@ -386,10 +364,6 @@ function* setLocalStorageAccountAndUser(
   )
 }
 
-/**
- * Sends the device timezone to identity only when it changed for this user,
- * or the last send is older than TIMEZONE_REFRESH_MS.
- */
 function* syncUserTimezone(userId: ID) {
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const localStorage = yield* getContext('localStorage')
@@ -628,7 +602,6 @@ export function* watchUploadTrack() {
 function* syncAccountToQueryClient() {
   const queryClient = yield* getContext('queryClient')
 
-  // Listen to all account slice actions
   yield* takeEvery(
     [
       fetchAccountSucceeded.type,
@@ -645,7 +618,6 @@ function* syncAccountToQueryClient() {
     function* () {
       const state = yield* select((state) => state.account)
 
-      // Convert the account state to the expected query data format
       const queryData: AccountState = {
         collections: state.collections,
         userId: state.userId,
@@ -660,7 +632,6 @@ function* syncAccountToQueryClient() {
         guestEmail: state.guestEmail
       }
 
-      // Update the query client
       yield* call(
         [queryClient, queryClient.setQueryData],
         getCurrentAccountQueryKey(),

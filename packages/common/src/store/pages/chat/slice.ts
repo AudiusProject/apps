@@ -51,17 +51,8 @@ type ChatState = {
   >
   unreadMessagesCount: number
   optimisticUnreadMessagesCount?: number
-  /**
-   * Server-reported unread counts per inbox category. Undefined until the
-   * server has answered (or if it doesn't support the breakdown yet), in which
-   * case the per-tab dots fall back to the chats loaded in state.
-   */
   unreadMessagesCountByCategory?: ChatUnreadCountByCategory
   optimisticUnreadMessagesCountByCategory?: ChatUnreadCountByCategory
-  /**
-   * Category a chat had before an in-flight setChatCategory, keyed by chat id,
-   * so a failed request can be rolled back.
-   */
   pendingChatCategoryRollback: Record<ChatID, ChatCategory | null>
   optimisticReactions: Record<string, ChatMessageReaction>
   optimisticChatRead: Record<
@@ -87,7 +78,6 @@ const chatSortComparator = (a: Chat, b: Chat) => {
   const aLastMessageAt = dayjs(a.last_message_at)
   const bLastMessageAt = dayjs(b.last_message_at)
   const alphabeticalSort = a.chat_id.localeCompare(b.chat_id)
-  // If last message timestamps are the same, favor blasts on top, then sort by chat_id alphabetically
   if (aLastMessageAt.isSame(bLastMessageAt)) {
     if (a.is_blast || b.is_blast) {
       return a.is_blast && !b.is_blast
@@ -110,10 +100,6 @@ const { selectById: getChat } = chatsAdapter.getSelectors(
   (state: ChatState) => state.chats
 )
 
-/**
- * Applies a delta to the optimistic unread count of the category bucket that
- * `chat` belongs to. No-op until the server has supplied a baseline.
- */
 const adjustUnreadCountForChatCategory = (
   state: ChatState,
   chat: { category?: ChatCategory | null; has_replied?: boolean },
@@ -127,10 +113,6 @@ const adjustUnreadCountForChatCategory = (
   state.optimisticUnreadMessagesCountByCategory = counts
 }
 
-/**
- * Adds `delta` to every bucket `chat` counts towards. Buckets the server did
- * not report (older api versions) are left absent.
- */
 const applyUnreadCountDelta = (
   counts: ChatUnreadCountByCategory,
   chat: { category?: ChatCategory | null; has_replied?: boolean },
@@ -143,7 +125,6 @@ const applyUnreadCountDelta = (
   }
 }
 
-/** The unread count currently shown for a chat, honoring optimistic reads. */
 const getDisplayedUnreadCount = (state: ChatState, chatId: ChatID) => {
   const optimisticRead = state.optimisticChatRead[chatId]
   if (optimisticRead) return optimisticRead.unread_message_count
@@ -165,8 +146,6 @@ const {
   selectIds: getAllMessageIds
 } = chatMessagesAdapter.getSelectors()
 
-// Recalculate hasTail for the message at index + 1 (the previous message of
-// the message at the given index).
 const recalculatePreviousMessageHasTail = (
   chatState: EntityState<ChatMessageWithExtras>,
   index: number
@@ -234,7 +213,7 @@ const slice = createSlice({
       const { chat } = action.payload
       chatsAdapter.upsertOne(state.chats, {
         ...chat,
-        messagesStatus: Status.IDLE // ensures ChatScreen/ChatMessagesList show "Say Hi"
+        messagesStatus: Status.IDLE
       })
       if (!(chat.chat_id in state.messages)) {
         state.messages[chat.chat_id] = chatMessagesAdapter.getInitialState()
@@ -271,11 +250,9 @@ const slice = createSlice({
       // triggers saga
     },
     fetchLatestChats: (state) => {
-      // triggers saga
       state.chats.status = 'REFRESHING'
     },
     fetchMoreChats: (state) => {
-      // triggers saga
       state.chats.status = Status.LOADING
     },
     fetchMoreChatsSucceeded: (
@@ -289,12 +266,6 @@ const slice = createSlice({
       if (!state.chats.summary) {
         state.chats.summary = summary
       } else if (summary) {
-        // Next direction: update if the response signals "no more newer chats"
-        // (count === 0) OR if its cursor strictly advances forward. The
-        // count===0 branch is what lets us trust the end-of-pagination signal
-        // even when the backend returns a null/empty cursor on an exhausted
-        // page; without it, prev_count/next_count get stuck above zero
-        // forever and the loader never resolves.
         if (
           summary.next_count === 0 ||
           (summary.next_cursor &&
@@ -305,7 +276,6 @@ const slice = createSlice({
             state.chats.summary.next_cursor = summary.next_cursor
           }
         }
-        // Prev direction: same pattern.
         if (
           summary.prev_count === 0 ||
           (summary.prev_cursor &&
@@ -330,7 +300,6 @@ const slice = createSlice({
       state.chats.status = Status.ERROR
     },
     fetchLatestMessages: (state, action: PayloadAction<{ chatId: string }>) => {
-      // triggers saga
       if (!state.messages[action.payload.chatId]) {
         state.messages[action.payload.chatId] = {
           ...chatMessagesAdapter.getInitialState(),
@@ -341,7 +310,6 @@ const slice = createSlice({
       }
     },
     fetchMoreMessages: (state, action: PayloadAction<{ chatId: string }>) => {
-      // triggers saga
       if (!state.messages[action.payload.chatId]) {
         state.messages[action.payload.chatId] = {
           ...chatMessagesAdapter.getInitialState(),
@@ -367,10 +335,6 @@ const slice = createSlice({
         return
       }
 
-      // Update the summary to include the max of next_cursor and
-      // min of prev_cursor. Also honor count === 0 as an authoritative
-      // end-of-pagination signal so the count fields can converge to 0 even
-      // when the backend returns a null/empty cursor on an exhausted page.
       const existingSummary = state.chats.entities[chatId]?.messagesSummary
       const summaryToUse = { ...summary, ...existingSummary }
       if (
@@ -428,8 +392,6 @@ const slice = createSlice({
       state,
       action: PayloadAction<SetMessageReactionPayload>
     ) => {
-      // triggers saga
-      // Optimistically set reaction
       const { userId, messageId, reaction } = action.payload
       const encodedUserId = Id.parse(userId)
       if (reaction) {
@@ -450,11 +412,9 @@ const slice = createSlice({
         reaction: ChatMessageNullableReaction
       }>
     ) => {
-      // Set the true state
       const { chatId, messageId, reaction } = action.payload
       delete state.optimisticReactions[messageId]
 
-      // Ensure the chat and message exists. If not, saga will fetch.
       if (!(chatId in state.messages)) {
         return
       }
@@ -478,7 +438,6 @@ const slice = createSlice({
       state,
       action: PayloadAction<SetMessageReactionPayload>
     ) => {
-      // Reset our optimism :(
       const { messageId } = action.payload
       delete state.optimisticReactions[messageId]
     },
@@ -494,7 +453,6 @@ const slice = createSlice({
         chat.last_message = ''
       }
       const existingChat = getChat(state, chat.chat_id)
-      // If the chat already exists, use its existing messagesStatus, otherwise default to PENDING
       const messagesStatus = existingChat?.messagesStatus ?? 'PENDING'
       chatsAdapter.upsertOne(state.chats, {
         ...chat,
@@ -505,8 +463,6 @@ const slice = createSlice({
       }
     },
     markChatAsRead: (state, action: PayloadAction<{ chatId: string }>) => {
-      // triggers saga
-      // Optimistically mark as read
       const { chatId } = action.payload
       const existingChat = getChat(state, chatId)
       if (existingChat && !existingChat.is_blast) {
@@ -532,7 +488,6 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ chatId: string }>
     ) => {
-      // Set the true state
       const { chatId } = action.payload
       delete state.optimisticChatRead[chatId]
       delete state.optimisticUnreadMessagesCount
@@ -559,18 +514,12 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ chatId: string }>
     ) => {
-      // Reset our optimism :(
       const { chatId } = action.payload
       delete state.optimisticChatRead[chatId]
       delete state.optimisticUnreadMessagesCount
       delete state.optimisticUnreadMessagesCountByCategory
     },
     markAllChatsAsRead: (state) => {
-      // triggers saga
-      // Optimistically mark every locally-known non-blast chat with unread
-      // messages as read. Chats that aren't loaded into state yet get cleared
-      // server-side by the saga's chat.read_all RPC and reconcile via the
-      // trailing fetchUnreadMessagesCount.
       const allChats = chatsAdapter.getSelectors().selectAll(state.chats)
       for (const chat of allChats) {
         if (chat.is_blast) continue
@@ -591,9 +540,6 @@ const slice = createSlice({
       }
     },
     markAllChatsAsReadSucceeded: (state) => {
-      // Server confirmed every chat_member.unread_count is now 0; promote the
-      // optimistic per-chat reads to the entity. unreadMessagesCount itself is
-      // overwritten by the trailing fetchUnreadMessagesCount the saga fires.
       for (const chatId of Object.keys(state.optimisticChatRead)) {
         const existingChat = chatsAdapter
           .getSelectors()
@@ -620,8 +566,6 @@ const slice = createSlice({
       delete state.optimisticUnreadMessagesCountByCategory
     },
     markAllChatsAsReadFailed: (state) => {
-      // chat.read_all is all-or-nothing; on failure undo every optimistic
-      // read this run installed.
       state.optimisticChatRead = {}
       delete state.optimisticUnreadMessagesCount
       delete state.optimisticUnreadMessagesCountByCategory
@@ -635,7 +579,6 @@ const slice = createSlice({
         resendMessageId?: string
       }>
     ) => {
-      // triggers saga which will add a message optimistically and replace it after success
       const { chatId, resendMessageId } = action.payload
       if (resendMessageId) {
         chatMessagesAdapter.updateOne(state.messages[chatId], {
@@ -653,13 +596,8 @@ const slice = createSlice({
         status?: Status
       }>
     ) => {
-      // triggers saga to get chat if not exists
       const { chatId, message, status, isSelfMessage } = action.payload
 
-      // Always update the last message, but don't update
-      // last_message_at if it's a blast message sent by current user,
-      // to avoid chat list re-sorting.
-      // Note: is_plaintext indicates that the message originated from a blast
       const existingChat = getChat(state, chatId)
       const changes =
         message.is_plaintext && isSelfMessage && !existingChat?.is_blast
@@ -676,22 +614,16 @@ const slice = createSlice({
         changes
       })
 
-      // If no chatId, don't add the message
-      // and abort early, relying on the saga
-      // to fetch the chat
       if (!(chatId in state.messages)) {
         return
       }
 
-      // Return early if we've seen this message: don't update
-      // recheck_permissions unless it's a message received from someone else
       const existingMessage = getMessage(
         state.messages[chatId],
         message.message_id
       )
       if (existingMessage) return
 
-      // Add the message
       chatMessagesAdapter.addOne(state.messages[chatId], {
         ...message,
         hasTail: true,
@@ -700,23 +632,18 @@ const slice = createSlice({
       chatsAdapter.updateOne(state.chats, {
         id: chatId,
         changes: {
-          // If a new message comes through, we don't need to recheck permissions anymore
           recheck_permissions: false
         }
       })
 
-      // Recalculate tails
       recalculatePreviousMessageHasTail(state.messages[chatId], 0)
 
-      // Handle unread counts
       if (!existingChat || existingChat.is_blast) return
       const optimisticRead = state.optimisticChatRead[chatId]
       const existingUnreadCount = optimisticRead
         ? optimisticRead.unread_message_count
         : (existingChat?.unread_message_count ?? 0)
       if (!isSelfMessage) {
-        // If we're actively reading, this will immediately get marked as read.
-        // Ignore the unread bump to prevent flicker
         if (state.activeChatId !== chatId) {
           chatsAdapter.updateOne(state.chats, {
             id: chatId,
@@ -724,12 +651,10 @@ const slice = createSlice({
           })
         }
 
-        // Web or mobile: update optimistic unread count
         state.optimisticUnreadMessagesCount =
           (state.optimisticUnreadMessagesCount ?? state.unreadMessagesCount) + 1
         adjustUnreadCountForChatCategory(state, existingChat, 1)
       } else {
-        // Mark chat as read if its our own
         chatsAdapter.updateOne(state.chats, {
           id: chatId,
           changes: {
@@ -745,8 +670,6 @@ const slice = createSlice({
           existingChat,
           -existingUnreadCount
         )
-        // Replying moves an uncategorized chat into Priority. Blast copies
-        // (plaintext) are not replies.
         if (!message.is_plaintext && existingChat.has_replied === false) {
           chatsAdapter.updateOne(state.chats, {
             id: chatId,
@@ -755,10 +678,6 @@ const slice = createSlice({
         }
       }
     },
-    /**
-     * Marks the chat as currently being read.
-     * Prevents flicker of unread status when new messages come in if actively reading.
-     */
     setActiveChat: (
       state,
       action: PayloadAction<{ chatId: string | null }>
@@ -773,7 +692,6 @@ const slice = createSlice({
         messageId: string
       }>
     ) => {
-      // Mark message as not sent
       const { chatId, messageId } = action.payload
       chatMessagesAdapter.updateOne(state.messages[chatId], {
         id: messageId,
@@ -826,8 +744,6 @@ const slice = createSlice({
       }
       state.permissionsStatus = Status.SUCCESS
     },
-    // Note: is not associated with any chatId because there will be at most
-    // one popup message at a time. Used for reactions popup overlay in mobile.
     setReactionsPopupMessageId: (
       state,
       action: PayloadAction<{
@@ -875,9 +791,6 @@ const slice = createSlice({
       state,
       action: PayloadAction<{ chatId: string; category: ChatCategory | null }>
     ) => {
-      // triggers saga
-      // Optimistically move the chat (and its unread messages) to the new
-      // category so it switches tabs immediately.
       const { chatId, category } = action.payload
       const existingChat = getChat(state, chatId)
       if (!existingChat || existingChat.is_blast) return
@@ -906,8 +819,6 @@ const slice = createSlice({
       delete state.pendingChatCategoryRollback[chatId]
       const existingChat = getChat(state, chatId)
       if (!existingChat || existingChat.is_blast) return
-      // Re-assert the confirmed category in case a concurrent chat refetch
-      // overwrote the optimistic value with the server's stale one.
       if ((existingChat.category ?? null) !== category) {
         chatsAdapter.updateOne(state.chats, {
           id: chatId,

@@ -49,7 +49,6 @@ const NodeTable: React.FC<NodeTableProps> = ({
       if (row.type === ServiceType.ContentNode) {
         pushRoute(contentNodePage(row.spID))
       } else if (row.type === ServiceType.DiscoveryProvider) {
-        // TODO: remove with dp deprecation
         pushRoute(discoveryNodePage(row.spID))
       } else if (row.type === ServiceType.Validator) {
         pushRoute(validatorPage(row.spID))

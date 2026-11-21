@@ -39,7 +39,6 @@ export const createUseRemoteVarHook = ({
 
 export type RemoteVarHook = ReturnType<typeof createUseRemoteVarHook>
 
-/** Fetches a remote config variable with default fallback */
 export function useRemoteVar(key: IntKeys): number
 export function useRemoteVar(key: StringKeys): string
 export function useRemoteVar(key: AllRemoteConfigKeys): string | number | null {

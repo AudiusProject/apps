@@ -74,10 +74,6 @@ const TracksTab = ({
 
   const { data: accountUser } = useCurrentAccountUser()
   const account = accountUser
-  // Drives table loading state for the current page. Replaces the legacy
-  // `getDashboardTracksStatus` selector — `useFormattedTrackData` (used by
-  // useFilteredTrackData below) reads page 0; this query reads the current
-  // page so the table's loading indicator reflects pagination fetches.
   const { isPending: tracksPending } = useUserTracksByHandle(
     {
       handle: accountUser?.handle,
@@ -108,7 +104,6 @@ const TracksTab = ({
           aria-label={`${checked ? 'Deselect' : 'Select'} ${track.title}`}
           checked={checked}
           onClick={(e) => {
-            // Keep the click from opening the track page.
             e.stopPropagation()
             selection.toggle(track.track_id, index, { shift: e.shiftKey })
           }}

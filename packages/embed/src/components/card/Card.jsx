@@ -42,10 +42,6 @@ export const CardContextProvider = (props) => {
 }
 
 const setCardSize = (setCardStyle, cardRef, mobileWebTwitter, isTwitter) => {
-  // Specialcase check for mobile twitter
-  // If it's a square aspect ratio and
-  // below a certain width, we should render
-  // the card square fullscreen.
   if (mobileWebTwitter) {
     setCardStyle({
       height: `${window.document.documentElement.clientHeight}px`,
@@ -59,13 +55,11 @@ const setCardSize = (setCardStyle, cardRef, mobileWebTwitter, isTwitter) => {
     window.document.body.clientWidth / window.document.body.clientHeight
 
   if (aspectRatio < viewportAspectRatio) {
-    // In this case, we have 'extra' width so height is the constraining factor
     setCardStyle({
       height: `${cardRef.current?.parentElement.clientHeight}px`,
       width: `${cardRef.current?.parentElement.clientHeight * aspectRatio}px`
     })
   } else {
-    // Extra height, so width constrains.
     setCardStyle({
       height: `${cardRef.current?.parentElement.clientWidth / aspectRatio}px`,
       width: `${cardRef.current?.parentElement.clientWidth}px`
@@ -83,20 +77,16 @@ const Card = ({
 }) => {
   const [cardStyle, setCardStyle] = useState({})
 
-  // Need to make the injected BG color slightly transparent
   const transparentBg = `${backgroundColor.slice(
     0,
     backgroundColor.length - 1
   )}, 0.5)`
   const mobileWebTwitter = isMobileWebTwitter(isTwitter)
-  // Don't display dropshadow on mobile web twitter
-  // bc we want to display it fullscreen
   const displayTwitterFooter = isTwitter && !mobileWebTwitter
   const getDropshadow = () =>
     isTwitter && !mobileWebTwitter
       ? { boxShadow: `0 3px 34px 0 ${transparentBg}` }
       : {}
-  // No border radius on mobile web twitter
   const getBorderRadius = () => (mobileWebTwitter ? 0 : 12)
   const height = cardStyle.height
 
@@ -128,7 +118,6 @@ const Card = ({
     if (!cardStyle.width || cardStyle.width === 0) {
       return
     }
-    // Feed the style into the card dimensions context
     const newStyle = {
       width: parseInt(cardStyle.width.replace('px', ''), 10),
       height: parseInt(cardStyle.height.replace('px', ''), 10)

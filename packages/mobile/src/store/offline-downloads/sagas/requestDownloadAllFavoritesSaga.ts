@@ -37,7 +37,6 @@ function* downloadAllFavorites() {
     { is_from_favorites: true, collection_id: DOWNLOAD_REASON_FAVORITES }
   ]
 
-  // Add local saves
   const favorite_created_at = dayjs().format('YYYY-MM-DD HH:mm:ss')
   const localSaves = yield* select(getLocalTrackFavorites)
   const localSavesToAdd: OfflineEntry[] = Object.keys(localSaves)
@@ -53,7 +52,6 @@ function* downloadAllFavorites() {
 
   offlineItemsToAdd.push(...localSavesToAdd)
 
-  // Add favorited tracks from api
   const sdk = yield* getSDK()
 
   const { data } = (yield* call([sdk.users, sdk.users.getUserFavorites], {
@@ -76,9 +74,6 @@ function* downloadAllFavorites() {
     }
   }
 
-  // Add favorited collections and their tracks
-  // AccountCollections don't include track lists, so retrieve all the collections
-  // first
   yield* call(fetchAllAccountCollections)
   const account = yield* queryCurrentAccount()
   const accountCollectionsMap = account?.collections ?? {}

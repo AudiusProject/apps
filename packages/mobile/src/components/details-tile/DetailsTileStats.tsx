@@ -27,9 +27,6 @@ type DetailsTileStatsProps = {
   onPressComments?: GestureResponderHandler
 }
 
-/**
- * The stats displayed on track and playlist screens
- */
 export const DetailsTileStats = ({
   playCount = 0,
   repostCount = 0,

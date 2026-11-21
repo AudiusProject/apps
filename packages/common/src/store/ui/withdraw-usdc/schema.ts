@@ -21,25 +21,14 @@ export type WithdrawUSDCFormValues = {
   [CONFIRM]?: boolean
 }
 
-/**
- * Creates a validation schema for withdraw USDC forms that can be shared
- * between web and mobile platforms.
- *
- * @param userBalanceCents - User's current balance in cents
- * @param minWithdrawBalanceCents - Minimum withdrawal amount for Coinflow (from remote config)
- * @returns Zod validation schema
- */
 export const createWithdrawUSDCFormSchema = (
   userBalanceCents: number,
   minWithdrawBalanceCents: number
 ) => {
-  // Create a unified amount parser that handles both strings and numbers
   const amountSchema = z.union([z.string(), z.number()]).transform((val) => {
     if (typeof val === 'string') {
-      // Convert string (e.g., "5.50") to cents (e.g., 550)
       return filterDecimalString(val).value
     }
-    // If it's already a number, assume it's in cents
     return val
   })
 

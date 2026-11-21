@@ -37,8 +37,6 @@ type CachedCollection = CollectionMetadata
 type CachedUser = { id: ID; uid: UID; metadata: UserMetadata }
 type CachedTrack = TrackMetadata
 
-// Each read is a few native fs calls; run several at once instead of one
-// round trip per downloaded item.
 const READ_CONCURRENCY = 8
 
 async function mapWithConcurrency<T, R>(
@@ -59,9 +57,7 @@ async function mapWithConcurrency<T, R>(
   return results
 }
 
-// Load offline data into redux on app start
 export function* rehydrateOfflineDataSaga() {
-  // Can remove this after all clients are likely updated
   yield* migrateOfflineDataPathSaga()
 
   const collectionsToCache: CachedCollection[] = []

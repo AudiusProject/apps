@@ -28,7 +28,6 @@ export const AdvancedScreen = () => {
     FeatureFlags.TRACK_FEEDBACK_REQUESTS
   )
 
-  // Feedback comes in as comments, so it can't stay on without them.
   useEffect(() => {
     if (commentsDisabled && feedbackRequested) {
       setFeedbackRequested(false)

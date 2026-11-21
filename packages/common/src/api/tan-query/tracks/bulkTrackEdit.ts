@@ -11,7 +11,6 @@ export type BulkTrackEditPrice =
   | { type: 'premium'; priceCents: number }
   | { type: 'free' }
 
-/** Fields left undefined are not changed. */
 export type BulkTrackEdit = {
   genre?: string
   mood?: string
@@ -49,11 +48,6 @@ const mergeTags = (existing: string[], added: string[]) => {
   return merged.slice(0, BULK_EDIT_MAX_TAGS)
 }
 
-/**
- * Returns the metadata fields that differ once `edit` is applied to `track`.
- * `priceSkipReason` is set when the price change can't apply to this track;
- * the other fields are still returned.
- */
 export const getBulkTrackEditChanges = (
   track: EditableTrack,
   edit: BulkTrackEdit
@@ -116,7 +110,6 @@ export const getBulkTrackEditChanges = (
       changes.stream_conditions = null
       changes.is_download_gated = false
       changes.download_conditions = null
-      // Premium turns downloads on, so turn them back off with the price.
       changes.is_downloadable = false
     } else if (track.is_stream_gated) {
       priceSkipReason = 'special_access'

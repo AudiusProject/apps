@@ -94,7 +94,6 @@ const ArtistChip = ({
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // Show skeleton while user data is loading
   if (isPending || !user) {
     return (
       <div

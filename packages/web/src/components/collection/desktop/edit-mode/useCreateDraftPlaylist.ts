@@ -24,12 +24,6 @@ type CreateDraftPlaylistParams = {
   trackIds: ID[]
 }
 
-/**
- * Persists a locally-drafted playlist (see the inline create flow) to the
- * backend in one shot: uploads artwork, writes metadata + ordered tracks, then
- * primes the confirmed playlist into the cache and adds it to the account.
- * Returns the confirmed collection so the caller can navigate to its permalink.
- */
 export const useCreateDraftPlaylist = () => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
@@ -51,7 +45,7 @@ export const useCreateDraftPlaylist = () => {
           ? (metadata.artwork.file as File)
           : undefined
 
-      const now = Math.round(Date.now() / 1000) // seconds
+      const now = Math.round(Date.now() / 1000)
       const sdkMetadata = playlistMetadataForCreateWithSDK(metadata as any)
       sdkMetadata.playlistId = Id.parse(playlistId)
       sdkMetadata.playlistContents = trackIds.map((trackId) => ({

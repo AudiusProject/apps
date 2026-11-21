@@ -16,7 +16,6 @@ export const ChatListener = () => {
       })
     })
   const { isGuest } = accountData ?? {}
-  // Connect to chats websockets and prefetch chats
   useEffect(() => {
     if (isAccountSuccess && !isGuest) {
       dispatch(connect())

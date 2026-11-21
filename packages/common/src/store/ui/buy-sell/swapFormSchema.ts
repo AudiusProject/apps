@@ -5,9 +5,6 @@ import { buySellMessages as messages } from '../../../messages'
 
 import { CoinInfo } from './types/swap.types'
 
-/**
- * Schema for validating token swap input
- */
 export const createSwapFormSchema = (
   min: number = 0,
   max: number = Number.MAX_SAFE_INTEGER,
@@ -20,7 +17,6 @@ export const createSwapFormSchema = (
       .string()
       .refine(
         (val) => {
-          // Allow empty string during typing, but require it for final validation
           if (val === '') return false
           try {
             // eslint-disable-next-line no-new
@@ -67,7 +63,6 @@ export const createSwapFormSchema = (
       .refine(
         (val) => {
           if (val === '') return false
-          // Treat only null/undefined as "unknown balance"; do not bypass check for numeric 0
           if (balance == null || balance === undefined) return true
           try {
             const amount = new FixedDecimal(val, decimals)

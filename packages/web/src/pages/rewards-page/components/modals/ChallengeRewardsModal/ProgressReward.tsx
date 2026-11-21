@@ -3,7 +3,6 @@ import { Flex, Text } from '@audius/harmony'
 
 import styles from './styles.module.css'
 
-/** Renders the box containing the amount of audio to be earned from the challenge */
 export const ProgressReward = ({
   amount,
   subtext

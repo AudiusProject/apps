@@ -24,7 +24,6 @@ function* processNextJob() {
   const offlineQueue = yield* select(getOfflineQueue)
   const [item] = offlineQueue
 
-  // end of the qeueue
   if (!item) {
     yield* put(updateQueueStatus({ queueStatus: QueueStatus.IDLE }))
     return

@@ -1,26 +1,12 @@
-/**
- * Runtime Lottie theming - applies theme colors to Lottie JSON in-place
- * instead of requiring separate assets per theme (light/dark/matrix).
- *
- * Theme model: ThemePalette (DEFAULT | CLASSIC | MATRIX) × ThemeMode (LIGHT | DARK | AUTO)
- * Maps to: default-light, default-dark, classic-light, classic-dark, matrix
- */
-
 import { Theme, ThemePalette } from '@audius/common/models'
 import { primitiveTheme } from '@audius/harmony'
 
 export type LottieThemeColors = {
-  /** Primary accent - used for fills, active states */
   primary: string
-  /** Secondary accent - used for gradients, strokes */
   secondary: string
-  /** Gradient start - for animations with gradient fills */
   gradientStop1: string
-  /** Gradient end - for animations with gradient fills */
   gradientStop2: string
-  /** Neutral/inactive - for outlines, inactive states (optional, grays often kept) */
   neutral?: string
-  /** Theme white token - can vary by theme (e.g. default-dark) */
   white?: string
 }
 
@@ -33,18 +19,9 @@ const hexToRgba = (hex: string): [number, number, number, number] => {
   return [r, g, b, a]
 }
 
-/**
- * Get Lottie theme colors for the current palette and mode.
- * Uses harmony primitiveTheme for consistency with the design system.
- *
- * When palette is null (legacy theme model), legacyTheme is used:
- * - MATRIX → matrix palette
- * - LIGHT/DARK/AUTO (or null) → default palette with appropriate mode
- */
 export const getLottieThemeColors = (
   palette: ThemePalette | null,
   isDark: boolean,
-  /** Legacy theme - used when palette is null */
   legacyTheme?: Theme | null
 ): LottieThemeColors => {
   if (
@@ -72,7 +49,6 @@ export const getLottieThemeColors = (
       white: p.special.white
     }
   }
-  // ThemePalette.DEFAULT or null fallback (legacy LIGHT/DARK/AUTO)
   const p = isDark ? primitiveTheme.defaultDark : primitiveTheme.defaultLight
   return {
     primary: p.primary.default,
@@ -84,7 +60,6 @@ export const getLottieThemeColors = (
   }
 }
 
-/** Check if [r,g,b,a] is a gray (low saturation) - these we may treat differently */
 const isGray = (rgba: number[]): boolean => {
   if (rgba.length < 3) return true
   const [r, g, b] = rgba
@@ -106,14 +81,8 @@ const isNearBlack = (rgba: number[]): boolean => {
   return r <= 0.03 && g <= 0.03 && b <= 0.03
 }
 
-/** 'accent' = active/on state (primary/gradient), 'neutral' = off state, 'primary' = solid primary for consistency */
 export type LottieThemeVariant = 'accent' | 'neutral' | 'primary'
 
-/**
- * Deep clone with color replacement - Lottie stores colors as [r,g,b,a] 0-1.
- * - Gray colors (low saturation) → theme neutral if provided
- * - Accent colors → accent variant: primary/gradient; neutral variant: theme neutral; primary variant: solid primary
- */
 const replaceColorsInValue = (
   value: unknown,
   colors: LottieThemeColors,
@@ -125,7 +94,6 @@ const replaceColorsInValue = (
       value.length === 4 &&
       value.every((x) => typeof x === 'number' && x >= 0 && x <= 1.01)
     ) {
-      // Preserve black details; map white details to theme white token.
       if (isNearWhite(value as number[]) && colors.white) {
         return [...hexToRgba(colors.white)]
       }
@@ -160,7 +128,6 @@ const replaceColorsInValue = (
         if (Array.isArray(c.k) && c.k.length > 0) {
           const first = c.k[0]
           if (typeof first === 'number') {
-            // Static color array, e.g. c.k = [r, g, b, a]
             newC.k = replaceColorsInValue(c.k, colors, ctx, variant)
           } else if (Array.isArray(first) && typeof first[0] === 'number') {
             newC.k = replaceColorsInValue(c.k, colors, ctx, variant)
@@ -200,13 +167,6 @@ const replaceColorsInValue = (
   return value
 }
 
-/**
- * Apply theme colors to a Lottie animation JSON.
- * Returns a deep clone with colors replaced by the theme palette.
- * - variant 'accent': active/on state - uses gradient colors (gradientStop1/2)
- * - variant 'neutral': off state - uses theme neutral/default color
- * - variant 'primary': solid primary for consistent active states across icons
- */
 export const applyThemeToLottie = (
   lottieJson: object,
   colors: LottieThemeColors,

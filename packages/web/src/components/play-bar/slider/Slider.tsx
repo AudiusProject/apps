@@ -5,16 +5,11 @@ import cn from 'classnames'
 import styles from './Slider.module.css'
 import { SliderProps } from './types'
 
-/** Gets the X-position of a div. */
 const getXPosition = (element: HTMLDivElement) => {
   const coords = element.getBoundingClientRect()
   return window.pageXOffset + coords.left
 }
 
-/**
- * A smooth scrubbable slider that relies on CSS animations rather
- * than progress ticks to achieve fluidity.
- */
 export const Slider = ({
   defaultValue = 0,
   value,
@@ -24,11 +19,8 @@ export const Slider = ({
 }: SliderProps) => {
   const [isActive, setIsActive] = useState(false)
 
-  // // Percentage of the complete scrubber being dragged to.
-  // // e.g. 0.25 means the user has dragged the scrubber 1/4th of the way.
   const dragPercent = useRef<number | null>(0)
 
-  // Refs to handle event listeners
   const mouseMoveRef = useRef<((this: Document, ev: MouseEvent) => any) | null>(
     null
   )
@@ -38,14 +30,10 @@ export const Slider = ({
   const touchMoveRef = useRef<((e: TouchEvent) => any) | null>(null)
   const touchEndRef = useRef<((e: TouchEvent) => any) | null>(null)
 
-  // Div refs
   const railRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
 
-  /**
-   * Sets the percentage across the scrubber for a given pageX position.
-   */
   const setDragPercent = useCallback(
     (pageX: number) => {
       if (railRef.current) {
@@ -59,25 +47,16 @@ export const Slider = ({
     [dragPercent]
   )
 
-  /**
-   * Sets the percentage across the scrubber for a given mouse event.
-   */
   const setDragPercentMouse = useCallback(
     (e: React.MouseEvent | MouseEvent) => setDragPercent(e.pageX),
     [setDragPercent]
   )
 
-  /**
-   * Sets the percentage across the scurbber for a given touch event.
-   */
   const setDragPercentTouch = useCallback(
     (e: React.TouchEvent | TouchEvent) => setDragPercent(e.touches[0].pageX),
     [setDragPercent]
   )
 
-  /**
-   * Watches user mouse movements while the scrubber handle is being dragged.
-   */
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
@@ -89,9 +68,6 @@ export const Slider = ({
     [setDragPercentMouse, max, onChange]
   )
 
-  /**
-   * Watches user touch movements while the scrubber handle is being dragged.
-   */
   const onTouchMove = useCallback(
     (e: TouchEvent) => {
       e.stopPropagation()
@@ -103,10 +79,6 @@ export const Slider = ({
     [setDragPercentTouch, max, onChange]
   )
 
-  /**
-   * Watches for a mouse-up action (which may not occur on the scrubber itself),
-   * calls the release callback, and resets dragging state.
-   */
   const onMouseUp = useCallback(() => {
     setIsActive(false)
     if (mouseMoveRef.current) {
@@ -119,10 +91,6 @@ export const Slider = ({
     if (dragPercent.current !== null) dragPercent.current = null
   }, [mouseMoveRef, mouseUpRef, dragPercent])
 
-  /**
-   * Watches for a touch-end action (which may not occur on the scrubber itself),
-   * calls the release callback, and resets dragging state.
-   */
   const onTouchEnd = useCallback(() => {
     setIsActive(false)
     if (touchMoveRef.current) {
@@ -135,11 +103,7 @@ export const Slider = ({
     if (dragPercent.current !== null) dragPercent.current = null
   }, [touchMoveRef, touchEndRef, dragPercent])
 
-  /**
-   * Attaches mouse-move and mouse-up event listeners and sets dragging state.
-   */
   const onMouseDown = (e: React.MouseEvent) => {
-    // Cancel mouse down if touch was fired.
     if (e.button !== 0 || touchMoveRef.current) return
 
     mouseMoveRef.current = onMouseMove
@@ -152,9 +116,6 @@ export const Slider = ({
     if (dragPercent.current !== null) onChange(dragPercent.current * max)
   }
 
-  /**
-   * Attaches touch-move and touch-end event listeners and sets dragging state.
-   */
   const onTouchStart = (e: React.TouchEvent) => {
     touchMoveRef.current = onTouchMove
     touchEndRef.current = onTouchEnd

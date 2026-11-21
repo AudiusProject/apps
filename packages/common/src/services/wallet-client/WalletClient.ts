@@ -107,30 +107,23 @@ export class WalletClient {
         { transferTxHash }
       )
 
-      // Note: At this point, the funds are sitting in Wormhole.
-      // The recurring jobs box will index the AudiusWormhole contract and
-      // auto-redeem the transfer.
-
-      // Start polling in the background but don't wait for it
       pollForTokenBalanceChange(sdk, {
         commitment: 'finalized',
         tokenAccount: account?.address,
         initialBalance: account?.amount,
         mint: 'wAUDIO',
         retryDelayMs: 10000,
-        maxRetryCount: 360 /* 60 minutes */
+        maxRetryCount: 360
       }).catch((error) => {
         console.error('Polling for token balance change failed:', error)
       })
 
-      // Return the transfer transaction hash immediately
       return transferTxHash
     }
 
     throw new Error('No ERC-20 AUDIO balance to transfer')
   }
 
-  /** Get total balance of external wallets connected to the user's account. Returns null on failure. */
   async getAssociatedWalletBalance(userID: ID): Promise<AudioWei | null> {
     try {
       const sdk = await this.audiusSdk()
@@ -157,13 +150,10 @@ export class WalletClient {
               address: wallet,
               sdk
             })
-          // Convert SPL wAudio -> AUDIO
           return AUDIO(wAUDIO(balance)).value
         })
       ])
 
-      // TODO: Remove once getAddressTotalStakedBalance is throwing for unexpected errors
-      // and let the catch below handle things
       if (balances.some((b) => isNullOrUndefined(b))) {
         throw new Error(
           'Unable to fetch balance for one or more associated wallets.'
@@ -222,7 +212,6 @@ export class WalletClient {
               })
             return {
               address: wallet,
-              // wAUDIO balances use a different precision, and we want AudioWei as output to be consistent
               balance: AUDIO(wAUDIO(balance)).value
             }
           })

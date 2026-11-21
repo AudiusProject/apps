@@ -52,12 +52,10 @@ export type StylesOptions = {
 export const makeResponsiveStyles = <Styles extends Record<string, CSSObject>>(
   stylesCreator: (options: StylesOptions) => Record<string, any>
 ) => {
-  // Return a hook that can be used in components
   return function useStyles(): Styles {
     const media = useMedia()
     const theme = useTheme()
 
-    // Process the style configurations through createResponsiveStyles
     const styleConfigs = stylesCreator({ media, theme })
     return createResponsiveStyles(media, styleConfigs) as Styles
   }

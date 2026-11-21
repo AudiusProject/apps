@@ -29,9 +29,6 @@ export const getExampleFile = ({
 }
 
 export const installExample = async ({ root, example }: InstallExampleArgs) => {
-  /**
-   * Copy the example files to the target directory.
-   */
   const copySource = ['**']
   const examplePath = path.join(__dirname, '../examples', example)
 

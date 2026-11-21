@@ -82,7 +82,6 @@ const NoPurchases = () => {
 export const usePurchases = () => {
   const { data: userId } = useCurrentUserId()
   const dispatch = useDispatch()
-  // Defaults: sort method = date, sort direction = desc
   const [sortMethod, setSortMethod] =
     useState<GetPurchasesSortMethodEnum>(DEFAULT_SORT_METHOD)
   const [sortDirection, setSortDirection] =
@@ -106,8 +105,6 @@ export const usePurchases = () => {
 
   const hasQueryError = purchasesIsError || countIsError
   const isQuerySuccess = purchasesIsSuccess && countIsSuccess
-
-  // TODO: Should fetch users before rendering the table
 
   const onSort = useCallback(
     (
@@ -167,9 +164,6 @@ export const usePurchases = () => {
   }
 }
 
-/**
- * Fetches and renders a table of purchases for the currently logged in user
- * */
 export const PurchasesTab = ({
   data = [],
   count,

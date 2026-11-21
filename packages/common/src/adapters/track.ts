@@ -44,14 +44,6 @@ import { transformAndCleanList } from './utils'
 
 const VALID_MOODS = new Set<string>(Object.values(Mood))
 
-/**
- * Pass through any non-empty genre string to the SDK. Canonical Genre enum
- * values are returned as-is; freeform strings are also passed through
- * unchanged so artists can enter custom genres (the SDK upload schema caps
- * them at 100 chars). Previously this filtered out any value not in the
- * canonical Genre enum, which caused custom genres to silently fall back to
- * Electronic.
- */
 function toSdkGenre(value: string | undefined | ''): string | undefined {
   if (value === undefined || value === '') return undefined
   return value
@@ -70,7 +62,6 @@ export const trackSegmentFromSDK = ({
   duration,
   multihash
 }: SdkTrackSegment): TrackSegment => ({
-  // Client code expects duration as a string
   duration: `${duration}`,
   multihash
 })
@@ -119,7 +110,6 @@ export const userTrackMetadataFromSDK = (
   const remixes = transformAndCleanList(input.remixOf?.tracks, remixFromSDK)
 
   const newTrack: UserTrackMetadata = {
-    // Fields from API that are omitted in this model
     ...omit(snakecaseKeys(input), [
       'id',
       'user_id',
@@ -127,10 +117,8 @@ export const userTrackMetadataFromSDK = (
       'favorite_count'
     ]),
 
-    // Conversions
     track_id: decodedTrackId,
     owner_id: decodedOwnerId,
-    // TODO: Remove this when api is fixed to return UTC dates
     release_date: input.releaseDate
       ? dayjs
           .utc(input.releaseDate)
@@ -139,7 +127,6 @@ export const userTrackMetadataFromSDK = (
           .format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ')
       : null,
 
-    // Nested Transformed Fields
     cover_art_cids: input.coverArtCids
       ? coverArtSizesCIDsFromSDK(input.coverArtCids)
       : null,
@@ -172,21 +159,17 @@ export const userTrackMetadataFromSDK = (
       : null,
     track_segments: input.trackSegments.map(trackSegmentFromSDK),
     user,
-    // Accepted collaborator artists, decoded/cleaned like the owner.
     collaborators: transformAndCleanList(
       input.collaborators,
       userMetadataFromSDK
     ),
-    // Pending invites (owner-only); lets the edit form preserve them on save.
     pending_collaborators: transformAndCleanList(
       input.pendingCollaborators,
       userMetadataFromSDK
     ),
 
-    // Retypes
     license: (input.license as License) ?? null,
 
-    // Nullable fields
     allowed_api_keys: input.allowedApiKeys ?? null,
     artists: input.artists
       ? transformAndCleanList(input.artists, resourceContributorFromSDK)
@@ -376,8 +359,6 @@ export const trackMetadataForUploadToSdk = (
           }))
         }
       : undefined,
-    // Collaborators are tagged as full user objects in the form; the on-chain
-    // metadata carries numeric user ids, which the ETL reconciles into invites.
     collaborators: input.collaborators
       ? getUniqueCollaborators(input.collaborators, input.owner_id).map(
           (collaborator) => collaborator.user_id
@@ -415,16 +396,13 @@ export const fileToSdk = (
   file: Blob | File | NativeFile,
   name: string
 ): CrossPlatformFile => {
-  // If we're in react-native, return as-is
   if ('uri' in file) {
     return file
   }
 
-  // If it's already a File, return as-is
   if (file instanceof File) {
     return file
   }
 
-  // If it's a Blob, convert to File with a name
   return new File([file], name, { type: file.type })
 }

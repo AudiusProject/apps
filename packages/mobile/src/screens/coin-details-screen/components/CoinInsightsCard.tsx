@@ -40,7 +40,7 @@ const GraduatedPill = () => {
       ph='s'
       borderRadius='l'
       style={{
-        backgroundColor: 'rgba(126, 27, 204, 0.1)' // Have to hardcode for opacity
+        backgroundColor: 'rgba(126, 27, 204, 0.1)'
       }}
     >
       <Text
@@ -48,7 +48,7 @@ const GraduatedPill = () => {
         size='s'
         color='accent'
         textTransform='uppercase'
-        style={{ marginTop: isIos ? 2 : 0 }} // Bugfix for iOS label variant text alignment
+        style={{ marginTop: isIos ? 2 : 0 }}
       >
         {messages.graduated}
       </Text>

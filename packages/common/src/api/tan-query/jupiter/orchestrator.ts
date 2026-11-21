@@ -63,29 +63,24 @@ export class SwapOrchestrator {
       isRetrying: false
     }
 
-    // Notify execution start
     if (this.config.onExecutionStart) {
       await this.config.onExecutionStart(context)
     }
 
-    // Determine swap type and create appropriate executor
     const executor = this.createExecutor(params, dependencies, tokens)
     const swapType = this.determineSwapType(params, dependencies, tokens)
 
     let result: SwapTokensResult
 
     if (swapType === 'INDIRECT') {
-      // IndirectSwapExecutor handles its own retries at the step level
       const executionResult = await executor.execute(params)
       result = this.convertExecutionResultToSwapResult(executionResult)
     } else {
-      // DirectSwapExecutor uses orchestrator-level retry logic
       const retryResult = await this.retryPolicy.executeWithRetry(
         async () => {
           context.attemptNumber++
           context.isRetrying = context.attemptNumber > 1
 
-          // Invalidate queries before retry (except on first attempt)
           if (context.isRetrying && this.config.enableQueryInvalidation) {
             await invalidateSwapQueries(
               dependencies.queryClient,
@@ -110,11 +105,9 @@ export class SwapOrchestrator {
         }
       )
 
-      // Convert retry result to SwapTokensResult
       result = this.convertToSwapResult(retryResult, context)
     }
 
-    // Invalidate queries on success
     if (
       result.status === SwapStatus.SUCCESS &&
       this.config.enableQueryInvalidation
@@ -122,7 +115,6 @@ export class SwapOrchestrator {
       await invalidateSwapQueries(dependencies.queryClient, dependencies.user)
     }
 
-    // Notify execution complete
     if (this.config.onExecutionComplete) {
       await this.config.onExecutionComplete(context, result)
     }
@@ -154,8 +146,6 @@ export class SwapOrchestrator {
   ): 'DIRECT' | 'INDIRECT' {
     const { inputMint, outputMint } = params
 
-    // Use the same logic as main branch: if either token is AUDIO, use direct swap
-    // Otherwise use indirect swap via AUDIO
     const isAudioPairedSwap =
       inputMint === dependencies.audioMint ||
       outputMint === dependencies.audioMint

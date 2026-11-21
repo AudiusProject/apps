@@ -13,16 +13,10 @@ const messages = {
 export const CastButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
-  // The audio element is routed through an AudioContext on this app, so
-  // `audio.remote.state` doesn't reliably flip to 'connected' when the user
-  // tab-casts via the system picker. Track an optimistic local flag set when
-  // the user successfully picks a device.
   const [pickedCast, setPickedCast] = useState(false)
   const { supported, state, prompt } = useRemotePlayback()
   const isCasting =
     pickedCast || state === 'connected' || state === 'connecting'
-  // Safari's `audio.remote.prompt()` opens the AirPlay picker; on Chromium
-  // it opens Chrome's cast picker. Label the popup row + tooltip accordingly.
   const mode = useMemo<'airplay' | 'cast'>(
     () => (isSafari() ? 'airplay' : 'cast'),
     []
@@ -50,10 +44,6 @@ export const CastButton = () => {
   const handleSelectThisBrowser = useCallback(async () => {
     setIsOpen(false)
     if (isCasting) {
-      // RemotePlayback has no programmatic disconnect. Re-opening the
-      // browser's native picker shows a "Stop casting" option for the
-      // currently-active device — the user clicks that to return audio
-      // to the local browser. This is the same flow Spotify uses.
       try {
         await prompt()
       } catch {

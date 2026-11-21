@@ -13,15 +13,15 @@ export default function ApiReference() {
     })
   }, [])
 
-  // Intercept cmd+k in capture phase so Vocs search never opens on this page.
-  // Instead, forward to Scalar's own search button.
   useEffect(() => {
     const handler = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.stopImmediatePropagation()
         e.preventDefault()
-        // Click Scalar's sidebar search button to open its search modal
-        const btn = document.querySelector('.t-doc__sidebar button[type="button"] .sidebar-search-placeholder, .scalar-api-reference button .sr-only')
+        const btn = document
+          .querySelector(
+            '.t-doc__sidebar button[type="button"] .sidebar-search-placeholder, .scalar-api-reference button .sr-only',
+          )
           ?.closest('button')
         btn?.click()
       }
@@ -30,7 +30,6 @@ export default function ApiReference() {
     return () => window.removeEventListener('keydown', handler, true)
   }, [])
 
-  // Vocs → Scalar: watch <html class="dark"> and push into Scalar via prop + localStorage
   useEffect(() => {
     const html = document.documentElement
     const syncFromVocs = () => {
@@ -44,7 +43,6 @@ export default function ApiReference() {
     return () => observer.disconnect()
   }, [])
 
-  // Scalar → Vocs: watch document.body for dark-mode/light-mode classes
   useEffect(() => {
     const syncFromScalar = () => {
       const isDark = document.body.classList.contains('dark-mode')
@@ -87,7 +85,6 @@ export default function ApiReference() {
                   authorizationCode: {
                     'x-usePkce': 'SHA-256',
                     selectedScopes: ['read'],
-                    // Audius API key for the docs app
                     'x-scalar-client-id': '2cc593fc814461263d282a84286fd4f72c79562e',
                     clientSecret: '',
                   },

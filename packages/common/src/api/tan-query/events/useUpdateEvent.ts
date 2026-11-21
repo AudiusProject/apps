@@ -36,7 +36,6 @@ export const useUpdateEvent = () => {
     onMutate: async (args: UpdateEventArgs) => {
       const { eventId, ...updates } = args
 
-      // Get the current event from cache
       const currentEvent = queryClient.getQueryData(getEventQueryKey(eventId))
       if (!currentEvent) return
 
@@ -46,16 +45,13 @@ export const useUpdateEvent = () => {
         updatedAt: new Date().toISOString()
       }
 
-      // Update the event cache
       queryClient.setQueryData(getEventQueryKey(eventId), updatedEvent)
 
-      // Return context for rollback
       return { previousEvent: currentEvent }
     },
     onError: (error: Error, args, context) => {
       console.error(error)
 
-      // Revert the optimistic updates
       if (context?.previousEvent) {
         queryClient.setQueryData(
           getEventQueryKey(args.eventId),
@@ -63,7 +59,6 @@ export const useUpdateEvent = () => {
         )
       }
 
-      // Toast generic error message
       toast({
         content: 'There was an error updating the event. Please try again'
       })

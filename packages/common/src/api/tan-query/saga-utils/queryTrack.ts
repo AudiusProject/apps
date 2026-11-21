@@ -46,10 +46,8 @@ export function* queryTracks(
 ): Generator<any, Track[], any> {
   if (!ids.length) return [] as Track[]
 
-  // Query each track in parallel using queryTrack
   const tracks = yield* all(ids.map((id) => call(queryTrack, id, queryOptions)))
 
-  // Filter out null and undefined results and return as Track[]
   return tracks.filter(removeNullable)
 }
 
@@ -75,15 +73,12 @@ export function* queryCollectionTracks(
 ): Generator<any, Track[], any> {
   if (!collectionId) return [] as Track[]
 
-  // Get collection data
   const collection = yield* call(queryCollection, collectionId, queryOptions)
   if (!collection) return [] as Track[]
 
-  // Extract track IDs from collection
   const trackIds = collection.playlist_contents.track_ids.map(
     ({ track }: { track: ID }) => track
   )
 
-  // Query all tracks in parallel
   return yield* call(queryTracks, trackIds, queryOptions)
 }

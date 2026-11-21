@@ -25,10 +25,6 @@ const getTokenPairQueryKey = (
 ) =>
   [QUERY_KEYS.tokenPair, lookupType, baseIdentifier, quoteIdentifier] as const
 
-/**
- * Helper function to get the query options for fetching a coin pair.
- * Useful for getting the query key tagged with the data type stored in the cache.
- */
 export const getTokenPairOptions = ({
   baseSymbol,
   quoteSymbol,

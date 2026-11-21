@@ -31,12 +31,8 @@ const { setVisibility } = modalsActions
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
-// Height of the nav controls row. Exported so ProfileTabNavigator can reserve
-// the matching amount of space via minHeaderHeight.
 export const PROFILE_NAV_CONTROLS_HEIGHT = 56
 
-// Scroll distance (in px) over which the blur background fades in and the
-// button icons transition from white to the neutral theme color.
 export const PROFILE_NAV_SCROLL_FADE_PX = 60
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -59,8 +55,6 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   title: {
     ...StyleSheet.absoluteFillObject,
-    // Leave space for the icon buttons on either side of the row so the
-    // title doesn't visually collide with them when it fades in.
     paddingHorizontal: spacing(14),
     alignItems: 'center',
     justifyContent: 'center',
@@ -68,7 +62,6 @@ const useStyles = makeStyles(({ spacing }) => ({
     gap: spacing(1)
   },
   iconStack: {
-    // Wrapper so the two stacked IconButton layers occupy the same space.
     position: 'relative'
   },
   iconLayer: {
@@ -103,7 +96,6 @@ export const ProfileNavOverlay = () => {
       : 0
   }))
 
-  // White icons fade out as the user scrolls past the cover photo.
   const whiteIconsStyle = useAnimatedStyle(() => ({
     opacity: scrollY
       ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [1, 0], {
@@ -113,7 +105,6 @@ export const ProfileNavOverlay = () => {
       : 1
   }))
 
-  // Neutral icons fade in as the user scrolls past the cover photo.
   const neutralIconsStyle = useAnimatedStyle(() => ({
     opacity: scrollY
       ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
@@ -123,8 +114,6 @@ export const ProfileNavOverlay = () => {
       : 0
   }))
 
-  // Title fades in alongside the blur background so it only appears once
-  // the cover photo has scrolled away.
   const titleStyle = useAnimatedStyle(() => ({
     opacity: scrollY
       ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {

@@ -215,7 +215,6 @@ export const PayoutWalletModal = NiceModal.create(() => {
             PublicKey.isOnCurve(addressPubkey)
 
           if (!isRootWallet) {
-            // If not a root wallet, maybe it's a USDC account
             try {
               const unpacked = unpackAccount(
                 addressPubkey,
@@ -230,7 +229,6 @@ export const PayoutWalletModal = NiceModal.create(() => {
               // fall through
             }
           } else {
-            // It's a root wallet - check for USDC mint ATA
             const ataPubkey = getAssociatedTokenAddressSync(
               usdcMint,
               addressPubkey
@@ -241,7 +239,6 @@ export const PayoutWalletModal = NiceModal.create(() => {
                 usdcAta = ataPubkey.toBase58()
               }
             } catch (e) {
-              // No USDC mint ATA. Make one if possible.
               if (e instanceof TokenAccountNotFoundError) {
                 const payer = await sdk.services.solanaRelay.getFeePayer()
                 const res = await connection.getLatestBlockhash()
@@ -280,7 +277,6 @@ export const PayoutWalletModal = NiceModal.create(() => {
                 })
                 let owner = null
                 let retryCount = 0
-                // Obscene max retry count is intentional
                 while (owner === null && retryCount < 10000) {
                   try {
                     owner = await getAssociatedTokenAccountOwner(

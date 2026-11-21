@@ -75,7 +75,6 @@ describe('ScreenFooterLayout', () => {
       expect(root.props.behavior).toBe('height')
       expect(root.props.keyboardVerticalOffset).toBe(88)
 
-      // A loaded/restored track alone does not reserve a hidden mini-player.
       const control = renderer.root.findByType('button')
       act(() => control.props.onClick())
       expect(
@@ -86,7 +85,6 @@ describe('ScreenFooterLayout', () => {
         renderer.root.findByType('AnimatedView' as any).props.style.height
       ).toBe(41 + (safeBottom as number))
 
-      // Keyboard clearance replaces the tab/mini-player clearance, including during animation.
       for (const keyboardHeight of [-20, -320, 0]) {
         mockKeyboardHeight = keyboardHeight
         act(() => renderer.update(screen()))

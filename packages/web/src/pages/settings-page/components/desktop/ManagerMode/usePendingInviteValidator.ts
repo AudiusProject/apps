@@ -15,9 +15,6 @@ const messages = {
   alreadyAcceptedInvitation: 'You already accepted this invitation'
 }
 
-/** Watches for a valid pending id value in the URL, extracts it and shows a toast
- * if the invite is invalid or has already been accepted.
- */
 export const usePendingInviteValidator = ({
   userId,
   managedAccounts

@@ -40,7 +40,6 @@ export const BlockMessagesDrawer = () => {
   const { data } = useDrawer('BlockMessages')
   const { userId, shouldOpenChat, isReportAbuse } = data
   const { data: user } = useUser(userId)
-  // Assuming blockees have already been fetched in ProfileActionsDrawer.
   const doesBlockUser = useSelector((state) => getDoesBlockUser(state, userId))
   const { canCreateChat } = useCanCreateChat(userId)
 

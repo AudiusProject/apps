@@ -51,7 +51,6 @@ export const useFanClubsList = <TResult = Coin[]>(
       const coins = response?.data
       const parsedCoins = coinListFromSDK(coins)
 
-      // Prime individual coin data for each mint
       if (parsedCoins) {
         parsedCoins.forEach((coin) => {
           if (coin.mint) {
@@ -113,7 +112,6 @@ export const useFanClubs = <TData = Coin[]>(
       const coins = response?.data
       const parsedCoins = coinListFromSDK(coins)
 
-      // Prime individual coin data for each mint
       if (parsedCoins) {
         parsedCoins.forEach((coin) => {
           if (coin.mint) {
@@ -126,11 +124,9 @@ export const useFanClubs = <TData = Coin[]>(
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      // If the last page has fewer items than the page size, we've reached the end
       if (lastPage.length < pageSize) {
         return undefined
       }
-      // Otherwise, return the next offset
       return allPages.length * pageSize
     },
     select: options?.select ?? ((data) => data.pages.flat() as TData),
@@ -139,5 +135,4 @@ export const useFanClubs = <TData = Coin[]>(
   })
 }
 
-// Export enum types for use in other components
 export { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum }

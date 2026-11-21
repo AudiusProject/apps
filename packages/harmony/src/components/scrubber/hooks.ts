@@ -45,7 +45,6 @@ export const usePlaybackPositionTracking = (
   }, [isPlayingRef])
 
   const refreshPosition = useCallback(() => {
-    // Allow queueing a refresh of position if the animation isn't running
     if (!isPlayingRef.current) {
       window.requestAnimationFrame(updatePositionRef.current)
     }

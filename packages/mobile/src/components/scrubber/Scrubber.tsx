@@ -28,34 +28,14 @@ const useStyles = makeStyles(({ palette }) => ({
 }))
 
 type ScrubberProps = {
-  /**
-   * A unique key to represent this instances of playback.
-   * If the user replays the same track, mediaKey should change
-   */
   mediaKey: string
-  /**
-   * Whether audio is playing and the scrubber should animate
-   */
   isPlaying: boolean
-  /**
-   * The duration of the currently playing track
-   */
   duration: number
-  /**
-   * Callback invoked when focus is gained on the scrubber
-   */
   onPressIn: () => void
-  /**
-   * Callback invoked when focus is lost on the scrubber
-   */
   onPressOut: () => void
-  /** Rail positions, 0 to 1, marked with a dot. */
   markers?: number[]
 }
 
-/**
- * Scrubber component to control track playback & seek.
- */
 export const Scrubber = ({
   mediaKey,
   isPlaying,
@@ -109,8 +89,6 @@ export const Scrubber = ({
     setIsInteracting(false)
   }, [])
 
-  // TODO: disable scrubber animation when now playing is closed
-  // Disable tracking bar animation when now playing bar is open
   return (
     <View style={styles.root}>
       <PositionTimestamp ref={ref} />

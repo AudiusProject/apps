@@ -40,11 +40,8 @@ export default function render(pageContext: CollectionPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
-  // Check if this request can show an embed player (Twitter/Discord bots)
   const shouldEmbed = canEmbed(userAgent)
 
-  // Create a fresh cache instance for this SSR request
-  // This ensures the theme context is properly connected
   const cache = createCache({ key: 'harmony', prepend: true })
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
@@ -59,14 +56,11 @@ export default function render(pageContext: CollectionPageContext) {
     hashId: id
   })
 
-  // Generate embed and app URLs
   const embedType = is_album ? 'album' : 'playlist'
   const embedUrl = getEmbedUrl(embedType, id)
   const appUrl = getAppUrl(urlPathname)
   const webUrl = getWebUrl(urlPathname)
 
-  // Discord uses a weird aspect ratio for OG unfurls, so serve artwork
-  // directly instead of the custom OG image
   const discordBot = isDiscord(userAgent)
   const discordImageOverride = discordBot
     ? (collection?.artwork?.['1000x1000'] ?? DEFAULT_IMAGE_URL)

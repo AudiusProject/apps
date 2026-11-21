@@ -45,7 +45,6 @@ const tierGradientMap: { [tier in BadgeTier]: any } = {
   }
 }
 
-/** Just the name of the badge, in a nice gradient.  Used in a few places. */
 export const BadgeTierText = ({
   tier,
   fontSize,
@@ -65,10 +64,6 @@ export const BadgeTierText = ({
   )
 }
 
-/**
- * Badge with additional info that lives on a profile page.
- * shows the badge icon as was as the name of the tier.
- */
 const ProfilePageBadge = ({
   userId,
   className,

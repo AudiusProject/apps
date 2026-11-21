@@ -25,16 +25,10 @@ export type TabsVariant = 'desktop' | 'mobile' | 'mobileV2'
 
 type TabsContextValue = {
   variant: TabsVariant
-  // Controlled-mode value, undefined in routed mode.
   controlledValue: string | undefined
   onSelect: (value: string) => void
-  // Optional click callback fired in either mode (e.g. for analytics).
   onTabClick?: (key: string) => void
-  // Tabs register themselves on mount and report active state. TabList
-  // computes which tab gets the accent — matched tab if any, else first.
   registerTab: (key: string, el: HTMLElement | null, isActive: boolean) => void
-  // Key of the tab TabList has chosen as active (may differ from the tab's
-  // own match status when no tab matches and TabList falls back to first).
   activeKey: string | null
   focusTabAt: (offset: number, fromKey: string) => void
   selectFirstTab: () => void
@@ -55,16 +49,8 @@ const useTabsContext = (component: string): TabsContextValue => {
 type TabListProps = {
   children: ReactNode
   variant?: TabsVariant
-  /**
-   * Provide `value` + `onChange` for controlled mode. Omit both for routed
-   * mode (each `<Tab>` uses its `to` prop with react-router).
-   */
   value?: string
   onChange?: (value: string) => void
-  /**
-   * Fires whenever a tab is clicked, in either mode. Useful for analytics
-   * — distinct from `onChange` which is only for controlled-mode state.
-   */
   onTabClick?: (key: string) => void
   disabledTabTooltipText?: string
   className?: string
@@ -93,10 +79,6 @@ export const TabList = ({
     [onChange]
   )
 
-  // Recompute which tab gets the accent: the active one if any reports active,
-  // otherwise the first registered tab. Falling back to the first means the
-  // accent is always visible when the URL doesn't yet match any subroute
-  // (e.g. /handle for an artist where /handle/tracks is the canonical URL).
   const recomputeActive = useCallback(() => {
     const list = tabRegistry.current
     const matched = list.find((t) => t.isActive) ?? list[0]
@@ -168,8 +150,6 @@ export const TabList = ({
     ]
   )
 
-  // Animate the accent underline to follow the active tab.
-  // react-spring v8's typings don't match the runtime API for the setter.
   const [accentSpring, setAccentSpringRaw] = useSpring(() => ({
     from: { left: 0, top: 0, width: 0 },
     config: { mass: 1, tension: 300, friction: 32, clamp: true }
@@ -196,7 +176,6 @@ export const TabList = ({
     positionAccent()
   }, [positionAccent])
 
-  // Reposition on container/tab resize (e.g. hideText toggle, font load).
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') return
     const els = [containerRef.current, activeEl].filter(
@@ -208,7 +187,6 @@ export const TabList = ({
     return () => observer.disconnect()
   }, [activeEl, positionAccent])
 
-  // Reposition on window resize too (handles container reflow without size change).
   useEffect(() => {
     const onResize = () => positionAccent()
     window.addEventListener('resize', onResize)
@@ -251,9 +229,6 @@ export type TabProps = CommonTabProps &
   ({ to: string; value?: never } | { value: string; to?: never })
 
 const useIsRouteActive = (to: string | undefined) => {
-  // useResolvedPath/useMatch must be called unconditionally for hook rules.
-  // When `to` is undefined (controlled mode), pass a stub path; the result
-  // is ignored.
   const resolved = useResolvedPath(to ?? '.')
   const match = useMatch({ path: resolved.pathname, end: true })
   return to !== undefined && match !== null
@@ -271,20 +246,14 @@ export const Tab = ({
   const ctx = useTabsContext('Tab')
   const tabRef = useRef<HTMLElement>(null)
 
-  // Local match: does THIS tab's identifier line up with the URL or with the
-  // controlled value? TabList aggregates these to pick the highlighted tab.
   const isRouteActive = useIsRouteActive(to)
   const localMatch =
     to !== undefined ? isRouteActive : ctx.controlledValue === value
 
   const key = (to ?? value)!
 
-  // Final active: TabList's chosen activeKey wins. This handles the fallback
-  // case where no tab matches the URL — TabList picks the first registered.
   const isActive = ctx.activeKey === key
 
-  // Register with TabList. Re-runs when localMatch changes so TabList can
-  // recompute which tab gets the accent underline.
   useEffect(() => {
     ctx.registerTab(key, tabRef.current, localMatch)
     return () => ctx.registerTab(key, null, false)
@@ -310,7 +279,6 @@ export const Tab = ({
         value !== undefined &&
         to === undefined
       ) {
-        // Controlled mode: Enter/Space activates. (NavLink handles this for routed.)
         e.preventDefault()
         ctx.onSelect(value)
       }
@@ -371,8 +339,6 @@ export const Tab = ({
     className
   }
 
-  // Preserve the current query string when navigating between tabs (e.g.
-  // Library's ?filter= and ?search= should survive tab clicks).
   const currentSearch = useLocation().search
 
   const tabElement =

@@ -5,12 +5,6 @@ import {
 
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
-/**
- * Skeleton placeholder used by ScreenSecondaryContent on the Trending screen
- * during the deferred-render window. Rendering TrackLineup with empty trackIds
- * + isPending guarantees the skeleton tiles match the loaded lineup exactly
- * (same SectionList row, same item wrapper, same LineupTileSkeleton sizing).
- */
 export const TrendingLineupSkeletons = () => (
   <TrackLineup
     trackIds={[]}

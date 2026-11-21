@@ -7,7 +7,6 @@
  */
 
 export const breakpoints = {
-  // Maximum width values for each breakpoint
   values: {
     /**
      * Extra small devices (portrait phones)

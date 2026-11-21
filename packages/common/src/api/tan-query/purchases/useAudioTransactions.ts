@@ -22,8 +22,6 @@ type GetAudioTransactionsArgs = {
   sortDirection?: GetAudioTransactionsSortDirectionEnum
 }
 
-// /v1/users/{id}/transactions/audio caps `limit` at 100 server-side. Keep the
-// page size at or below that.
 export const DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE = 50
 
 export const getAudioTransactionsQueryKey = ({
@@ -90,8 +88,6 @@ export const useAudioTransactions = (
     enabled: options?.enabled !== false && !!userId
   })
 
-  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
-  // doesn't change every render. Mirrors the pattern in usePurchases.
   const queryResultRef = useRef(queryResult)
   queryResultRef.current = queryResult
   const loadNextPage = useCallback(() => {

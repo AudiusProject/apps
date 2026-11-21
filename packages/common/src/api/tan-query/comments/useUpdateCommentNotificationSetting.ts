@@ -38,7 +38,6 @@ export const useUpdateCommentNotificationSetting = () => {
             isMuted: action === EntityManagerAction.MUTE
           } as CommentOrReply
         }
-        // TODO: this might be a bug. Shouldn't be storing non-CommentOrReply data in the cache
         return {
           isMuted: action === EntityManagerAction.MUTE
         } as CommentOrReply

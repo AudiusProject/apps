@@ -193,8 +193,6 @@ export const TrackTile = ({
     [has_current_user_reposted, handleUnrepostTrack, handleRepostTrack, isFeed]
   )
 
-  // We wanted to use mobile track tile on desktop, which means shimming in the desktop overflow
-  // menu whenever isMobile is false.
   const renderOverflowMenu = () => {
     const menu: Omit<TrackMenuProps, 'children'> = {
       extraMenuItems: [],

@@ -52,10 +52,6 @@ const formatStatus = (endDate?: string | null): string => {
 export type ContestCardVariant = 'hero' | 'grid'
 
 export type ContestCardProps = Omit<PaperProps, 'onClick'> & {
-  /**
-   * The parent track ID the contest is attached to. The card resolves the
-   * remix-contest event (end date, prize info) internally via useRemixContest.
-   */
   trackId: ID
   variant?: ContestCardVariant
   onClick?: (e: MouseEvent<HTMLAnchorElement>) => void
@@ -63,12 +59,6 @@ export type ContestCardProps = Omit<PaperProps, 'onClick'> & {
 
 const COVER_HEIGHT = 96
 
-/**
- * Renders the contest card cover as a proper `<img>` tag (instead of a CSS
- * background-image). Using a real image element lets the browser apply its
- * native image scaling on HiDPI displays, which is meaningfully crisper for
- * the wide hero variant. A Skeleton overlay fades out when the image loads.
- */
 const ContestCover = ({
   src,
   children
@@ -184,13 +174,6 @@ const StatusPill = ({ children }: { children: ReactNode }) => {
 export const ContestCardSkeleton = (
   props: { variant?: ContestCardVariant } & Omit<PaperProps, 'variant'>
 ) => {
-  // Mirror the dimensions the real `ContestCard` uses so the skeleton
-  // doesn't pop in shorter than the resolved card. Hero rows render
-  // heading/l (line-height 40) and grid rows render heading/m
-  // (line-height 32); both clamp to two lines, giving an 80 / 64 px
-  // title block respectively. Earlier iterations rendered a single 28px
-  // line, which was the source of the "skeleton loader is the wrong
-  // size on the explore page" QA pass.
   const variant = props.variant ?? 'grid'
   const titleBlockHeight = variant === 'hero' ? 80 : 64
   return (
@@ -230,9 +213,6 @@ export const ContestCard = forwardRef(
     const { data: track } = useTrack(trackId)
     const { data: user } = useUser(track?.owner_id)
     const { data: remixContest } = useRemixContest(trackId)
-    // Hero is full-width (~960px+ at 2x DPI ≈ 1920px), so always request the
-    // largest size the SDK exposes (1000×1000). Grid cards are ~309px wide so
-    // 480×480 is a much better size/fidelity tradeoff.
     const { imageUrl: trackImageUrl } = useTrackCoverArt({
       trackId,
       size:
@@ -240,33 +220,17 @@ export const ContestCard = forwardRef(
           ? SquareSizes.SIZE_1000_BY_1000
           : SquareSizes.SIZE_480_BY_480
     })
-    // Prefer the contest's own cover photo (set on the host contest form's
-    // "Cover Photo" field) over the parent track's artwork — same fallback
-    // ordering the contest page itself uses.
     const contestCoverPhotoUrl = (remixContest?.eventData as any)
       ?.coverPhotoUrl as string | undefined
     const imageUrl = contestCoverPhotoUrl || trackImageUrl
 
-    // staleTime lets the discovery endpoint's primed cache (see
-    // useAllRemixContests) satisfy this query without an extra count-only
-    // round-trip per card. 60s is loose enough to skip redundant refetches
-    // during a single visit, tight enough that a returning user sees
-    // near-live counts.
     const { data: entriesCount = 0 } = useRemixesCount(
       { trackId, isContestEntry: true },
       { enabled: !!trackId, staleTime: 60_000 }
     )
-    // Line-height for heading/m + heading/l respectively, pulled from
-    // Harmony typography. We pin the title row to exactly two lines so
-    // cards in the grid line up regardless of title length (Figma
-    // reference: the tile grid is visibly uniform even when some
-    // titles wrap to two lines and others don't).
     const titleLineHeight = variant === 'hero' ? 40 : 32
     const titleBlockHeight = titleLineHeight * 2
 
-    // Land on the dedicated contest page rather than the host's track page
-    // — the contest page is the actual destination readers are trying to
-    // reach from the Explore grid.
     const contestDestination = track?.permalink
       ? contestPage(track.permalink)
       : ''
@@ -275,13 +239,6 @@ export const ContestCard = forwardRef(
       return <ContestCardSkeleton variant={variant} {...other} />
     }
 
-    // Skip contests whose host has been deactivated. The discovery
-    // endpoint can still return these (e.g. the fake "Audius" /
-    // life-audius-airdrop accounts that were deleted) but a contest
-    // with a tombstoned host has no valid action surface — and showing
-    // them on the explore grid was the root of the "deleted accounts
-    // surface contests" bug. Returning null lets the grid auto-collapse
-    // around the missing card without leaving a placeholder hole.
     if (user.is_deactivated) {
       return null
     }
@@ -301,10 +258,6 @@ export const ContestCard = forwardRef(
           overflow: 'hidden',
           borderRadius: 14,
           cursor: 'pointer',
-          // Establish a positioning context for the stretched <Link> overlay
-          // below, which is what lets cmd+click / middle-click open the
-          // contest page in a new tab the way the browser does for any
-          // ordinary anchor.
           position: 'relative'
         }}
         {...other}
@@ -384,9 +337,6 @@ export const ContestCard = forwardRef(
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 '&::-webkit-scrollbar': { display: 'none' },
-                // Elevate the horizontally-scrolling entries row above the
-                // stretched link so horizontal scroll / pill clicks don't
-                // accidentally navigate to the contest page.
                 position: 'relative',
                 zIndex: 2
               }}

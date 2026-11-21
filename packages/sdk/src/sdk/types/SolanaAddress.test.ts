@@ -17,7 +17,6 @@ const acceptedByWeb3 = (value: string) => {
 
 const programId = new PublicKey('Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo')
 
-// Deterministic PRNG so failures are reproducible
 const rng = (() => {
   let seed = 42
   return () => {
@@ -33,25 +32,20 @@ const randomBase58 = (length: number) =>
   ).join('')
 
 const cases = [
-  // Valid on-curve keys
   ...Array.from({ length: 20 }, () => Keypair.generate().publicKey.toBase58()),
-  // Off-curve PDAs
   ...Array.from(
     { length: 10 },
     (_, i) =>
       PublicKey.findProgramAddressSync([Buffer.from(`seed-${i}`)], programId)[0]
   ).map((k) => k.toBase58()),
-  // All-zero key and leading zero bytes
   '11111111111111111111111111111111',
   new PublicKey(
     new Uint8Array([0, 0, ...new Uint8Array(30).fill(7)])
   ).toBase58(),
-  // Wrong lengths: 31 and 33 bytes
   new PublicKey(new Uint8Array(32).fill(255)).toBase58().slice(0, -1),
   Keypair.generate().publicKey.toBase58() + '1',
   Keypair.generate().publicKey.toBase58() + 'z',
   '1' + Keypair.generate().publicKey.toBase58(),
-  // Invalid characters
   Keypair.generate().publicKey.toBase58().replace(/.$/, '0'),
   Keypair.generate().publicKey.toBase58().replace(/.$/, 'O'),
   Keypair.generate().publicKey.toBase58().replace(/.$/, 'I'),
@@ -61,14 +55,12 @@ const cases = [
   '0x5a9b1a5e9b5a7a1c0b5d8f1a2b3c4d5e6f7a8b9c',
   '',
   'abc',
-  // Random base58 strings around the valid lengths
   ...Array.from({ length: 2000 }, (_, i) => randomBase58(28 + (i % 20)))
 ]
 
 describe('isSolanaPublicKeyString', () => {
   it('accepts and rejects the same strings as new PublicKey()', () => {
     const accepted = cases.filter(acceptedByWeb3)
-    // Sanity check that both sides are exercised
     expect(accepted.length).toBeGreaterThan(30)
     expect(cases.length - accepted.length).toBeGreaterThan(30)
     for (const value of cases) {

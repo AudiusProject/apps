@@ -76,10 +76,7 @@ export const SignOnStack = (props: SignOnStackProps) => {
   const navigation = useNavigation<RootScreenParamList>()
   const lastHandledPage = useRef<Pages | null>(null)
 
-  // Respond to signon saga page changes
   useEffect(() => {
-    // Process each page transition once. Handle changes on PickHandle should not
-    // advance the user to FinishProfile before they submit the handle.
     if (lastHandledPage.current === page) return
     lastHandledPage.current = page
 
@@ -87,8 +84,6 @@ export const SignOnStack = (props: SignOnStackProps) => {
       page,
       hasHandle: Boolean(handle.value)
     })
-    // The sign-on screens live in the nested stack below, so target them
-    // through this screen's route.
     if (screen) navigation.navigate('SignOnStack', { screen, pop: true })
   }, [handle.value, navigation, page])
 
@@ -132,7 +127,6 @@ export const SignOnStack = (props: SignOnStackProps) => {
         <Stack.Screen
           name='AccountLoading'
           component={AccountLoadingScreen}
-          // animation: none here is a workaround to prevent "white screen of death" on Android
           options={{
             headerShown: false,
             ...(isAndroid ? { animation: 'none' } : undefined)

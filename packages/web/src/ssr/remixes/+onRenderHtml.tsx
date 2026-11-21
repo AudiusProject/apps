@@ -1,5 +1,3 @@
-// Remixes page SSR - meta tags only
-
 import type { Track, User } from '@audius/common/models'
 import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
@@ -21,7 +19,6 @@ export default function render(pageContext: RemixesPageContext) {
   const { pageProps, urlPathname } = pageContext
   const { track, user } = pageProps
 
-  // Build remixes-specific meta tags
   const title =
     track?.title && user?.name
       ? `Remixes of ${track.title} • ${user.name}`

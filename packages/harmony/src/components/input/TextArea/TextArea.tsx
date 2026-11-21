@@ -87,7 +87,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
     const maxHeight = grows
       ? getMaxHeight({ maxVisibleRows, size })
-      : rootRef.current?.offsetHeight // clamp to initial height if non-growing
+      : rootRef.current?.offsetHeight
 
     const style = {
       [styles.noResize]: !resize,
@@ -117,8 +117,6 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       useFocusState<HTMLTextAreaElement>(onFocusProp, onBlurProp)
 
     useEffect(() => {
-      // Even though we always "grow" the text area,
-      // the maxHeight of the container will cause a scrollbar to appear if necesary
       growTextArea()
     }, [growTextArea, value])
 

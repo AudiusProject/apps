@@ -30,7 +30,6 @@ export const useUserCoin = <TResult = UserCoinWithAccounts | null>(
   options?: UseUserCoinOptions<TResult>
 ) => {
   const { audiusSdk, env } = useQueryContext()
-  // Default to current user if no userId is provided
   const { data: currentUser } = useCurrentAccountUser({
     enabled: !params.userId
   })

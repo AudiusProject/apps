@@ -7,8 +7,6 @@ export const formatShareText = (title, creator) => {
 }
 
 export const getAudiusURL = () => {
-  // This envvar only exists in the develop config -
-  // otherwise it's lifted from the window.location in production.
   const hostname = getAudiusHostname()
   if (!hostname) {
     return `https://${window.location.host}`

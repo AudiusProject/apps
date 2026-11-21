@@ -12,8 +12,6 @@ const SIDEBAR_SECTION_WIDTH = 360
 const DESKTOP_NAV_WIDTH = 240
 
 const useStyles = makeResponsiveStyles(({ theme }) => {
-  // Keep sidebar fixed; allow the main column to shrink until both columns
-  // are equal width, then collapse to single-column.
   const pageInsetHorizontalPadding = theme.spacing.unit15 * 2
   const twoColumnMinViewportWidth =
     SIDEBAR_SECTION_WIDTH +
@@ -41,7 +39,6 @@ const useStyles = makeResponsiveStyles(({ theme }) => {
         }
       }
     },
-    /** Primary column: fan club story + fan club feed (desktop left). */
     mainColumn: {
       base: {
         display: 'contents' as const,
@@ -57,7 +54,6 @@ const useStyles = makeResponsiveStyles(({ theme }) => {
         }
       }
     },
-    /** Sidebar: balance, leaderboard, insights, on-chain details (desktop right). */
     sidebarColumn: {
       base: {
         display: 'contents' as const,
@@ -73,13 +69,11 @@ const useStyles = makeResponsiveStyles(({ theme }) => {
         }
       }
     },
-    /** Item wrappers – collapse when the child component renders null. */
     itemWrapper: {
       base: {
         '&:empty': { display: 'none' }
       }
     },
-    /** Single-column ordering for interleaved layout */
     heroSection: {
       base: { order: 1 }
     },

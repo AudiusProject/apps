@@ -51,8 +51,6 @@ export type GetDecreaseDelegateStakeCancelledEventsResponse = {
   serviceProvider: Address
 }
 
-// Events
-
 export type GetClaimEventsResponse = {
   blockNumber: number
   claimer: Address

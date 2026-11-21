@@ -45,8 +45,6 @@ export const AccountListContent = ({
   const mainContentRef = useMainContentRef()
   const { spacing } = useTheme()
   const [contentHeight, setContentHeight] = useState(0)
-  // If the current user is one of the managed account, sort it to the top of
-  // the list
   const accounts = useMemo(() => {
     const selectedIdx = accountsProp.findIndex(
       ({ user }) => user.user_id === currentUserId
@@ -57,8 +55,6 @@ export const AccountListContent = ({
     return [selectedAccount, ...withoutSelected]
   }, [accountsProp, currentUserId])
 
-  // Tracking mainContent height so we can ensure the account list
-  // stays well within the viewport
   useLayoutEffect(() => {
     if (mainContentRef.current) {
       const { height } = mainContentRef.current.getBoundingClientRect()

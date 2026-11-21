@@ -234,7 +234,6 @@ export const getChallengeConfig = (id: ChallengeRewardID) => {
   return {
     ...commonConfig,
     ...webConfig,
-    // Ensure required fields are always present
     title: commonConfig?.title ?? '',
     description: commonConfig?.description ?? (() => ''),
     id: commonConfig?.id ?? id

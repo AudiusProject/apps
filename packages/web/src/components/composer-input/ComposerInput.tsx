@@ -111,9 +111,7 @@ export const ComposerInput = (props: ComposerInputProps) => {
   )
   const { color } = useTheme()
   const messageIdRef = useRef(messageId)
-  // Ref to keep track of the submit state of the input
   const submittedRef = useRef(false)
-  // Ref to keep track of a unique id for each change
   const changeOpIdRef = useRef(0)
 
   const {
@@ -295,7 +293,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
     value
   ])
 
-  // Submit when pressing enter while not holding shift
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       const textarea = ref.current as HTMLTextAreaElement
@@ -333,7 +330,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
         return
       }
 
-      // Submit on enter
       if (e.key === ENTER_KEY && !e.shiftKey) {
         if (onSubmit) {
           e.preventDefault()
@@ -341,9 +337,7 @@ export const ComposerInput = (props: ComposerInputProps) => {
         }
       }
 
-      // Start user autocomplete
       if (e.key === AT_KEY) {
-        // Only trigger autocomplete if @ is at the start of input or after a space
         const textBeforeCursor = textarea.value.slice(0, cursorPosition)
         const isAtStartOfWordOrInput =
           !textBeforeCursor || textBeforeCursor.endsWith(' ')
@@ -353,7 +347,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
         }
       }
 
-      // Delete any matched values with a single backspace
       if (e.key === BACKSPACE_KEY) {
         const textBeforeCursor = textarea.value.slice(0, cursorPosition)
         const { editValue, newCursorPosition } = handleBackspace({
@@ -391,14 +384,11 @@ export const ComposerInput = (props: ComposerInputProps) => {
 
   const renderDisplayText = useCallback(
     (value: string) => {
-      // Line index is used to keep track of the index of the last text section
-      // so that we do not have duplicate keys in the rendered text sections
       let lineIndex = 0
       const matches = getMatches(value) ?? []
       const mentions = getUserMentions(value) ?? []
       const fullMatches = [...matches, ...mentions, ...timestamps]
 
-      // If there are no highlightable sections, render text normally
       if (!fullMatches.length && !isUserAutocompleteActive) {
         return createTextSections(value, lineIndex)
       }
@@ -406,7 +396,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
       const renderedTextSections = []
       const autocompleteRange = getAutocompleteRange()
 
-      // Filter out matches split by an autocomplete section
       const filteredMatches = fullMatches.filter(({ index }) => {
         if (index === undefined) return false
         if (autocompleteRange) {
@@ -417,7 +406,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
         return true
       })
 
-      // Add the autocomplete section
       if (
         autocompleteRange &&
         autocompleteRange[0] >= 0 &&
@@ -431,7 +419,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
         })
       }
 
-      // Sort match sections by index
       const sortedMatches = filteredMatches.sort(
         (a, b) => (a.index ?? 0) - (b.index ?? 0)
       )
@@ -441,7 +428,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
         const { type, text, index } = match
         if (index === undefined) continue
 
-        // Add text before the match
         if (index > lastIndex) {
           const textSections = createTextSections(
             value.slice(lastIndex, index),
@@ -451,9 +437,7 @@ export const ComposerInput = (props: ComposerInputProps) => {
           lineIndex += textSections.length
         }
 
-        // Add the matched word with accent color
         if (type === 'autocomplete') {
-          // Autocomplete highlight
           renderedTextSections.push(
             <UserMentionAutocompleteText
               key={`${text}-${index}`}
@@ -465,7 +449,6 @@ export const ComposerInput = (props: ComposerInputProps) => {
             />
           )
         } else {
-          // User Mention or Link match
           renderedTextSections.push(
             <ComposerText key={`${text}-${index}`} color='accent'>
               {text}
@@ -473,11 +456,9 @@ export const ComposerInput = (props: ComposerInputProps) => {
           )
         }
 
-        // Update lastIndex to the end of the current match
         lastIndex = index + text.length
       }
 
-      // Add remaining text after the last match
       if (lastIndex < value.length) {
         const textSections = createTextSections(
           value.slice(lastIndex),

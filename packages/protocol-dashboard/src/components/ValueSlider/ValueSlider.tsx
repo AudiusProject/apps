@@ -15,7 +15,6 @@ const messages = {
   current: 'CURRENT'
 }
 
-// TODO: get html element node width after load/animation
 const MIN_SLIDER_WIDTH = 4
 
 type Label = { value: BigNumber; text?: string }

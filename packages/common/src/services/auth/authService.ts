@@ -18,9 +18,7 @@ export type SignInResponse = {
 }
 
 export type GetWalletAddressesResult = {
-  /** Wallet address of the current (acting-as) user. */
   accountWalletAddress: string
-  /** Wallet address of the signed-in user */
   web3WalletAddress: string
 }
 

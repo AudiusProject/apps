@@ -73,7 +73,7 @@ export const createPurchaseContentSchema = (
       },
       {
         message: 'Email Required',
-        path: [GUEST_EMAIL] // Specify the path to the error
+        path: [GUEST_EMAIL]
       }
     )
     .superRefine(async ({ guestEmail }, ctx) => {
@@ -82,7 +82,6 @@ export const createPurchaseContentSchema = (
         !guestEmail ||
         guestEmail === emailFromLocalStorage
       ) {
-        // only validate email if on guest checkout page and email is different
         return
       }
 

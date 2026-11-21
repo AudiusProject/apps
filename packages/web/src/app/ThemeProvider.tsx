@@ -48,7 +48,6 @@ const selectHarmonyTheme = (state: AppState): Theme => {
     return resolveTheme(palette, mode, sysAppearance)
   }
 
-  // No stored palette (e.g. new account, incognito) — always use default (Neue) theme
   switch (legacyTheme) {
     case LegacyTheme.LIGHT:
       return 'default-light'
@@ -77,7 +76,6 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
     }
     const mediaQuery = window.matchMedia(PREFERS_DARK_MEDIA_QUERY)
 
-    // Function to update state based on media query
     const handleSystemAppearanceChange = (e: MediaQueryListEvent) => {
       dispatch(
         setSystemAppearance({

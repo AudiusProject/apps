@@ -14,11 +14,6 @@ import type { Env } from '~/services/env'
 
 import type { MintName } from './solana'
 
-/**
- * Solana-specific parts of the AudiusBackend. Kept in their own module so
- * @solana/web3.js and @solana/spl-token are only loaded when one of these
- * methods is first used.
- */
 export const createSolanaBackend = ({
   env,
   reportError
@@ -27,7 +22,6 @@ export const createSolanaBackend = ({
   reportError: (args: { error: Error }) => void | Promise<void>
 }) => {
   function getMintAddress(mint: MintName): PublicKey {
-    // Simple mapping for the fixed set of mint names
     const mintAddresses: Record<MintName, string> = {
       wAUDIO: env.WAUDIO_MINT_ADDRESS,
       USDC: env.USDC_MINT_ADDRESS
@@ -40,11 +34,6 @@ export const createSolanaBackend = ({
     return new PublicKey(address)
   }
 
-  /**
-   * Fetches the Sol balance for the given wallet address
-   * @param {string} The solana wallet address
-   * @returns {Promise<AudioWei>}
-   */
   async function getAddressSolBalance({
     address,
     sdk
@@ -121,10 +110,6 @@ export const createSolanaBackend = ({
     return associatedTokenAddress
   }
 
-  /** Gets associated token account info for the passed account, deriving the associated address
-   * if necessary. If the account doesn't exist, it will attempt to create it using the user's
-   * browser wallet.
-   */
   async function getOrCreateAssociatedTokenAccount({
     address,
     sdk,
@@ -140,8 +125,6 @@ export const createSolanaBackend = ({
       const account = await getAccount(connection, pubkey)
       return account.address
     } catch (err) {
-      // Account is not a valid token account (either doesn't exist or wrong owner).
-      // Assume it's a wallet address and derive the associated token account from it.
       if (
         err instanceof TokenInvalidAccountOwnerError ||
         err instanceof TokenAccountNotFoundError
@@ -153,16 +136,11 @@ export const createSolanaBackend = ({
           solanaWalletKey: pubkey,
           mint
         })
-        // Atempt to get the associated token account
         try {
           const account = await getAccount(connection, associatedTokenAccount)
           return account.address
         } catch (err) {
-          // If it's not a valid token account, attempt to create it
           if (err instanceof TokenAccountNotFoundError) {
-            // We do not want to relay gas fees for this token account creation,
-            // so we ask the user to create one with phantom, showing an error
-            // if phantom is not found.
             return createAssociatedTokenAccountWithPhantom(
               connection,
               address,
@@ -173,14 +151,10 @@ export const createSolanaBackend = ({
           throw err
         }
       }
-      // Other error (including non-existent account)
       throw err
     }
   }
 
-  /**
-   * Make a request to send solana tokens
-   */
   async function sendTokens({
     address,
     amount,
@@ -194,11 +168,9 @@ export const createSolanaBackend = ({
     ethAddress: string
     sdk: AudiusSdkWithServices
     mint: PublicKey
-    recipientEthAddress?: string // When provided, derives user-bank ATA for the recipient
+    recipientEthAddress?: string
   }) {
     if (recipientEthAddress) {
-      // When sending to a user by ETH address, derive their user bank and
-      // combine account creation (if needed) + transfer in a single tx.
       const { userBank, instructions: createInstructions } =
         await sdk.services.claimableTokensClient.createUserBankIfNeededInstruction(
           {
@@ -217,7 +189,6 @@ export const createSolanaBackend = ({
       })
       return { res, error: null }
     } else {
-      // When sending to a Solana wallet address directly, use regular ATA logic
       const tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
         address,
         sdk,
@@ -269,7 +240,6 @@ export const createSolanaBackend = ({
         destination
       })
 
-    // Fetch blockhash explicitly to provide better error handling
     let recentBlockhash: string
     try {
       const connection = await sdk.services.solanaClient.getConnection()
@@ -303,11 +273,6 @@ export const createSolanaBackend = ({
     return signature
   }
 
-  /**
-   * Fetches the SPL WAUDIO balance for the user's solana wallet address
-   * @param {string} The solana wallet address
-   * @returns {Promise<wAUDIO | null>} Returns the balance, 0 for non-existent token accounts
-   */
   async function getAddressWAudioBalance({
     address,
     sdk
@@ -322,7 +287,6 @@ export const createSolanaBackend = ({
       })
       return wAUDIO(amount).value
     } catch (err) {
-      // Non-existent token accounts indicate 0 balance. Other errors fall through
       if (err instanceof TokenAccountNotFoundError) {
         return wAUDIO(0).value
       }
@@ -330,12 +294,6 @@ export const createSolanaBackend = ({
     }
   }
 
-  /**
-   * Finds the associated token address given a solana wallet public key
-   * @param solanaWalletKey Public Key for a given solana account (a wallet)
-   * @param mintKey
-   * @returns token account public key
-   */
   function findAssociatedTokenAddress({
     solanaWalletKey,
     mint
@@ -356,10 +314,6 @@ export const createSolanaBackend = ({
     return addresses[0]
   }
 
-  /** Gets associated token account info for the passed account. It will
-   * first check if `address` ia a token account. If not, it will assume
-   * it is a root account and attempt to derive an associated token account from it.
-   */
   async function getAssociatedTokenAccountInfo({
     address,
     sdk,
@@ -374,8 +328,6 @@ export const createSolanaBackend = ({
     try {
       return await getAccount(connection, pubkey)
     } catch (err) {
-      // Account is not a valid token account (either doesn't exist or wrong owner).
-      // Assume it's a wallet address and derive the associated token account from it.
       if (
         err instanceof TokenInvalidAccountOwnerError ||
         err instanceof TokenAccountNotFoundError
@@ -390,7 +342,6 @@ export const createSolanaBackend = ({
         })
         return await getAccount(connection, associatedTokenAccount)
       }
-      // Other error (including non-existent account)
       throw err
     }
   }

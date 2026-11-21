@@ -87,12 +87,10 @@ export const createSdkWithServices = (config: SdkConfig) => {
   const apiSecret = 'apiSecret' in config ? config.apiSecret : undefined
   const bearerToken = 'bearerToken' in config ? config.bearerToken : undefined
 
-  // Default apiKey to derived key from apiSecret if not provided
   if (apiSecret && !apiKey) {
     apiKey = privateKeyToAccount(ensureHex(apiSecret)).address
   }
 
-  // Initialize services
   const services = initializeServices({
     config,
     apiKey,
@@ -100,14 +98,12 @@ export const createSdkWithServices = (config: SdkConfig) => {
     bearerToken
   })
 
-  // Warn if using private key in the browser
   if (apiSecret && isBrowser) {
     services.logger.warn(
       "apiSecret should only be provided server side so that it isn't exposed"
     )
   }
 
-  // Warn if provided apiKey doesn't match apiSecret if both are provided
   if (apiSecret && apiKey) {
     const derivedKey = privateKeyToAccount(ensureHex(apiSecret)).address
     if (derivedKey.toLowerCase() !== ensureHex(apiKey.toLowerCase())) {
@@ -117,14 +113,12 @@ export const createSdkWithServices = (config: SdkConfig) => {
     }
   }
 
-  // Warn if only appName is provided
   if (!apiKey) {
     services.logger.warn(
       'No apiKey provided, some endpoints may have lower rate limits or require additional authentication'
     )
   }
 
-  // Initialize APIs (also creates tokenStore and oauth)
   const apis = initializeApis({
     config,
     apiKey,
@@ -160,7 +154,6 @@ const initializeServices = ({
   const audiusWalletClient =
     config.services?.audiusWalletClient ??
     createAppWalletClient({
-      // Allow undefined apiKey for now, use dummy wallet
       apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
       apiSecret
     })
@@ -213,7 +206,6 @@ const initializeServices = ({
     })
   ]
 
-  /* Solana Programs */
   const solanaRelay = config.services?.solanaRelay
     ? config.services.solanaRelay.withMiddleware(
         addRequestSignatureMiddleware({
@@ -255,10 +247,6 @@ const initializeServices = ({
       solanaRelay
     })
 
-  // The Solana client, on-chain program clients and Ethereum contracts are
-  // lazy facades that load their implementations (@solana/web3.js, anchor,
-  // @audius/spl, @audius/eth ABIs) on first use, so creating the SDK doesn't
-  // pull them in.
   const solanaClient =
     config.services?.solanaClient ??
     (new LazySolanaClient({
@@ -373,10 +361,8 @@ const initializeApis = ({
     addSolanaWalletSignatureMiddleware({ solanaWallet })
   ]
 
-  // Token store for PKCE flow — provides dynamic accessToken to Configuration
   const tokenStore = services.tokenStore ?? new TokenStoreLocalStorage()
 
-  // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
   const oauth = new OAuth({
     apiKey,
     tokenStore,
@@ -401,20 +387,15 @@ const initializeApis = ({
     middleware,
     basePath,
     accessToken: (name, _scopes) => {
-      // 'OAuth2' comes from the name in the securitySchemes in the OpenAPI spec
       if (name === 'OAuth2') {
-        // For OAuth2, we need to return the token with the 'Bearer ' prefix ourselves
-        // See: https://github.com/OpenAPITools/openapi-generator/issues/12514#issuecomment-1166293860
         return tokenStore
           .getAccessToken()
           .then((t) => (t ? `Bearer ${t}` : undefined))
       }
       // 'BearerAuth' comes from the name in the securitySchemes in the OpenAPI spec
       else if (name === 'BearerAuth') {
-        // The template adds the 'Bearer ' prefix, so we don't need to add it here
         return bearerToken
       }
-      // Default to bearerToken for any other auth schemes that require a token, for backward compatibility with older SDK versions
       return bearerToken
     }
   })

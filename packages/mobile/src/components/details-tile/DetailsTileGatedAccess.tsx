@@ -59,7 +59,6 @@ export const DetailsTileGatedAccess = ({
   return (
     <DetailsTileNoAccess
       trackId={trackId}
-      // Currently only follow-gated tracks are supported
       contentType={PurchaseableContentType.TRACK}
       streamConditions={streamConditions}
       token={token}

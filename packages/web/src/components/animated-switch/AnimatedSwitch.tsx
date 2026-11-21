@@ -93,40 +93,29 @@ const AnimatedSwitch = ({
   const pathname = getPathname(location)
 
   const [getAnimation, setAnimation] = useInstanceVar(noTransition)
-  // Maintain an instance var to track whether the navigation stack is reset (no animations)
-  // so that `window.onpopstate` can know whether or not to set animations
   const [getIsStackResetting, setIsStackResetting] = useInstanceVar(false)
 
-  // Track last pathname to prevent duplicate animation setup
   const lastPathnameRef = useRef(pathname)
-  // Use state for stable pathname so useMemo can track changes
   const [stablePathname, setStablePathname] = useState(pathname)
 
-  // Handle pathname changes
   useEffect(() => {
-    // If pathname hasn't actually changed, don't do anything
     if (pathname === stablePathname) {
       return
     }
 
-    // Check if navigating between bottom bar pages - if so, use noTransition and update immediately
-    // DISABLED_PAGES already includes FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, LIBRARY_PAGE
     const isNavigatingBetweenBottomBarPages =
       DISABLED_PAGES.has(pathname) &&
       DISABLED_PAGES.has(lastPathnameRef.current)
 
-    // Update stablePathname immediately
     setStablePathname(pathname)
     lastPathnameRef.current = pathname
 
-    // For bottom bar pages, use noTransition (instant)
     if (isNavigatingBetweenBottomBarPages) {
       setAnimation(noTransition)
       setIsStackResetting(false)
       return
     }
 
-    // For other pages, use slide animation
     const animation =
       slideDirection === SlideDirection.FROM_LEFT
         ? slideInLeftTransition
@@ -141,7 +130,6 @@ const AnimatedSwitch = ({
     setIsStackResetting
   ])
 
-  // Reset
   useEffect(() => {
     if (stackReset) {
       setIsStackResetting(true)
@@ -150,7 +138,6 @@ const AnimatedSwitch = ({
     }
   }, [stackReset, setStackReset, setAnimation, setIsStackResetting])
 
-  // Go back a page
   useEffect(() => {
     window.onpopstate = (e: any) => {
       if (!getIsStackResetting()) {
@@ -168,8 +155,6 @@ const AnimatedSwitch = ({
   useEffect(() => {
     if (
       DISABLED_PAGES.has(getPathname(location)) ||
-      // Don't animate on replace transitions (v6 doesn't expose action directly)
-      // We'll handle this via location state if needed
       // @ts-ignore
       location.state?.noAnimation
     ) {
@@ -179,8 +164,6 @@ const AnimatedSwitch = ({
     }
   }, [location, disabled, setDisabled])
 
-  // Use stable pathname to prevent rapid transition creation
-  // For bottom bar pages, stablePathname updates immediately, so this should be in sync
   const transitionItems = useMemo(() => [stablePathname], [stablePathname])
 
   const transitions = useTransition(
@@ -201,7 +184,6 @@ const AnimatedSwitch = ({
           return null
         }
         const transitionProps = stackReset ? {} : props
-        // Render Routes for the current pathname (item) to ensure immediate rendering
         const itemPathname = item
         return (
           <animatedAny.div

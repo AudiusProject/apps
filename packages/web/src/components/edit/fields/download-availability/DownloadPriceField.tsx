@@ -51,7 +51,6 @@ export const DownloadPriceField = (props: TrackAvailabilityFieldsProps) => {
   const handlePriceBlur: FocusEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       if (humanizedValue === null && !e.target.value) {
-        // Do nothing if there is no value set and the user just loses focus
         return
       }
       setHumanizedValue(padDecimalValue(e.target.value))

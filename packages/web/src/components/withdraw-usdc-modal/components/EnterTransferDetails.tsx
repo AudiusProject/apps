@@ -104,8 +104,6 @@ export const EnterTransferDetails = () => {
       ? rootWalletUsdcStatus.ataCreationFeeUsdc
       : 0
 
-  // No separate minimum validation for the Coinflow setup fee — the fee is
-  // deducted from the withdrawal amount, and the existing $5 minimum still applies.
   const isInsufficientForCoinflowSetup = false
 
   const [humanizedValue, setHumanizedValue] = useState(

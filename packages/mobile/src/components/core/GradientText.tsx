@@ -9,9 +9,6 @@ import { useThemeColors } from 'app/utils/theme'
 export type GradientTextProps = TextProps &
   Partial<Omit<LinearGradientProps, 'style'>>
 
-/**
- * Diagonal gradient text in the Audius colors
- */
 export const GradientText = (props: GradientTextProps) => {
   const { pageHeaderGradientColor1, pageHeaderGradientColor2 } =
     useThemeColors()

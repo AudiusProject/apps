@@ -61,11 +61,9 @@ describe('Delay calculator tests', () => {
     })
     await calc.start()
     const slotThreshold = await calc.getSolanaSlotThreshold()
-    // Should be 90: 100 - 5 / 0.5 block/sec
     assert.strictEqual(slotThreshold, 90)
 
     const blockThreshold = await calc.getPOABlockThreshold()
-    // Should be 99: 100 - 5 / 5
     assert.strictEqual(blockThreshold, 99)
   })
 
@@ -83,7 +81,6 @@ describe('Delay calculator tests', () => {
     await calc.getSolanaSlotThreshold()
     await calc.getPOABlockThreshold()
 
-    // Test cached values
     libs.getSlot = () => 110
     libs.getBlockNumber = () => 110
     const slotThreshold = await calc.getSolanaSlotThreshold()
@@ -106,7 +103,6 @@ describe('Delay calculator tests', () => {
     await calc.getSolanaSlotThreshold()
     await calc.getPOABlockThreshold()
 
-    // Test cached values
     await new Promise((res) => setTimeout(res, 1100))
     libs.getSlot = () => 110
     libs.getBlockNumber = () => 110
@@ -120,9 +116,6 @@ describe('Delay calculator tests', () => {
     const solSlot = {
       last: 100
     }
-    // new slots every ~250ms for 4 slots/sec
-    // give it a little padding to make sure we produce
-    // a slot before the pollingInterval runs
     const i = setInterval(() => {
       solSlot.last += 1
     }, 230)
@@ -140,16 +133,10 @@ describe('Delay calculator tests', () => {
     })
     calc.start()
     const slotThreshold1 = await calc.getSolanaSlotThreshold()
-    // Initially this rate should be 0.5sec/slot
-    // 100 starting - 1s * 2slot/sec
     assert.strictEqual(slotThreshold1, 90)
 
-    // Wait for staleness interval of 1s
     await new Promise((res) => setTimeout(res, 1100))
     const slotThreshold2 = await calc.getSolanaSlotThreshold()
-    // Current slot should be 104
-    // it should calculate 4 slot/sec
-    // so 5 sec lag behind = 104 - 5 * 4 = 84
     assert.strictEqual(slotThreshold2, 84)
 
     clearInterval(i)
@@ -207,9 +194,6 @@ describe('Rewards Attester Tests', () => {
   })
 
   it('Sets offset correctly for unretryable errors with same starting block', async () => {
-    // This tests that we *add* offsets correctly if each challenge we return has the same starting block.
-    // For this test, fetch challenges in batches of 2, and the first 4 all share the same completed block
-    // and are unretryable, so the offset should be 4 by the end
     const libs = new MockLibs()
     const rewardsStub = sinon.stub(libs.Rewards)
 
@@ -241,7 +225,6 @@ describe('Rewards Attester Tests', () => {
         return withSuccess([])
       })
 
-    // Entries 0-3 should return rejection (no retry)
     rewardsStub.submitAndEvaluate
       .withArgs(sinon.match({ specifier: sinon.match.in([0, 1, 2, 3]) }))
       .returns({
@@ -258,9 +241,6 @@ describe('Rewards Attester Tests', () => {
   })
 
   it('Sets offset correctly for unretryable errors with different starting block', async () => {
-    // If we get some unretryable errors with a different starting block,
-    // we should *reset* the offset instead of accumulating it.
-
     const libs = new MockLibs()
     const rewardsStub = sinon.stub(libs.Rewards)
 
@@ -292,7 +272,6 @@ describe('Rewards Attester Tests', () => {
         return withSuccess([])
       })
 
-    // Entries 0-3 should return rejection (no retry)
     rewardsStub.submitAndEvaluate
       .withArgs(sinon.match({ specifier: sinon.match.in([0, 1, 2, 3]) }))
       .returns({
@@ -309,9 +288,6 @@ describe('Rewards Attester Tests', () => {
   })
 
   it('Handles errors in processChallenges after retrying', async () => {
-    // processChallenges needs to return an error after it retries and fails,
-    // so that clients can act upon the error
-
     const libs = new MockLibs()
     const rewardsMock = sinon.mock(libs.Rewards)
 
@@ -330,7 +306,6 @@ describe('Rewards Attester Tests', () => {
       maxCooldownMsec: 100
     })
 
-    // Have it always return a retryable error
     rewardsMock.expects('submitAndEvaluate').exactly(5).returns({
       success: false,
       error: SubmitAndEvaluateError.CHALLENGE_INCOMPLETE,

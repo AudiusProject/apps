@@ -92,22 +92,15 @@ export const RewardPanel = ({
     remainingLabel
   })
 
-  // Determine the final label to display
-  // If there's no progress bar, no "Ready to Claim" status, and the formatted label is empty or not meaningful,
-  // show "Available" instead
   const displayLabel = useMemo(() => {
-    // If there's a progress bar or "Ready to Claim" status, use the formatted label
     if (shouldShowProgressBar || needsDisbursement) {
       return formattedProgressLabel
     }
 
-    // If the formatted label is empty or just whitespace, use getChallengeStatusLabel
-    // which will return "Available" for challenges without meaningful status
     if (!formattedProgressLabel || formattedProgressLabel.trim() === '') {
       return getChallengeStatusLabel(challenge, id)
     }
 
-    // Otherwise use the formatted label
     return formattedProgressLabel
   }, [
     formattedProgressLabel,

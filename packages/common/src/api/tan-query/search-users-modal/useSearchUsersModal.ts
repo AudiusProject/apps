@@ -31,14 +31,6 @@ export const getSearchUsersModalQueryKey = ({
     InfiniteData<ID[]>
   >
 
-/**
- * Paginated user search backed by `sdk.search.search` with `kind: USERS`.
- *
- * Replaces the legacy `searchUsersModal` redux slice + `searchUsersModalSagas`
- * pair. Each query value gets its own infinite query key, so callers don't
- * need to manually clear state when the query changes — the previous query's
- * results stay in cache and the new query starts fresh.
- */
 export const useSearchUsersModal = (
   { query, limit = DEFAULT_LIMIT }: UseSearchUsersModalArgs,
   options?: QueryOptions

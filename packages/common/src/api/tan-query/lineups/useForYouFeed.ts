@@ -26,14 +26,6 @@ export const getForYouFeedQueryKey = (userId: ID | null | undefined) => {
   return [QUERY_KEYS.forYouFeed, userId] as unknown as QueryKey<LineupData[]>
 }
 
-/**
- * "For You" feed for the Feed page. Backed by the dedicated
- * `GET /v1/users/{id}/feed/for-you` endpoint — a lean 6-source pipeline
- * (in-network, trending, underground × tracks + playlists) with linear
- * ranking and a shared per-owner diversity pass. Returns a heterogenous
- * feed of tracks and playlists/albums, mirroring the chronological feed
- * shape; consumers that only render tracks can use `trackIds`.
- */
 export const useForYouFeed = (
   {
     initialPageSize = FOR_YOU_INITIAL_PAGE_SIZE,
@@ -88,7 +80,6 @@ export const useForYouFeed = (
         }
       )
 
-      // Prime caches so tile renders don't have to re-fetch
       primeTrackData({ tracks, queryClient })
       primeCollectionData({ collections, queryClient })
 
@@ -111,9 +102,6 @@ export const useForYouFeed = (
     [data]
   )
 
-  // When the query is disabled, react-query keeps isPending/isLoading true
-  // (data is undefined). Surface them as false so consumers can render an
-  // empty state instead of an indefinite loading state.
   const isDisabled = currentUserId == null || options?.enabled === false
 
   const loadNextPage = useLoadNextPage(query)

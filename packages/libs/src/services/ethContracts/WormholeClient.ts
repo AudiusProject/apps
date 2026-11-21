@@ -34,17 +34,13 @@ export class WormholeClient {
     )
   }
 
-  // Get the name of the contract
   async nonces(wallet: string) {
-    // Pass along a unique param so the nonce value is always not cached
     const nonce = await this.WormholeContract.methods.nonces(wallet).call({
       _audiusBustCache: Date.now()
     })
     const number = this.web3.utils.toBN(nonce).toNumber()
     return number
   }
-
-  /* ------- SETTERS ------- */
 
   async initialize(fromAcct: string, wormholeAddress: string, relayer: string) {
     const method = this.WormholeContract.methods.initialize(
@@ -57,15 +53,11 @@ export class WormholeClient {
       this.contractAddress,
       fromAcct,
       relayer,
-      /* retries */ 0
+      0
     )
     return { txReceipt: tx }
   }
 
-  /**
-   * Transfers in eth from the user's wallet to the wormhole contract and
-   * specifies a solana wallet to realized the tokens in SOL
-   */
   async transferTokens(
     fromAcct: string,
     amount: BN,
@@ -92,7 +84,7 @@ export class WormholeClient {
       this.contractAddress,
       fromAcct,
       relayer,
-      /* retries */ 0,
+      0,
       null
     )
     return tx

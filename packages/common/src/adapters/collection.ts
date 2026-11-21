@@ -68,7 +68,6 @@ export const userCollectionMetadataFromSDK = (
     }
 
     const newCollection: UserCollectionMetadata = {
-      // Fields from API that are omitted in this model
       ...omit(snakecaseKeys(input), [
         'id',
         'user_id',
@@ -86,15 +85,12 @@ export const userCollectionMetadataFromSDK = (
         : {},
       variant: Variant.USER_GENERATED,
 
-      // Conversions
       playlist_id: decodedPlaylistId,
       playlist_owner_id: decodedOwnerId,
-      // TODO: Remove this when api is fixed to return UTC dates
       release_date: input.releaseDate
         ? dayjs.utc(input.releaseDate).local().toString()
         : null,
 
-      // Nested Transformed Fields
       artists: input.artists
         ? transformAndCleanList(input.artists, resourceContributorFromSDK)
         : null,
@@ -135,10 +131,8 @@ export const userCollectionMetadataFromSDK = (
       ),
       user,
 
-      // Retypes / Renames
       save_count: input.favoriteCount,
 
-      // Nullable fields
       cover_art: 'coverArt' in input ? (input.coverArt ?? null) : null,
       cover_art_sizes:
         'coverArtSizes' in input ? (input.coverArtSizes ?? null) : null,

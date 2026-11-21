@@ -49,7 +49,6 @@ export const useRedeemCoin = () => {
     onError: (error: Error, _args, _context) => {
       console.error(error)
 
-      // Toast generic error message
       toast({
         content: 'There was an error redeeming the coin'
       })

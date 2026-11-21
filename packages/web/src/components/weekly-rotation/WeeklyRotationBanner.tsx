@@ -30,16 +30,9 @@ const ART_SIZE_DESKTOP = 140
 const ART_SIZE_MOBILE = 96
 
 type WeeklyRotationBannerProps = {
-  /** Surface this renders on; sent with every event. */
   surface: WeeklyRotationSurface
 }
 
-/**
- * Promotional banner for Weekly Rotation.
- *
- * Shared across Explore and the feed rather than duplicated, so the two stay
- * visually identical and the analytics differ only by `surface`.
- */
 export const WeeklyRotationBanner = ({
   surface
 }: WeeklyRotationBannerProps) => {
@@ -64,7 +57,6 @@ export const WeeklyRotationBanner = ({
     { enabled: inView && isWeeklyRotationEnabled }
   )
 
-  // The banner always promotes the viewer's own mix.
   const mixProperties = useMemo(
     () => ({
       surface,
@@ -77,8 +69,6 @@ export const WeeklyRotationBanner = ({
     [surface, isMobile, trackIds.length, currentUserId]
   )
 
-  // Fire once, only when the mix is non-empty, so hidden banners don't count
-  // as impressions.
   const hasTrackedView = useRef(false)
   useEffect(() => {
     if (hasTrackedView.current || !inView || !trackIds.length) return
@@ -97,8 +87,6 @@ export const WeeklyRotationBanner = ({
     navigate(WEEKLY_ROTATION_PAGE)
   }, [navigate, trackEvent, mixProperties])
 
-  // Hidden when flagged off or when there's no mix. Gates every surface that
-  // renders the banner.
   if (
     !isWeeklyRotationEnabled ||
     isError ||

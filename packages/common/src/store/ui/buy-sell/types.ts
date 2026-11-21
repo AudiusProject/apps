@@ -9,24 +9,22 @@ export type Screen = 'input' | 'confirm' | 'success'
 export type TokenType = 'AUDIO' | 'USDC' | 'BONK'
 
 export type CoinInfo = {
-  symbol: string // e.g., 'AUDIO', 'USDC', 'WETH'
-  name: string // e.g., 'Audius', 'USD Coin', 'Wrapped Ether'
-  icon?: ComponentType<any> // Component for the token's icon (optional to avoid circular deps)
-  logoURI?: string // URL for the token's logo image
-  decimals: number // Number of decimal places (e.g., 18 for ETH)
-  balance: number | null // User's balance for this token
-  address: string // Contract/mint address (required for token identification)
-  isStablecoin?: boolean // Flag for UI formatting ($ prefix, etc.)
+  symbol: string
+  name: string
+  icon?: ComponentType<any>
+  logoURI?: string
+  decimals: number
+  balance: number | null
+  address: string
+  isStablecoin?: boolean
 }
 
 export type CoinPair = {
-  baseToken: CoinInfo // The token being priced (e.g., AUDIO)
-  quoteToken: CoinInfo // The token used for pricing (e.g., USDC)
-  exchangeRate: number | null // Rate of baseToken in terms of quoteToken
+  baseToken: CoinInfo
+  quoteToken: CoinInfo
+  exchangeRate: number | null
 }
 
-// This type might be web-specific if TokenAmountSection is not made common.
-// For now, keeping it as per original types.ts content.
 export type TokenAmountSectionProps = {
   title: string
   tokenInfo: CoinInfo
@@ -83,12 +81,6 @@ export type TransactionData = {
   isExchangeRateLoading?: boolean
 } | null
 
-/**
- * Utility function to get input and output tokens based on active tab and token pair
- * For 'buy': user pays with quote token (e.g., USDC) to get base token (e.g., AUDIO)
- * For 'sell': user pays with base token (e.g., AUDIO) to get quote token (e.g., USDC)
- * For 'convert': user pays with base token (e.g., AUDIO) to get quote token (e.g., BONK)
- */
 export const getSwapTokens = (activeTab: BuySellTab, tokenPair: CoinPair) => {
   return {
     inputToken:

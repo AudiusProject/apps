@@ -35,7 +35,6 @@ type TokenDropdownProps = {
   sortAlphabetically?: boolean
 }
 
-// Used to close the dropdown when clicking outside of it, but still inside of the modal
 const Blanket = (props: React.HTMLAttributes<HTMLDivElement>) => (
   <Box
     css={{
@@ -108,8 +107,6 @@ const CustomOption = (props: OptionProps<TokenOption>) => {
 }
 
 const CustomInput = (props: InputProps<TokenOption>) => {
-  // Extract only the props we need from react-select's InputProps
-  // to avoid passing invalid props to TextInput
   const { value, onChange, onBlur, onFocus } = props
 
   return (

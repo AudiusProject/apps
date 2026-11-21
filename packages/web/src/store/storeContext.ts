@@ -36,8 +36,6 @@ export const buildStoreContext = ({
       window?.localStorage?.setItem(key, value),
     removeLocalStorageItem: async (key: string) =>
       window?.localStorage?.removeItem(key),
-    // Note: casting return type to Promise<boolean> to maintain pairity with mobile, but
-    // it may be best to update mobile to not be async
     getFeatureEnabled: getFeatureEnabled as unknown as (
       flag: FeatureFlags
     ) => Promise<boolean>,
@@ -57,7 +55,6 @@ export const buildStoreContext = ({
     instagramAppId: env.INSTAGRAM_APP_ID,
     instagramRedirectUrl: env.INSTAGRAM_REDIRECT_URL,
     share: getShare(isMobile),
-    // The test SDK imports vitest which we're not able to use in browser
     audiusSdk: isTest
       ? () =>
           Promise.resolve(import('../test/mocks/audiusSdk')).then((m) =>

@@ -39,8 +39,6 @@ export const FanRemixContestStartedNotification = (
   const dispatch = useDispatch()
 
   const entity = useNotificationEntity(notification) as TrackEntity | null
-  // Fallback host lookup so the row still renders if the contest's track
-  // has been deleted; the entity hook returns null in that case.
   const { data: hostUser } = useUser(entity ? null : entityUserId)
   const host = entity?.user ?? hostUser ?? null
 

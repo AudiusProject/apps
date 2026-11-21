@@ -53,7 +53,7 @@ export type AccountState = {
   hasTracks: Nullable<boolean>
   status: Status
   reason: Nullable<FailureReason>
-  connectivityFailure: boolean // Did we fail from no internet connectivity?
+  connectivityFailure: boolean
   needsAccountRecovery: boolean
   walletAddresses: {
     currentUser: string | null

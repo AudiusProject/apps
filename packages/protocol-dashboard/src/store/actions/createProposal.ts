@@ -31,7 +31,6 @@ function createAudiusProposal(
       }
       await aud.Governance.submitProposal(proposal)
 
-      // Repull proposal
       await dispatch(fetchActiveProposals())
 
       setStatus(Status.Success)

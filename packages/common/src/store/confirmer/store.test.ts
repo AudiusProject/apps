@@ -66,7 +66,7 @@ describe('requestConfirmation', () => {
           confirm2,
           success2,
           fail2,
-          (result: number) => result // pass previous result to this confirmation call
+          (result: number) => result
         )
       )
       .put(actions._addConfirmationCall('111', confirm1))
@@ -109,7 +109,7 @@ describe('requestConfirmation', () => {
           confirm2,
           success2,
           fail2,
-          (result: { id: number }) => result.id // pass the previous result id to this confirmation call
+          (result: { id: number }) => result.id
         )
       )
       .put(actions._addConfirmationCall('111', confirm1))
@@ -256,7 +256,7 @@ describe('requestConfirmation timeouts', () => {
     const fail1 = vitest.fn()
 
     const confirm2 = async () => {
-      await timeout(200) // will timeout
+      await timeout(200)
       return 2
     }
     const success2 = vitest.fn()
@@ -278,7 +278,7 @@ describe('requestConfirmation timeouts', () => {
           success1,
           fail1,
           (result: number) => result, // pass previous result to this confirmation call,
-          100 // ms
+          100
         )
       )
       .dispatch(
@@ -288,7 +288,7 @@ describe('requestConfirmation timeouts', () => {
           success2,
           fail2,
           (result: number) => result, // pass previous result to this confirmation call
-          100 // ms
+          100
         )
       )
       .put(actions._addConfirmationCall('111', confirm1))

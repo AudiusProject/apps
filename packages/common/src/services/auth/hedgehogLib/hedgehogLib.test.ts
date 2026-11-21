@@ -1,9 +1,3 @@
-/**
- * Equivalence suite: the vendored hedgehog must derive the same keys, produce
- * the same ciphertexts and signatures, and read the same stored state as
- * @audius/hedgehog 3.0.0-alpha.1 + eth-sig-util. If any of these fail, users
- * get locked out of their accounts.
- */
 import { randomBytes as nodeRandomBytes } from 'crypto'
 
 import * as old from '@audius/hedgehog'
@@ -76,8 +70,6 @@ const outcome = <T>(fn: () => T): { ok: true; value: T } | { ok: false } => {
   }
 }
 
-// Fast deterministic stand-in for scrypt so the flow tests run quickly. The
-// real scrypt createKey is compared separately below.
 const fakeCreateKey: CreateKey = async (encryptStr, ivHex) => {
   const { sha256 } = await import('@noble/hashes/sha256')
   const keyBuffer = sha256(new TextEncoder().encode(`${encryptStr}|${ivHex}`))
@@ -180,7 +172,6 @@ describe('entropy -> mnemonic -> seed -> key', () => {
       hex(20) + 'q'
     ]
     for (let i = 0; i < 300; i++) {
-      // random mixes of hex and non-hex
       cases.push(
         hex(16 + Math.floor(Math.random() * 4)) +
           randomString(Math.floor(Math.random() * 4))
@@ -323,9 +314,6 @@ describe('aes-256-cbc entropy encryption', () => {
   })
 
   it('rejects ciphertext with a partial final block (login fails either way)', async () => {
-    // browserify-cipher "decrypts" a trailing partial block into garbage and
-    // occasionally passes the padding check; the garbage entropy then fails
-    // bip39. The new code throws in decrypt. Both end in a failed login.
     const loginOutcome = async (
       decrypt: typeof Authentication.decrypt,
       derive: typeof Authentication.generateWalletFromEntropy,
@@ -390,8 +378,6 @@ describe('createKey (scrypt)', () => {
 })
 
 describe('createKey (scrypt) vs the old web worker', () => {
-  // Outputs of the scrypt-js@2.0.4 + buffer scripts the old web worker loaded
-  // from jsdelivr, run with the same inputs and JSON round-trip.
   const vectors: Array<[string, string, string]> = [
     [
       'hunter2',
@@ -500,7 +486,6 @@ describe('Hedgehog flows across old and new implementations', () => {
 
       const newStorage = memoryStorage()
       const hh = makeNew(identity, newStorage)
-      // username is lowercased for the lookup key, as before
       const newWallet = await hh.login({
         username: email.toLowerCase(),
         password
@@ -531,7 +516,6 @@ describe('Hedgehog flows across old and new implementations', () => {
       expect(identity.users[0].walletAddress).toBe(newWallet.getAddressString())
       const record = [...identity.records.values()][0]
       expect(record.iv).toMatch(/^[0-9a-f]{32}$/)
-      // 19-byte prefix + 32 hex chars = 51 bytes -> 4 AES blocks
       expect(record.cipherText).toMatch(/^[0-9a-f]{128}$/)
 
       const oldStorage = memoryStorage()
@@ -560,7 +544,6 @@ describe('Hedgehog flows across old and new implementations', () => {
     expect(hh.isLoggedIn()).toBe(true)
     expectSameWallet(oldWallet, hh.getWallet()!)
 
-    // and the reverse
     const storage2 = memoryStorage()
     const newWallet = await makeNew(identity, storage2).createWalletObj('pw')
     const oldHh = makeOld(identity, storage2, true)
@@ -600,7 +583,6 @@ describe('Hedgehog flows across old and new implementations', () => {
     expectSameWallet(afterChange, hh.getWallet()!)
     expect(afterChange.getAddressString()).toBe(original.getAddressString())
 
-    // recovery link flow: entropy is written to storage, then resetPassword
     const recoveryStorage = memoryStorage()
     recoveryStorage.data.set(
       'hedgehog-entropy-key',

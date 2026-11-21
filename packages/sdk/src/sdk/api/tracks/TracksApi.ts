@@ -77,7 +77,6 @@ import {
   type TracksApiServicesConfig
 } from './types'
 
-// Extend that new class
 export class TracksApi extends GeneratedTracksApi {
   private readonly trackUploadHelper: TrackUploadHelper
 
@@ -237,7 +236,6 @@ export class TracksApi extends GeneratedTracksApi {
           ? this.storage.uploadFile({
               file: audioFile,
               onProgress: (progress) => {
-                // Only audio affects the total progress
                 totalProgressPercentage =
                   (progress.loaded / progress.total) * 0.5 +
                   progress.transcode * 0.5
@@ -379,7 +377,6 @@ export class TracksApi extends GeneratedTracksApi {
     >,
     advancedOptions?: AdvancedOptions
   ) {
-    // Write metadata to chain
     this.logger.info('Writing metadata to chain')
 
     const entityId =
@@ -428,7 +425,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: CreateTrackRequestWithFiles,
     requestInit?: RequestInit
   ) {
-    // Upload files
     let metadata = params.metadata
     const { audioUploadResponse, imageUploadResponse } =
       await this.uploadTrackFiles({
@@ -476,7 +472,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerUpdateTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId, metadata } = await parseParams(
       'updateTrack',
       UpdateTrackSchema
@@ -485,7 +480,6 @@ export class TracksApi extends GeneratedTracksApi {
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
     }
-    // Write metadata to chain
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.TRACK,
@@ -513,7 +507,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: UpdateTrackRequestWithFiles,
     requestInit?: RequestInit
   ) {
-    // Upload files
     let metadata = params.metadata
     const { audioUploadResponse, imageUploadResponse } =
       await this.uploadTrackFiles({
@@ -538,8 +531,6 @@ export class TracksApi extends GeneratedTracksApi {
       imageUploadResponse
     )
 
-    // Generate preview if requested and no audio file was uploaded
-    // (as that would handle the preview generation already)
     if (
       params.generatePreview &&
       metadata.previewStartSeconds !== undefined &&
@@ -557,7 +548,6 @@ export class TracksApi extends GeneratedTracksApi {
         }
       )
 
-      // Update metadata to include updated preview CID
       metadata.previewCid = previewCid
     }
 
@@ -584,7 +574,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerDeleteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId } = await parseParams(
       'deleteTrack',
       DeleteTrackSchema
@@ -669,7 +658,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerFavoriteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId, metadata } = await parseParams(
       'favoriteTrack',
       FavoriteTrackSchema
@@ -705,7 +693,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerUnfavoriteTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId } = await parseParams(
       'unfavoriteTrack',
       UnfavoriteTrackSchema
@@ -740,7 +727,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerShareTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId } = await parseParams(
       'shareTrack',
       ShareTrackSchema
@@ -775,7 +761,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerRepostTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId, metadata } = await parseParams(
       'respostTrack',
       RepostTrackSchema
@@ -816,7 +801,6 @@ export class TracksApi extends GeneratedTracksApi {
     params: EntityManagerUnrepostTrackRequest,
     advancedOptions?: AdvancedOptions
   ) {
-    // Parse inputs
     const { userId, trackId } = await parseParams(
       'unrepostTrack',
       UnrepostTrackSchema
@@ -912,14 +896,12 @@ export class TracksApi extends GeneratedTracksApi {
     const contentType = 'track'
     const mint = 'USDC'
 
-    // Fetch track
     this.logger.debug('Fetching track purchase info...', { trackId })
     const { data: track } = await this.getTrackAccessInfo({
       trackId: encodeHashId(trackId)!, // use hashed trackId
-      userId: encodeHashId(userId)! // use hashed userId
+      userId: encodeHashId(userId)!
     })
 
-    // Validate purchase attempt
     if (!track) {
       throw new Error('Track not found.')
     }
@@ -936,7 +918,6 @@ export class TracksApi extends GeneratedTracksApi {
     let centPrice: number
     let accessType: 'stream' | 'download' = 'stream'
 
-    // Get conditions
     if (
       track.streamConditions &&
       instanceOfExtendedPurchaseGate(track.streamConditions)
@@ -954,7 +935,6 @@ export class TracksApi extends GeneratedTracksApi {
       throw new Error('Track is not available for purchase.')
     }
 
-    // Check if already purchased
     if (
       (accessType === 'download' && track.access?.download) ||
       (accessType === 'stream' && track.access?.stream)
@@ -962,7 +942,6 @@ export class TracksApi extends GeneratedTracksApi {
       throw new Error('Track already purchased')
     }
 
-    // Check if price changed
     if (USDC(priceNumber).value < USDC(centPrice / 100).value) {
       throw new Error('Track price increased.')
     }
@@ -1023,7 +1002,6 @@ export class TracksApi extends GeneratedTracksApi {
     )(params)
 
     const {
-      // only send the base params to getPurchaseInstructions
       wallet: ignoredWallet,
       walletAdapter: ignoredWalletAdapter,
       ...baseParams
@@ -1044,7 +1022,6 @@ export class TracksApi extends GeneratedTracksApi {
       this.logger.debug('Using provided wallet to purchase...', {
         wallet: wallet.toBase58()
       })
-      // Use the specified Solana wallet
       const transferInstruction =
         await this.paymentRouterClient.createTransferInstruction({
           sourceWallet: wallet,
@@ -1061,7 +1038,6 @@ export class TracksApi extends GeneratedTracksApi {
         ].filter(Boolean) as TransactionInstruction[]
       })
     } else {
-      // Use the authed wallet's userbank and relay
       this.logger.debug(
         `Using userBank ${await this.claimableTokensClient.deriveUserBank({
           mint: 'USDC'

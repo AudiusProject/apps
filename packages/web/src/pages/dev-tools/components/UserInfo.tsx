@@ -70,56 +70,46 @@ const formatUserData = (user: any): string => {
 
   const jsonString = JSON.stringify(cleanUser, null, 4)
 
-  // Apply syntax highlighting
   let result = jsonString
     // Escape HTML characters first
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
-  // Split into lines and process each line separately
   const lines = result.split('\n')
   const processedLines = lines.map((line) => {
-    // Count leading spaces to determine indent level
     const leadingSpaces = (line.match(/^ */) || [''])[0].length
     const indentLevel = Math.floor(leadingSpaces / 4)
     const content = line.trim()
 
     if (content === '') return '<div></div>'
 
-    // Create a div with hanging indent for this line
-    const paddingLeft = indentLevel * 2 // 2em per indent level
+    const paddingLeft = indentLevel * 2
     return `<div style="padding-left: ${paddingLeft}em; text-indent: -${paddingLeft}em; margin-left: ${paddingLeft}em;">${content}</div>`
   })
 
   result = processedLines.join('')
 
-  // Apply syntax highlighting in specific order to avoid conflicts
-  // 1. Property names (keys)
   result = result.replace(
     /"([^"]+)":/g,
     '<span style="color: #0066cc; font-weight: 600; word-break: break-all; overflow-wrap: break-word;">"$1"</span>:'
   )
 
-  // 2. String values
   result = result.replace(
     /:\s*"([^"]*)"/g,
     ': <span style="color: #008000; word-break: break-all; overflow-wrap: break-word;">"$1"</span>'
   )
 
-  // 3. Boolean values
   result = result.replace(
     /:\s*(true|false)(?=\s*[,\n\r}])/g,
     ': <span style="color: #d73a49; font-weight: 600; word-break: break-all; overflow-wrap: break-word;">$1</span>'
   )
 
-  // 4. Number values
   result = result.replace(
     /:\s*(\d+)(?=\s*[,\n\r}])/g,
     ': <span style="color: #6f42c1; font-weight: 600; word-break: break-all; overflow-wrap: break-word;">$1</span>'
   )
 
-  // 5. Null values
   result = result.replace(
     /:\s*(null)(?=\s*[,\n\r}])/g,
     ': <span style="color: #6a737d; font-style: italic; word-break: break-all; overflow-wrap: break-word;">$1</span>'

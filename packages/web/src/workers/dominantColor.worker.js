@@ -4,19 +4,14 @@ export default () => {
   const DEFAULT_RGB = '#7e1bcc'
   const SAMPLE_RATE = 20
   const NUM_DOMINANT_COLORS = 3
-  // Based off this site: https://app.contrast-finder.org/result.html?foreground=%23FFFFFF&background=%23cdc8c8&ratio=4.5&isBackgroundTested=true&algo=Rgb
-  // the brightest color we want to support, given white text, is
-  // #CDC8C8, which works out to a luminance of 201.
   const LUMINANCE_THRESHOLD = 201
 
-  const clampedRGBColor = (rgbString /* string of 'r,g,b' */) => {
+  const clampedRGBColor = (rgbString) => {
     const rgb = rgbString.split(',').map((x) => parseInt(x, 10))
     const r = rgb[0]
     const g = rgb[1]
     const b = rgb[2]
 
-    // Luminance in [0, 255]
-    // https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
     const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
     if (luminance < LUMINANCE_THRESHOLD) {
@@ -27,11 +22,6 @@ export default () => {
     return [r, g, b].map((x) => x * scaleFactor)
   }
 
-  /**
-   * Returns the 3 dominant RGB colors of an image.
-   * @param {string} key identifies this computation
-   * @param {string} imageUrl url of the image to use
-   */
   const dominantRgb = ({ key, imageUrl }) => {
     Jimp.read(imageUrl)
       .then((img) => {
@@ -125,7 +115,7 @@ export default () => {
   }
 
   // eslint-disable-next-line
-  self.addEventListener('message', e => {
+  self.addEventListener('message', (e) => {
     if (!e) return
     dominantRgb(JSON.parse(e.data))
   })

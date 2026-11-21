@@ -28,10 +28,6 @@ type InboxTabsProps = {
   onSelectTab: (tab: InboxTab) => void
 }
 
-/**
- * Priority / General inbox switcher. Each tab shows its own dot, inside the
- * pill after the label, when that tab has unread messages.
- */
 export const InboxTabs = ({ currentTab, onSelectTab }: InboxTabsProps) => {
   const { color } = useTheme()
   const hasUnreadPriority = useSelector(getHasUnreadPriorityMessages)
@@ -75,7 +71,6 @@ export const InboxTabs = ({ currentTab, onSelectTab }: InboxTabsProps) => {
                   height: DOT_SIZE,
                   flexShrink: 0,
                   borderRadius: '50%',
-                  // Selected pills are purple, so the dot flips to white
                   backgroundColor:
                     currentTab === tab
                       ? color.static.white

@@ -16,7 +16,6 @@ export const updateCollectionData = function* (
 ) {
   const queryClient = yield* getContext<QueryClient>('queryClient')
 
-  // Get existing collection data and merge with updates
   const collectionsToUpdate = partialCollections.map((partialCollection) => {
     const { playlist_id } = partialCollection
     const existingCollection = queryClient.getQueryData(
@@ -34,7 +33,6 @@ export const updateCollectionData = function* (
     return partialCollection as Collection
   })
 
-  // Use primeCollectionData with forceReplace to ensure updates are saved
   primeCollectionData({
     collections: collectionsToUpdate,
     queryClient,

@@ -13,11 +13,6 @@ import {
 import { userCollectionMetadataFromSDK } from './collection'
 import { userTrackMetadataFromSDK } from './track'
 
-/**
- * Activity.item from getRepostsByHandle can be raw API JSON (snake_case) when
- * the response discriminator isn't used. Normalize to SDK shape (camelCase)
- * using the SDK's FromJSON before passing to our adapters.
- */
 function normalizeActivityItem(
   item: object,
   itemType:

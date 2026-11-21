@@ -33,12 +33,8 @@ const initialState: UploadState = {
   formState: null,
   success: false,
 
-  // For multitrack upload, we allow some tracks to
-  // fail without aborting the whole thing
   failedTrackIndices: [],
 
-  // Id to take the user to after completing upload.
-  // Can be either a track or playlist/album.
   completionId: null,
   error: false
 }
@@ -176,7 +172,6 @@ const actionsMap = {
     const nextProgress = { ...prevProgress }
     nextProgress.status = progress.status
     if (progress.loaded !== undefined && progress.total !== undefined) {
-      // Don't allow progress to jump backwards on retries
       nextProgress.loaded = Math.max(nextProgress.loaded ?? 0, progress.loaded)
       nextProgress.total = progress.total
     }

@@ -69,7 +69,6 @@ export const CoverPhoto = (props: CoverPhotoProps) => {
       usingProfilePicture = false
     }
 
-    // Android upload format does not quite match the expected format, so we have to drill into 'file' to workaround for android
     if (source && 'file' in source && !('uri' in source)) {
       return { source: source.file, usingProfilePicture }
     } else {

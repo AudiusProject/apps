@@ -117,7 +117,6 @@ export type AppTabScreenParamList = {
   SettingsScreen: undefined
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
-  // No handle: the signed-in user's own mix. With one: a shared mix.
   WeeklyRotationScreen: { handle?: string } | undefined
   AccountSettingsScreen: undefined
   ChangeEmail: undefined
@@ -191,10 +190,6 @@ type AppTabScreenProps = {
   Stack: ReturnType<typeof createNativeStackNavigator>
 }
 
-/**
- * This is the base tab screen that includes common screens
- * like track and profile
- */
 export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const screenOptions = useAppScreenOptions()
   const { drawerNavigation, setIsAtStackRoot, gesturesDisabled } =
@@ -208,9 +203,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const applyDrawerSwipe = useCallback(
     (isAtRoot: boolean) => {
       setIsAtStackRoot?.(isAtRoot)
-      // NowPlayingDrawer calls setOptions({ swipeEnabled: false }) imperatively
-      // on pan release, and that override outlives a re-render of
-      // screenOptions, so we re-assert it imperatively here too.
       drawerNavigation?.setOptions({
         swipeEnabled: isAtRoot && !isNowPlayingDrawerOpen
       })
@@ -220,7 +212,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
 
   const handleChangeState = useCallback(
     (event: NavigationStateEvent) => {
-      // Nested navigator state changes bubble up; only act on the outer stack.
       if (event?.data?.state?.type !== 'stack') return
       const isAtRoot = event.data.state.routes.length === 1
       isAtStackRootRef.current = isAtRoot
@@ -230,24 +221,14 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
     [isFocused, applyDrawerSwipe]
   )
 
-  /**
-   * Reset lastNavAction on transitionEnd
-   * Need to do this via screenListeners on the Navigator because listening
-   * via navigation.addListener inside a screen does not always
-   * catch events from other screens
-   */
   const handleTransitionEnd = useCallback(() => {
     setLastNavAction(undefined)
   }, [])
 
-  // Re-apply on tab focus so the drawer reflects the active tab's stack depth.
   useEffect(() => {
     if (isFocused) applyDrawerSwipe(isAtStackRootRef.current)
   }, [isFocused, applyDrawerSwipe])
 
-  // Keep AppTabNavigationContext pointed at the active tab's stack so external
-  // surfaces like NowPlayingDrawer push onto whichever tab is currently in
-  // focus, regardless of stack depth.
   const screenListeners = useCallback(
     ({ navigation }: { navigation: any }) => ({
       state: handleChangeState,
@@ -257,16 +238,11 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
     [handleChangeState, handleTransitionEnd, setNavigation]
   )
 
-  // Mid-screen swipe-to-open on the tab's root screen. Off when a screen handles
-  // horizontal gestures itself (gesturesDisabled, e.g. Feed) or when a right
-  // swipe means back.
   const openDrawerGesture = useOpenDrawerGesture(
     isFocused && isAtStackRoot && !gesturesDisabled && !isNowPlayingDrawerOpen
   )
 
   return (
-    // Publishes the floating header heights and scroll signal to this tab's
-    // screens.
     <GlassChromeProvider>
       {/* Hands the scroll signal to the tab bar, which renders outside this provider. */}
       <TabBarAutoHideBridge isAtStackRoot={isAtStackRoot} />
@@ -289,12 +265,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
             <Stack.Screen
               name='Profile'
               getComponent={() => ProfileScreen}
-              // Profile uses a collapsible tab view (horizontal pager + vertical
-              // scroll). The global `fullScreenGestureEnabled: true` makes the
-              // swipe-to-pop recognizer span the whole screen, so a slightly diagonal
-              // vertical scroll gets hijacked as a back gesture. Restrict swipe-back
-              // to the left edge here (same treatment as the Chat screen) so
-              // mid-screen scrolling reaches the list untouched.
               options={{ headerShown: false, fullScreenGestureEnabled: false }}
             />
             <Stack.Group>
@@ -334,10 +304,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
             <Stack.Screen
               name='Contests'
               getComponent={() => ContestsScreen}
-              // Contests is reached from the left nav drawer, which passes
-              // `fromAppDrawer: true` and drops the screen animation to 'none'.
-              // That leaves a jarring instant pop when navigating away. Force the
-              // standard horizontal push so it transitions like the Track screen.
               options={{ animation: 'simple_push' }}
             />
             <Stack.Screen name='Contest' getComponent={() => ContestScreen} />

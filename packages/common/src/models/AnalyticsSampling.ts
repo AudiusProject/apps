@@ -1,9 +1,5 @@
 import { Name } from './Analytics'
 
-/**
- * Events sent from every device. Any other event is only sent from a fixed
- * sample of devices (see getAnalyticsSampleRate).
- */
 export const CORE_ANALYTICS_EVENTS: ReadonlySet<string> = new Set<string>([
   Name.CREATE_ACCOUNT_OPEN,
   Name.CREATE_ACCOUNT_COMPLETE_EMAIL,
@@ -119,7 +115,6 @@ export const CORE_ANALYTICS_EVENTS: ReadonlySet<string> = new Set<string>([
   Name.PURCHASE_CONTENT_USDC_USER_BANK_COPIED,
   Name.CHAT_BLAST_MESSAGE_SENT,
   Name.SEND_MESSAGE_SUCCESS,
-  // The only record of a chat abuse report
   Name.CHAT_REPORT_USER,
   Name.COMMENTS_NOTIFICATION_OPEN,
   Name.LAUNCHPAD_SPLASH_GET_STARTED,
@@ -162,10 +157,8 @@ export const CORE_ANALYTICS_EVENTS: ReadonlySet<string> = new Set<string>([
   Name.LAUNCHPAD_CLAIM_VESTED_COINS_FAILURE
 ])
 
-/** Share of devices that send non-core events */
 export const ANALYTICS_SAMPLE_RATE = 0.1
 
-// FNV-1a, so a device lands in the same bucket on every load and platform
 const hashString = (value: string) => {
   let hash = 0x811c9dc5
   for (let i = 0; i < value.length; i++) {
@@ -178,16 +171,8 @@ const hashString = (value: string) => {
 export const isCoreAnalyticsEvent = (
   eventName: string,
   coreEvents: ReadonlySet<string> = CORE_ANALYTICS_EVENTS
-) =>
-  coreEvents.has(eventName) ||
-  // Weekly Rotation events are still being added
-  eventName.startsWith('Weekly Rotation')
+) => coreEvents.has(eventName) || eventName.startsWith('Weekly Rotation')
 
-/**
- * Returns null when this device should not send the event, otherwise the
- * sample rate it was sent at (1 for core events). Non-core events carry the
- * rate as a `sampleRate` property so counts can be scaled back up.
- */
 export const getAnalyticsSampleRate = (
   eventName: string,
   deviceId: string | undefined,

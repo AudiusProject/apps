@@ -19,7 +19,6 @@ export const setModalRootTop = () => {
 let modalCount = 0
 
 export const useModalScrollCount = () => {
-  // Keep a state toggle to trigger recomputations of the effect
   const [toggle, setToggle] = useState(false)
   const [isOverflowHidden, setIsOverflowHidden] = useState(false)
 
@@ -56,8 +55,6 @@ export const useModalScrollCount = () => {
     setToggle((toggle) => !toggle)
   }, [setToggle])
   const decrementScrollCount = useCallback(() => {
-    // Though we should in theory never be decrementing past zero, getting into
-    // that state would be bad for us, so guard against it defensively
     modalCount = Math.max(0, modalCount - 1)
     setToggle((toggle) => !toggle)
   }, [setToggle])

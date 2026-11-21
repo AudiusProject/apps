@@ -40,7 +40,6 @@ export const TransactionSuccessScreen = (
     hideUSDCTooltip
   } = props
 
-  // Follow same pattern as ConfirmSwapScreen - call hooks first
   const { formattedAmount: formattedPayAmount } = useCoinAmountFormatting({
     amount: payAmount,
     isStablecoin: !!payTokenInfo.isStablecoin,

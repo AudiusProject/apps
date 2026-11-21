@@ -41,14 +41,12 @@ export function* addWalletToUser(
 
   function* onSuccess() {
     const queryClient = yield* getContext<QueryClient>('queryClient')
-    // Trigger a refetch for all audio balances
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.audioBalance]
     })
 
     yield* put(setWalletAddedConfirmed({}))
 
-    // Disconnect the web3 instance because after we've linked, we no longer need it
     yield* call(disconnect)
   }
 
@@ -59,7 +57,6 @@ export function* addWalletToUser(
           'An error occured while connecting a wallet with your account.'
       })
     )
-    // Disconnect the web3 instance in the event of an error, we no longer need it
     yield* call(disconnect)
   }
 

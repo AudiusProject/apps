@@ -60,7 +60,6 @@ export const CreateNewAppPage = (props: CreateNewAppPageProps) => {
   const initialValues: DeveloperAppValues = {
     name: '',
     description: '',
-    // Undefined unless set to pass validation
     imageUrl: undefined
   }
 

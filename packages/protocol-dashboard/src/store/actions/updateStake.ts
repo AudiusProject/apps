@@ -21,7 +21,6 @@ function increaseAudiusStake(
     try {
       await aud.ServiceProviderClient.increaseStake(stakingAmount)
 
-      // Repull pending transactions
       const state = getState()
       const wallet = getAccountWallet(state)
       if (wallet) await dispatch(fetchUser(wallet))
@@ -44,7 +43,6 @@ function decreaseAudiusStake(
     try {
       await aud.ServiceProviderClient.requestDecreaseStake(stakingAmount)
 
-      // Repull pending transactions
       const state = getState()
       const wallet = getAccountWallet(state)
       if (wallet) await dispatch(fetchPendingTransactions(wallet))

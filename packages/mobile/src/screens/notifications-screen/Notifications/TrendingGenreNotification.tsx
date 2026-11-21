@@ -26,10 +26,6 @@ type TrendingGenreNotificationProps = {
   notification: TrendingGenreNotificationType
 }
 
-/**
- * The artist's track is in the top 10 of its genre's weekly chart (sent
- * Fridays). Hidden when the flag is off, since the server sends it regardless.
- */
 export const TrendingGenreNotification = (
   props: TrendingGenreNotificationProps
 ) => {

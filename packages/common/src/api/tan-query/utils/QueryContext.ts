@@ -73,7 +73,6 @@ export const useQueryContext = () => {
 }
 
 export function* getQueryContext(): Generator<any, QueryContextType, any> {
-  // We can't use common typed `getContext` here because of circular dependency
   return {
     audiusBackend: yield* getContext<QueryContextType['audiusBackend']>(
       'audiusBackendInstance'

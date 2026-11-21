@@ -83,7 +83,6 @@ export const CoinflowOnrampModal = NiceModal.create(() => {
     >
       {showContent ? (
         <CoinflowPurchase
-          // SDK runtime supports sessionKey with a wallet, but its types omit it.
           {...{ sessionKey }}
           email={guestEmail}
           transaction={transaction}

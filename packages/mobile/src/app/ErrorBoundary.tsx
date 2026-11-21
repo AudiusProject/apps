@@ -11,7 +11,6 @@ type ErrorToastProps = {
 
 const ErrorToast = (props: ErrorToastProps) => {
   const { error } = props
-  // Do nothing other than trigger a toast when error changes
   const { toast } = useToast()
 
   useEffect(() => {
@@ -33,7 +32,6 @@ class ErrorBoundary extends PureComponent<ErrorBoundaryProps> {
   }
 
   componentDidCatch(error: Error | null, errorInfo: any) {
-    // On catch set the error state so it triggers a toast
     this.setState({ error: error?.message })
     console.error(error ?? new Error('Unknown error caught by'), errorInfo)
   }

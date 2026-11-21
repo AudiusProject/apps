@@ -30,7 +30,6 @@ const messages = {
   newFolderName: 'New Folder'
 }
 
-// Allows user to create a playlist or playlist-folder
 export const CreatePlaylistLibraryItemButton = () => {
   const { data: library } = useCurrentAccount({
     select: (account) => account?.playlistLibrary
@@ -58,7 +57,6 @@ export const CreatePlaylistLibraryItemButton = () => {
     updatePlaylistLibrary(newLibrary)
   }, [library, updatePlaylistLibrary])
 
-  // Gate triggering popup behind authentication
   const handleClickPill = useRequiresAccountCallback(
     (triggerPopup: () => void) => {
       triggerPopup()

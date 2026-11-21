@@ -12,11 +12,6 @@ type UseProfilePictureArgs = {
   defaultImage?: string
 }
 
-/**
- * Like `useProfilePicture`, but also returns `useImageSize`'s `onError`, so an
- * `<img>` render failure can advance to the next mirror. `preload` alone can
- * miss a node that fails the render request.
- */
 export const useProfilePictureSource = ({
   userId,
   size,
@@ -30,8 +25,6 @@ export const useProfilePictureSource = ({
     partialUser ?? {}
 
   const { imageUrl, onError } = useImageSize({
-    // Deactivated/deleted accounts must not expose their profile picture
-    // (privacy/GDPR) — force the default placeholder instead.
     artwork: is_deactivated ? undefined : profile_picture,
     targetSize: size,
     defaultImage: defaultImage ?? profilePicEmpty,

@@ -25,13 +25,6 @@ type ExpandableArrowIconProps = {
   size?: IconProps['size']
 }
 
-/**
- * Arrow/caret to be used in conjunction with Expandable that
- * rotates when expanded.
- *
- * @param expanded whether the arrow and content is expanded
- * @param iconSize size of the arrow
- */
 export const ExpandableArrowIcon = ({
   expanded,
   size = 'm' as IconProps['size']

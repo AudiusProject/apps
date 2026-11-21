@@ -27,7 +27,6 @@ import { profilePage, searchResultsPage } from 'utils/route'
 
 import { Metadata } from './components/Metadata'
 
-// Inlined formatDate to avoid dayjs dependency
 const formatDate = (date: string, format?: string): string => {
   const dateObj = new Date(date)
   if (isNaN(dateObj.getTime())) {
@@ -43,7 +42,6 @@ const formatDate = (date: string, format?: string): string => {
     .replace(/D/g, day.toString())
 }
 
-// Inlined formatSecondsAsText to avoid dayjs dependency
 const formatSecondsAsText = (seconds: number): string => {
   const SECONDS_PER_HOUR = 3600
   const hours = Math.floor(seconds / SECONDS_PER_HOUR)
@@ -89,7 +87,6 @@ export const DesktopServerTrackPage = ({
   const artworkSrc = hasArtwork ? artwork['480x480'] : undefined
   const { handle, name, cover_photo, profile_picture } = user
 
-  // Use user cover photo as primary, fallback to profile picture with blur
   const coverPhotoUrl =
     cover_photo?.[WidthSizes.SIZE_2000] ??
     profile_picture?.[SquareSizes.SIZE_1000_BY_1000] ??

@@ -151,7 +151,6 @@ describe('playback slice', () => {
         seeded,
         actions.setShuffle({ enable: true })
       )
-      // Advance once in the shuffled queue.
       const advanced = playbackReducer(shuffled, actions.next({}))
       const playingTrack = advanced.queue[advanced.index]
       const restored = playbackReducer(
@@ -175,7 +174,6 @@ describe('playback slice', () => {
         seeded,
         actions.setShuffle({ enable: true })
       )
-      // Remove the visible track at position 1 (some random track).
       const removedTrack = shuffled.queue[1]
       const afterRemove = playbackReducer(
         shuffled,
@@ -191,7 +189,6 @@ describe('playback slice', () => {
           (t) => t.trackId === removedTrack.trackId
         )
       ).toBeUndefined()
-      // Disabling shuffle should restore the remaining 3 in original order.
       const restored = playbackReducer(
         afterRemove,
         actions.setShuffle({ enable: false })
@@ -260,9 +257,7 @@ describe('playback slice', () => {
         shuffled.queue[0],
         shuffled.queue[1]
       ])
-      // Original queue is unchanged.
       expect(reordered.shuffleOriginalQueue).toEqual(tracks)
-      // shuffleOriginalIndices follow their tracks.
       expect(reordered.shuffleOriginalIndices).toEqual([
         shuffled.shuffleOriginalIndices[2],
         shuffled.shuffleOriginalIndices[0],
@@ -280,7 +275,6 @@ describe('playback slice', () => {
       )
       expect(seeded.shuffle).toBe(true)
       expect(seeded.index).toBe(0)
-      // Track originally at startIndex sits at visible position 0.
       expect(seeded.queue[0]).toEqual(track(2))
       expect(seeded.shuffleOriginalQueue).toHaveLength(4)
     })

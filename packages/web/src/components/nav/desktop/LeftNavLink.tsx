@@ -13,14 +13,6 @@ import { CollapsedNavItem } from './CollapsedNavItem'
 import styles from './LeftNavLink.module.css'
 import { useNavSidebar } from './NavSidebarContext'
 
-/**
- * Helper function to check if the current path matches any of the provided paths
- * @param params - Object containing path matching parameters
- * @param params.currentPath - The current pathname from location
- * @param params.pathsToMatch - Array of paths to check against
- * @param params.exact - Whether to use exact matching or startsWith
- * @returns true if any path matches, false otherwise
- */
 const isPathMatch = ({
   currentPath,
   pathsToMatch,

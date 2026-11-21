@@ -21,10 +21,6 @@ type CollaboratorLinksProps = Omit<
   collaborators?: Collaborator[] | null
 }
 
-/**
- * Renders accepted collaborators as comma-separated `", <UserLink>"` entries.
- * Returns null when there are none, so it's a no-op append to an owner element.
- */
 export const CollaboratorLinks = ({
   collaborators,
   ...userLinkProps
@@ -52,15 +48,10 @@ type TrackArtistsProps = Omit<
   ComponentProps<typeof UserLink>,
   'style' | 'hideBadges'
 > & {
-  /** Accepted collaborator artists embedded on the track. */
   collaborators?: Collaborator[] | null
   style?: StyleProp<ViewStyle>
 }
 
-/**
- * A track's centered artist line for mobile: the owner `<UserLink>` plus
- * accepted collaborators, each followed by their own user badges.
- */
 export const TrackArtists = ({
   collaborators,
   style,

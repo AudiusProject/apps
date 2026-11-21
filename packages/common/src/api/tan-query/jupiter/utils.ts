@@ -13,9 +13,6 @@ import { QUERY_KEYS } from '../queryKeys'
 
 import { SwapErrorType, SwapStatus } from './types'
 
-/**
- * Get the appropriate error response for a swap error based on the error stage.
- */
 export function getSwapErrorResponse(params: {
   errorStage: string
   error: Error
@@ -79,17 +76,7 @@ export function getSwapErrorResponse(params: {
   }
 }
 
-/**
- * Formats a token price string using USDC formatting with custom decimal places.
- * This function preserves the original behavior for token price display.
- *
- * @param price - The price string to format
- * @param decimalPlaces - Number of decimal places to show
- * @returns Formatted price string
- */
 export function formatTokenPrice(price: string, decimalPlaces: number): string {
-  // USDC constructor uses 6 decimal places, so we need to constrain the display
-  // to not exceed what's available in the FixedDecimal representation
   const maxDecimalPlaces = Math.min(decimalPlaces, 6)
 
   return USDC(price.replace(/,/g, '')).toLocaleString('en-US', {
@@ -111,46 +98,30 @@ export const invalidateSwapQueries = async (
   queryClient: ReturnType<typeof useQueryClient>,
   user: User
 ): Promise<void> => {
-  // Invalidate user-specific queries
   if (user?.wallet) {
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.usdcBalance, user.wallet]
     })
   }
 
-  // Invalidate general user coins query
   await queryClient.invalidateQueries({
     queryKey: [QUERY_KEYS.userCoins]
   })
 }
 
-/**
- * Checks if a swap is direct swappable between two tokens.
- * @param inputMint - The input mint address
- * @param outputMint - The output mint address
- * @returns True if the swap is direct swappable, false otherwise
- */
 export const getIsDirectSwappable = (
   inputMint: string,
   outputMint: string
 ): boolean => {
-  // Check for direct swaps for non-fan clubs
   if (
     NON_FAN_CLUB_MINTS.includes(inputMint) &&
     NON_FAN_CLUB_MINTS.includes(outputMint)
   ) {
     return true
   }
-  // At this point we know one of our mints is a fan club - so to be a direct swap, the other mint must be AUDIO
   return inputMint === AUDIO_MINT || outputMint === AUDIO_MINT
 }
 
-/**
- * Checks for pool
- * @param mint - The mint address of the coin
- * @param queryClient
- * @returns { isDBC: boolean; isDAMM: boolean } - Whether the coin is a DBC or DAMM
- */
 export const getCoinPoolState = (
   mint: string,
   queryClient: QueryClient

@@ -31,7 +31,6 @@ export const DesktopServerProfilePage = ({
 
   const isArtist = track_count > 0
 
-  // Use profile picture with blur as fallback if cover photo is not available
   const coverPhotoUrl =
     cover_photo?.['2000x'] ?? profile_picture?.['1000x1000'] ?? null
   const useBlurFallback = !cover_photo?.['2000x'] && profile_picture

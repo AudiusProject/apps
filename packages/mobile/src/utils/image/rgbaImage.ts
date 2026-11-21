@@ -2,7 +2,6 @@ import { decode as decodeJpeg, encode as encodeJpeg } from 'jpeg-js'
 
 import { decodePng, isPng } from './decodePng'
 
-/** An 8-bit RGBA bitmap, laid out like ImageData and jimp's `bitmap`. */
 export type RgbaImage = {
   width: number
   height: number
@@ -40,7 +39,6 @@ export const readImage = async (url: string): Promise<RgbaImage> => {
   return decodeImage(new Uint8Array(await response.arrayBuffer()))
 }
 
-/** Encodes the image as a base64 JPEG (alpha is dropped). */
 export const encodeJpegBase64 = (image: RgbaImage, quality: number) => {
   const { data } = encodeJpeg(
     { width: image.width, height: image.height, data: image.data },
@@ -49,10 +47,6 @@ export const encodeJpegBase64 = (image: RgbaImage, quality: number) => {
   return Buffer.from(data).toString('base64')
 }
 
-/**
- * Resizes with an area average when shrinking and bilinear interpolation when
- * growing, which is close to what jimp's default resize produced.
- */
 export const resizeImage = (
   image: RgbaImage,
   width: number,
@@ -117,7 +111,6 @@ export const resizeImage = (
   return out
 }
 
-/** Draws `src` onto `dst` at (x, y) with source-over alpha blending. */
 export const compositeImage = (
   dst: RgbaImage,
   src: RgbaImage,

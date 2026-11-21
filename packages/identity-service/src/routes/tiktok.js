@@ -12,11 +12,6 @@ const {
   errorResponseBadRequest
 } = require('../apiHelpers')
 
-/**
- * This file contains the TikTok endpoints for oauth
- *
- * See: https://developers.tiktok.com/doc/login-kit-web
- */
 module.exports = function (app) {
   app.get(
     '/tiktok',
@@ -54,7 +49,6 @@ module.exports = function (app) {
       }
 
       try {
-        // Fetch user's accessToken
         const accessTokenResponse = await axios.post(
           'https://open.tiktokapis.com/v2/oauth/token/',
           querystring.stringify({
@@ -83,7 +77,6 @@ module.exports = function (app) {
           )
         }
 
-        // Fetch TikTok user from the TikTok API
         const fields = [
           'open_id',
           'username',
@@ -125,7 +118,6 @@ module.exports = function (app) {
             `Another Audius profile has already been authenticated with TikTok user @${tikTokUser.username}!`
           )
         } else {
-          // Store the user id, and current profile for user in db
           await models.TikTokUser.upsert({
             uuid: tikTokUser.open_id,
             profile: tikTokUser,
@@ -141,10 +133,6 @@ module.exports = function (app) {
     })
   )
 
-  /**
-   * After the user finishes onboarding in the client app and has a blockchain userId, we need to associate
-   * the blockchainUserId with the tiktok profile so we can write the verified flag on chain
-   */
   app.post(
     '/tiktok/associate',
     handleResponse(async (req, res, next) => {
@@ -169,12 +157,9 @@ module.exports = function (app) {
           tikTokObj &&
           tikTokObj.profile.username.toLowerCase() === user.handle.toLowerCase()
 
-        // only set blockchainUserId if not already set
         if (isUnassociated && handlesMatch) {
           tikTokObj.blockchainUserId = userId
 
-          // Update the user's social verification status along with the social app handle that verification came from.
-          // If the user is not verified, send the transaction to ensure that their linked social handle is updated.
           const [encodedABI, contractAddress] =
             await audiusLibsInstance.User.updateSocialVerification(
               userId,
@@ -211,7 +196,6 @@ module.exports = function (app) {
             })
           }
 
-          // the final step is to save userId to db and respond to request
           try {
             await tikTokObj.save()
             return successResponse()

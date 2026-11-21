@@ -21,7 +21,6 @@ export const convertBigIntToAmountObject = (
   }
 }
 
-/** General Wallet Utils */
 export const shortenSPLAddress = (addr: string, numChars = 4) => {
   return `${addr.substring(0, numChars)}...${addr.substr(
     addr.length - numChars - 1

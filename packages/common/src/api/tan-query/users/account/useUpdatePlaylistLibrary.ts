@@ -32,7 +32,6 @@ export const useUpdatePlaylistLibrary = () => {
   })
 }
 
-// feature-tan-query TODO: migrate saga usages, then remove this
 export const updatePlaylistLibrary = async (
   audiusSdk: AudiusSdkWithServices,
   userId: ID | null | undefined,
@@ -52,7 +51,5 @@ export const updatePlaylistLibrary = async (
     playlist_library: dedupedPlaylistLibrary
   })
 
-  // feature-tan-query TODO: just set localStorage directly
-  // Triggers sync to local storage
   dispatch(accountActions.updatePlaylistLibrary(dedupedPlaylistLibrary))
 }

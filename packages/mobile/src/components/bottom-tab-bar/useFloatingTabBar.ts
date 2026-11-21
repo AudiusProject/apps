@@ -8,14 +8,6 @@ import {
   FLOATING_BAR_TOP_GAP
 } from './constants'
 
-/**
- * Where the floating pill sits, or null when the classic full-width bar should
- * render instead.
- *
- * The pill only floats on devices with a home indicator. Home-button devices
- * have no bottom inset to sink it into, so it would need more room than
- * BOTTOM_BAR_HEIGHT gives it.
- */
 export const useFloatingTabBar = () => {
   const { bottom } = useSafeAreaInsets()
   const pillBottom =

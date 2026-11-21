@@ -12,7 +12,6 @@ type SubmenuListProps = {
   style?: StyleProp<ViewStyle>
 }
 
-// Helper component to manage spacing and borders for a list of contextual-submenu fields
 export const SubmenuList = (props: SubmenuListProps) => {
   const { children, removeBottomDivider, style } = props
   const updatedChildren = Children.map(children, (child: ReactElement, index) =>

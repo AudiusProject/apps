@@ -20,13 +20,12 @@ export const SearchHeader = (props: Partial<HeaderProps>) => {
 
   const mobileHeaderCss: CSSObject = {
     overflow: 'scroll',
-    /* Hide scrollbar for Chrome, Safari and Opera */
     '::-webkit-scrollbar': {
       display: 'none'
     },
 
-    '-ms-overflow-style': 'none' /* IE and Edge */,
-    'scrollbar-width': 'none' /* Firefox */,
+    '-ms-overflow-style': 'none',
+    'scrollbar-width': 'none',
 
     backgroundColor: color.background.white,
     borderBottom: `1px solid ${color.border.default}`
@@ -46,7 +45,6 @@ export const SearchHeader = (props: Partial<HeaderProps>) => {
 
   const filterKeys: string[] = categories[categoryKey].filters.filter(
     (filter) => {
-      // Disable key and bpm filters when genre is Podcasts
       if (isPodcastGenre && (filter === 'key' || filter === 'bpm')) {
         return false
       }

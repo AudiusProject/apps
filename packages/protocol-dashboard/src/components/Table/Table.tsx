@@ -13,41 +13,28 @@ import styles from './Table.module.css'
 type TableProps = {
   className?: string
 
-  // The table title displayed at the top
-  // No title is rendered if unset
   title?: string
 
-  // The label to appear in the same row as the title
   label?: string
 
-  // If the table contents are loading in
   isLoading?: boolean
 
-  // THe columns
   columns: Array<{ title: string; className?: string }>
 
-  // Data to map to each row render
   data: Array<any>
 
-  // Row rendering function
   renderRow: (props: any) => React.ReactNode
 
-  // On row click
   onRowClick?: (row: any) => void
 
-  // The max number of rows to show before limiting
   limit?: number
 
-  // Always show more
   alwaysShowMore?: boolean
 
-  // Text displayed at the bottom of the table if limit provided
   moreText?: string
 
-  // On click action of moreText
   onClickMore?: () => void
 
-  // If there was an error fetching data
   error?: boolean
 
   tooltipComponent?: React.ComponentType<AppliedInfoTooltipProps>

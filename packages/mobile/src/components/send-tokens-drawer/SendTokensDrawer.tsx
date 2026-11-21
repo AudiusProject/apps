@@ -49,7 +49,6 @@ export const SendTokensDrawer = () => {
     mint: state.selectedMint || (mint ?? '')
   })
 
-  // Reset state when drawer opens with new data (including pre-populated user)
   useEffect(() => {
     if (isOpen && state.step === 'input') {
       setState((prev) => ({
@@ -84,7 +83,6 @@ export const SendTokensDrawer = () => {
   }
 
   const handleUserChange = (user: User | null) => {
-    // Update state when user is selected/reselected
     setState((prev) => ({
       ...prev,
       selectedUser: user,
@@ -100,7 +98,6 @@ export const SendTokensDrawer = () => {
       const { signature } = await sendTokensMutation.mutateAsync({
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
         amount: state.amount,
-        // When sending to a user, pass their Ethereum address to derive user-bank ATA
         recipientEthAddress: state.selectedUser?.erc_wallet,
         source: 'send_tokens_drawer',
         recipientHandle: state.selectedUser?.handle
@@ -111,7 +108,6 @@ export const SendTokensDrawer = () => {
       let errorMessage =
         error instanceof Error ? error.message : 'An unknown error occurred'
 
-      // Check for specific Solana token account errors
       const errorString =
         error instanceof Error ? error.toString() : String(error)
       if (
@@ -120,9 +116,6 @@ export const SendTokensDrawer = () => {
         errorString.includes('0x3') ||
         errorString.includes('custom program error: 0x3')
       ) {
-        // This error should no longer occur as we now automatically create
-        // user-bank accounts in the transaction. If it still occurs, it's likely
-        // a different issue or the account creation failed.
         errorMessage =
           'Failed to create recipient token account. Please try again.'
       }
@@ -159,7 +152,6 @@ export const SendTokensDrawer = () => {
   }
 
   const handleBeforeUserSelectionNavigate = () => {
-    // Close the drawer but preserve state so it can be restored when user selects
     onClose()
   }
 

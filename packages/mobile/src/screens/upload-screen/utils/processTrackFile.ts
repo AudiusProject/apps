@@ -46,7 +46,6 @@ export const processTrackFile = async (
   if (size > ALLOWED_MAX_AUDIO_SIZE_BYTES) {
     throw new Error('File too large')
   }
-  // Check file extension (heuristic for failure)
   if (
     !ALLOWED_AUDIO_FILE_EXTENSIONS.some((ext) =>
       name?.trim().toLowerCase().endsWith(ext)
@@ -54,14 +53,12 @@ export const processTrackFile = async (
   ) {
     throw new Error('Unsupported file type')
   }
-  // If the mime type is somehow undefined or it doesn't begin with audio/ reject.
-  // Backend will try to match on mime again and if it's not an audio/ match, it'll error
   if (type && !type.match(ALLOWED_AUDIO_FILE_MIME)) {
     throw new Error('File must be an audio file')
   }
 
   const duration = await getAudioDuration(localCopyUri ?? uri)
-  const title = name?.replace(/\.[^/.]+$/, '') ?? null // strip file extension
+  const title = name?.replace(/\.[^/.]+$/, '') ?? null
 
   return {
     clientId: uuid(),

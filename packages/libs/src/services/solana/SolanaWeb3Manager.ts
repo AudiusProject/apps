@@ -78,53 +78,26 @@ const MEMO_PROGRAM_ID = new PublicKey(
   'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo'
 )
 
-// Somewhat arbitrary close-to-zero number of Sol. For context, creating a UserBank costs ~0.002 SOL.
-// Without this padding, we could reach some low non-zero number of SOL where transactions would fail
-// despite a remaining balance.
 const ZERO_SOL_EPSILON = 0.005
 const SOL_PER_LAMPORT = 0.000000001
 
-// Generous default connection confirmation timeout to better cope with RPC congestion
 const DEFAULT_CONNECTION_CONFIRMATION_TIMEOUT_MS = 180 * 1000
 
 export type SolanaWeb3Config = {
-  //  the RPC endpoint to make requests against
   solanaClusterEndpoint: string
-  // wAudio mint address
   mintAddress: string
-  // USDC mint address
   usdcMintAddress: string
-  // native solana token program
   solanaTokenAddress: string
-  // address for the fee payer for transactions
   feePayerAddress: PublicKey
-  // address of the audius user bank program
   claimableTokenProgramAddress: string
-  // address for the Rewards Manager program
   rewardsManagerProgramId: string
-  // Rewards Manager PDA
   rewardsManagerProgramPDA: string
-  // The PDA of the rewards manager funds holder account
   rewardsManagerTokenPDA: string
-  // address for the payment router program
   paymentRouterProgramId: string
-  // Whether to use identity as a relay or submit transactions locally
   useRelay: boolean
-  // fee payer secret keys, if client wants to switch between different fee payers during relay
   feePayerKeypairs?: Keypair[]
-  // solana web3 connection confirmationTimeout in ms
   confirmationTimeout: number
 }
-
-/**
- * SolanaWeb3Manager acts as the interface to solana contracts from a client.
- * It wraps methods to create and lookup user banks, transfer balances, and
- * interact with the @solana/web3 library.
- *
- * Note: Callers of this class should specify all $AUDIO amounts in units of wei.
- * The internals of this class should handle the conversion from wei AUDIO to wormhole
- * $AUDIO amounts.
- */
 
 export class SolanaWeb3Manager {
   solanaWeb3Config: SolanaWeb3Config
@@ -277,9 +250,6 @@ export class SolanaWeb3Manager {
     return !!tokenAccount
   }
 
-  /**
-   * Creates a solana bank account, either for optional `ethAddress` or from the web3 provider's eth address
-   */
   async createUserBank({
     feePayerOverride,
     ethAddress,
@@ -307,10 +277,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Creates a userbank if needed.
-   * Returns the userbank address as `userbank` if it was created or already existed, or `error` if it failed to create.
-   */
   async createUserBankIfNeeded({
     feePayerOverride,
     ethAddress,
@@ -345,10 +311,6 @@ export class SolanaWeb3Manager {
     return { userbank: derived, didExist }
   }
 
-  /**
-   * Creates a token account for the provided solana address (a wallet)
-   * See https://spl.solana.com/associated-token-account
-   */
   async createAssociatedTokenAccount(
     solanaAddress: string,
     mint: MintName = DEFAULT_MINT
@@ -363,10 +325,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Finds the user bank token account for a provided solana address (a wallet) for the given mint
-   * See https://spl.solana.com/associated-token-account
-   */
   async findAssociatedTokenAddress(
     solanaAddress: string,
     mint: MintName = DEFAULT_MINT
@@ -378,9 +336,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Gets a solana bank account from `ethAddress` or the current web3 provider's eth address.
-   */
   async deriveUserBank({
     ethAddress,
     mint = DEFAULT_MINT
@@ -405,10 +360,6 @@ export class SolanaWeb3Manager {
     return bank
   }
 
-  /**
-   * Gets the info for a user bank/wAudio token account given a spl-token address.
-   * If the address is not a valid token account, returns `null`
-   */
   async getTokenAccountInfo(
     solanaAddress: string,
     commitment?: solanaWeb3.Commitment
@@ -425,25 +376,18 @@ export class SolanaWeb3Manager {
     }
   }
 
-  /**
-   * Gets the SPL waudio balance for a solana address in wei with 18 decimals
-   */
   async getWAudioBalance(solanaAddress: string | PublicKey) {
     const pubkey = new PublicKey(solanaAddress)
     try {
-      // Get the account info
       const account = await this.getConnection().getAccountInfo(pubkey)
       let tokenAccount = null
       if (account && account.owner.equals(TOKEN_PROGRAM_ID)) {
-        // If owned by the token program, it's a token account
         console.debug('Found token account', pubkey.toBase58())
         tokenAccount = splToken.unpackAccount(pubkey, account)
       } else if (
         !account ||
         account.owner.equals(solanaWeb3.SystemProgram.programId)
       ) {
-        // If owned by the system program, assume root wallet and derive
-        // canonical associated token account
         console.debug('Getting associated token account for', pubkey.toBase58())
         const tokenAccountAddress = splToken.getAssociatedTokenAddressSync(
           this.mints.audio,
@@ -457,49 +401,27 @@ export class SolanaWeb3Manager {
       }
 
       if (tokenAccount) {
-        // Check the mint is correct
         if (!tokenAccount.mint.equals(this.mints.audio)) {
           throw new Error(
             `Invalid mint for wAudio token account for ${pubkey.toBase58()}: Expected ${this.mints.audio.toBase58()} found ${tokenAccount.mint.toBase58()}`
           )
         }
-        // Multiply by 10^10 to maintain same decimals as eth $AUDIO
         const decimals = AUDIO_DECIMALS - WAUDIO_DECIMALS
         return tokenAccount.amount * BigInt('1'.padEnd(decimals + 1, '0'))
       } else {
-        // If not owned by either of those, there's no token account
-        // which means no AUDIO in this account.
         console.debug('No token accounts found for', solanaAddress)
         return BigInt(0)
       }
     } catch (e) {
       if (e instanceof splToken.TokenAccountNotFoundError) {
-        // If the call to splToken.getAccount() fails because the token account
-        // doesn't exist on this wallet, that's the same as having 0 AUDIO
         console.debug('Token account does not exist', pubkey.toBase58(), e)
         return BigInt(0)
       }
-      // Something weird happened if we get here
       console.error('getWAudioBalance Error:', e)
       return null
     }
   }
 
-  /**
-   * Transfers audio from the web3 provider's eth address
-   * @param {string} recipientSolanaAddress
-   *  Recipient solana address which is either a user bank, wAudio token account,
-   *  or a solana account. In the last case, an associated token account is created
-   *  if one does not already exist for the solana account
-   * @param {BN} amount the amount of $AUDIO to send in wei units of $AUDIO.
-   * **IMPORTANT NOTE**
-   * wAudio (Solana) does not support 10^-18 (wei) units of $AUDIO. The smallest
-   * demarcation on that side is 10^-8, so the $AUDIO amount must be >= 10^8 and have no
-   * remainder after a division with 10^8 or this method will throw.
-   *
-   * Generally speaking, callers into the solanaWeb3Manager should use BN.js representation
-   * of wei $AUDIO for all method calls
-   */
   async transferWAudio(recipientSolanaAddress: string, amount: BN) {
     if (!this.web3Manager) {
       throw new Error(
@@ -507,13 +429,11 @@ export class SolanaWeb3Manager {
       )
     }
 
-    // Check if the solana address is a token account
     let tokenAccountInfo = await this.getTokenAccountInfo(
       recipientSolanaAddress
     )
     if (!tokenAccountInfo) {
       console.info('Provided recipient solana address was not a token account')
-      // If not, check to see if it already has an associated token account.
       const associatedTokenAccount = await this.findAssociatedTokenAddress(
         recipientSolanaAddress
       )
@@ -521,7 +441,6 @@ export class SolanaWeb3Manager {
         associatedTokenAccount.toString()
       )
 
-      // If it's not a valid token account, we need to make one first
       if (!tokenAccountInfo) {
         console.info(
           'Provided recipient solana address has no associated token account, creating'
@@ -560,16 +479,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Purchases USDC gated content
-   * @param params.id the id of the content, eg. the track ID
-   * @param params.type the type of the content, eg. "track"
-   * @param params.blocknumber the blocknumber the content was last updated
-   * @param params.splits map of address to USDC amount, used to split the price amoung several stakeholders
-   * @param params.extraAmount Extra amount in USDC wei to be distributed to the stakeholders
-   * @param params.purchaserUserId Id of the user that is purchasing the track
-   * @returns the transaction signature and/or an error
-   */
   async purchaseContent({
     id,
     type,
@@ -652,17 +561,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Purchases USDC gated content
-   * @param params.id the id of the content, eg. the track ID
-   * @param params.type the type of the content, eg. "track"
-   * @param params.blocknumber the blocknumber the content was last updated
-   * @param params.splits map of address to USDC amount, used to split the price amoung several stakeholders
-   * @param params.extraAmount Extra amount in USDC wei to be distributed to the stakeholders
-   * @param params.purchaserUserId Id of the user that is purchasing the track
-   * @param params.senderAccount Should either be root solana account or user bank.
-   * @returns the transaction signature and/or an error
-   */
   async getPurchaseContentWithPaymentRouterInstructions({
     id,
     type,
@@ -693,7 +591,6 @@ export class SolanaWeb3Manager {
       )
     }
 
-    // TODO: PAY-2252 split extra amount amongst all recipients correctly
     const recipientAmounts: Record<string, bigint> = Object.entries(
       splits
     ).reduce(
@@ -714,7 +611,6 @@ export class SolanaWeb3Manager {
         this.paymentRouterProgramId
       )
 
-    // Associated token account owned by the PDA
     const paymentRouterTokenAccount = await this.findAssociatedTokenAddress(
       paymentRouterPda.toString(),
       'usdc'
@@ -844,9 +740,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Submits attestations for challenge completion to the RewardsManager program on Solana.
-   */
   async submitChallengeAttestations({
     attestations,
     oracleAttestation,
@@ -875,9 +768,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Evaluates existing submitted attestations, disbursing if successful.
-   */
   async evaluateChallengeAttestations({
     challengeId,
     specifier,
@@ -906,9 +796,6 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Creates a new rewards signer (one that can attest)
-   */
   async createSender({
     senderEthAddress,
     operatorEthAddress,
@@ -928,17 +815,11 @@ export class SolanaWeb3Manager {
     })
   }
 
-  /**
-   * Gets the balance of a PublicKey, in SOL
-   */
   async getBalance({ publicKey }: { publicKey: PublicKey }) {
     const lamports = await this.getConnection().getBalance(publicKey)
     return lamports * SOL_PER_LAMPORT
   }
 
-  /**
-   * Gets whether a PublicKey has a usable balance
-   */
   async hasBalance({
     publicKey,
     epsilon = ZERO_SOL_EPSILON
@@ -965,9 +846,6 @@ export class SolanaWeb3Manager {
     return await this.identityService?.getRandomFeePayer()
   }
 
-  /**
-   * Gets whether a given node registered on eth with `senderEthAddress` is registered on Solana
-   */
   async getIsDiscoveryNodeRegistered(senderEthAddress: string) {
     const derivedSenderSolanaAddress = await deriveSolanaSenderFromEthAddress(
       senderEthAddress,
@@ -988,11 +866,6 @@ export class SolanaWeb3Manager {
     )
   }
 
-  /**
-   * Finds a 'derived' address by finding a programAddress with
-   * seeds array  as first 32 bytes of base + seeds
-   * @returns the program address
-   */
   async findDerivedAddress(
     programId: PublicKey,
     base: PublicKey,
@@ -1004,10 +877,6 @@ export class SolanaWeb3Manager {
     )
   }
 
-  /**
-   * Finds the target PDA with the base audius admin as the initial seed
-   * In conjunction with the secondary seed as the users id in bytes
-   */
   async findDerivedPair(
     programId: PublicKey,
     adminAccount: PublicKey,
@@ -1032,10 +901,6 @@ export class SolanaWeb3Manager {
     return { baseAuthorityAccount, derivedAddress, bumpSeed }
   }
 
-  /**
-   * Given the eth address buffer from the account, convert to hex
-   * @returns hex string of input bytes
-   */
   async deriveEthWalletFromAddress(accountEthAddress: Buffer) {
     let encodedEthAddress = Buffer.from(accountEthAddress).toString('hex')
 
@@ -1046,10 +911,6 @@ export class SolanaWeb3Manager {
     return encodedEthAddress
   }
 
-  /**
-   * Creates transfer instructions from the current user's user bank to the provided solana address.
-   * Supports both $AUDIO or USDC user banks.
-   */
   async createTransferInstructionsFromCurrentUser({
     amount,
     feePayerKey,

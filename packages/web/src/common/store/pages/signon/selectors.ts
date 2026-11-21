@@ -2,7 +2,6 @@ import { createSelector } from 'reselect'
 
 import { AppState } from 'store/types'
 
-// Sign On selectors
 export const getSignOn = (state: AppState) => state.signOn
 export const getEmailField = (state: AppState) => state.signOn.email
 export const getNameField = (state: AppState) => state.signOn.name
@@ -45,9 +44,6 @@ export const getFollowIds = (state: AppState) => state.signOn.selectedUserIds
 export const getStartedAndFinishedSignup = createSelector(
   [getStartedSignUpProcess, getFinishedSignUpProcess],
   (startedSignUpProcess, finishedSignUpProcess) => {
-    // If a user has started the sign up flow,
-    // only return true if they finish the flow
-    // (including selecting followees)
     return !startedSignUpProcess || finishedSignUpProcess
   }
 )

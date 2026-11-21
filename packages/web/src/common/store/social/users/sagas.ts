@@ -25,8 +25,6 @@ import errorSagas from './errorSagas'
 
 const { profilePage } = route
 
-/* FOLLOW */
-
 function* watchFollowUser() {
   yield* takeEvery(socialActions.FOLLOW_USER, followUser)
 }
@@ -53,7 +51,6 @@ function* followUser(action: ReturnType<typeof socialActions.followUser>) {
 
   if (!followedUser) {
     try {
-      // If we haven't cached the followed user, need to fetch and cache it first to ensure that we have the correct `does_current_user_follow` on the user value before the follow gets indexed.
       const user = yield* call(queryUser, action.userId)
       if (user) {
         followedUser = user
@@ -66,7 +63,6 @@ function* followUser(action: ReturnType<typeof socialActions.followUser>) {
   }
 
   if (followedUser) {
-    // Increment the followed user's follower count
     queryClient.setQueryData(getUserQueryKey(action.userId), (prevUser) =>
       !prevUser
         ? undefined
@@ -78,7 +74,6 @@ function* followUser(action: ReturnType<typeof socialActions.followUser>) {
           }
     )
   }
-  // Increment the signed in user's followee count
   queryClient.setQueryData(getUserQueryKey(currentUser.user_id), (prevUser) =>
     !prevUser
       ? undefined
@@ -128,7 +123,6 @@ function* confirmFollowUser(
         const followedUser = yield* queryUser(userId)
         const currentUser = yield* queryUser(accountId)
         if (followedUser) {
-          // Revert the incremented follower count on the followed user
           queryClient.setQueryData(getUserQueryKey(userId), (prevUser) =>
             !prevUser
               ? undefined
@@ -141,7 +135,6 @@ function* confirmFollowUser(
         }
 
         if (currentUser) {
-          // Revert the incremented followee count on the current user
           queryClient.setQueryData(
             getUserQueryKey(currentUser.user_id),
             (prevUser) =>
@@ -166,19 +159,14 @@ function* followUserSucceeded(
   action: ReturnType<typeof socialActions.followUserSucceeded>
 ) {
   const { onSuccessActions } = action
-  // Do any callbacks
   if (onSuccessActions) {
-    // Spread here to unfreeze the action
-    // Redux sagas can't "put" frozen actions
     for (const onSuccessAction of onSuccessActions) {
       yield* put({ ...onSuccessAction })
     }
   }
 
-  // Auto-subscribe when following a user
   const { userId } = action
 
-  // Call the subscribe saga (it handles the optimistic update)
   yield* call(subscribeToUserAsync, userId)
 }
 
@@ -187,7 +175,6 @@ function* watchUnfollowUser() {
 }
 
 function* unfollowUser(action: ReturnType<typeof socialActions.unfollowUser>) {
-  /* Make Async Backend Call */
   yield* call(waitForWrite)
   const queryClient = yield* getContext('queryClient')
   const accountUser = yield* queryAccountUser()
@@ -205,7 +192,6 @@ function* unfollowUser(action: ReturnType<typeof socialActions.unfollowUser>) {
 
   const currentUserId = yield* call(queryCurrentUserId)
 
-  // Decrement the follower count on the unfollowed user
   queryClient.setQueryData(getUserQueryKey(action.userId), (prevUser) =>
     !prevUser
       ? undefined
@@ -217,7 +203,6 @@ function* unfollowUser(action: ReturnType<typeof socialActions.unfollowUser>) {
         }
   )
 
-  // Decrement the followee count on the current user
   queryClient.setQueryData(getUserQueryKey(currentUserId), (prevUser) =>
     !prevUser
       ? undefined
@@ -235,7 +220,6 @@ function* unfollowUser(action: ReturnType<typeof socialActions.unfollowUser>) {
 
   yield* call(confirmUnfollowUser, action.userId, accountId)
 
-  // Auto-unsubscribe when unfollowing a user
   yield* call(unsubscribeFromUserAsync, action.userId)
 }
 
@@ -265,7 +249,6 @@ function* confirmUnfollowUser(userId: ID, accountId: ID) {
         )
         const currentUserId = yield* call(queryCurrentUserId)
 
-        // Revert decremented follower count on unfollowed user
         queryClient.setQueryData(getUserQueryKey(userId), (prevUser) =>
           !prevUser
             ? undefined
@@ -276,7 +259,6 @@ function* confirmUnfollowUser(userId: ID, accountId: ID) {
               }
         )
 
-        // Revert decremented followee count on current user
         queryClient.setQueryData(getUserQueryKey(currentUserId), (prevUser) =>
           !prevUser
             ? undefined
@@ -289,8 +271,6 @@ function* confirmUnfollowUser(userId: ID, accountId: ID) {
     )
   )
 }
-
-/* SUBSCRIBE */
 
 function* watchSubscribeUser() {
   yield* takeEvery(
@@ -421,8 +401,6 @@ function* confirmUnsubscribeFromUser(userId: ID, accountId: ID) {
     )
   )
 }
-
-/* SHARE */
 
 function* watchShareUser() {
   yield* takeEvery(

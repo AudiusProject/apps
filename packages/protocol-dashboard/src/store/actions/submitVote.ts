@@ -27,7 +27,6 @@ function submitAudiusVote(
         await aud.Governance.submitVote({ proposalId, vote })
       }
 
-      // Repull proposal
       await dispatch(fetchVotes(proposalId))
       await dispatch(fetchProposal(proposalId))
 

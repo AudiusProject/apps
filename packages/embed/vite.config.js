@@ -20,8 +20,6 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     define: {
-      // Using `process.env` to support mobile,
-      // This can be removed once the common migration is complete
       'process.env': env
     },
     optimizeDeps: {
@@ -36,8 +34,6 @@ export default defineConfig(({ command, mode }) => {
       svgr({
         include: '**/*.svg'
       }),
-      // Import workerscript as raw string
-      // Could use ?raw suffix but it breaks on mobile
       {
         transform(code, id) {
           if (/\.workerscript$/.test(id)) {
@@ -74,7 +70,6 @@ export default defineConfig(({ command, mode }) => {
         http: require.resolve('stream-http'),
         https: require.resolve('https-browserify'),
         stream: require.resolve('stream-browserify'),
-        // Resolve to lodash-es to support tree-shaking
         lodash: 'lodash-es'
       }
     },

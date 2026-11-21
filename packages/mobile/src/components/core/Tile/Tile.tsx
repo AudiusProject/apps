@@ -25,8 +25,6 @@ const useStyles = makeStyles(({ palette }) => ({
     backgroundColor: palette.white,
     borderWidth: 1,
     borderRadius,
-    // Not using react-native-shadow-2 because it causes performance issues when rendering
-    // multiple lineups (in tabs)
     ...shadowStyles
   },
   content: {
@@ -47,11 +45,8 @@ type TileOwnProps<TileComponentType extends ComponentType = ComponentType> =
     scaleTo?: number
     style?: StyleProp<ViewStyle>
     styles?: StylesProp<{
-      // styles for root element
       root: ViewStyle
-      // styles for tile element, the view that establishes the border
       tile: ViewStyle
-      // styles for the inner view that displays the tile content
       content: ViewStyle
     }>
     as?: TileComponentType

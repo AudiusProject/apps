@@ -22,8 +22,8 @@ export type CollectionHeaderProps = {
   artistName: string
   description: string
   artistHandle: string
-  releaseDate: string | number // either format should be utc time
-  lastModifiedDate?: string | number // either format should be utc time
+  releaseDate: string | number
+  lastModifiedDate?: string | number
   numTracks: number
   duration: number
   userId: Nullable<ID>

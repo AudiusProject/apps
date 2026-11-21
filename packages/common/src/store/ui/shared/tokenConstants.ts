@@ -1,20 +1,12 @@
-/**
- * From Jupiter API documentation:
- * https://docs.jup.ag/jupiter-core/jupiter-sdk/v2/full-guide
- * "6. Configure the input token, output token"
- */
 export type JupiterTokenListing = {
-  chainId: number // 101,
-  address: string // 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-  symbol: string // 'USDC',
-  name: string // 'Wrapped USDC',
-  decimals: number // 6,
-  logoURI: string // 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW/logo.png',
+  chainId: number
+  address: string
+  symbol: string
+  name: string
+  decimals: number
+  logoURI: string
 }
 
-/**
- * Base token metadata without environment-specific addresses
- */
 const BASE_TOKEN_METADATA = {
   AUDIO: {
     chainId: 101,
@@ -48,9 +40,6 @@ export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
 export const NON_FAN_CLUB_MINTS = [AUDIO_MINT, SOL_MINT, USDC_MINT]
 
-/**
- * Legacy token listing map with hardcoded addresses for backward compatibility
- */
 export const TOKEN_LISTING_MAP: Record<string, JupiterTokenListing> = {
   AUDIO: {
     ...BASE_TOKEN_METADATA.AUDIO,

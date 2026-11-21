@@ -1,6 +1,5 @@
 import type { PageContextServer } from 'vike/types'
 
-// Simple helper to get API URL without importing services/env which pulls in SDK dependencies
 const getApiUrl = () => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {

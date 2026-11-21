@@ -346,8 +346,6 @@ const UserBalanceHistoryGraphImpl = () => {
     >
       <Line
         data={getChartData(timestamps, balances, secondary)}
-        // chart.js v2-style options shape; cast as any to bypass v3+ type
-        // mismatches (xAxes/yAxes vs scales.x/scales.y, hover.mode literal).
         options={
           getChartOptions(chartId, neutralColor, spacing, borderColor) as any
         }

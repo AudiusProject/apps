@@ -12,10 +12,6 @@ type AcceptTrackCollaborationArgs = {
   trackId: ID
 }
 
-/**
- * Accept a pending collaborator invite on a track. The current user is the
- * invited collaborator; once accepted the track surfaces on their profile.
- */
 export const useAcceptTrackCollaboration = () => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()

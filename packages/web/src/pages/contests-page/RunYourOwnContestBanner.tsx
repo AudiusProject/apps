@@ -26,18 +26,6 @@ const messages = {
   dismiss: 'Dismiss'
 }
 
-/**
- * Desktop-only floating CTA encouraging viewers to host their own remix
- * contest. Hidden on mobile-width viewports. Hovers at the bottom of the
- * viewport (above the play bar) rather than sitting at the end of the
- * document scroll, so it remains reachable while the user scrolls the
- * contest grid.
- *
- * Positioning mirrors FanClubsExplorePage's launch banner: fixed inside
- * a portal on the main content container, offset by the nav width on the
- * left and the play bar height on the bottom. Dismissable for the rest
- * of the session (state is not persisted across reloads).
- */
 export const RunYourOwnContestBanner = () => {
   const isMobile = useIsMobile()
   const [isDismissed, setIsDismissed] = useState(false)

@@ -31,9 +31,6 @@ type ReorderLibraryResult = {
   collectionType: PlaylistLibraryKind
 }
 
-/**
- * Hook to reorder items in the playlist library
- */
 export const useReorderLibrary = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: playlistLibrary } = usePlaylistLibrary()
@@ -54,9 +51,6 @@ export const useReorderLibrary = () => {
         throw new Error('Missing required data')
       }
 
-      // Snapshot the pre-update library before mutating — `updatePlaylistLibrary`
-      // overwrites it via setQueryData, and onSuccess needs to reason about the
-      // prior state (was the playlist already in the library? in a folder?).
       const previousLibrary = playlistLibrary
       const updatedLibrary = playlistLibraryHelpers.reorderPlaylistLibrary(
         previousLibrary,

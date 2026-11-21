@@ -68,10 +68,6 @@ const MenuForm = (props: MenuFormProps) => {
   const { resetForm, errors, initialStatus, status, setStatus } =
     useFormikContext()
 
-  // The HTML `id`/`form` attribute association requires an id with no
-  // whitespace. Labels like "Track Privacy" contain spaces, which makes the
-  // `<Form>`/submit-button association silently fail so the Save button does
-  // nothing on click. Slugify the label into a valid id used for both ends.
   const formId = useMemo(
     () => label.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '') || 'menu-form',
     [label]
@@ -89,7 +85,6 @@ const MenuForm = (props: MenuFormProps) => {
   }, [displayMenuErrorMessage, errors])
 
   useEffect(() => {
-    // If the menu is closed, trigger callback if exists and reset the status
     if (!isOpen) {
       closeMenuCallback?.(status)
       setStatus(initialStatus)
@@ -201,7 +196,6 @@ export const ContextualMenu = <FormValues extends FormikValues = FormikValues>(
   const [isMenuOpen, toggleMenu] = useToggle(false)
 
   useEffect(() => {
-    // If forceOpen is true, open the menu and reset the forceOpen flag
     if (forceOpen && setForceOpen) {
       setForceOpen(false)
       toggleMenu()

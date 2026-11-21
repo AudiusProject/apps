@@ -121,7 +121,6 @@ const DownloadTrackArchiveDrawerContent = ({
     startDownload()
   }, [startDownload])
 
-  // Close drawer automatically if download was successful
   useEffect(() => {
     if (downloadSuccess) {
       onClose()

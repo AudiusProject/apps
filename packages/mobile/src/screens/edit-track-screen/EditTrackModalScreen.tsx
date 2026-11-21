@@ -31,8 +31,6 @@ export const EditTrackModalScreen = () => {
 
   const { data: track } = useTrack(id)
   const { mutateAsync: updateTrack } = useUpdateTrack()
-  // The cached track can be missing pending invites; saving without them
-  // would delete those invites.
   const { data: collaboratorsForEdit, isPending: isCollaboratorsPending } =
     useTrackCollaboratorsForEdit(id)
 
@@ -47,7 +45,6 @@ export const EditTrackModalScreen = () => {
         trackId: id,
         metadata
       })
-      // Close the modal, then show the track in the tab stack below
       navigation.goBack()
       tabNavigation.navigate('Track', { trackId: id })
     },

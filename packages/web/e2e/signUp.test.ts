@@ -42,7 +42,6 @@ async function testSignUp({
 }) {
   const { email, password, handle, name } = testUser
 
-  // --> Load signup route
   await page.goto(signUpUrl)
   await expect(
     page.getByRole('heading', { name: /sign up for audius/i, level: 1 })
@@ -50,22 +49,17 @@ async function testSignUp({
 
   await page.getByRole('button', { name: /sign up free/i }).click()
 
-  // --> Email Page
   await page.getByRole('textbox', { name: /email/i }).fill(email)
   await page.getByRole('button', { name: /sign up free/i }).click()
 
   await assertOnCreatePasswordPage(testUser, page)
 
-  // --> Password Page
-  // Password inputs dont have a role, so we just check against label text
-  // https://github.com/testing-library/dom-testing-library/issues/567#issue-616906804
   await page.getByLabel(/^password/i).fill(password)
   await page.waitForTimeout(500)
   await page.getByLabel(/confirm password/i).fill(password)
 
   await page.getByRole('button', { name: /continue/i }).click()
 
-  // --> Pick Handle Page
   await expect(
     page.getByRole('heading', { name: /pick your handle/i })
   ).toBeVisible()
@@ -75,22 +69,12 @@ async function testSignUp({
   await page.getByRole('textbox', { name: /handle/i }).fill(handle)
   await page.getByRole('button', { name: /continue/i }).click()
 
-  // --> Finish Profile Page
   await expect(
     page.getByRole('heading', { name: /finish your profile/i })
   ).toBeVisible()
   await expect(
     page.getByText(/your photos & display name is how others see you./i)
   ).toBeVisible()
-
-  // upload cover & profile photo
-  // await page
-  //   .getByRole('button', { name: /upload a cover photo for your profile/i })
-  //   .click()
-  // await page
-  //   .getByTestId('coverPhoto-dropzone')
-  //   .locator('input')
-  //   .setInputFiles(path.join(__dirname, 'files/cover-photo.jpeg'))
 
   await page.getByRole('button', { name: /upload a profile photo/i }).click()
   await page
@@ -101,7 +85,6 @@ async function testSignUp({
   await page.getByRole('textbox', { name: /display name/i }).fill(name)
   await page.getByRole('button', { name: /continue/i }).click()
 
-  // --> Select Genres Page
   await expect(
     page.getByRole('heading', { name: /select your genres/i })
   ).toBeVisible()
@@ -120,7 +103,6 @@ async function testSignUp({
 
   await page.getByRole('button', { name: /continue/i }).click()
 
-  // --> Select Artists Page
   await expect(
     page.getByRole('heading', { name: /follow at least 3 artists/i })
   ).toBeVisible()
@@ -142,9 +124,6 @@ async function testSignUp({
     await artistGroup.getByRole('checkbox', { checked: false }).first().click()
   }
 
-  // Check if featuredArtist is visible,
-  // If not, it's likely we are in a dev environment without any artists set
-  // in which case we can skip this step
   const featuredArtist = page.getByRole('group', {
     name: /pick featured artists/
   })
@@ -154,10 +133,8 @@ async function testSignUp({
     .catch(() => {})
 
   if (await featuredArtist.isVisible()) {
-    // Pick a featured artist
     await selectArtist(/pick featured artists/i)
 
-    // Pick an artist from each genre we selected
     await page.getByRole('radio', { name: /acoustic/i }).click()
     await selectArtist(/pick acoustic artists/i)
 
@@ -167,25 +144,22 @@ async function testSignUp({
 
   await page.getByRole('button', { name: /continue/i }).click()
 
-  // --> Mobile CTA page (desktop web only)
   if (!isMobile) {
     await page.getByRole('heading', { name: /get the app/i }).click()
     await expect(page.getByText(/take audius with you/i)).toBeVisible()
     await page.getByRole('button', { name: /continue/i }).click()
   }
 
-  // --> Welcome modal page
   await expect(
     page.getByRole('dialog', {
       name: /welcome to audius/i
     })
-  ).toBeVisible({ timeout: 60000 }) // This can take a long time
+  ).toBeVisible({ timeout: 60000 })
   await page.getByRole('button', { name: /start listening/i }).click()
   await expect(page).toHaveURL(/feed/i)
 }
 
 test.describe('Sign Up', () => {
-  // Resets auth state for this suite so we aren't already signed in
   test.use(resetAuthState)
   test.describe('desktop', () => {
     test('can navigate to signup from trending', async ({ page }) => {
@@ -271,7 +245,6 @@ test.describe('Sign Up', () => {
         signUpUrl: `/signup?ref=dejayjdstaging`,
         page
       })
-      // TODO: this is the desktop flow, need to figure out how to get mobile view to properly show
       await page
         .getByRole('button', { name: /toggle navigation menu/i })
         .click()

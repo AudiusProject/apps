@@ -45,9 +45,6 @@ export class Account extends Base {
     this.signUpV2 = this.signUpV2.bind(this)
   }
 
-  /**
-   * Logs a user into Audius
-   */
   async login(email: string, password: string, otp?: string) {
     const phases = {
       FIND_WALLET: 'FIND_WALLET',
@@ -86,12 +83,6 @@ export class Account extends Base {
     return { error: 'No user found', phase }
   }
 
-  /**
-   * Logs a user out of Audius
-   * Note: Actions will stop working at this point, but
-   * clients may wish to call window.location.reload()
-   * to show the user as logged out
-   */
   async logout() {
     if (!this.web3Manager.web3IsExternal()) {
       this.REQUIRES(Services.HEDGEHOG)
@@ -99,17 +90,6 @@ export class Account extends Base {
     }
   }
 
-  /**
-   * Signs a user up for Audius
-   * @param email
-   * @param password
-   * @param metadata
-   * @param profilePictureFile an optional file to upload as the profile picture
-   * @param coverPhotoFile an optional file to upload as the cover phtoo
-   * @param hasWallet
-   * @param host The host url used for the recovery email
-   * @param generateRecoveryLink an optional flag to skip generating recovery link for testing purposes
-   */
   async signUpV2(
     email: string,
     password: string,
@@ -139,7 +119,6 @@ export class Account extends Base {
         )
       } else {
         this.REQUIRES(Services.HEDGEHOG)
-        // If an owner wallet already exists, don't try to recreate it
         if (!hasWallet) {
           phase = phases.HEDGEHOG_SIGNUP
           const ownerWallet = await this.hedgehog.signUp({
@@ -156,7 +135,6 @@ export class Account extends Base {
         }
       }
 
-      // Select a storage node to send future requests to
       phase = phases.SELECT_STORAGE_NODE
       const randomNodes = await this.ServiceProvider.autoSelectStorageV2Nodes(
         1,
@@ -164,7 +142,6 @@ export class Account extends Base {
       )
       await this.creatorNode.setEndpoint(randomNodes[0]!)
 
-      // Add user to chain
       phase = phases.ADD_USER
       const { newMetadata, blockHash, blockNumber } =
         await this.User.createEntityManagerUserV2({
@@ -197,7 +174,6 @@ export class Account extends Base {
       this.REQUIRES(Services.HEDGEHOG)
       phase = phases.HEDGEHOG_SIGNUP
 
-      // guest account secured by OTP
       const ownerWallet = await this.hedgehog.signUp({
         username: email,
         password: 'TemporaryPassword',
@@ -205,7 +181,6 @@ export class Account extends Base {
       })
 
       this.web3Manager.setOwnerWallet(ownerWallet)
-      // Add user to chain
       phase = phases.ADD_USER
       const { newMetadata, blockHash, blockNumber } =
         await this.User.createEntityManagerGuestUser(metadata)
@@ -220,9 +195,6 @@ export class Account extends Base {
     }
   }
 
-  /**
-   * Generates and sends a recovery email for a user
-   */
   async generateRecoveryLink({
     host
   }: {
@@ -234,7 +206,7 @@ export class Account extends Base {
       // @ts-expect-error hard to type this hedgehog addon
       const recoveryInfo = await this.hedgehog.generateRecoveryInfo()
 
-      const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+      const unixTs = Math.round(new Date().getTime() / 1000)
       const data = `Click sign to authenticate with identity service: ${unixTs}`
       const signature = await this.web3Manager.sign(Buffer.from(data, 'utf-8'))
 
@@ -281,18 +253,11 @@ export class Account extends Base {
     return await this.hedgehog.confirmCredentials(args)
   }
 
-  /**
-   * Check if an email address has been previously registered.
-   */
   async checkIfEmailRegistered(email: string) {
     this.REQUIRES(Services.IDENTITY_SERVICE)
     return await this.identityService.checkIfEmailRegistered(email)
   }
 
-  /**
-   * Associates a user with a twitter uuid.
-   * @param uuid from the Twitter API
-   */
   async associateTwitterUser(
     uuid: string,
     userId: number,
@@ -308,10 +273,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Associates a user with an instagram uuid.
-   * @param uuid from the Instagram API
-   */
   async associateInstagramUser(
     uuid: string,
     userId: number,
@@ -327,10 +288,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Associates a user with an tiktok uuid
-   * @param uuid from the TikTok API
-   */
   async associateTikTokUser(
     uuid: string,
     userId: number,
@@ -346,51 +303,21 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Looks up a Twitter account by handle.
-   */
   async lookupTwitterHandle(handle: string) {
     this.REQUIRES(Services.IDENTITY_SERVICE)
     return await this.identityService.lookupTwitterHandle(handle)
   }
 
-  /**
-   * Perform a full-text search. Returns tracks, users, playlists, albums
-   *    with optional user-specific results for each
-   *  - user, track, and playlist objects have all same data as returned from standalone endpoints
-   * @param text search query
-   * @param kind 'tracks', 'users', 'playlists', 'albums', 'all'
-   * @param limit max # of items to return per list (for pagination)
-   * @param offset offset into list to return from (for pagination)
-   */
   async searchFull(text: string, kind: string, limit = 100, offset = 0) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.searchFull(text, kind, limit, offset)
   }
 
-  /**
-   * Perform a lighter-weight full-text search. Returns tracks, users, playlists, albums
-   *    with optional user-specific results for each
-   *  - user, track, and playlist objects have core data, and track & playlist objects
-   *    also return user object
-   * @param text search query
-   * @param limit max # of items to return per list (for pagination)
-   * @param offset offset into list to return from (for pagination)
-   */
   async searchAutocomplete(text: string, limit = 100, offset = 0) {
     this.REQUIRES(Services.DISCOVERY_PROVIDER)
     return await this.discoveryProvider.searchAutocomplete(text, limit, offset)
   }
 
-  /**
-   * Perform a tags-only search. Returns tracks with required tag and users
-   * that have used a tag greater than a specified number of times
-   * @param text search query
-   * @param userTagCount min # of times a user must have used a tag to be returned
-   * @param kind 'tracks', 'users', 'playlists', 'albums', 'all'
-   * @param limit max # of items to return per list (for pagination)
-   * @param offset offset into list to return from (for pagination)
-   */
   async searchTags(
     text: string,
     userTagCount = 2,
@@ -426,10 +353,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Check if the user has a distribution claim
-   * @param index The index of the claim to check (if known)
-   */
   async getHasClaimed(index?: number) {
     this.REQUIRES(Services.COMSTOCK)
     if (index) {
@@ -444,9 +367,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Get the distribution claim amount
-   */
   async getClaimDistributionAmount() {
     this.REQUIRES(Services.COMSTOCK)
     const userWallet = this.web3Manager.getWalletAddress()
@@ -457,12 +377,6 @@ export class Account extends Base {
     return amount
   }
 
-  /**
-   * Make the claim
-   * @param index The index of the claim to check
-   * @param amount The amount to be claimed
-   * @param merkleProof The merkle proof for the claim
-   */
   async makeDistributionClaim(
     index: number,
     amount: BN,
@@ -489,9 +403,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Sends `amount` tokens to `recipientAddress`
-   */
   async permitAndSendTokens(recipientAddress: string, amount: BN) {
     this.REQUIRES(Services.IDENTITY_SERVICE)
     const myWalletAddress = this.web3Manager.getWalletAddress()
@@ -506,12 +417,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Sends Eth `amount` tokens to `solanaAccount` by way of the wormhole
-   * 1.) Permits the eth relay to proxy send tokens on behalf of the user
-   * 2.) Transfers the tokens on the eth side to the wormhole contract
-   * 3.) Gathers attestations from wormhole oracles and relizes the tokens on sol
-   */
   async sendTokensFromEthToSol(amount: BN, solanaAccount: string) {
     this.REQUIRES(Services.IDENTITY_SERVICE)
     const phases = {
@@ -568,10 +473,6 @@ export class Account extends Base {
     }
   }
 
-  /**
-   * Sends Eth `amount` tokens to `solanaAccount` on the identity service
-   * by way of the wormhole.
-   */
   async proxySendTokensFromEthToSol(amount: BN, solanaAccount: string) {
     this.REQUIRES(Services.IDENTITY_SERVICE)
     const myWalletAddress = this.web3Manager.getWalletAddress()
@@ -606,14 +507,6 @@ export class Account extends Base {
     })
   }
 
-  /**
-   * Sends `amount` tokens to `ethAccount` by way of the wormhole
-   * 1.) Creates a solana root wallet
-   * 2.) Sends the tokens from the user bank account to the solana wallet
-   * 3.) Permits the solana wallet to approve transfer to wormhole
-   * 4.) Transfers to the wrapped audio to the sol wormhole contract
-   * 5.) Gathers attestations from wormhole oracles and realizes the tokens on eth
-   */
   async sendTokensFromSolToEth(amount: BN, ethAccount: string) {
     const { error, logs, phase } =
       await this.wormholeClient.sendTokensFromSolToEthViaWormhole(
@@ -639,11 +532,9 @@ export class Account extends Base {
     const name = await this.ethContracts.AudiusTokenClient.name()
     const tokenAddress = this.ethContracts.AudiusTokenClient.contractAddress
 
-    // Submit permit request to give address approval, via relayer
     const nonce = await this.ethContracts.AudiusTokenClient.nonces(owner)
     const currentBlockNumber = await web3.eth.getBlockNumber()
     const currentBlock = await web3.eth.getBlock(currentBlockNumber)
-    // 1 hour, sufficiently far in future
     const deadline = (currentBlock.timestamp as unknown as number) + 60 * 60 * 1
 
     const digest = getPermitDigest(
@@ -662,9 +553,6 @@ export class Account extends Base {
     }
   }
 
-  /**
-   * Permits `relayerAddress` to send `amount` on behalf of the current user, `owner`
-   */
   async permitProxySendTokens(
     owner: string,
     relayerAddress: string,
@@ -687,9 +575,6 @@ export class Account extends Base {
     return tx
   }
 
-  /**
-   * Gets the permit method to proxy send tokens `relayerAddress` to send `amount` on behalf of the current user, `owner`
-   */
   async getPermitProxySendTokensMethod(
     owner: string,
     relayerAddress: string,
@@ -713,9 +598,6 @@ export class Account extends Base {
     return contractMethod
   }
 
-  /**
-   * Sends `amount` tokens to `address` from `owner`
-   */
   async sendTokens(
     owner: string,
     address: string,
@@ -731,13 +613,9 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Updates the minimum delegation amount for a user in identity
-   * NOTE: Requests eth account signature
-   */
   async updateMinimumDelegationAmount(amount: BN) {
     this.REQUIRES(Services.IDENTITY_SERVICE)
-    const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+    const unixTs = Math.round(new Date().getTime() / 1000)
     const message = `Click sign to authenticate with identity service: ${unixTs}`
     const signature = await this.ethWeb3Manager.sign(
       Buffer.from(message, 'utf-8') as unknown as string
@@ -753,10 +631,6 @@ export class Account extends Base {
     )
   }
 
-  /**
-   * Checks that the current user has claimed account PDA on SOL
-   * @returns userHasClaimedAccount
-   */
   async userHasClaimedSolAccount(
     {
       account = null,

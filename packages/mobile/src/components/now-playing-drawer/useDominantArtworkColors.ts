@@ -13,11 +13,6 @@ import { isImageUriSource } from 'app/utils/image'
 
 const { setDominantColors } = averageColorActions
 
-/**
- * Computes the artwork's dominant colors from the small artwork and stores
- * them by CID, where `getDominantColorsByTrack` reads them. Nothing else on
- * mobile fills that store.
- */
 export const useDominantArtworkColors = (
   trackId: ID | undefined,
   enabled: boolean
@@ -40,7 +35,6 @@ export const useDominantArtworkColors = (
     if (!enabled || !uri || !multihash || hasColors) return
     let cancelled = false
     getDominantRgb(uri).then((result) => {
-      // A string result is the fallback for an image it couldn't read.
       if (cancelled || typeof result === 'string' || !result.length) return
       dispatch(setDominantColors({ multihash, colors: result }))
     })
@@ -50,7 +44,6 @@ export const useDominantArtworkColors = (
   }, [enabled, uri, multihash, hasColors, dispatch])
 }
 
-/** The most colorful of the dominant colors, so dark art still glows. */
 export const mostSaturated = (colors: Color[]) => {
   let best = colors[0]
   let bestChroma = -1

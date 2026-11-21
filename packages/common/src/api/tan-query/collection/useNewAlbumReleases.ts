@@ -39,9 +39,6 @@ export const useNewAlbumReleases = (
       const { data = [] } = await sdk.playlists.getPlaylistsNewReleases({
         limit,
         type: 'album',
-        // Requester id so the backend personalizes embedded album-owner users
-        // (e.g. does_current_user_follow). primeCollectionData fans these out
-        // into the shared user cache, so without this they'd poison it.
         userId: currentUserId ? Id.parse(currentUserId) : undefined
       })
       const collections = transformAndCleanList(

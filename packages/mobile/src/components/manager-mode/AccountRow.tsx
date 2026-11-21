@@ -9,7 +9,6 @@ import { UserBadges } from 'app/components/user-badges'
 type AccountRowProps = {
   user: Pick<UserMetadata, 'user_id' | 'name' | 'handle'>
   isSelected?: boolean
-  /** Rendered on the right side of the row */
   children?: ReactNode
 }
 

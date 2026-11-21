@@ -19,16 +19,11 @@ export const AnchoredSubmitRow = () => {
   const scrollToTop = useContext(EditFormScrollContext)
   const { isValid, submitForm } = useFormikContext()
   const [showError, setShowError] = useState(false)
-  // Portal out of mainContentWrapper — its `transform` creates a containing
-  // block that breaks position:fixed relative to the viewport. Target the
-  // app shell (parent of mainContent) so the fixed row anchors to the
-  // viewport and still inherits the --nav-width / --play-bar-height vars.
   const mainContentRef = useMainContentRef()
   const Portal = usePortal({
     container: mainContentRef.current?.parentElement ?? undefined
   })
 
-  // Whenever the error stops showing, reset our error state until they break the form again AND try to submit again
   useEffect(() => {
     if (isValid) {
       setShowError(false)

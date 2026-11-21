@@ -18,11 +18,6 @@ export const getRootWalletUsdcAccountQueryKey = () =>
     QUERY_KEYS.rootWalletUsdcAccount
   ] as unknown as QueryKey<DestinationUsdcAccountStatus>
 
-/**
- * Checks whether the user's root Solana wallet has a USDC token account.
- * When it doesn't, returns the estimated one-time fee to create it.
- * Used in the Coinflow withdraw-to-bank flow to show a setup fee.
- */
 export const useRootWalletUsdcAccountCheck = (
   options?: QueryOptions<DestinationUsdcAccountStatus>
 ) => {

@@ -27,7 +27,6 @@ export type WormholeConfig = {
   ethTokenBridgeAddress: string
 }
 
-/** Singleton state-manager for audius wormhole interaction */
 export class Wormhole {
   hedgehog: Nullable<Hedgehog>
   ethWeb3Manager: EthWeb3Manager
@@ -53,14 +52,12 @@ export class Wormhole {
     ethBridgeAddress: string,
     ethTokenBridgeAddress: string
   ) {
-    // Wormhole service dependecies
     this.hedgehog = hedgehog
     this.ethWeb3Manager = ethWeb3Manager
     this.ethContracts = ethContracts
     this.identityService = identityService
     this.solanaWeb3Manager = solanaWeb3Manager
 
-    // Wormhole config
     this.rpcHosts = rpcHosts
     this.solBridgeAddress = solBridgeAddress
     this.solTokenBridgeAddress = solTokenBridgeAddress
@@ -102,9 +99,6 @@ export class Wormhole {
     return result
   }
 
-  /**
-   * Sends `amount` tokens to `solanaAccount` by way of the wormhole
-   */
   async attestAndCompleteTransferEthToSol(
     ethTxReceipt: string,
     customSignTransaction?: (transaction: Transaction) => Promise<Transaction>,
@@ -149,7 +143,6 @@ export class Wormhole {
         }
         signTransaction = async (transaction: Transaction) => {
           const { blockhash } = await connection.getLatestBlockhash()
-          // Must call serialize message to set the correct signatures on the transaction
           transaction.serializeMessage()
           const transactionData: RelayTransactionData = {
             recentBlockhash: blockhash,
@@ -185,7 +178,6 @@ export class Wormhole {
         vaaBytes as Buffer
       )
 
-      // Finally, redeem on Solana
       phase = phases.REDEEM_ON_SOLANA
       const transaction = await this.wormholeSDK.redeemOnSolana(
         connection,
@@ -196,7 +188,6 @@ export class Wormhole {
       )
 
       let finalTxSignature
-      // Must call serialize message to set the correct signatures on the transaction
       if (customSignTransaction) {
         const signedTransaction = await signTransaction(transaction)
         const txid = await connection.sendRawTransaction(
@@ -244,9 +235,6 @@ export class Wormhole {
     }
   }
 
-  /**
-   * Sends `amount` tokens to `solanaAccount` by way of the wormhole
-   */
   async sendTokensFromSolToEthViaWormhole(
     amount: BN,
     ethTargetAddress: string,
@@ -278,8 +266,6 @@ export class Wormhole {
         throw new Error('Expected a browser/client context with Metamask')
       }
       const wAudioAmount = wAudioFromWeiAudio(amount)
-      // Generate a solana keypair derived from the hedgehog private key
-      // NOTE: The into to fromSeed is a 32 bytes Uint8Array
       const rootSolanaAccount =
         this.solanaWeb3Manager.solanaWeb3.Keypair.fromSeed(
           this.hedgehog.wallet?.getPrivateKey() as Uint8Array
@@ -288,14 +274,12 @@ export class Wormhole {
       const solanaAddress = rootSolanaAccount.publicKey.toString()
       logs.push(`Root Solana Account: ${solanaAddress}`)
 
-      // Find the token account owned by the root solana account and get the token account's info
       const associatedTokenAccount =
         await this.solanaWeb3Manager.findAssociatedTokenAddress(solanaAddress)
       const tokenAccountInfo = await this.solanaWeb3Manager.getTokenAccountInfo(
         associatedTokenAccount.toString()
       )
 
-      // If it's not a valid token account, create the token account
       if (!tokenAccountInfo) {
         logs.push(
           `Creating Associated Token Account: ${associatedTokenAccount.toString()}`
@@ -308,7 +292,6 @@ export class Wormhole {
       }
 
       phase = phases.TRANSFER_WAUDIO_TO_ROOT
-      // Move wrapped audio from then user bank account to the user's token wallet
       await this.solanaWeb3Manager.transferWAudio(
         tokenAccountInfo!.address.toString(),
         amount
@@ -320,7 +303,6 @@ export class Wormhole {
 
       const connection = this.solanaWeb3Manager.getConnection()
 
-      // Submit transaction - results in a Wormhole message being published
       const tx = await this.wormholeSDK.transferFromSolana(
         connection, // solana web3 Connection
         this.solBridgeAddress, // bridge address
@@ -336,10 +318,9 @@ export class Wormhole {
           32
         ), // Uint8Array of length 32 originAddress
         this.wormholeSDK.CHAIN_ID_ETH, //  ChainId originChain
-        solanaAddress // from owner address
+        solanaAddress
       )
 
-      // Must call serialize message to set the correct signatures on the transaction
       tx.serializeMessage()
       tx.partialSign(rootSolanaAccount)
 
@@ -361,13 +342,11 @@ export class Wormhole {
       )
       phase = phases.GET_EMITTER_ADDR
 
-      // Get the sequence number and emitter address required to fetch the signedVAA of our message
       const info = await connection.getTransaction(transactionSignature)
       const sequence = this.wormholeSDK.parseSequenceFromLogSolana(info!)
       const emitterAddress = await this.wormholeSDK.getEmitterAddressSolana(
         this.solTokenBridgeAddress
       )
-      // Fetch the signedVAA from the Wormhole Network (this may require retries while you wait for confirmation)
       phase = phases.GET_SIGNED_VAA
       const { vaaBytes } = await this.getSignedVAAWithRetry(
         this.rpcHosts,
@@ -377,8 +356,6 @@ export class Wormhole {
         options
       )
 
-      // Redeem on Ethereum
-      // NOTE: The signer should be the user's personal wallet
       phase = phases.REDEEM_ON_ETH
       // @ts-expect-error
       const signer = new providers.Web3Provider(window.ethereum).getSigner()
@@ -398,10 +375,6 @@ export class Wormhole {
     }
   }
 
-  /**
-   * Locks assets owned by `fromAccount` into the Solana wormhole with a target
-   * solanaAccount destination via the provided relayer wallet.
-   */
   async _getTransferTokensToEthWormholeParams(
     fromAccount: string,
     amount: BN,
@@ -421,7 +394,6 @@ export class Wormhole {
     const currentBlockNumber = await web3.eth.getBlockNumber()
     const currentBlock = await web3.eth.getBlock(currentBlockNumber)
 
-    // 1 hour, sufficiently far in future
     const deadline = (currentBlock.timestamp as unknown as number) + 60 * 60 * 1
     const solanaB58 = bs58.decode(solanaAccount).toString('hex')
     const recipient = toBuffer(`0x${solanaB58}`)
@@ -454,14 +426,6 @@ export class Wormhole {
     }
   }
 
-  /**
-   * Locks assets owned by `fromAccount` into the Solana wormhole with a target
-   * solanaAccount destination via the provided relayer wallet.
-   * @param fromAccount the account holding the ETH AUDIO to transfer
-   * @param amount The amount of AUDIO to send in WEI (18 decimals)
-   * @param solanaAccount The solana token account
-   * @param relayer The eth relayer to permission to aprrove and transfer
-   */
   async transferTokensToEthWormhole(
     fromAccount: string,
     amount: BN,

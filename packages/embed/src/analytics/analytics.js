@@ -11,12 +11,10 @@ const amp = amplitude.getInstance()
 const BOT_USER_AGENT_REGEX =
   /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|prerender|phantomjs|puppeteer|playwright|selenium|facebookexternalhit|embedly|bingpreview|inspectiontool/i
 
-// Crawlers of pages that embed the player get no analytics
 const isLikelyBot = () => {
   if (typeof navigator === 'undefined') return false
   if (navigator.webdriver === true) return true
   const userAgent = navigator.userAgent || ''
-  // Cubot is a phone brand, not a crawler
   return BOT_USER_AGENT_REGEX.test(userAgent) && !/cubot/i.test(userAgent)
 }
 
@@ -24,7 +22,6 @@ let isEnabled = false
 
 const CLIENT_IDENTIFIED_KEY = 'amplitude:clientIdentified'
 
-// Which client the user is on, as a user property set once per device
 const identifyClient = () => {
   try {
     if (window.localStorage.getItem(CLIENT_IDENTIFIED_KEY)) return
@@ -59,7 +56,6 @@ const track = (event, properties) => {
   }
 }
 
-/** id param is the numeric id */
 export const recordPlay = (id) => {
   track(PLAYBACK_PLAY, {
     id: `${id}`,
@@ -68,7 +64,6 @@ export const recordPlay = (id) => {
   })
 }
 
-/** id param is the numeric id */
 export const recordPause = (id) => {
   track(PLAYBACK_PAUSE, {
     id: `${id}`,
@@ -77,7 +72,6 @@ export const recordPause = (id) => {
   })
 }
 
-/** id param is the numeric id */
 export const recordListen = (id) => {
   track(LISTEN, { id: `${id}` })
 }

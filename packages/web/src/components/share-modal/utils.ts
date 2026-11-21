@@ -33,7 +33,6 @@ export const getXShareText = async (
   let link = ''
   let analyticsEvent: ShareToTwitterEvent
   switch (content.type) {
-    // Web has no stat card yet, so milestones share as their track
     case 'track':
     case 'milestone': {
       const {
@@ -52,9 +51,6 @@ export const getXShareText = async (
       } = content
       xText = messageConfig.contestShareText(title, getXShareHandle(artist))
       link = fullContestPage(permalink)
-      // Contest shares route through the parent track's analytics
-      // entry — there's no dedicated 'contest' event kind yet and
-      // the parent track is what gets credited for engagement.
       analyticsEvent = { kind: 'track', id: track_id, url: link }
       break
     }

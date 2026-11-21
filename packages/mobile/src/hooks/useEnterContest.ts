@@ -5,13 +5,6 @@ import { type ID, SquareSizes } from '@audius/common/models'
 
 import { useNavigation } from 'app/hooks/useNavigation'
 
-/**
- * Returns a "submit a remix to this contest" callback that pushes onto the
- * Upload navigator with artwork + genre + remix_of pre-filled. Mobile wrapper
- * around the shared common hook — handles the React Native blob/file shape
- * (RN's `File` object stores its data on `_data`) and the navigation push,
- * while the metadata shape itself comes from `@audius/common/hooks`.
- */
 export const useEnterContest = (trackId: ID | undefined) => {
   const navigation = useNavigation()
   const { originalTrack, buildInitialMetadata } = useEnterContestShared(trackId)
@@ -35,7 +28,6 @@ export const useEnterContest = (trackId: ID | undefined) => {
           }
         }
       } catch (e) {
-        // Artwork is only a pre-fill, so continue to upload without it
         console.warn('Failed to pre-fill contest artwork', e)
       }
     }

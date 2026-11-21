@@ -130,23 +130,14 @@ export const useCollectionPage = (
   } = useTracks(trackIdsInCollection, {
     enabled: !!collection && trackIdsInCollection.length > 0
   })
-  // Also fetch the track owners — `TQTrack = Omit<Track, 'user'>` so we need
-  // to attach `.user` ourselves before UI code like the tracks table reads
-  // `metadata.user.name`.
   const trackOwnerIds = useMemo(
     () => (fetchedTracks ?? []).map((t) => t.owner_id),
     [fetchedTracks]
   )
   const { byId: usersById } = useUsers(trackOwnerIds)
 
-  // UI-owned sort/reorder order. A list of stable UIDs. `null` means
-  // "render in collection order" (no custom sort applied).
   const [customOrder, setCustomOrder] = useState<string[] | null>(null)
 
-  // Build CollectionTrack[] entries from tanquery-cached tracks. These
-  // replace what used to come from the legacy `getCollectionTracksLineup`
-  // state. UIDs are derived so that row-level uid-based lookups (playing
-  // highlight, reorder) keep working.
   const collectionEntries: CollectionTrack[] = useMemo(() => {
     if (!collection) return []
     return collection.playlist_contents.track_ids
@@ -161,8 +152,6 @@ export const useCollectionPage = (
           kind: Kind.TRACKS,
           id: trackId,
           uid: makeStableUid(Kind.TRACKS, trackId, COLLECTION_TRACKS_SOURCE),
-          // `time` is 0 when playlist_contents has no added timestamp; show the
-          // track's created_at instead of the Unix epoch.
           dateAdded: time ? dayjs.unix(time) : dayjs(t.created_at),
           timeAdded: time
         } as CollectionTrack
@@ -176,8 +165,6 @@ export const useCollectionPage = (
     const ordered = customOrder
       .map((uid) => byUid.get(uid))
       .filter((e): e is CollectionTrack => !!e)
-    // If customOrder is stale (e.g. a track was removed), fall back to
-    // collectionEntries to avoid missing rows.
     return ordered.length === collectionEntries.length
       ? ordered
       : collectionEntries
@@ -211,15 +198,10 @@ export const useCollectionPage = (
   }, [sortedEntries])
   const { data: playlistUpdates = [] } = useAllPlaylistUpdateIds()
   const { mutate: markPlaylistAsViewed } = useMarkPlaylistAsViewed()
-  // Note: These selectors are available but not currently used in the hook
-  // const reduxCollectionId = useSelector((state: any) => getCollectionId(state))
-  // const reduxCollectionPermalink = useSelector((state: any) => getCollectionPermalink(state))
-  // const pathnameFromState = useSelector(getLocationPathname)
 
   const trackCount = collection?.playlist_contents.track_ids.length ?? 0
   const playlistId = collection?.playlist_id
 
-  // State
   const [filterText, setFilterText] = useState('')
   const [initialOrder, setInitialOrder] = useState<string[] | null>(null)
   const [allowReordering, setAllowReordering] = useState(true)
@@ -228,7 +210,6 @@ export const useCollectionPage = (
   const prevPathnameRef = useRef(pathname)
   const historyUnlistenRef = useRef<(() => void) | null>(null)
 
-  // Fetch collection function
   const fetchCollection = useCallback(
     (pathnameToFetch: string) => {
       const paramsToFetch = parseCollectionRoute(pathnameToFetch)
@@ -256,17 +237,14 @@ export const useCollectionPage = (
     [dispatch, location.state, localPlaylistId]
   )
 
-  // Reset collection function
   const resetCollection = useCallback(() => {
     dispatch(collectionActions.resetCollection())
   }, [dispatch])
 
-  // Fetch collection on mount and route changes
   useEffect(() => {
     fetchCollection(pathname)
   }, [pathname, fetchCollection])
 
-  // Set up history listener
   useEffect(() => {
     if (!history?.listen) return
 
@@ -290,7 +268,6 @@ export const useCollectionPage = (
     }
   }, [history, fetchCollection, resetCollection])
 
-  // Reset collection on unmount (desktop only)
   useEffect(() => {
     return () => {
       if (!isMobile) {
@@ -299,7 +276,6 @@ export const useCollectionPage = (
     }
   }, [isMobile, resetCollection])
 
-  // Update playlist viewed
   useEffect(() => {
     if (!collection) return
     if (
@@ -311,7 +287,6 @@ export const useCollectionPage = (
     }
   }, [collection, playlistId, type, playlistUpdates, markPlaylistAsViewed])
 
-  // Initialize order from tracks
   useEffect(() => {
     const newInitialOrder = tracks.entries.map((track) => track.uid)
     const noInitialOrder = !initialOrder && tracks.entries.length > 0
@@ -327,7 +302,6 @@ export const useCollectionPage = (
     }
   }, [tracks.entries, initialOrder])
 
-  // Error handling
   useEffect(() => {
     if (!params || !collection) return
     if (status === Status.ERROR) {
@@ -340,14 +314,12 @@ export const useCollectionPage = (
     }
   }, [status, params, playlistId, collection, accountUserId, navigate])
 
-  // Redirect if user deactivated
   useEffect(() => {
     if (user?.is_deactivated) {
       navigate(profilePage(user.handle))
     }
   }, [user, navigate])
 
-  // Handle collection moved
   useEffect(() => {
     if (!collection || updatingRoute || !collection._moved) return
     const collectionId = Uid.fromString(collection._moved).id as number
@@ -369,14 +341,12 @@ export const useCollectionPage = (
     dispatch(replace(newPath))
   }, [collection, updatingRoute, pathname, dispatch])
 
-  // Reset updatingRoute when collection is no longer moved
   useEffect(() => {
     if (collection && !collection._moved && updatingRoute) {
       setUpdatingRoute(false)
     }
   }, [collection, updatingRoute])
 
-  // URL normalization
   useEffect(() => {
     if (!collection || !params || !user || updatingRoute) return
 
@@ -435,8 +405,6 @@ export const useCollectionPage = (
     }
   }, [collection, params, user, pathname, dispatch, updatingRoute])
 
-  // The currently-playing entry's uid (as constructed locally for this
-  // collection), or null if a different source is playing.
   const playingUid = useMemo(() => {
     if (
       currentQueueItem.trackId == null ||
@@ -451,7 +419,6 @@ export const useCollectionPage = (
     )
   }, [currentQueueItem.trackId, currentQueueItem.source])
 
-  // Helper functions
   const isQueued = useCallback(() => {
     return tracks.entries.some((entry) => playingUid === entry.uid)
   }, [tracks.entries, playingUid])
@@ -507,14 +474,10 @@ export const useCollectionPage = (
     [filterText, tracks.entries, getPlayingUid, formatMetadata]
   )
 
-  // Event handlers
   const onFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setFilterText(e.target.value)
   }, [])
 
-  // Matches legacy `collectionPageLineupActions.prefix` ('COLLECTION_TRACKS')
-  // so code that keys off the queue source (e.g. PlaylistLibrary highlight)
-  // keeps working.
   const collectionPlaybackSource = 'COLLECTION_TRACKS'
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
@@ -716,7 +679,6 @@ export const useCollectionPage = (
       const { column, order } = sorters
       const dataSource = formatMetadata(tracks.entries)
       if (!column) {
-        // Reset to collection order.
         setCustomOrder(null)
         setAllowReordering(true)
       } else {
@@ -742,7 +704,6 @@ export const useCollectionPage = (
 
       const trackIdAndTimes = newOrder.map((uid: any) => ({
         id: tracks.entries[order[uid]].track_id,
-        // Write back the stored time, not the display fallback in dateAdded.
         time:
           tracks.entries[order[uid]].timeAdded ??
           tracks.entries[order[uid]].dateAdded.unix()
@@ -906,7 +867,6 @@ export const useCollectionPage = (
     fetchCollection(pathname)
   }, [fetchCollection, pathname])
 
-  // SEO fields
   const seoFields = getCollectionPageContext({
     playlistName: collection?.playlist_name,
     playlistId: collection?.playlist_id,
@@ -918,7 +878,6 @@ export const useCollectionPage = (
   })
 
   return {
-    // Data
     collection,
     user,
     tracks,
@@ -932,16 +891,13 @@ export const useCollectionPage = (
     playlistUpdates,
     trackCount,
     playlistId,
-    // State
     filterText,
     initialOrder,
     allowReordering,
-    // Helpers
     isQueued,
     getPlayingUid,
     getPlayingId,
     getFilteredData,
-    // Handlers
     onFilterChange,
     onClickRow,
     onClickRepostTrack,
@@ -961,7 +917,6 @@ export const useCollectionPage = (
     onUnfollow,
     onClickMobileOverflow,
     refreshCollection,
-    // SEO
     ...seoFields
   }
 }

@@ -11,8 +11,6 @@ const messages = {
   allGenres: 'All Genres'
 }
 
-// Header button for filtering trending by
-// genre.
 const TrendingFilterButton = ({
   onClick,
   selectedGenre

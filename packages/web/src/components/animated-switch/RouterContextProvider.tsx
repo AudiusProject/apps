@@ -21,12 +21,6 @@ export const RouterContext = createContext<RouterContextProps>({
   setSlideDirection: () => {}
 })
 
-/**
- * `RouterContextProvider` maintains navigational stack properties that tie into
- * page change animations.
- * When the stack is "reset," the next page animation should be immediate rather than
- * animated
- */
 export const RouterContextProvider = memo(
   (props: { children: JSX.Element }) => {
     const [stackReset, setStackReset] = useState(false)

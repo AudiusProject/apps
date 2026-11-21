@@ -87,10 +87,6 @@ export const PickWinnersPage = () => {
 
   const { sortMethod, isCosign } = usePickWinnersPageParams()
 
-  // Submissions list — raw remixes for the contest entry. Uses
-  // `useRemixes` directly rather than `useRemixesLineup` so the list
-  // does not prepend the original track or the winners (those live in
-  // the winner-selection strip above).
   const remixesArgs = useMemo(
     () => ({
       trackId: originalTrack?.track_id,
@@ -142,7 +138,6 @@ export const PickWinnersPage = () => {
 
   const handleFinalize = useCallback(() => {
     if (canFinalize && currentUserId && remixContest) {
-      // Edit the remix contest with the new winners
       if (!isEqual(winners, remixContest.eventData.winners)) {
         updateEvent({
           eventId: remixContest.eventId,
@@ -355,7 +350,6 @@ export const PickWinnersPage = () => {
         const item = winnersCopy.splice(originIdx, 1)[0]
         winnersCopy.splice(placeIdx + offset, 0, item)
         setWinners(winnersCopy)
-        // Map new positions back to original indices in the playback queue.
         const newOrderedIndices = winnersCopy.map((id) => winners.indexOf(id))
         dispatch(reorder({ orderedIndices: newOrderedIndices }))
       }
@@ -372,7 +366,6 @@ export const PickWinnersPage = () => {
                 className={css({
                   width: '100%',
                   position: 'relative',
-                  // Drop Indicator
                   '::after': {
                     content: '""',
                     position: 'absolute',
@@ -390,10 +383,8 @@ export const PickWinnersPage = () => {
                     cursor: 'not-allowed'
                   },
                   ...(isDragging && draggingId === winnerId
-                    ? // Fade out tile when dragging
-                      { '& > *': { opacity: 0.6 } }
-                    : // Display drop indicator when hovering over tile
-                      { '&.winnerTileHover::after': { opacity: 1 } })
+                    ? { '& > *': { opacity: 0.6 } }
+                    : { '&.winnerTileHover::after': { opacity: 1 } })
                 })}
               >
                 <>
@@ -441,7 +432,6 @@ export const PickWinnersPage = () => {
   return (
     <Page title={messages.pickWinnersTitle} header={pageHeader}>
       {!remixContest ? (
-        // TODO: Add loading skeletons here
         <Flex justifyContent='center' alignItems='center' p='2xl'>
           <LoadingSpinner css={{ width: 48, height: 48 }} />
         </Flex>

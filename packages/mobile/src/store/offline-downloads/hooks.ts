@@ -6,10 +6,6 @@ import type { AppState } from 'app/store'
 
 import { getOfflineTrackIds, getTrackOfflineMetadata } from './selectors'
 
-/**
- * Hook that returns all offline tracks with their offline metadata
- * @returns Array of tracks with offline metadata
- */
 export const useOfflineTracks = () => {
   const offlineTrackIds = useSelector(getOfflineTrackIds)
   const { byId } = useTracks(offlineTrackIds.map((id) => parseInt(id)))

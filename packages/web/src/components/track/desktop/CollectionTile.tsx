@@ -221,13 +221,7 @@ export const CollectionTile = ({
   const isCollectionPlaying = isActive && isPlaying
 
   const onTogglePlay = useCallback(
-    (e?: MouseEvent /* click event within TrackTile */) => {
-      // Skip playing / pausing track if click event happened within track menu container
-      // because clicking on it should not affect corresponding playlist track.
-      // We have to do this instead of stopping the event propagation
-      // because we need it to bubble up to the document to allow
-      // the document click listener to close other track/playlist tile menus
-      // that are already open.
+    (e?: MouseEvent) => {
       const shouldSkipTogglePlay = isDescendantElementOf(
         e?.target,
         menuRef.current
@@ -485,7 +479,6 @@ export const CollectionTile = ({
     }
   }, [hasLoaded, index, isLoading])
 
-  // Failsafe check - should never get this far, lineups should filter deactivated playlists
   if (isOwnerDeactivated) {
     return null
   }

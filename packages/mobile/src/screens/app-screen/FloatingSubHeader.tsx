@@ -17,14 +17,8 @@ import {
 } from './GlassChromeContext'
 
 type FloatingSubHeaderProps = {
-  /** The in-flow row under the title (e.g. large tab pills). */
   children: ReactNode
-  /**
-   * Copy of the controls, pinned in a glass bar under the status bar once
-   * the in-flow row has scrolled away.
-   */
   compact?: ReactNode
-  /** Pads the row to the screen gutter. Off for full-width rows. */
   padded?: boolean
 }
 
@@ -38,15 +32,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   }
 }))
 
-/**
- * A screen's controls row (feed tabs, trending categories) under the root
- * header. It scrolls away with the header, then its compact copy pins under
- * the status bar.
- *
- * Owned by the screen rather than passed into `MobileRootHeader`, whose
- * memoized render prop must not rebuild on tab-state changes (that remounts
- * `AccountPictureHeader` and re-fires the profile-picture fetch).
- */
 export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
   const { children, compact, padded = true } = props
   const styles = useStyles()

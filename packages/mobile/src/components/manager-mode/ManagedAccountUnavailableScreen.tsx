@@ -38,11 +38,6 @@ export const ManagedAccountUnavailableScreen = () => {
   )
 }
 
-/**
- * Renders the unavailable screen instead of `Component` while managing
- * another account. Used for screens that act as the signed-in wallet
- * (e.g. DMs), which a manager can't do on the managed account's behalf.
- */
 export const withManagedAccountRestriction = <P extends object>(
   Component: ComponentType<P>
 ) => {

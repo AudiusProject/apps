@@ -13,10 +13,6 @@ import type { StyleProp, ViewStyle } from 'react-native'
 
 import type { ImageProps } from '@audius/harmony-native'
 
-/**
- * Optional variant to modify the lineup item features and styles
- * The 'readonly' variant will remove the action buttons on the tile
- */
 export type LineupItemVariant = 'readonly'
 
 export enum LineupTileSource {

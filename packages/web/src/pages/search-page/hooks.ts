@@ -50,7 +50,6 @@ export const useSearchCategory = () => {
 
   const setCategory = useCallback(
     (newCategory: CategoryKey, params?: UseSearchParamsResult) => {
-      // Do not animate on mobile - use flushSync to ensure this is processed before navigation
       if (isMobile) {
         flushSync(() => {
           setStackReset(true)

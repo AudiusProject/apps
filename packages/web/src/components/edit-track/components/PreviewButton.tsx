@@ -32,8 +32,6 @@ export const PreviewButton = (props: PreviewButtonProps) => {
 
   useEffect(() => {
     if (!track.preview) return
-    // 2 or more signifies playable
-    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
     if (track.preview.readyState >= 2) {
       canPlay()
     } else {

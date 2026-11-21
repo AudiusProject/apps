@@ -54,9 +54,6 @@ export type ManageEntityCIDMetadata = {
   data: TrackMetadata | UserMetadata
 }
 
-/**
- * Generic management of Audius Data entities
- **/
 export class EntityManagerClient extends ContractClient {
   static Action = Action
   static EntityType = EntityType
@@ -106,15 +103,6 @@ export class EntityManagerClient extends ContractClient {
     return [method.encodeABI(), contractAddress]
   }
 
-  /**
-   * Calls the manage entity method on chain
-   * @param {number} userId The numeric user id
-   * @param {EntityType} entityType The type of entity being modified
-   * @param {number} entityId The id of the entity
-   * @param {Action} action Action being performed on the entity
-   * @param {string} metadata CID multihash or metadata associated with action
-   * @param {string}privateKey The private key used to sign the transaction
-   */
   async manageEntity(
     userId: number,
     entityType: EntityType,

@@ -47,7 +47,6 @@ const tooltipContent = {
 
 export const ArtistFanClubDetailsPage = () => {
   const location = useLocation()
-  // Locations should be in the format /coins/:ticker/details (COIN_DETAIL_MOBILE_WEB_ROUTE)
   const ticker = location.pathname.split('/')[2]
   const { data: fanClub } = useFanClubByTicker({
     ticker

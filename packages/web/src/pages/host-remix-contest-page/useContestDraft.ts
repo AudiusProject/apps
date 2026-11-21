@@ -38,15 +38,6 @@ const readDraft = (key: string | null): ContestDraft | null => {
   }
 }
 
-/**
- * Persists in-progress Create Contest form state to localStorage so users
- * can come back later without re-entering everything. Drafts are scoped
- * per user and per primary track (or "trackless" for the
- * /host-contest route).
- *
- * Drafts are only relevant for the create flow — edit mode is driven by
- * the live event and skipped entirely.
- */
 export const useContestDraft = ({
   userId,
   primaryTrackId,
@@ -58,9 +49,6 @@ export const useContestDraft = ({
 }) => {
   const key = enabled ? draftKey(userId, primaryTrackId) : null
 
-  // Snapshot at mount — the page's form state is initialized from this,
-  // so it's only the *existing* draft that matters here. Subsequent saves
-  // shouldn't re-trigger the restore banner.
   const [existingDraft] = useState<ContestDraft | null>(() => readDraft(key))
 
   const saveDraft = useCallback(

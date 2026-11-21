@@ -14,7 +14,6 @@ export const SkipButton = () => {
   const dispatch = useDispatch()
 
   const handleSkip = useCallback(() => {
-    // User is skipping genre/artist selection, create account now
     dispatch(signUp())
     navigation.navigate('AccountLoading')
   }, [dispatch, navigation])

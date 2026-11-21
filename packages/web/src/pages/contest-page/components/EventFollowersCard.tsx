@@ -17,12 +17,7 @@ const messages = {
   openLeaderboard: 'Open contest leaderboard'
 }
 
-// Max avatar discs surfaced before the chevron. Kept small because
-// each extra disc visibly compresses the stack. The Figma reference
-// (node 2857-99349) shows seven overlapping discs.
 const MAX_AVATARS = 7
-// Horizontal overlap between adjacent avatars. Match the Figma's
-// ~1/3 overlap for the leaderboard row.
 const OVERLAP_PX = 14
 
 type EventFollowersCardProps = {
@@ -31,20 +26,6 @@ type EventFollowersCardProps = {
   onOpenLeaderboard?: () => void
 }
 
-/**
- * Right-column Followers card for the contest page, aligned to
- * Figma node 2857-99349.
- *
- * Layout:
- *   FOLLOWERS (245)                    ← label + count, small uppercase
- *   [◉◉◉◉◉◉◉]                      ›  ← avatar stack + chevron, one row
- *
- * Title lives inside the Paper (matches the other right-column
- * tiles — STEMS & DOWNLOADS, COMMENTS). The avatar stack and chevron
- * share a single row with `justify-content: space-between` so the
- * chevron hugs the right edge. Empty-state just hides the avatar row
- * (title stays).
- */
 export const EventFollowersCard = ({
   eventId,
   followerCount,
@@ -84,11 +65,7 @@ export const EventFollowersCard = ({
                   <Box
                     key={userId}
                     css={{
-                      // Overlap each subsequent avatar over the previous
-                      // to produce the stacked "face pile" look.
                       marginLeft: idx === 0 ? 0 : -OVERLAP_PX,
-                      // Later avatars sit on top so the overlap reads
-                      // left → right.
                       zIndex: idx
                     }}
                   >

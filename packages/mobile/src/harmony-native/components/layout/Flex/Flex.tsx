@@ -13,7 +13,6 @@ const invalidProps = [
   'columnGap'
 ]
 
-/** Layout component used to group child elements in one-deminsional arrangements. */
 export const Flex = styled(Box, {
   shouldForwardProp: (prop) => !invalidProps.includes(prop)
 })<FlexProps>((props) => {

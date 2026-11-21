@@ -46,17 +46,13 @@ const messages = {
   edited: '(edited)'
 }
 
-/**
- * Generate a deterministic pseudo-random placeholder string for locked posts
- * so each post looks visually distinct behind the blur.
- */
 const generatePlaceholder = (commentId: ID) => {
   const seed = Number(commentId)
-  const wordCount = 5 + (seed % 21) // 5–25 words
+  const wordCount = 5 + (seed % 21)
   const words = []
   const pool = 'abcdefghijklmnopqrstuvwxyz'
   for (let i = 0; i < wordCount; i++) {
-    const len = 3 + ((seed * (i + 1) * 7) % 8) // 3–10 chars per word
+    const len = 3 + ((seed * (i + 1) * 7) % 8)
     let word = ''
     for (let j = 0; j < len; j++) {
       word += pool[(seed * (i + 1) * (j + 1) * 13) % pool.length]

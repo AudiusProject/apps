@@ -7,10 +7,8 @@ import { env } from 'services/env'
 
 import { encodeUrlName } from './urlUtils'
 
-// Local route functions to avoid importing from @audius/common/src/utils/route which pulls in formatUtil/dayjs
 const SIGN_UP_PAGE = '/signup'
 
-// Inline "create playlist" flow entry point.
 export const CREATE_PLAYLIST_PAGE = '/create/playlist'
 
 export const profilePage = (handle: string | null | undefined) => {
@@ -24,7 +22,6 @@ export const collectionPage = (
   permalink?: string | null,
   isAlbum?: boolean
 ) => {
-  // Prioritize permalink if available. If not, default to legacy routing
   if (permalink) {
     return permalink
   } else if (playlistName && playlistId && handle) {
@@ -40,12 +37,10 @@ export const collectionPage = (
 
 const USE_HASH_ROUTING = env.USE_HASH_ROUTING
 
-// Host/protocol.
 export const BASE_URL = `${env.PUBLIC_PROTOCOL}//${env.PUBLIC_HOSTNAME}`
 export const BASE_GA_URL = `${env.PUBLIC_PROTOCOL}//${env.PUBLIC_HOSTNAME}`
 const BASENAME = env.BASENAME
 
-// Create full formed urls for routes.
 export const fullTrackPage = (permalink: string) => {
   return `${BASE_URL}${permalink}`
 }
@@ -65,8 +60,6 @@ export const fullPickWinnersPage = (permalink: string) => {
 }
 
 export const contestPage = (permalink: string) => {
-  // Permalink shape: `/{handle}/{slug}`. Contest URL injects the literal
-  // "contest" segment between handle and slug → `/{handle}/contest/{slug}`.
   const [, handle, ...rest] = permalink.split('/')
   return `/${handle}/contest/${rest.join('/')}`
 }
@@ -113,7 +106,6 @@ export const fullProfilePage = (handle: string) => {
   return `${BASE_URL}${profilePage(handle)}`
 }
 
-// Under /explore to avoid colliding with /:handle/:slug track permalinks.
 export const weeklyRotationPage = (handle: string) => {
   return `/explore/weekly-rotation/${encodeUrlName(handle)}`
 }
@@ -147,8 +139,6 @@ export const doesMatchRoute = (
   route: string,
   exact = true
 ) => {
-  // In React Router v6, matchPath takes (pattern, pathname)
-  // For exact matching, we need to ensure the pattern matches the full pathname
   const pathname = getPathname(location)
   const match = matchPath(route, pathname)
   if (exact) {
@@ -159,11 +149,6 @@ export const doesMatchRoute = (
 
 export const stripBaseUrl = (url: string) => url.replace(BASE_URL, '')
 
-/**
- * Gets the pathname from the location or the hashed path name
- * if using hash routing
- * @param {Location} location
- */
 export const getPathname = (location: Location) => {
   return BASENAME ? location.pathname.replace(BASENAME, '') : location.pathname
 }
@@ -181,9 +166,6 @@ const recordGoToSignup = (callback: () => void) => {
   }
 }
 
-/**
- * Forces a reload of the window by manually setting the location.href
- */
 export const pushWindowRoute = (route: string) => {
   let routeToPush: string
   if (USE_HASH_ROUTING) {
@@ -209,16 +191,11 @@ export const pushWindowRoute = (route: string) => {
 export const pushUniqueRoute = (location: Location, route: string) => {
   const pathname = getPathname(location)
   if (route !== pathname) {
-    // This function is deprecated - use useNavigate hook instead
-    // Returning empty action for backwards compatibility
     return { type: '' }
   }
   return { type: '' }
 }
 
-/**
- * Checks if a current route matches a target route
- */
 export const matchesRoute = ({
   current,
   target
@@ -229,9 +206,6 @@ export const matchesRoute = ({
   return current?.startsWith(target) ?? false
 }
 
-/**
- * Hook to check if the current route matches a target route
- */
 export const useMatch = (targetRoute: string) => {
   const location = useLocation()
   return matchesRoute({ current: location.pathname, target: targetRoute })

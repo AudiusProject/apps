@@ -20,15 +20,8 @@ import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 
 const { apiEndpoint } = developmentConfig.network
 
-/**
- * TODO: Use better types - these types need to match the API, not the SDK outputs
- */
-
 type TestUser = typeof artistUser | typeof nonArtistUser
 
-/**
- *  User mocks
- */
 export const mockUserByHandle = (user: typeof artistUser) =>
   http.get(`${apiEndpoint}/v1/users/handle/${user.handle}`, () =>
     HttpResponse.json({ data: user })
@@ -51,7 +44,6 @@ export const mockNfts = () =>
 export const mockCurrentAccount = (
   user: typeof artistUser | typeof nonArtistUser
 ) => {
-  // Set wallet addresses first - this is required for useCurrentAccount to be enabled
   queryClient.setQueryData(getWalletAddressesQueryKey(), {
     currentUser: user.wallet,
     web3User: user.wallet
@@ -80,15 +72,11 @@ export const mockCurrentAccount = (
     // @ts-ignore - user is a TestUser, not matching full user type spec (yet)
     userMetadataFromSDK(user)
   )
-  // Set current account data
   return http.get(`${apiEndpoint}/v1/users/account/${user.wallet}`, () =>
     HttpResponse.json({ data: account })
   )
 }
 
-/**
- * Wallets
- */
 export const mockUserConnectedWallets = (user: typeof artistUser) =>
   http.get(`${apiEndpoint}/v1/users/${user.id}/connected_wallets`, () =>
     HttpResponse.json({
@@ -96,17 +84,11 @@ export const mockUserConnectedWallets = (user: typeof artistUser) =>
     })
   )
 
-/**
- * Events
- */
 export const mockEvents = (/* todo: */) =>
   http.get(`${apiEndpoint}/v1/events/entity`, () =>
     HttpResponse.json({ data: [] })
   )
 
-/**
- * Fan Clubs
- */
 export const mockCoinByMint = (coin: typeof mockFanClub) =>
   http.get(`${apiEndpoint}/v1/coins/${coin.mint}`, () =>
     HttpResponse.json({ data: coin })
@@ -154,9 +136,6 @@ export const mockUserCreatedCoin = (
   })
 }
 
-/**
- * Collections
- */
 export const mockCollectionById = (collection: typeof testCollection & any) =>
   http.get(`${apiEndpoint}/v1/playlists`, ({ request }) => {
     const url = new URL(request.url)
@@ -169,25 +148,19 @@ export const mockCollectionById = (collection: typeof testCollection & any) =>
     return HttpResponse.json({ data: [] })
   })
 
-/**
- * Tracks
- */
 export const mockTrackById = (track: typeof testTrack & any) =>
   http.get(`${apiEndpoint}/v1/tracks`, ({ request }) => {
     const url = new URL(request.url)
-    // Handle both single ID param and array params (id[]=1&id[]=2)
     const idParam = url.searchParams.get('id')
     const idArrayParams = url.searchParams.getAll('id[]')
     const ids =
       idArrayParams.length > 0 ? idArrayParams : idParam ? [idParam] : []
 
-    // Get track IDs in various formats for comparison
     const trackIdStr = track.id?.toString()
     const trackTrackIdStr = track.track_id?.toString()
     const trackIdNum = track.id
     const trackTrackIdNum = track.track_id
 
-    // Check if any requested ID matches the track
     const matches = ids.some((id) => {
       const idNum = Number(id)
       return (
@@ -198,7 +171,6 @@ export const mockTrackById = (track: typeof testTrack & any) =>
       )
     })
 
-    // If no IDs specified or we have a match, return the track
     if (ids.length === 0 || matches) {
       return HttpResponse.json({ data: [track] })
     }
@@ -206,9 +178,6 @@ export const mockTrackById = (track: typeof testTrack & any) =>
     return HttpResponse.json({ data: [] })
   })
 
-/**
- * Notifications
- */
 export const mockUsers = (users: (typeof artistUser)[]) =>
   http.get(`${apiEndpoint}/v1/users`, () => HttpResponse.json({ data: users }))
 

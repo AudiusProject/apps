@@ -50,7 +50,6 @@ export const getChatPermissions = (state: CommonState) =>
 export const getChatPermissionsStatus = (state: CommonState) =>
   state.pages.chat.permissionsStatus
 
-// Gets a chat and its optimistic read status
 export const getChat = createSelector(
   [
     selectChatById,
@@ -68,20 +67,13 @@ export const getChat = createSelector(
 
 export const getNonOptimisticChat = selectChatById
 
-/**
- * Gets all chats and their optimistic read status
- */
 export const getChats = createSelector(
   [selectAllChats, getOptimisticReads],
   (chats, optimisticReads) => {
     if (!chats) return chats
-    // Preserve outer array identity when no chat in this list has an optimistic
-    // read override, so subscribers don't re-render on unrelated optimistic
-    // state changes.
     const hasAnyOptimistic = chats.some((c) => !!optimisticReads?.[c.chat_id])
     if (!hasAnyOptimistic) return chats
     return chats.map((chat) => {
-      // If have a clientside optimistic read status, override the server status
       if (optimisticReads?.[chat.chat_id]) {
         chat = {
           ...chat,
@@ -104,9 +96,6 @@ export const getChatMessages = createSelector(
   ],
   (messages, optimisticReactions) => {
     if (!messages) return messages
-    // Preserve outer array identity when no message in this chat has an
-    // optimistic reaction. Avoids re-rendering subscribers and re-triggering
-    // effects keyed on chatMessages identity when optimistic state is unrelated.
     const hasAnyOptimistic = messages.some(
       (m) => !!optimisticReactions[m.message_id]
     )
@@ -136,10 +125,6 @@ export const getUnreadMessagesCount = (state: CommonState) => {
   return state.pages.chat.unreadMessagesCount
 }
 
-/**
- * Unread counts broken down by inbox category, honoring optimistic updates.
- * Undefined until the server has supplied them.
- */
 export const getUnreadMessagesCountByCategory = (state: CommonState) =>
   state.pages.chat.optimisticUnreadMessagesCountByCategory ??
   state.pages.chat.unreadMessagesCountByCategory
@@ -149,10 +134,8 @@ const makeGetChatsForInboxTab = (tab: InboxTab) =>
     chats.filter((chat) => getInboxTabForChat(chat) === tab)
   )
 
-/** Chats shown in the Priority tab: marked Priority, or uncategorized and replied to. */
 export const getPriorityInboxChats = makeGetChatsForInboxTab(InboxTab.PRIORITY)
 
-/** Chats shown in the General tab: marked General, or never replied to. */
 export const getGeneralInboxChats = makeGetChatsForInboxTab(InboxTab.GENERAL)
 
 export const getChatsForInboxTab = (state: CommonState, tab: InboxTab) =>
@@ -160,19 +143,12 @@ export const getChatsForInboxTab = (state: CommonState, tab: InboxTab) =>
     ? getGeneralInboxChats(state)
     : getPriorityInboxChats(state)
 
-/**
- * Whether the given inbox tab has unread messages. Prefers the server's
- * per-category counts (which cover chats not yet paginated into state) and
- * falls back to scanning the loaded chats.
- */
 export const getHasUnreadMessagesForInboxTab = (
   state: CommonState,
   tab: InboxTab
 ) => {
   const counts = getUnreadMessagesCountByCategory(state)
   if (counts) {
-    // Older api versions don't report the unreplied split; their
-    // uncategorized chats all show in Priority.
     const unreplied = counts.uncategorized_unreplied ?? 0
     const tabCount =
       tab === InboxTab.GENERAL
@@ -191,17 +167,10 @@ export const getHasUnreadPriorityMessages = (state: CommonState) =>
 export const getHasUnreadGeneralMessages = (state: CommonState) =>
   getHasUnreadMessagesForInboxTab(state, InboxTab.GENERAL)
 
-/**
- * Whether the account has any unread messages across every inbox category.
- * Drives the sidebar / nav dot, so a new message in either Priority or
- * General (or an uncategorized chat) lights it up.
- */
 export const getHasUnreadMessages = (state: CommonState) => {
   if (getUnreadMessagesCount(state) > 0) {
     return true
   }
-  // Fallback if the count is out of sync. Blasts have no unread count; skip
-  // them.
   const chats = getChats(state)
   for (const chat of chats) {
     if (chat.is_blast) continue
@@ -212,9 +181,6 @@ export const getHasUnreadMessages = (state: CommonState) => {
   return false
 }
 
-/**
- * Gets a list of the users the current user has 1:1 chats with.
- **/
 export const getUserList = createSelector(
   [
     getChats,
@@ -325,12 +291,7 @@ export const useCanCreateChat = (userId: ID | null | undefined) => {
     }
   }
 
-  // Check for existing chat, since unblocked users with existing chats
-  // don't need permission to continue chatting.
-  // Use a callback fn to prevent iteration until necessary to improve perf
-  // Note: this only works if the respective chat has been fetched already, like in chatsUserList
   const encodedUserId = Id.parse(userId)
-  // Only 1:1 chats count; sharing a group grants nothing.
   const existingChat = chats.find(
     (c) =>
       !c.is_blast &&

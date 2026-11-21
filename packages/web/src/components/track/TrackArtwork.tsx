@@ -12,7 +12,6 @@ type TrackArtworkProps = {
   isLoading?: boolean
 } & Omit<ArtworkProps, 'src'>
 
-// TODO build this out and replace the existing TrackImage component
 export const TrackArtwork = (props: TrackArtworkProps) => {
   const {
     trackId,

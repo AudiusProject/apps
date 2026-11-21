@@ -26,7 +26,6 @@ const emojiMap: Record<UiErrorCode, React.ReactNode> = {
 
 export const SomethingWrong = () => {
   const isMobile = useIsMobile()
-  // Select only once per mount
   const isOpen = useSelector(getIsErrorPageOpen)
   const uiErrorCode = useSelector(getUiErrorCode, () => true)
 

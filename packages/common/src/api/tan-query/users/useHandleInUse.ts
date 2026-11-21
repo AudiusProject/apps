@@ -19,7 +19,6 @@ export const fetchHandleInUse = async (
     return !!user
   } catch (e: any) {
     if ('response' in e && e.response.status === 404) {
-      // Expect not found when handle is available
       return false
     }
     throw e
@@ -30,9 +29,6 @@ export const getHandleInUseQueryKey = (handle: string | null | undefined) => {
   return [QUERY_KEYS.handleInUse, handle] as unknown as QueryKey<boolean>
 }
 
-/**
- * Hook to check if a handle is already in use
- */
 export const useHandleInUse = (
   handle: string | null | undefined,
   options?: QueryOptions

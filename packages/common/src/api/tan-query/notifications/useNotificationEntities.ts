@@ -45,7 +45,6 @@ type PlaylistNotification = Extract<
 export const useNotificationEntities = <T extends Notification>(
   notification: T
 ): EntityTypes<T> => {
-  // Always call hooks unconditionally
   const { data: track } = useTrack(
     'trackId' in notification ? notification.trackId : null
   )
@@ -54,7 +53,6 @@ export const useNotificationEntities = <T extends Notification>(
     'playlistId' in notification ? notification.playlistId : null
   )
 
-  // Get playlist owner for playlist notifications
   const isPlaylistNotification = (
     n: Notification
   ): n is PlaylistNotification & { playlistOwnerId: number } => {
@@ -73,12 +71,7 @@ export const useNotificationEntities = <T extends Notification>(
   const { data: users } = useUsers(playlistOwnerId ? [playlistOwnerId] : null)
   const playlistOwner = playlistOwnerId ? users?.[playlistOwnerId] : null
 
-  // For entity-based notifications
   const entityIds = 'entityIds' in notification ? notification.entityIds : []
-  // For UserSubscription notifications, limit to first entity to avoid
-  // fetching extra tracks
-  // The UI only uses entities[0] for single uploads and just shows the count
-  // for multi-uploads.
   const isUserSubscription =
     notification.type === NotificationType.UserSubscription
   const trackEntityIds =
@@ -89,14 +82,12 @@ export const useNotificationEntities = <T extends Notification>(
       : null
   )
 
-  // Get unique user IDs from tracks
   const userIds = useMemo(() => {
     return tracks?.map((track) => track?.owner_id).filter(removeNullable)
   }, [tracks])
 
   const { byId: trackUsers } = useUsers(userIds)
 
-  // Combine tracks with their users
   const trackEntities = useMemo(() => {
     if (!tracks || !trackUsers) return []
     return tracks
@@ -115,7 +106,6 @@ export const useNotificationEntities = <T extends Notification>(
       .filter((entity): entity is EntityWithUser<Track> => entity !== null)
   }, [tracks, trackUsers])
 
-  // Return appropriate data based on notification type
   if (
     notification.type === NotificationType.AddTrackToPlaylist ||
     notification.type === NotificationType.TrackAddedToPurchasedAlbum
@@ -133,7 +123,6 @@ export const useNotificationEntities = <T extends Notification>(
       return trackEntities as EntityTypes<T>
     }
 
-    // For collections, we'll need to implement this once we have a collection query hook
     console.warn(
       'Collection notifications not yet implemented with query hooks'
     )

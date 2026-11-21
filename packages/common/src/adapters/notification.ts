@@ -64,11 +64,6 @@ const toEntityType = (
   return Entity.Playlist
 }
 
-/**
- * Maps the SDK notifications type to the type that the UI expects,
- * decoding hashIds and in some cases extracting userId from the groupId
- * and other nuanced things on a per notification basis.
- */
 export const notificationFromSDK = (
   notification: SdkNotification
 ): Notification | undefined => {
@@ -212,7 +207,6 @@ export const notificationFromSDK = (
           const data = action.data
           if (instanceOfCreatePlaylistNotificationActionData(data)) {
             entityType = data.isAlbum ? Entity.Album : Entity.Playlist
-            // Future proofing for when playlistId is fixed to be a string
             return HashId.parse(
               Array.isArray(data.playlistId)
                 ? data.playlistId[0]!
@@ -224,14 +218,10 @@ export const notificationFromSDK = (
         })
         .flat()
         .filter(removeNullable)
-      // playlist owner ids are the specifier of the playlist create notif
       const userId =
         entityType === Entity.Track
-          ? // track create notifs store track owner id in the group id
-            parseInt(notification.groupId.split(':')[3])
-          : // album/playlist create notifications store album owner
-            // id as the specifier
-            HashId.parse(notification.actions[0].specifier)
+          ? parseInt(notification.groupId.split(':')[3])
+          : HashId.parse(notification.actions[0].specifier)
       return {
         type: NotificationType.UserSubscription,
         userId,
@@ -687,7 +677,6 @@ export const notificationFromSDK = (
       }
     }
     default:
-      // Types below may arrive before the SDK is regenerated
       {
         const n = notification as unknown as {
           type: string

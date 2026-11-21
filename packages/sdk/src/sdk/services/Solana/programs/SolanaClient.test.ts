@@ -15,8 +15,6 @@ const recentBlockhash = Keypair.generate().publicKey.toBase58()
 
 describe('SolanaClient', () => {
   describe('buildTransaction', () => {
-    // The default VERY_HIGH priority uses a 1.5x multiplier, so an odd recent
-    // fee produces a fractional microLamports value
     it('rounds a fractional priority fee', async () => {
       const client = new SolanaClient({
         rpcEndpoints: ['http://localhost:8899'],

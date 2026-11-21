@@ -29,12 +29,6 @@ export const ChatMessagePlaylist = ({
   const collectionId = playlist?.playlist_id
   const { data: collection } = useCollection(collectionId)
 
-  // Subscribe to the permalink-lookup query directly. `useCollectionByPermalink`
-  // chains permalink → collection and returns the inner `useCollection`'s
-  // pending state, which stays `true` forever when the permalink resolves
-  // to no collection (the inner query is just disabled). Reading the
-  // permalink query state directly lets us distinguish "still resolving"
-  // from "resolved with no collection" so the skeleton terminates correctly.
   const { data: collectionIdFromPermalink, isPending: isPermalinkPending } =
     useQuery<number | null | undefined>({
       queryKey: getCollectionByPermalinkQueryKey(permalink),
@@ -69,15 +63,10 @@ export const ChatMessagePlaylist = ({
   const hasResolvedCollection = !isPending && collectionExists
 
   useEffect(() => {
-    // Defer firing parent callbacks while the permalink query is still
-    // resolving so the URL text doesn't flash before the tile or empty state.
     if (isPending) return
     if (hasResolvedCollection) {
       onSuccess?.()
     } else {
-      // Collection URL resolved to nothing playable (deleted or missing) —
-      // signal empty so the bubble falls back to bare URL text rather than
-      // showing a misleading or generic preview.
       onEmpty?.()
     }
   }, [isPending, hasResolvedCollection, onSuccess, onEmpty])
@@ -87,8 +76,6 @@ export const ChatMessagePlaylist = ({
   }
 
   if (hasResolvedCollection && collectionId) {
-    // You may wonder why we use the mobile web playlist tile here.
-    // It's simply because the chat playlist tile uses the same design as mobile web.
     return (
       <CollectionTile
         containerClassName={className}

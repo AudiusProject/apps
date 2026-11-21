@@ -20,10 +20,6 @@ export const getTrackDownloadCountsQueryKey = (trackIds: string[]) => {
   >
 }
 
-/**
- * Single-track download count. Use for track page / metadata when you only need one track.
- * For multiple tracks (e.g. summing), use useTrackDownloadCounts (bulk) instead.
- */
 export const useTrackDownloadCount = (
   trackId: string | null | undefined,
   options?: QueryOptions<number>

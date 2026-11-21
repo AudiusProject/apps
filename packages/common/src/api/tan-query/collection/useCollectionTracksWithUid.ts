@@ -7,10 +7,6 @@ import { useTracks } from '../tracks/useTracks'
 
 export type CollectionTrack = TrackMetadata
 
-/**
- * Returns the tracks belonging to a collection, in playlist order.
- * NOTE: not an actual query hook, more of a selector.
- */
 export const useOrderedCollectionTracks = (
   collection:
     | Pick<TQCollection, 'playlist_contents' | 'trackIds' | 'playlist_id'>

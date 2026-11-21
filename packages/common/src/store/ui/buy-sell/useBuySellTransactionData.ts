@@ -11,7 +11,6 @@ export const useBuySellTransactionData = () => {
       data: NonNullable<TransactionData> & { isInsufficientBalance: boolean }
     ) => {
       setTransactionData(data)
-      // Use the explicit boolean instead of inferring
       setHasSufficientBalance(!data.isInsufficientBalance)
     },
     []

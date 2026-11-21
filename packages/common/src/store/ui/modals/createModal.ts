@@ -24,11 +24,6 @@ type ModalTrackingConfig<T> =
 
 type CreateModalConfig<T> = BaseCreateModalConfig<T> & ModalTrackingConfig<T>
 
-/**
- * Creates the necessary actions/reducers/selectors for a modal,
- * and returns the reducer to be wired to the store
- * and hook to be used in the application.
- */
 export const createModal = <T>({
   reducerPath,
   initialState,
@@ -70,19 +65,11 @@ export const createModal = <T>({
     return baseState
   }
 
-  // Need to explicitly retype this because TS got confused
   const open = slice.actions.open as (
     state: T & BaseModalState
   ) => PayloadAction<T & BaseModalState>
 
   const { close, closed, set } = slice.actions
-  /**
-   * A hook that returns the state of the modal,
-   * an open callback that opens the modal,
-   * a close callback that closes it,
-   * and a closed callback that clears the state
-   * @returns an object with the state and all three callbacks
-   */
   const useModal = () => {
     const { isOpen, ...data } = useSelector(selector)
     const dispatch = useDispatch()

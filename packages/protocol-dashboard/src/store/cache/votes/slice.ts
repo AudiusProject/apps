@@ -3,9 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { VoteEvent, Vote } from 'types'
 
 export type State = {
-  // All votes, mapping from proposalId => VoteEvents[]
   votes: { [proposalId: number]: VoteEvent[] }
-  // Current users' votes, mapping from proposalId => Vote
   userVotes: { [proposalId: number]: Vote }
 }
 

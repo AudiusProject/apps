@@ -13,16 +13,12 @@ const getSwipeTransitions = (direction: 'back' | 'forward') =>
   direction === 'forward'
     ? {
         ...defaultTransitions,
-        // Next screen enters from right
         from: { opacity: 0, transform: 'translate3d(100%, 0, 0)' },
-        // Current screen leaves on left
         leave: { opacity: 0, transform: 'translate3d(-100%, 0, 0)' }
       }
     : {
         ...defaultTransitions,
-        // Previous screen enters from left
         from: { opacity: 0, transform: 'translate3d(-100%, 0, 0)' },
-        // Current screen leaves on right
         leave: { opacity: 0, transform: 'translate3d(100%, 0, 0)' }
       }
 

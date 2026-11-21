@@ -40,14 +40,6 @@ type UseEventCommentsArgs = {
   enabled?: boolean
 }
 
-/**
- * Fetch the top-level comment stream for a remix-contest event. Replies come
- * back nested inside each comment (matching the track-comment shape), so the
- * same CommentBlock components that render track comments can render these.
- *
- * The distinction between "post update" and "normal comment" is resolved at
- * render time by comparing `comment.userId === eventOwnerUserId`.
- */
 export const useEventComments = ({
   eventId,
   sortMethod = 'newest',
@@ -69,9 +61,6 @@ export const useEventComments = ({
     queryFn: async ({ pageParam }): Promise<EventCommentsFeedItem[]> => {
       if (!eventId) return []
       const sdk = await audiusSdk()
-      // Event comments live on the events API (see swagger
-      // /events/{eventId}/comments). Response reuses the track_comments_response
-      // schema so the parsing path is identical to track / fan-club comments.
       const response = await sdk.events.getEventComments({
         eventId: encodeHashId(eventId)!,
         userId: OptionalId.parse(currentUserId ?? undefined),

@@ -24,12 +24,6 @@ export const getPathFromAudiusUrl = (url: string) =>
     ? url
     : (new RegExp(audiusUrlRegex).exec(url)?.[2] ?? null)
 
-/**
- * Pasted URLs commonly contain percent-encoded unicode (e.g. `%E2%80%93` for
- * an en-dash). The SDK URL-encodes its query params before hitting the API,
- * so passing an already-encoded path through results in double-encoding and
- * the lookup fails. Decode here so callers always get the canonical form.
- */
 const safeDecodePath = (path: string) => {
   try {
     return decodeURIComponent(path)

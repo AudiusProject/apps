@@ -35,12 +35,10 @@ export type LockedStatusBadgeProps = {
   locked: boolean
   variant?: 'premium' | 'gated' | 'tokenGated'
   text?: string
-  /** Whether the badge is colored when locked */
   coloredWhenLocked?: boolean
   iconSize?: 'medium' | 'small'
 }
 
-/** Renders a small badge with locked or unlocked icon */
 export const LockedStatusBadge = (props: LockedStatusBadgeProps) => {
   const {
     locked,

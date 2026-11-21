@@ -26,7 +26,6 @@ const messages = {
   deal: 'That’s a pretty big deal.',
   share: 'Share with your fans and let them know you’re here!',
   shareButton: 'Share With Your Fans',
-  // Note: twitter auto appends the link to the text
   tweet:
     'I just joined @audius and uploaded my first track! Check out my profile $AUDIO'
 }

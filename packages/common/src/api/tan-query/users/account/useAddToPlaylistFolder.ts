@@ -34,9 +34,6 @@ const messages = {
     `This playlist was already in your library. It has now been moved to ${folderName}!`
 }
 
-/**
- * Hook to add items to a playlist folder
- */
 export const useAddToPlaylistFolder = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: playlistLibrary } = usePlaylistLibrary()
@@ -53,7 +50,6 @@ export const useAddToPlaylistFolder = () => {
         throw new Error('Missing required data')
       }
 
-      // Snapshot before mutating — updatePlaylistLibrary overwrites the cache.
       const previousLibrary = playlistLibrary
       const updatedLibrary = playlistLibraryHelpers.addPlaylistToFolder(
         previousLibrary,

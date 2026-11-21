@@ -38,8 +38,6 @@ export const AppTabsScreen = () => {
   usePrefetchNotifications()
 
   return (
-    // Sits above the navigator so the tab bar, which renders as a sibling of
-    // the screens, can still animate off the focused tab's scrolling.
     <BottomBarInsetProvider>
       <TabBarAutoHideProvider>
         <Tab.Navigator

@@ -91,7 +91,6 @@ export class AdvancedModal {
       })
       .click()
     await this.locator.getByRole('combobox', { name: /find users/i }).fill(user)
-    // This option is mounted to the page
     await this.locator.page().getByRole('option', { name: user }).click()
   }
 
@@ -107,11 +106,11 @@ export class AdvancedModal {
     if (allow) {
       await this.allowAttribution
         .getByRole('radio', { name: /allow attribution/i })
-        .check({ force: true }) // segmented control
+        .check({ force: true })
     } else {
       await this.allowAttribution
         .getByRole('radio', { name: /no attribution/i })
-        .check({ force: true }) // segmented control
+        .check({ force: true })
     }
   }
 
@@ -119,11 +118,11 @@ export class AdvancedModal {
     if (allow) {
       await this.commercialUse
         .getByRole('radio', { name: /^commercial use/i })
-        .check({ force: true }) // segmented control
+        .check({ force: true })
     } else {
       await this.commercialUse
         .getByRole('radio', { name: /non-commercial use/i })
-        .check({ force: true }) // segmented control
+        .check({ force: true })
     }
   }
 
@@ -132,7 +131,7 @@ export class AdvancedModal {
   ) {
     await this.derivativeWorks
       .getByRole('radio', { name: permission, exact: true })
-      .check({ force: true }) // segmented control
+      .check({ force: true })
   }
 
   async save() {

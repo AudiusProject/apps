@@ -201,16 +201,13 @@ export const EditProfileScreen = () => {
         newProfile.updatedProfilePicture = profile_picture
       }
 
-      // Handle fan club badge
       if (fan_club_badge) {
         if (
           fan_club_badge.mint === '__default__' ||
           fan_club_badge.mint === '__none__'
         ) {
-          // Set to null for default/none
           newProfile.fan_club_badge = null
         } else {
-          // Set the actual badge
           newProfile.fan_club_badge = fan_club_badge
         }
       }

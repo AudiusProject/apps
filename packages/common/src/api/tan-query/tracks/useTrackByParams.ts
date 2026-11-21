@@ -11,10 +11,6 @@ type TrackParams = {
   trackId?: ID | null
 }
 
-/**
- * Hook that returns track data given either a track ID or a handle + slug.
- * Internally uses useTrack and useTrackByPermalink for consistent behavior.
- */
 export const useTrackByParams = (
   params: TrackParams | null,
   options?: QueryOptions

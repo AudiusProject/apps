@@ -84,34 +84,20 @@ import remixersUserListReducer from './user-list/remixers/reducers'
 import repostsUserListReducer from './user-list/reposts/reducers'
 import wallet from './wallet/slice'
 
-/**
- * A function that creates common reducers.
- * @returns an object of all reducers to be used with `combineReducers`
- */
 export const reducers = (storage: Storage, history?: History) => ({
   account,
 
-  // TODO: Move to common
-  // signOn: signOnReducer,
-  // backend,
-  // confirmer,
-
-  // Config
   reachability,
 
   savedCollections: savedCollectionsReducer,
 
-  // Playback
   playback,
   playbackPosition,
 
-  // Wallet
   wallet,
 
-  // Cast
   cast,
 
-  // UI
   ui: combineReducers({
     averageColor: averageColorReducer,
     addToCollection: addToCollectionReducer,
@@ -142,7 +128,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     theme
   }),
 
-  // Pages
   pages: combineReducers({
     audioRewards: audioRewardsSlice.reducer,
     chat: chatReducer,
@@ -164,7 +149,6 @@ export const reducers = (storage: Storage, history?: History) => ({
   search: searchReducer(storage),
   stemsUpload,
 
-  // Gated content
   buyUSDC: buyUSDCReducer,
   gatedContent,
   purchaseContent: purchaseContentReducer,
@@ -177,30 +161,17 @@ export const reducers = (storage: Storage, history?: History) => ({
 
 export type CommonState = {
   account: ReturnType<typeof account>
-  // TODO: Migrate to common
-  // signOn: ReturnType<typeof signOnReducer>
 
-  // TODO: Migrate to common
-  // backend: BackendState
-
-  // Config
   reachability: ReachabilityState
 
-  // TODO: Migrate to common
-  // confirmer: ConfirmerState
-
-  // TODO: missing types for internally managed api slice state
   api: any
   savedCollections: ReturnType<typeof savedCollectionsReducer>
 
-  // Playback
   playback: PlaybackState
   playbackPosition: PlaybackPositionState
 
-  // Wallet
   wallet: ReturnType<typeof wallet>
 
-  // Cast
   cast: ReturnType<typeof cast>
 
   ui: {
@@ -254,10 +225,8 @@ export type CommonState = {
 
   stemsUpload: ReturnType<typeof stemsUpload>
 
-  // USDC
   buyUSDC: ReturnType<typeof buyUSDCReducer>
 
-  // Gated content
   purchaseContent: ReturnType<typeof purchaseContentReducer>
   gatedContent: ReturnType<typeof gatedContent>
   withdrawUSDC: ReturnType<typeof withdrawUSDCReducer>

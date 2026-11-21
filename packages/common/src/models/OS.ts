@@ -1,5 +1,3 @@
-// These should reference the actual build platform name
-// from the electron builder.
 export enum OS {
   MAC = 'mac',
   WIN = 'win',

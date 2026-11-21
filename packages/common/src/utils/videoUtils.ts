@@ -10,10 +10,6 @@ const YOUTUBE_REGEX =
 
 const VIMEO_REGEX = /(?:vimeo\.com\/)(\d+)/
 
-/**
- * Parse a video URL and extract the platform and video ID.
- * Supports YouTube and Vimeo URLs.
- */
 export const parseVideoUrl = (url: string): ParsedVideo | null => {
   const youtubeMatch = url.match(YOUTUBE_REGEX)
   if (youtubeMatch) {
@@ -28,10 +24,6 @@ export const parseVideoUrl = (url: string): ParsedVideo | null => {
   return null
 }
 
-/**
- * Get the thumbnail URL for a video. Only YouTube provides static thumbnail URLs.
- * Vimeo requires an API call, so returns null.
- */
 export const getVideoThumbnailUrl = (parsed: ParsedVideo): string | null => {
   if (parsed.platform === 'youtube') {
     return `https://img.youtube.com/vi/${parsed.videoId}/hqdefault.jpg`
@@ -39,9 +31,6 @@ export const getVideoThumbnailUrl = (parsed: ParsedVideo): string | null => {
   return null
 }
 
-/**
- * Get the embeddable URL for a video.
- */
 export const getVideoEmbedUrl = (parsed: ParsedVideo): string => {
   if (parsed.platform === 'youtube') {
     return `https://www.youtube.com/embed/${parsed.videoId}?origin=https://audius.co&enablejsapi=1`
@@ -49,9 +38,6 @@ export const getVideoEmbedUrl = (parsed: ParsedVideo): string => {
   return `https://player.vimeo.com/video/${parsed.videoId}`
 }
 
-/**
- * Get the watch URL for a video (for opening in a new tab).
- */
 export const getVideoWatchUrl = (parsed: ParsedVideo): string => {
   if (parsed.platform === 'youtube') {
     return `https://www.youtube.com/watch?v=${parsed.videoId}`
@@ -59,9 +45,6 @@ export const getVideoWatchUrl = (parsed: ParsedVideo): string => {
   return `https://vimeo.com/${parsed.videoId}`
 }
 
-/**
- * Check if a URL is a valid YouTube or Vimeo video URL.
- */
 export const isValidVideoUrl = (url: string): boolean => {
   return parseVideoUrl(url) !== null
 }

@@ -110,12 +110,6 @@ export enum Entity {
   Playlist = 'Playlist',
   Album = 'Album',
   User = 'User',
-  // Remix-contest comment notifications carry `data.type === "Event"`
-  // because the indexer's comment_*/comment_reaction notifications stamp
-  // the contest's event_id (not its underlying track) as `entity_id`.
-  // Surfaces that render comment notifications use this case to pick a
-  // "remix contest" label and resolve navigation through the underlying
-  // track instead of trying to look up an Event in useNotificationEntity.
   Event = 'Event'
 }
 
@@ -132,7 +126,6 @@ export type BaseNotification = {
   isViewed: boolean
   timestamp: number
   timeLabel?: string
-  // group id is a part of the notifications v2 spec
   groupId?: string
 }
 
@@ -142,7 +135,6 @@ export type AnnouncementNotification = BaseNotification & {
   shortDescription: string
   longDescription?: string
   route: string
-  /** Internal notification campaign id (e.g. Supabase announcements / engagement sends) */
   notificationCampaignId?: string
 }
 
@@ -331,7 +323,6 @@ export type MilestoneNotification = BaseNotification &
   )
 
 export type MilestoneFollowPushNotification = {
-  // TODO: Not the full structure. Need to verify the fields that come back from identity
   initiator: ID
   slot: number
   type: PushNotificationType.MilestoneFollow
@@ -340,7 +331,6 @@ export type MilestoneFollowPushNotification = {
 export type MilestoneListenPushNotification = {
   actions: [
     {
-      // NOTE: This is actually the milestone value, not the id
       actionEntityId: number
       actionEntityType: Entity.Track | Entity.Album | Entity.Playlist
     }
@@ -349,7 +339,6 @@ export type MilestoneListenPushNotification = {
   entityId: ID
   slot: number
   type: PushNotificationType.MilestoneListen
-  /** Set on pushes that should open the milestone stat card */
   shareCard?: boolean
   threshold?: number
   metadata: {
@@ -362,7 +351,6 @@ export type MilestoneListenPushNotification = {
 export type MilestoneRepostPushNotification = {
   actions: [
     {
-      // NOTE: This is actually the milestone value, not the id
       actionEntityId: number
       actionEntityType: Entity.Track | Entity.Album | Entity.Playlist
     }
@@ -381,7 +369,6 @@ export type MilestoneRepostPushNotification = {
 export type MilestoneFavoritePushNotification = {
   actions: [
     {
-      // NOTE: This is actually the milestone value, not the id
       actionEntityId: number
       actionEntityType: Entity.Track | Entity.Album | Entity.Playlist
     }
@@ -409,19 +396,16 @@ export type RemixCreatePushNotification = {
   type: PushNotificationType.RemixCreate
   entityId: ID
   actions: [
-    // Parent Track User
     {
       actionEntityType: Entity.User
       actionEntityId: ID
       blocknumber: number
     },
-    // Remixed Track
     {
       actionEntityType: Entity.Track
       actionEntityId: ID
       blocknumber: number
     },
-    // Parent Track
     {
       actionEntityType: Entity.Track
       actionEntityId: ID
@@ -465,7 +449,6 @@ export type TrendingTrackNotification = BaseNotification & {
   entityId: ID
 }
 
-/** Trending pushes carry `shareCard` when tapping should open the stat card */
 export type TrendingPushFields = { shareCard?: boolean }
 
 export type TrendingUndergroundNotification = BaseNotification & {
@@ -481,7 +464,7 @@ export type TastemakerNotification = BaseNotification & {
   type: NotificationType.Tastemaker
   entityType: Entity.Track
   entityId: ID
-  userId: ID // track owner id
+  userId: ID
 }
 
 export type ChallengeRewardNotification = BaseNotification & {
@@ -518,7 +501,6 @@ export type TrackAddedToPurchasedAlbumNotification = BaseNotification & {
   playlistOwnerId: ID
 }
 
-/** Editorial playlist pushes carry these when tapping should open the stat card */
 export type AddTrackToPlaylistPushFields = {
   shareCard?: boolean
   trackId?: ID
@@ -528,7 +510,6 @@ export type AddTrackToPlaylistPushNotification = {
   type: PushNotificationType.AddTrackToPlaylist
   entityId: ID
   metadata: {
-    // TODO: Need to verify camelCase vs snake_case
     playlistId: ID
     trackOwnerId: ID
     playlistOwnerId: ID
@@ -539,7 +520,6 @@ export type TrackAddedToPurchasedAlbumPushNotification = {
   type: PushNotificationType.TrackAddedToPurchasedAlbum
   entityId: ID
   metadata: {
-    // TODO: Need to verify camelCase vs snake_case
     playlistId: ID
     trackOwnerId: ID
     playlistOwnerId: ID
@@ -626,58 +606,37 @@ export type ListenStreakReminderNotification = BaseNotification & {
 
 export type WeeklyRotationNotification = BaseNotification & {
   type: NotificationType.WeeklyRotation
-  /** The rotation period announced, as an ISO (year, week) pair. */
   year: number
   week: number
 }
 
-/**
- * Sent to an artist on the Wednesday rollover: how many listeners' Weekly
- * Rotations included their tracks in the period that just closed.
- */
 export type WeeklyRotationFeaturedNotification = BaseNotification & {
   type: NotificationType.WeeklyRotationFeatured
   entityType: Entity.Track
-  /** The most-featured track; the only one when trackCount is 1. */
   entityId: ID
   trackCount: number
   rotationCount: number
-  /** The rotation period reported, as an ISO (year, week) pair. */
   year: number
   week: number
 }
 
-/**
- * Push payload for WeeklyRotationFeatured: a Track when one track was
- * featured, otherwise the artist (User) whose profile the tap opens.
- */
 export type WeeklyRotationFeaturedPushNotification = {
   type: NotificationType.WeeklyRotationFeatured
   entityType: Entity.Track | Entity.User
   entityId: ID
 }
 
-/**
- * Sent to an artist on the Wednesday rollover with their numbers for the week
- * that just closed. topCity is missing when no play had a city.
- */
 export type WeeklyArtistRecapNotification = BaseNotification & {
   type: NotificationType.WeeklyArtistRecap
   playCount: number
   followerCount: number
   saveCount: number
-  /** Saves from listeners whose Weekly Rotation included the track. */
   rotationSaveCount: number
   topCity?: string
-  /** The week reported, as a Weekly Rotation ISO (year, week) pair. */
   year: number
   week: number
 }
 
-/**
- * Sent on Friday when the artist's track is in the top 10 of its genre's
- * weekly trending chart.
- */
 export type TrendingGenreNotification = BaseNotification & {
   type: NotificationType.TrendingGenre
   rank: number

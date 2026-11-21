@@ -57,8 +57,6 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
 
     const railInset = isMobile ? 16 : 18
     const contentInset = 8
-    // Scroll containers clip overflow; keep a generous internal vertical buffer
-    // so card shadows (including hover states) are not cut between carousels.
     const railShadowPaddingTop = isMobile ? 12 : 10
     const railShadowPaddingBottom = isMobile ? 12 : 20
     const handleScrollBy = useCallback(
@@ -66,8 +64,6 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
         const container = scrollContainerRef.current
         if (!container) return
 
-        // Scroll by nearly one viewport of rail content so nav remains aligned
-        // across responsive widths without hardcoded pixel jumps.
         const scrollAmount = Math.max(
           240,
           container.clientWidth - (railInset + contentInset) * 2 - 24
@@ -155,11 +151,10 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
             scrollbarWidth: 'none', // Firefox
             msOverflowStyle: 'none', // IE/Edge
             '&::-webkit-scrollbar': {
-              display: 'none' // Chrome/Safari
+              display: 'none'
             },
             overscrollBehaviorX: 'contain', // prevents back gesture on chrome
 
-            // Keep edge clipping behavior while preserving room for card shadows.
             marginLeft: -railInset,
             marginRight: -railInset,
             paddingLeft: railInset,

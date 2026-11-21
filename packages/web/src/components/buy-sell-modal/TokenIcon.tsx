@@ -9,7 +9,6 @@ export type TokenIconProps = {
 } & ArtworkProps &
   IconProps
 
-// Component to render token icon - handles both icon component and logoURI
 export const TokenIcon = ({
   icon: IconComponent,
   logoURI,
@@ -26,7 +25,6 @@ export const TokenIcon = ({
   }
 
   if (logoURI) {
-    // Handle different size props for Artwork component
     const sizeMap: Record<string, { w: number; h: number }> = {
       xs: { w: 14, h: 14 }, // Used for ChatBlastHeader, non-standard size
       s: { w: spacing.unit4, h: spacing.unit4 },
@@ -37,7 +35,6 @@ export const TokenIcon = ({
       '4xl': { w: spacing.unit16, h: spacing.unit16 }
     }
 
-    // Use explicit w/h if provided, otherwise use size mapping
     const dimensions = w && h ? { w, h } : sizeMap[size]
 
     return (

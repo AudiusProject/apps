@@ -36,7 +36,6 @@ export const primeCollectionData = ({
         }))
       }
     } as TQCollection
-    // Prime collection data only if it doesn't exist and skipQueryData is false
     if (
       forceReplace ||
       (!skipQueryData &&
@@ -62,7 +61,6 @@ export const primeCollectionData = ({
       )
     }
 
-    // Prime user data from collection owner
     if ('user' in collection) {
       primeUserData({
         users: [collection.user],
@@ -70,7 +68,6 @@ export const primeCollectionData = ({
       })
     }
 
-    // Prime track and user data from tracks in collection
     if (collection.tracks?.length) {
       primeTrackDataInternal({
         tracks: collection.tracks,

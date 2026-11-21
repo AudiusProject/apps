@@ -18,27 +18,19 @@ const { setIsOpen: _setIsNowPlayingOpen } = nowPlayingUIActions
 
 const DEFAULT_HEIGHT = typeof window !== 'undefined' ? window.innerHeight : 0
 
-// Translation values for a totally hidden drawer
 const DRAWER_HIDDEN_TRANSLATION = -48
-// Translation values for the play bar stub
-const STUB_HIDDEN_TRANSLATION = -96 // 20 //-96
+const STUB_HIDDEN_TRANSLATION = -96
 
-// Translations for the bottom bar
 const BOTTOM_BAR_INITIAL_TRANSLATION = 0
 const BOTTOM_BAR_HIDDEN_TRANSLATION = 80
 
-// Fraction of swipe up to fade (1 / FADE_FRACTION_DENOMINATOR)
 const FADE_FRACTION_DENOMINATOR = 4
 const FADE_IN_MULTIPLIER = 1.5
 
-// Cut off where an open is considered an open
 const OPEN_CUTOFF = 0.2
-// Cut off where a close is considered a close
 const CLOSE_CUTOFF = 0.7
-// Cut off where velocity trumps open/close cut offs
 const VELOCITY_CUTOFF = 0.5
 
-// Controls the amount of friction in swiping when overflowing up or down
 const OVERFLOW_FRICTION = 4
 
 const wobble = {
@@ -58,7 +50,6 @@ const fast = {
   friction: 40
 }
 
-// Interpolates a single y-value into a string translate3d
 const interpY = (y: number) => `translate3d(0, ${y}px, 0)`
 
 type NowPlayingDrawerProps = {
@@ -66,13 +57,6 @@ type NowPlayingDrawerProps = {
   shouldClose: boolean
 }
 
-/**
- * A drawer-like component that houses the now playing menu,
- * play bar, and bottom bar for the mobile UI.
- * When the drawer is dragged up, the play bar fades into a header
- * and then bottom bar animates away.
- * When the drawer is dragged down, the reverse happens.
- */
 const NowPlayingDrawer = ({
   isPlaying,
   shouldClose
@@ -82,18 +66,13 @@ const NowPlayingDrawer = ({
     (isOpen: boolean) => dispatch(_setIsNowPlayingOpen({ isOpen })),
     [dispatch]
   )
-  // Stores the initial translation of the drawer (it's totally off-screen
-  // until something is playing)
   const [initialTranslation, setInitialTranslation] = useInstanceVar(
     DRAWER_HIDDEN_TRANSLATION
   )
-  // Stores the last transition
   const [currentTranslation, setCurrentTranslation] = useInstanceVar(
     DRAWER_HIDDEN_TRANSLATION
   )
-  // Stores the height (as the window.innerHeight can change)
   const [height, setHeight] = useInstanceVar(DEFAULT_HEIGHT)
-  // Stores whether or not the now playing drawer is "open"
   const [isOpen, setIsOpen] = useInstanceVar(false)
 
   const [drawerSlideProps, setDrawerSlideProps] = useSpring(() => ({
@@ -158,7 +137,6 @@ const NowPlayingDrawer = ({
 
   useEffect(() => {
     window.onresize = () => {
-      // const diff = Math.abs(height - window.innerHeight)
       const drawer = document.getElementById('now-playing-drawer')
       if (drawer) {
         const h = window.innerHeight
@@ -243,7 +221,6 @@ const NowPlayingDrawer = ({
     setIsNowPlayingOpen
   ])
 
-  // Handle the "controlled" component
   useEffect(() => {
     if (shouldClose) {
       close()
@@ -281,22 +258,17 @@ const NowPlayingDrawer = ({
     }) => {
       let newY = memo + my
 
-      // Overflow dragging up: the height of the drawer drag is > window height
-      // Add friction
       const topOverflow = Math.abs(newY) - height()
       if (topOverflow > 0) {
         newY = -1 * height() - topOverflow / OVERFLOW_FRICTION
       }
 
-      // Overflow dragging down: the height of the drawer < playbar height
-      // Add friction
       const bottomOverflow = newY - STUB_HIDDEN_TRANSLATION
       if (bottomOverflow > 0) {
         newY = STUB_HIDDEN_TRANSLATION + bottomOverflow / OVERFLOW_FRICTION
       }
 
       if (last) {
-        // If this is the last touch event, potentially open or close the drawer
         if (vy === 0) {
           if (Math.abs(newY) > height() * OPEN_CUTOFF) {
             open()
@@ -305,7 +277,6 @@ const NowPlayingDrawer = ({
           }
           // Click, do nothing
         } else if (vy < 0) {
-          // swipe up
           if (
             Math.abs(newY) > height() * OPEN_CUTOFF ||
             Math.abs(vy) > VELOCITY_CUTOFF
@@ -315,7 +286,6 @@ const NowPlayingDrawer = ({
             close()
           }
         } else {
-          // swipe down
           if (
             Math.abs(newY) < height() * CLOSE_CUTOFF ||
             vy > VELOCITY_CUTOFF
@@ -326,7 +296,6 @@ const NowPlayingDrawer = ({
           }
         }
       } else if (!first) {
-        // Otherwise track the touch events with the drawer
         setDrawerSlideProps({
           to: {
             y: newY
@@ -336,8 +305,6 @@ const NowPlayingDrawer = ({
         })
         setHeaderFadeProps({
           to: {
-            // Start fading the header in 1/4th of the height and complete
-            // fading it in at 2/3rds of the height
             opacity: Math.min(
               1,
               (Math.abs(newY) - height() / FADE_FRACTION_DENOMINATOR) /
@@ -349,7 +316,6 @@ const NowPlayingDrawer = ({
         })
         setPlayBarFadeProps({
           to: {
-            // Animate from opacity 1 to 0 at 1/4th the height
             opacity: Math.max(
               0,
               1 - Math.abs(newY / (height() / FADE_FRACTION_DENOMINATOR))

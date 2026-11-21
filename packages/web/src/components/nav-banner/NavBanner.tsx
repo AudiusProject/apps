@@ -33,7 +33,6 @@ const NavBanner = (props: NavBannerProps) => {
   const { tabs, onSortByRecent, onSortByPopular, dropdownDisabled, isArtist } =
     props
 
-  // Only show sort button at full width to avoid crowding the tabs
   const hideSortButton = useMediaQuery(
     `(max-width: ${MAX_PAGE_WIDTH_PX + 120}px)`
   )

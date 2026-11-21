@@ -1,7 +1,3 @@
-/**
- * Core types for token swap functionality
- */
-
 export type CoinInfo = {
   address: string
   symbol: string
@@ -22,9 +18,6 @@ export type BalanceData = {
   formattedBalance: string
 }
 
-/**
- * State machine types for bidirectional calculations
- */
 export type CalculationSource = 'input' | 'output' | null
 
 export type CalculationState =
@@ -45,9 +38,6 @@ export type CalculationResult = {
   isValid: boolean
 }
 
-/**
- * Token limit calculation types
- */
 export type TokenLimits = {
   min: number
   max: number
@@ -61,9 +51,6 @@ export type TokenLimitInput = {
   tokenAddress?: string
 }
 
-/**
- * Validation types
- */
 export type ValidationErrors = Record<string, string>
 export type ValidationWarnings = Record<string, string>
 export type ValidationTouched = Record<string, boolean>
@@ -84,9 +71,6 @@ export type ValidationInput = {
   isBalanceLoading: boolean
 }
 
-/**
- * Data layer types
- */
 export type TokenDataHookResult = {
   balance: number
   fullBalance: number
@@ -121,9 +105,6 @@ export type SwapValidationHookResult = {
   resetValidation: () => void
 }
 
-/**
- * Transaction data types
- */
 export type TransactionData = {
   inputAmount: number
   outputAmount: number
@@ -135,17 +116,11 @@ export type TransactionData = {
   isExchangeRateLoading?: boolean
 }
 
-/**
- * Form-specific types
- */
 export type SwapFormValues = {
   inputAmount: string
   outputAmount: string
 }
 
-/**
- * Main hook configuration and result types
- */
 export type TokenSwapFormConfig = {
   inputToken: CoinInfo
   outputToken: CoinInfo
@@ -157,33 +132,27 @@ export type TokenSwapFormConfig = {
 }
 
 export type TokenSwapFormResult = {
-  // Form values
   inputAmount: string
   numericInputAmount: number
   outputAmount: string
   numericOutputAmount: number
 
-  // State
   error: string | null
   exchangeRateError: any
   isExchangeRateLoading: boolean
   isBalanceLoading: boolean
 
-  // Data
   availableBalance: number
   currentExchangeRate: number | null
   displayExchangeRate: number | null
   calculatedLimits: TokenLimits
 
-  // Handlers
   handleInputAmountChange: (value: string) => void
   handleOutputAmountChange: (value: string) => void
   handleMaxClick: () => void
 
-  // Formik integration (maintaining backward compatibility)
   formik: any
 
-  // Token info (maintaining backward compatibility)
   inputToken: CoinInfo
   outputToken: CoinInfo
 }

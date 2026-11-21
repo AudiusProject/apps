@@ -490,11 +490,9 @@ describe('DiscoveryProviderSelection', () => {
     const fourthService = await s.select()
     assert.strictEqual(firstService, fourthService)
 
-    // Clear the cached service
     s.clearUnhealthy()
     localStorage.removeItem(DISCOVERY_PROVIDER_TIMESTAMP)
 
-    // Make healthy1 start failing but healthy2 succeed
     nock(healthy1)
       .get('/health_check')
       .reply(400, {

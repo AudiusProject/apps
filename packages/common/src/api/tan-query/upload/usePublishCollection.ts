@@ -58,13 +58,11 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         throw new Error('User ID and wallet are required to publish collection')
       }
 
-      // If the collection is a premium album, this will populate the premium metadata (price/splits/etc)
       let albumTrackPrice: number | undefined
       if (
         params.collectionMetadata.is_album &&
         isContentUSDCPurchaseGated(params.collectionMetadata.stream_conditions)
       ) {
-        // albumTrackPrice will be parsed out of the collection metadata, so we keep a copy here
         albumTrackPrice =
           params.collectionMetadata.stream_conditions?.usdc_purchase
             .albumTrackPrice ?? undefined
@@ -74,7 +72,6 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         )
       }
 
-      // Combine collection metadata into each track's metadata
       for (const track of params.tracks) {
         track.metadata = combineMetadata(
           userId,
@@ -84,7 +81,6 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         )
       }
 
-      // Publish all the tracks first
       const publishedTracks = await publishTracks(
         {
           ...context,
@@ -93,7 +89,6 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         params.tracks
       )
 
-      // For collection artwork, use the existing flow (not TUS) to keep things simple for now.
       const { artwork } = params.collectionMetadata
       const artworkBlob =
         artwork && 'file' in artwork ? (artwork?.file ?? null) : null
@@ -159,7 +154,6 @@ export const usePublishCollection = (
       if (!playlist.playlistId) return
       const sdk = await audiusSdk()
 
-      // Prefetch the newly created collection data and prime the cache
       const batchGetCollections = getCollectionsBatcher({
         sdk,
         currentUserId: userId,
@@ -170,7 +164,6 @@ export const usePublishCollection = (
         HashId.parse(playlist.playlistId)
       )
 
-      // Update the playlist sidebar
       dispatch(
         accountActions.addAccountPlaylist({
           id: collection.playlist_id,
@@ -184,7 +177,6 @@ export const usePublishCollection = (
         })
       )
 
-      // Persist the now-updated library to the user's profile + tan-query cache.
       const previousLibrary = account?.playlistLibrary ?? { contents: [] }
       await updatePlaylistLibrary(
         sdk,
@@ -200,7 +192,6 @@ export const usePublishCollection = (
         dispatch
       )
 
-      // Add to library as favorite locally
       dispatch(
         libraryPageActions.addLocalCollection({
           collectionId: collection.playlist_id,
@@ -209,12 +200,10 @@ export const usePublishCollection = (
         })
       )
 
-      // Invalidate user query to update collection count and track count
       queryClient.invalidateQueries({
         queryKey: getUserQueryKey(userId)
       })
 
-      // Invalidate the uploader's profile tracks cache
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.profileTracks, accountUser?.handle]
       })
@@ -222,10 +211,6 @@ export const usePublishCollection = (
   })
 }
 
-/**
- * Combines the metadata for a track and a collection (playlist or album),
- * taking the metadata from the playlist when the track is missing it.
- */
 function combineMetadata(
   userId: number,
   trackMetadata: TrackMetadataForUpload,
@@ -248,18 +233,14 @@ function combineMetadata(
   }
 
   if (metadata.tags === null && collectionMetadata.trackDetails?.tags) {
-    // Take collection tags
     metadata.tags = collectionMetadata.trackDetails?.tags
   }
 
-  // Set download & hidden status
   metadata.is_downloadable = !!collectionMetadata.is_downloadable
 
-  // Marks child tracks so backend suppresses per-track follower create notifications.
   metadata.is_playlist_upload = true
   metadata.is_unlisted = !!collectionMetadata.is_private
   if (collectionMetadata.is_private && collectionMetadata.field_visibility) {
-    // Convert any undefined values to booleans
     const booleanFieldVisibility = mapValues(
       collectionMetadata.field_visibility,
       Boolean
@@ -267,9 +248,7 @@ function combineMetadata(
     metadata.field_visibility = booleanFieldVisibility
   }
 
-  // If the tracks were added as part of a premium album, add all the necessary premium track metadata
   if (albumTrackPrice !== undefined && albumTrackPrice > 0) {
-    // is_download_gated must always be set to true for all premium tracks
     metadata.is_download_gated = true
     metadata.download_conditions = {
       usdc_purchase: {
@@ -277,13 +256,11 @@ function combineMetadata(
         splits: []
       }
     }
-    // Set up initial stream gating values
     metadata.is_stream_gated = true
     metadata.preview_start_seconds = 0
     metadata.stream_conditions = {
       usdc_purchase: { price: albumTrackPrice, splits: [] }
     }
-    // Add splits to stream & download conditions
     addPremiumMetadata(userId, metadata)
   }
   return metadata

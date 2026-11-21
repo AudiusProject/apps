@@ -13,10 +13,6 @@ type UsePurchaseMethodProps = {
   setMethod: (value: PurchaseMethod) => void
 }
 
-/**
- * Use existing balance as default payment method if available.
- * Otherwise, default to card.
- */
 export const usePurchaseMethod = ({
   price,
   extraAmount,

@@ -12,7 +12,6 @@ export const convertHexToRGBA = (
   const g = parseInt(hex.substring(2, 4), 16)
   const b = parseInt(hex.substring(4, 6), 16)
 
-  /* Backward compatibility for whole number based opacity values. */
   if (opacity > 1 && opacity <= 100) {
     opacity = opacity / 100
   }

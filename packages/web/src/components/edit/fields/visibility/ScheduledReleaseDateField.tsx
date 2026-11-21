@@ -46,7 +46,6 @@ export const ScheduledReleaseDateField = () => {
                 if (value.includes(':')) {
                   return value
                 }
-                // add :00 if it's missing
                 const number = parseInt(value, 10)
                 if (!isNaN(number) && number >= 1 && number <= 12) {
                   return `${number}:00`

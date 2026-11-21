@@ -10,7 +10,6 @@ const messages = {
   feedbackWanted: 'Feedback Wanted'
 }
 
-/** Shown on tracks whose artist is asking for feedback. */
 export const FeedbackWantedTag = ({ trackId }: { trackId?: ID }) => {
   const { isEnabled } = useFeatureFlag(FeatureFlags.TRACK_FEEDBACK_REQUESTS)
   const { data: track } = useTrack(trackId, {

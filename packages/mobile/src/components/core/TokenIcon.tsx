@@ -14,7 +14,6 @@ export const TokenIcon = ({ logoURI, size = 's' }: TokenIconProps) => {
 
   if (!logoURI) return null
 
-  // Handle both IconSize (string) and number types
   const iconSize = typeof size === 'number' ? size : iconSizes[size]
 
   return (

@@ -45,13 +45,7 @@ const {
 const DRAWER_NAME = 'Queue'
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
-// Default (non-fullscreen) drawer takes ~85% of the screen so the user can
-// still see/dismiss the drawer by tapping the dimmed background, and so the
-// drag handle and header are guaranteed to be on-screen regardless of how
-// long the queue is.
 const COLLAPSED_HEIGHT = Math.round(SCREEN_HEIGHT * 0.85)
-// Fixed row height — required so getItemLayout works and initialScrollIndex
-// doesn't break scroll bounds.
 const ROW_HEIGHT = 64
 
 const messages = {
@@ -239,10 +233,6 @@ const useNextFromSourceMobile = () => {
   return useMemo<{ trackIds: ID[]; sourceKey: string | null }>(() => {
     if (!querySource) return { trackIds: [], sourceKey: null }
     type LineupItem = { id: number | string; type?: string }
-    // Most lineup pages are `LineupItem[]`. The remixes/contest lineup wraps
-    // its items in `{ count, tracks: LineupItem[] }` — without this branch,
-    // `for (const item of page)` would throw on the object and crash the
-    // drawer when a contest track is playing.
     type LineupPage = LineupItem[] | { tracks: LineupItem[] }
     const data = queryClient.getQueryData<{ pages: LineupPage[] }>(
       querySource.queryKey as any
@@ -292,8 +282,6 @@ export const QueueDrawer = () => {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const listRef = useRef<any>(null)
 
-  // Reset fullscreen state when the drawer fully closes so the next open
-  // starts in the collapsed state.
   useEffect(() => {
     if (!isOpen) setIsFullscreen(false)
   }, [isOpen])
@@ -317,9 +305,6 @@ export const QueueDrawer = () => {
     wasOpenRef.current = isOpen
   }, [isOpen, record])
 
-  // Suspend the parent drawer's swipe-to-dismiss gesture while the user is
-  // reordering items. Without this, the drawer's PanResponder claims the
-  // vertical drag and the drawer slides instead of the row.
   const [isItemDragging, setIsItemDragging] = useState(false)
   const dragResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const handleDragHandleLongPress = useCallback(() => {
@@ -342,8 +327,6 @@ export const QueueDrawer = () => {
     }
   }, [])
 
-  // Build full queue list — past, now-playing, and upcoming all rendered so
-  // the user can scroll above the now-playing track to see history.
   const listData = useMemo<ListItem[]>(
     () =>
       queue.map((t, i) => ({
@@ -409,9 +392,6 @@ export const QueueDrawer = () => {
     )
   }, [dispatch, queue.length, upNextStart, record])
 
-  // Reorder is only valid for upcoming tracks (anything after the now-playing
-  // index). The from/to indices come from the rendered list and align with
-  // the underlying queue index because we render the entire queue.
   const handleListReorder = useCallback(
     ({ from, to }: { from: number; to: number }) => {
       if (from === to) return
@@ -501,8 +481,6 @@ export const QueueDrawer = () => {
   const initialScrollIndex =
     index >= 0 && index < listData.length ? index : undefined
 
-  // FlatList row layout — required for initialScrollIndex to behave correctly
-  // and avoid clipped scroll bounds.
   const getItemLayout = useCallback(
     (_data: ArrayLike<ListItem> | null | undefined, i: number) => ({
       length: ROW_HEIGHT,

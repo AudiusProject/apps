@@ -77,7 +77,6 @@ export const ChatListItem = ({ chatId }: { chatId: string }) => {
     swipeableRef.current?.close()
   }, [])
 
-  // Swipe left to reveal Priority / General; long-press for the full menu.
   const renderRightActions = useCallback(
     () => (
       <ChatCategorySwipeActions
@@ -93,8 +92,6 @@ export const ChatListItem = ({ chatId }: { chatId: string }) => {
     <ReanimatedSwipeable
       ref={swipeableRef}
       friction={2}
-      // Require a clear horizontal drag so a vertical scroll with sideways
-      // drift stays with the list (the default is 10pt).
       dragOffsetFromRightEdge={30}
       dragOffsetFromLeftEdge={30}
       rightThreshold={40}

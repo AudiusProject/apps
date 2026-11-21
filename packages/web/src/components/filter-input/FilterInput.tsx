@@ -8,8 +8,6 @@ type FilterInputProps = {
   value: string
 }
 
-// Input component used for filtering content,
-// e.g. filtering tracks on the favorites page.
 const FilterInput = ({ placeholder, onChange, value }: FilterInputProps) => {
   return (
     <div className={styles.filterContainer}>

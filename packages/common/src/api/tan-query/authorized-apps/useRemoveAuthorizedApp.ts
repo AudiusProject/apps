@@ -54,7 +54,6 @@ export const useRemoveAuthorizedApp = () => {
         }
       }
 
-      // Splice out the removed app
       const appIndex = previousApps?.findIndex((app) => app.address === address)
       const newApps = cloneDeep(previousApps).splice(appIndex, 1)
 
@@ -63,7 +62,6 @@ export const useRemoveAuthorizedApp = () => {
         newApps
       )
 
-      // Return context with the previous apps
       return { previousApps }
     },
     onError: (_error, _address, context) => {

@@ -7,7 +7,6 @@ import { useRemoteVar } from '../useRemoteVar'
 
 import { PayExtraAmountPresetValues, PayExtraPreset } from './types'
 
-/** Extracts and parses the Pay Extra presets from remote config */
 export const usePayExtraPresets = () => {
   const configValue = useRemoteVar(StringKeys.PAY_EXTRA_PRESET_CENT_AMOUNTS)
   return useMemo<PayExtraAmountPresetValues>(() => {

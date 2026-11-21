@@ -13,7 +13,6 @@ import type {
 
 type ContractName = keyof EthereumServiceConfigInternal['addresses']
 
-// viem contract namespaces whose functions all return promises
 const ASYNC_NAMESPACES = [
   'read',
   'write',
@@ -25,7 +24,6 @@ const ASYNC_NAMESPACES = [
 
 type AnyFn = (...args: any[]) => any
 
-// Proxy targets are empty, so never report a `then` and look like a promise
 const isMethodName = (fn: string | symbol): fn is string =>
   typeof fn === 'string' && fn !== 'then'
 
@@ -90,7 +88,6 @@ export const createLazyContract = <C extends object>(
     enumerable: true,
     get: () => (peek() as { address?: string } | undefined)?.address ?? address
   })
-  // Not enumerable so spreading or logging the contract doesn't throw
   Object.defineProperty(contract, 'abi', {
     enumerable: false,
     get: () => {

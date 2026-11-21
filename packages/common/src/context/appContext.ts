@@ -28,7 +28,6 @@ type AppContextType = {
   audiusSdk?: AudiusSdkWithServices
   remoteConfig: RemoteConfigInstance
   localStorage: LocalStorage
-  /** Restarts the app after an account switch. Web falls back to a page reload. */
   reloadApp?: () => void
 }
 

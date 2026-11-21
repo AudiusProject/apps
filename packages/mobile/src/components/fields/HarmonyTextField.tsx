@@ -9,13 +9,7 @@ import type { TextInputRef, TextInputProps } from '@audius/harmony-native'
 
 export type HarmonyTextFieldProps = TextInputProps & {
   name: string
-  /**
-   * Clears out field errors while the input is being changed for a small UX improvement
-   * @default true
-   */
   clearErrorOnChange?: boolean
-  /** Function to transform the input value upon `onChange`.
-   * E.g. a function to trim whitespace */
   transformValueOnChange?: (value: string) => string
   transformValueOnBlur?: (value: string) => string
   debouncedValidationMs?: number
@@ -71,7 +65,6 @@ export const HarmonyTextField = forwardRef(
         }}
         onBlur={(e) => {
           if (transformValueOnBlur) {
-            // The blur event type has no `text`; iOS still sends it.
             const nativeEvent = e.nativeEvent as typeof e.nativeEvent & {
               text: string
             }

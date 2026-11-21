@@ -83,8 +83,6 @@ const InboxSettingsModal = () => {
     [handleClose, savePermissions]
   )
 
-  // Fetch the latest permissions for the current user when the modal is made visible
-  // Note that this will trigger the following effect as well, causing the permission state to update
   useEffect(() => {
     doFetchPermissions()
   }, [doFetchPermissions])

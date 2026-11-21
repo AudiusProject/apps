@@ -44,7 +44,6 @@ export const formatCalendarTime = (
   return formatReleaseMessage(time, dayLabel, isFuture)
 }
 
-// DayJs Utils
 export const getLocalTimezone = () => {
   return dayjs().format('z')
 }

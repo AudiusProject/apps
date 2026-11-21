@@ -7,9 +7,7 @@ import cn from 'classnames'
 import styles from './RepostFavoritesStats.module.css'
 
 export enum Size {
-  // With text
   LARGE = 'large',
-  // Just icons
   SMALL = 'small'
 }
 

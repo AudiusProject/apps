@@ -2,9 +2,6 @@ import { takeEvery, put } from 'redux-saga/effects'
 
 import * as errorActions from 'store/errors/actions'
 
-/**
- * Creates error sagas.
- */
 export const createErrorSagas = <ActionType extends { type: string }>({
   errorTypes, // list of action types to listen for
   getShouldRedirect,

@@ -59,9 +59,7 @@ describe('test fileHasher with randomized text content', () => {
 
     try {
       await Utils.fileHasher.generateImageCids(randomTextFilePath)
-      throw new Error(
-        '`generateImageCids` should throw if `hashImages` fails'
-      )
+      throw new Error('`generateImageCids` should throw if `hashImages` fails')
     } catch (e) {
       assert.ok(e.toString().includes('failed to generate only hash'))
     }
@@ -73,14 +71,12 @@ describe('test FileHasher with static content', () => {
   const staticImagePath = path.join(__dirname, './assets/static_image.png')
 
   const files = [
-    // index 0 - static text
     {
       type: 'text',
       path: staticTextPath,
       buffer: fs.readFileSync(staticTextPath),
       cid: 'QmNXk37dMvg8QYhy2S8AtV8stQRDCL91ybCretxFK8R4Yd'
     },
-    // index 1 - static image
     {
       type: 'image',
       path: staticImagePath,

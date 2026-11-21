@@ -53,15 +53,10 @@ export const getWalletChainId = async (walletProvider: Eip1193Provider) => {
   return parseInt(chainId, 16).toString()
 }
 
-/**
- * Ethereum providers sometime returns null chainId,
- * so if this happens, try a second time after a slight delay
- */
 const getWalletIsOnEthMainnet = async (walletProvider: Eip1193Provider) => {
   let chainId = await getWalletChainId(walletProvider)
   if (chainId === CHAIN_ID) return true
 
-  // Try a second time just in case wallet was being slow to understand itself
   chainId = await new Promise((resolve) => {
     console.debug('Wallet network not matching, trying again')
     setTimeout(async () => {
@@ -79,9 +74,6 @@ const accountConnectedPromise = new Promise<Eip1193Provider>((resolve) => {
 })
 
 export async function setup(this: AudiusClient): Promise<void> {
-  // Until the user connects, we're in read only mode
-
-  // Avoid initializing read-only libs if account is already connected from previous session
   const quickConnectedWalletProvider = await Promise.race([
     accountConnectedPromise,
     new Promise((resolve) => {
@@ -98,7 +90,6 @@ export async function setup(this: AudiusClient): Promise<void> {
     this.onSetupFinished()
   }
 
-  // Wait for user to connect with web3modal:
   const walletProvider = await accountConnectedPromise
 
   let account = null
@@ -118,7 +109,6 @@ export async function setup(this: AudiusClient): Promise<void> {
       }
     })
 
-    // Failed to pull necessary info from metamask, configure read only
     if (!this.libs) {
       this.libs = await configureReadOnlyLibs()
       this.isAccountMisconfigured = true
@@ -221,7 +211,6 @@ const configureLibsWithAccount = async ({
     onWalletAccountLoaded(connectedAccount)
   }
 
-  // Not connected or no accounts, return
   if (!connectedAccount) {
     return null
   }

@@ -5,7 +5,6 @@ const nock = require('nock')
 
 const helpers = require('./helpers')
 
-// const audiusConfig = helpers.audiusLibsConfig
 const { getRandomLocalhost, audiusInstance: audius0 } = helpers
 const initializeLibConfig = helpers.initializeLibConfig
 const ethContractsConfig = require('../src/eth-contracts/config.json')
@@ -39,10 +38,10 @@ const assertThrows = async (
     )
     return error
   }
-  // assert.fail() for some reason does not have its error string printed 🤷
   assert(
     false,
-    `Expected "${expectedErrorCode}"${expectedReason ? ` (with reason: "${expectedReason}")` : ''
+    `Expected "${expectedErrorCode}"${
+      expectedReason ? ` (with reason: "${expectedReason}")` : ''
     } but it did not fail`
   )
 }
@@ -64,8 +63,6 @@ describe('Staking tests', () => {
     token = audius0.ethContracts.AudiusTokenClient
     accounts = await audius0.ethWeb3Manager.getWeb3().eth.getAccounts()
 
-    // Set lockup durations to a small number so we can reach it
-    // in a reasonable test time
     await audius0.ethContracts.GovernanceClient.setVotingPeriod(1)
     await audius0.ethContracts.GovernanceClient.setExecutionDelay(0)
     await audius0.ethContracts.ServiceProviderFactoryClient.updateDecreaseStakeLockupDuration(
@@ -79,7 +76,6 @@ describe('Staking tests', () => {
     sp1 = accounts[1]
     sp2 = accounts[2]
 
-    // Initialize more lib instances
     const libsConfig1 = await initializeLibConfig(sp1)
     assert(
       ethContractsConfig.ownerWallet !== libsConfig1.ownerWallet,
@@ -96,7 +92,6 @@ describe('Staking tests', () => {
     audius2 = new AudiusLibs(libsConfig2)
     await audius2.init()
 
-    // Refund test accounts
     await token.transfer(
       sp1,
       convertAudsToWeiBN(audius1.ethWeb3Manager.getWeb3(), 2000000)
@@ -131,7 +126,6 @@ describe('Staking tests', () => {
     let defaultStake
 
     beforeEach(async () => {
-      // Clear any accounts registered w/the audius1 account
       initialSPBalance = await token.balanceOf(sp1)
       testEndpt = getRandomLocalhost()
 
@@ -148,7 +142,6 @@ describe('Staking tests', () => {
 
       nock(testEndpt).get(path).reply(200, response)
 
-      // Cache stake amount prior to register
       initialStake =
         await audius1.ethContracts.StakingProxyClient.totalStakedFor(sp1)
       defaultStake = convertAudsToWeiBN(
@@ -156,7 +149,6 @@ describe('Staking tests', () => {
         210000
       )
 
-      // Register
       const tx =
         await audius1.ethContracts.ServiceProviderFactoryClient.register(
           testServiceType,
@@ -197,7 +189,6 @@ describe('Staking tests', () => {
       const expectedStaked = preIncreaseStake.add(defaultStake)
       assert(totalStaked.eq(expectedStaked), 'Expect increase in stake')
 
-      // Confirm revert occurred for incorrect owner
       assertRevert(
         audius2.ethContracts.ServiceProviderFactoryClient.increaseStake(
           defaultStake
@@ -241,7 +232,6 @@ describe('Staking tests', () => {
 
       const currentStake =
         await audius1.ethContracts.StakingProxyClient.totalStakedFor(sp1)
-      // Configure amount greater than current stake to try and decrease
       const increaseAmt = audius1.ethWeb3Manager.getWeb3().utils.toBN(10)
       const invalidDecreaseAmount = currentStake.add(increaseAmt)
       assertRevert(
@@ -259,7 +249,6 @@ describe('Staking tests', () => {
     let initialStake
     let defaultStake
     beforeEach(async () => {
-      // Clear any accounts registered w/the audius1 account
       initialSPBalance = await token.balanceOf(sp1)
       testEndpt = getRandomLocalhost()
 
@@ -276,7 +265,6 @@ describe('Staking tests', () => {
 
       nock(testEndpt).get(path).reply(200, response)
 
-      // Cache stake amount prior to register
       initialStake =
         await audius1.ethContracts.StakingProxyClient.totalStakedFor(sp1)
       defaultStake = convertAudsToWeiBN(
@@ -284,7 +272,6 @@ describe('Staking tests', () => {
         210000
       )
 
-      // Register
       const tx =
         await audius1.ethContracts.ServiceProviderFactoryClient.register(
           testServiceType,

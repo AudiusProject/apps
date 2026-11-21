@@ -43,7 +43,6 @@ const filterNodes = (
   return cnNodes
 }
 
-// -------------------------------- Selectors  --------------------------------
 export const getStatus = (state: AppState) => state.cache.validator.status
 export const getTotal = (state: AppState) => state.cache.validator.total
 export const getNode = (spID: number) => (state: AppState) =>
@@ -56,8 +55,6 @@ export const getFilteredNodes =
     const nodes = state.cache.validator.nodes
     return filterNodes(nodes)
   }
-
-// -------------------------------- Helpers  --------------------------------
 
 const processNode = async (node: Node, aud: Audius): Promise<Validator> => {
   const { country, version } = await Audius.getValidatorMetadata(node.endpoint)
@@ -80,9 +77,6 @@ const processNode = async (node: Node, aud: Audius): Promise<Validator> => {
   }
 }
 
-// -------------------------------- Thunk Actions  --------------------------------
-
-// Async function to get
 export function fetchValidators(
   props: UseValidatorsProps = {}
 ): ThunkAction<void, AppState, Audius, Action<string>> {
@@ -110,7 +104,6 @@ export function fetchValidators(
   }
 }
 
-// Async function to get
 export function getValidator(
   spID: number,
   setStatus?: (status: Status) => void
@@ -136,8 +129,6 @@ export function getValidator(
     if (setStatus) setStatus(Status.Success)
   }
 }
-
-// -------------------------------- Hooks  --------------------------------
 
 export const useValidators = ({ owner, sortBy, limit }: UseValidatorsProps) => {
   const status = useSelector(getStatus)

@@ -83,7 +83,6 @@ const DelegatorsTable: React.FC<DelegatorsTableProps> = ({
 
   const onRowClick = useCallback(
     (row: Delegator) => {
-      // Go to delegator
       pushRoute(accountPage(row.address))
     },
     [pushRoute]

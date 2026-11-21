@@ -57,7 +57,6 @@ type CollectionsTableProps = {
   tableHeaderClassName?: string
   responsiveColumns?: TableProps['responsiveColumns']
   isDense?: boolean
-  /** Router state passed along when a collection name link is followed. */
   linkState?: unknown
 }
 
@@ -70,10 +69,6 @@ const defaultColumns: CollectionsTableColumn[] = [
   'spacer'
 ]
 
-/**
- * Note: this table is not generalized the way TracksTable is. It is
- * specifically tailored to the Artist Dashboard use case.
- */
 export const CollectionsTable = ({
   columns = defaultColumns,
   data,
@@ -91,7 +86,6 @@ export const CollectionsTable = ({
   isDense,
   linkState
 }: CollectionsTableProps) => {
-  // Cell Render Functions
   const renderNameCell = useCallback(
     (cellInfo: CollectionCell) => {
       const collection = cellInfo.row.original
@@ -166,7 +160,6 @@ export const CollectionsTable = ({
     )
   }, [])
 
-  // Columns
   const tableColumnMap = useMemo(
     () => ({
       name: {

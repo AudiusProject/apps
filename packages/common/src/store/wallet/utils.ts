@@ -42,11 +42,6 @@ export const badgeTiers: BadgeTierInfo[] = [
   }
 ]
 
-/**
- * Hook to get the tier and verification status for a user
- * @param userId Optional user ID to check. If not provided, uses the current user
- * @returns Object containing tier, isVerified, and tierNumber
- */
 export const useTierAndVerifiedForUser = (userId: Maybe<Nullable<ID>>) => {
   const { data: user } = useUser(userId, {
     select: (user) => ({
@@ -65,8 +60,6 @@ export const useTierAndVerifiedForUser = (userId: Maybe<Nullable<ID>>) => {
   return { tier, isVerified, tierNumber }
 }
 
-// Helpers
-
 export const getTierAndNumberForBalance = (
   balance: StringWei,
   useWei: boolean = true
@@ -83,7 +76,6 @@ export const getTierAndNumberForBalance = (
   return { tier, tierNumber }
 }
 
-/** Gets tier number, highest tier being badgeTiers.length, lowest being 1  */
 export const getTierNumber = (tier: BadgeTier) =>
   badgeTiers.length - badgeTiers.findIndex((t) => t.tier === tier)
 
@@ -92,18 +84,12 @@ export const getTierForUser = (totalBalance: Nullable<StringWei>) => {
   return getTierAndNumberForBalance(balance).tier
 }
 
-// The other fns here use wei formatting, new fan club data doesnt use wei
 export const getTierForUserNonWei = (totalBalance: Nullable<StringWei>) => {
   const balance = totalBalance ?? ('0' as StringWei)
   return getTierAndNumberForBalance(balance, false).tier
 }
 
-/**
- * Checks whether the input address is a valid solana address.
- */
 export const isValidSolAddress = (address: SolanaWalletAddress) => {
-  // Same check as `new PublicKey(address)`: base58 that decodes to 32 bytes.
-  // Avoids loading @solana/web3.js just to validate an address.
   try {
     return bs58.decode(address).length === 32
   } catch (err) {

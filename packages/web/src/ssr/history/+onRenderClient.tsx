@@ -1,6 +1,3 @@
-// Simple SSR pages use createRoot instead of hydrateRoot
-// to avoid hydration mismatches since we only render meta tags during SSR
-
 import '../polyfills'
 
 import 'setimmediate'

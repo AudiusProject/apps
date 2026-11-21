@@ -65,7 +65,6 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
         <Hint
           icon={IconError}
           actions={
-            // TODO: use variant='visible' when migrated to harmony
             <ExternalTextLink
               to={AUDIUS_SDK_LINK}
               className={styles.readTheDocs}

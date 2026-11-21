@@ -119,11 +119,9 @@ const reducer = createReducer<ConfirmerState, ConfirmerActions>(initialState, {
       action.operationId in newOperationSuccessCallIdx[action.uid]
     ) {
       const index = newOperationSuccessCallIdx[action.uid][action.operationId]
-      // Cancel the previous success call in the `complete` queue
       newComplete[action.uid][index] = noop
       const newLength = newComplete[action.uid].push(action.completionCall)
 
-      // Update the tracker with new index of the operation's success call
       newOperationSuccessCallIdx[action.uid][action.operationId] = newLength - 1
     } else {
       let newLength: number

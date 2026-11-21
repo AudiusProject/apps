@@ -57,12 +57,6 @@ async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-/**
- * Since the format that Viem requests for `sendTransaction` and the format RPCs
- * expect for `eth_sendTransaction` differ, convert back from the latter to the
- * former. Viem uses `never` types for the non-allowed fields of the different
- * variants, so to do this the most type safely, handle each variant separately.
- */
 const toTransactionRequest = (
   transaction: RpcTransactionRequest
 ): TransactionRequest => {
@@ -155,10 +149,6 @@ const toTransactionRequest = (
   return base
 }
 
-/**
- * Runs a function within the context of holding a lock. Ensures the lock is
- * released whether the function is successful or throws an exception.
- */
 const withLock = async <T>(
   lockKey: string,
   fn: () => Promise<T>,
@@ -180,10 +170,6 @@ const withLock = async <T>(
 const createRouter = () => {
   const router = express.Router()
 
-  /**
-   * Proxies requests to the RPC provider. Intercepts `eth_sendTransaction`
-   * requests and signs them before sending them locally.
-   */
   router.post(
     '/rpc',
     parameterizedAuthMiddleware({ shouldRespondBadRequest: true }),
@@ -202,7 +188,6 @@ const createRouter = () => {
         logger.info({ method, params }, 'Received Ethereum RPC request...')
 
         if (body.method === 'eth_sendTransaction') {
-          // Intercept eth_sendTransaction and send locally
           const relayer = getRandomRelayerWallet()
           const res = await withLock(
             generateETHWalletLockKey(relayer.publicKey),
@@ -221,7 +206,6 @@ const createRouter = () => {
           )
           return successResponse({ result: res })
         } else {
-          // Pass through everything else
           logger.debug('Proxying request to RPC...')
           const res = await walletClient.transport.request(req.body)
           return successResponse({ result: res })

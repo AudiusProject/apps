@@ -43,7 +43,6 @@ function* removeWallet(action: ConfirmRemoveWalletAction) {
 
   function* onSuccess() {
     const queryClient = yield* getContext<QueryClient>('queryClient')
-    // Trigger a refetch for all audio balances
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.audioBalance]
     })

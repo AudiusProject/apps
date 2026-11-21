@@ -1,5 +1,3 @@
-// Utility Functions to compute confetti physics
-
 function degreesToRads(degrees) {
   return degrees / (180 * Math.PI)
 }
@@ -29,11 +27,8 @@ function sample(array) {
 const RANDOM_LETTERS =
   'abcdefghijklmnoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~!@#$%^&*()`™£¢∞§¶•ªº'
 
-// How far apart columns are in matrix mode
 const COLUMN_SPACING = 50
 
-// Particle class representing a piece of confetti
-// The particle holds the image, postion, and phsyics for moving in the animation
 class Particle {
   constructor(
     path,
@@ -68,7 +63,6 @@ class Particle {
   }
 
   update = (ctx) => {
-    // Update particle position/physics
     this.x += this.vx
     this.y += this.vy
     this.vx += (this.center - this.x) * 0.8 * this.ax
@@ -78,7 +72,6 @@ class Particle {
     this.vy = this.vy * this.friction * vXDiff
     this.angle += this.anglespin
 
-    // Draw onto canvas
     ctx.save()
     ctx.translate(Math.floor(this.x), Math.floor(this.y))
     ctx.rotate(this.angle)
@@ -88,18 +81,12 @@ class Particle {
       ctx.fillStyle = this.color
       ctx.fill(this.path)
     } else {
-      // If no image, we must be in matrix mode
-
-      // As letters descend down the screen, draw their ghosts
-      // progressively higher up leading to a cool parallax effect
       const heightMultipler = this.y / 100
 
-      // Draw the letter
       ctx.font = '14px Avenir Next LT Pro'
       ctx.fillStyle = 'rgba(12, 241, 12, 1)'
       ctx.fillText(this.randomLetter, 0, 0)
 
-      // Draw lower opacity ghosts behind the falling letter
       ctx.fillStyle = 'rgba(12, 241, 12, 0.3)'
       ctx.fillText(this.randomLetter, 0, -10 * heightMultipler)
       ctx.fillStyle = 'rgba(12, 241, 12, 0.1)'
@@ -145,8 +132,6 @@ export default class Confetti {
     this.particlesGenerated = 0
     this.onCompletion = onCompletion
 
-    // For matrix, generate columns by iterating over width with a
-    // COLUMN_SPACING step and then perturbing the values somewhat
     this.particleColumns = range(0, width, COLUMN_SPACING).map(
       (c) => c + Math.random() * COLUMN_SPACING - COLUMN_SPACING * 0.4
     )
@@ -173,9 +158,9 @@ export default class Confetti {
     const x = this.swing
       ? randomRange(0, this.width)
       : sample(this.particleColumns)
-    const y = -30 // Start the particle 30px above
-    const opacity = this.swing ? randomRange(0.3, 0.9) : randomRange(0.8, 1) // Range from 0.3 to 0.9
-    const size = this.swing ? ((opacity + 0.2) * 5) / 6 : 1 // range 0.5 to 1
+    const y = -30
+    const opacity = this.swing ? randomRange(0.3, 0.9) : randomRange(0.8, 1)
+    const size = this.swing ? ((opacity + 0.2) * 5) / 6 : 1
 
     const path = this.paths
       ? this.paths[randomInt(0, this.paths.length - 1)]
@@ -206,12 +191,10 @@ export default class Confetti {
   }
 
   animate = () => {
-    // Clear the previous screen
     this.context.clearRect(0, 0, this.width, this.height)
 
     const nP = this.particles.length
 
-    // If recycling, continously create particles so that the number of particles is close to the limit
     const particleCount = this.recycle
       ? this.particles.length
       : this.particlesGenerated
@@ -229,7 +212,6 @@ export default class Confetti {
     }
 
     const removeParticlesIdx = []
-    // Move each particle and remove if off the screen
     this.particles.forEach((p, i) => {
       p.update(this.context)
       if (
@@ -239,7 +221,6 @@ export default class Confetti {
         p.x < -100
       ) {
         if (this.recycle && particleCount <= this.limit) {
-          // a brand new particle replacing the dead one
           this.particles[i] = this.generateParticle()
         } else {
           removeParticlesIdx.push(i)
@@ -247,7 +228,6 @@ export default class Confetti {
       }
     })
 
-    // Remove all the particles at the same time after animation update
     for (let idx = 0; idx < removeParticlesIdx.length; idx += 1) {
       const particlesIndex =
         removeParticlesIdx[removeParticlesIdx.length - 1 - idx]

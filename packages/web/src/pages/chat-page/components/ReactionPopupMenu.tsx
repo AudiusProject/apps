@@ -92,9 +92,6 @@ export const ReactionPopupMenu = (props: ReactionPopupMenuProps) => {
     return () => document.removeEventListener('keydown', handleKeyDown, true)
   }, [isVisible, onClose])
 
-  // Flip side-to-side when possible. If both sides clip inside the nearest
-  // horizontal clipping container, place the popup below the trigger and scale
-  // it just enough to fit.
   useLayoutEffect(() => {
     if (!isVisible) return
 

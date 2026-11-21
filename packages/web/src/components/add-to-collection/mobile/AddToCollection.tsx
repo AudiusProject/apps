@@ -68,7 +68,6 @@ const AddToCollection = () => {
     }
   }, [isFetchingNextPage, hasNextPage, fetchNextPage])
 
-  // Close the page if the route was changed
   const handleClose = useCallback(() => {
     dispatch(close())
     dispatch(setVisibility({ modal: 'AddToCollection', visible: false }))
@@ -123,7 +122,6 @@ const AddToCollection = () => {
     handleClose
   ])
 
-  // Guard against null values
   if (!trackTitle) return null
 
   const cards = collections.map((collection) => (

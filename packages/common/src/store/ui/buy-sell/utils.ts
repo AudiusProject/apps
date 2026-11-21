@@ -1,8 +1,5 @@
 import { CoinInfo, CoinPair } from '~/store'
 
-/**
- * Normalizes token symbols by removing $ prefix if present
- */
 export const normalizeTokenSymbol = (symbol: string): string => {
   if (!symbol || typeof symbol !== 'string') {
     console.warn('normalizeTokenSymbol: Invalid symbol provided:', symbol)
@@ -11,9 +8,6 @@ export const normalizeTokenSymbol = (symbol: string): string => {
   return symbol.replace(/^\$/, '')
 }
 
-/**
- * Creates a fallback token pair for AUDIO/USDC when no pairs are available
- */
 export const createFallbackPair = (): CoinPair => ({
   baseToken: {
     symbol: 'AUDIO',
@@ -37,9 +31,6 @@ export const createFallbackPair = (): CoinPair => ({
   exchangeRate: null
 })
 
-/**
- * Creates a pair from two token symbols, with fallback if tokens are missing
- */
 export const createPairFromSymbols = (
   baseSymbol: string,
   quoteSymbol: string,
@@ -57,9 +48,6 @@ export const createPairFromSymbols = (
   }
 }
 
-/**
- * Efficiently finds a token by symbol, handling $ prefixes
- */
 export const findTokenBySymbol = (
   symbol: string,
   tokens: Record<string, CoinInfo>
@@ -72,22 +60,16 @@ export const findTokenBySymbol = (
     return null
   }
 
-  // Try exact match first
   if (tokens[symbol]) return tokens[symbol]
 
-  // Try normalized symbol
   const normalized = normalizeTokenSymbol(symbol)
   if (tokens[normalized]) return tokens[normalized]
 
-  // Try with $ prefix
   if (tokens[`$${normalized}`]) return tokens[`$${normalized}`]
 
   return null
 }
 
-/**
- * Finds a token by address
- */
 export const findTokenByAddress = (
   address: string,
   tokens: Record<string, CoinInfo>

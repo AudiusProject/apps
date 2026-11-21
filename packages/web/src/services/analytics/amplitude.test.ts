@@ -33,7 +33,6 @@ describe('amplitude', () => {
     window.localStorage.clear()
     vi.restoreAllMocks()
     vi.clearAllMocks()
-    // The test DOM reports itself as automated
     vi.spyOn(window.navigator, 'webdriver', 'get').mockReturnValue(false)
   })
 

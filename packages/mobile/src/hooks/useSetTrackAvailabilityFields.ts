@@ -17,8 +17,6 @@ type TrackAvailabilityField = {
   'field_visibility.remixes': boolean
 }
 
-// This hook allows us to set track availability fields during upload.
-// It has to be used with a Formik context because it uses formik's useField hook.
 export const useSetEntityAvailabilityFields = () => {
   const [{ value: entityType }] = useField('entityType')
   const [, , { setValue: setIsStreamGated }] =

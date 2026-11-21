@@ -39,17 +39,14 @@ const messages = {
 
 const tooltipContent = launchpadMessages.review.tooltips
 
-// Helper functions for market cap calculations
 const formatAudioAmount = (amount: number): string => {
   return `${formatCount(amount)} $AUDIO`
 }
 
 const calculateMarketCaps = (audioPriceUSD: number) => {
-  // Fixed AUDIO amounts as requested
-  const initialAudioAmount = 100000 // 100K AUDIO
-  const graduationAudioAmount = 1000000 // 1M AUDIO
+  const initialAudioAmount = 100000
+  const graduationAudioAmount = 1000000
 
-  // Calculate USD values based on current AUDIO price
   const initialMarketCapUSD = initialAudioAmount * audioPriceUSD
   const graduationMarketCapUSD = graduationAudioAmount * audioPriceUSD
 
@@ -65,7 +62,6 @@ const calculateMarketCaps = (audioPriceUSD: number) => {
   }
 }
 
-// Default fallback values for display when config is not available
 const defaultCoinDetails = {
   initialPrice: '~$0.0₄415',
   totalSupply: '1,000,000,000',
@@ -125,9 +121,7 @@ export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
   })
   const bannerPreviewUrl = defaultBannerImageUrl ?? null
 
-  // Calculate market caps with fixed AUDIO amounts and current AUDIO price
   const coinDetails = useMemo(() => {
-    // Get current AUDIO price, fall back to 0.0612 if not available
     const audioPriceUSD = audioCoinData?.price ?? 0.0612
 
     const marketCaps = calculateMarketCaps(audioPriceUSD)
@@ -317,7 +311,7 @@ export const ReviewPage = ({ onContinue, onBack }: PhasePageProps) => {
         cancelText={messages.back}
         backIcon
         onContinue={handleContinue}
-        isValid={values.termsAgreed} // Require checkbox to be checked before proceeding
+        isValid={values.termsAgreed}
         onBack={handleBack}
       />
     </>

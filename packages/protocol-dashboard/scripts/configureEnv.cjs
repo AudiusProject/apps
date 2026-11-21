@@ -9,7 +9,9 @@ if (process.argv.length < 3) {
 }
 const env = process.argv[2]
 if (!(env === 'stage' || env === 'prod' || env === 'dev')) {
-  console.error("Invalid environment arg. Please use 'stage', 'prod', or 'dev'.")
+  console.error(
+    "Invalid environment arg. Please use 'stage', 'prod', or 'dev'."
+  )
   process.exit(1)
 }
 
@@ -18,7 +20,9 @@ if (env === 'stage' || env === 'prod') {
   try {
     const ENV_FILE = `.env.${env}`
 
-    const parsedEnv = dotenv.config({ path: path.join(__dirname, '..', ENV_FILE) })
+    const parsedEnv = dotenv.config({
+      path: path.join(__dirname, '..', ENV_FILE)
+    })
 
     if (parsedEnv.error) {
       throw parsedEnv.error
@@ -33,7 +37,7 @@ if (env === 'stage' || env === 'prod') {
     console.log(`Protocol dashboard base path: ${VITE_DASHBOARD_BASE_URL}`)
 
     const configuredEnv = path.join(__dirname, '..', CONFIGURED_ENV_FILE)
-    fs.writeFile(configuredEnv, envString, err => {
+    fs.writeFile(configuredEnv, envString, (err) => {
       if (err) {
         console.error(err)
       }
@@ -77,15 +81,12 @@ if (env === 'stage' || env === 'prod') {
     const VITE_ETH_PROVIDER_URL = `http://${host}:8546`
     const VITE_ETH_TOKEN_ADDRESS = ethConfigFile.audiusTokenAddress
     const VITE_ETH_OWNER_WALLET = ethConfigFile.ownerWallet
-    // Chain id is 1337 for local eth ganache because we are ... leet
     const VITE_ETH_NETWORK_ID = 1337
 
     const VITE_CLAIMABLE_TOKEN_PROGRAM_ADDRESS =
       solConfigFile.claimableTokenAddress
-    const VITE_REWARDS_MANAGER_PROGRAM_ID =
-      solConfigFile.rewardsManagerAddress
-    const VITE_REWARDS_MANAGER_PROGRAM_PDA =
-      solConfigFile.rewardsManagerAccount
+    const VITE_REWARDS_MANAGER_PROGRAM_ID = solConfigFile.rewardsManagerAddress
+    const VITE_REWARDS_MANAGER_PROGRAM_PDA = solConfigFile.rewardsManagerAccount
     const VITE_REWARDS_MANAGER_TOKEN_PDA =
       solConfigFile.rewardsManagerTokenAccount
     const VITE_SOLANA_TOKEN_PROGRAM_ADDRESS =
@@ -138,18 +139,19 @@ if (env === 'stage' || env === 'prod') {
     VITE_IDENTITY_SERVICE_ENDPOINT=${VITE_IDENTITY_SERVICE_ENDPOINT}
     `
 
-    // Note .env.development.local takes precidence over .env.development
-    // https://facebook.github.io/create-react-app/docs/adding-custom-environment-variables
-    fs.writeFile(CONFIGURED_ENV_FILE, contents, err => {
+    fs.writeFile(CONFIGURED_ENV_FILE, contents, (err) => {
       if (err) {
         console.error(err)
       }
       console.log(`Successfully configured ${CONFIGURED_ENV_FILE}`)
     })
   } catch (e) {
-    console.error(`
+    console.error(
+      `
       Did not find configuration file.
       See https://github.com/AudiusProject/audius-e2e-tests to configure a local dev environment.
-    `, e)
+    `,
+      e
+    )
   }
 }

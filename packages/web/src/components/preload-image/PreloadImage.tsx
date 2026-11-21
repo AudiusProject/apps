@@ -6,7 +6,6 @@ import { preload } from 'utils/image'
 
 import styles from './PreloadImage.module.css'
 
-/** Super simple PreloadImage component to be used for fading in an image */
 const PreloadImage = ({
   src,
   alt = '',

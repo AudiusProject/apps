@@ -83,10 +83,6 @@ const CreateChatModal = () => {
       openInboxUnavailableModal({
         userId: user.user_id,
         presetMessage,
-        // Previously dispatched `searchUsersModalActions.searchUsers({ query: '' })`
-        // here to clear the search slice. Search query state is now per-component
-        // local state inside `SearchUsersModal`, so the explicit reset is no longer
-        // necessary — the modal will reset its own input when re-opened.
         onCancelAction: createChatModalActions.open(data)
       })
       onClose()
@@ -129,7 +125,6 @@ const CreateChatModal = () => {
                 ? {
                     isSelected: selectedUserIds.includes(user.user_id),
                     isSelecting: selectedUserIds.length > 0,
-                    // The current user takes one of the slots
                     isFull:
                       selectedUserIds.length >= MAX_GROUP_CHAT_MEMBERS - 1,
                     onToggle: handleToggleUser

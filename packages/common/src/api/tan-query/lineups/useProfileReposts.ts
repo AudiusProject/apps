@@ -54,7 +54,6 @@ export const useProfileReposts = (
       const sdk = await audiusSdk()
       if (!handle) return []
 
-      // If the @ is still at the beginning of the handle, trim it off
       const handleNoAt = handle.startsWith('@') ? handle.substring(1) : handle
       const { data: repostsSDKData } = await sdk.users.getRepostsByHandle({
         handle: handleNoAt,
@@ -65,7 +64,6 @@ export const useProfileReposts = (
 
       if (!repostsSDKData) return []
 
-      // Transform the reposts data and get just the items
       const reposts = transformAndCleanList(
         repostsSDKData,
         (activity) => repostActivityFromSDK(activity)?.item
@@ -90,7 +88,6 @@ export const useProfileReposts = (
         queryClient
       })
 
-      // Return only ids
       return reposts.map((t) =>
         'track_id' in t
           ? { id: t.track_id, type: EntityType.TRACK }

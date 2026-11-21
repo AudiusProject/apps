@@ -12,10 +12,6 @@ export type StorageNode = {
   delegateOwnerWallet: string
 }
 
-/**
- * Selects numNodes storage nodes from the given list of allNodes, optionally ordering them (descending) by rendezvous score.
- * @dev This makes the wallet lowercase - not suitable for use with CIDs because they're case sensitive (use RendezvousHash directly instead).
- */
 export const getNStorageNodes = async (
   allNodes: StorageNode[],
   numNodes = 0,
@@ -26,7 +22,6 @@ export const getNStorageNodes = async (
     if (numNodes === 0) numNodes = allNodes.length
     let sortedEndpoints: string[]
 
-    // Sort endpoints by rendezvous score if a rendezvous key is provided
     if (wallet?.length) {
       const endpoints = allNodes.map((n) => n.endpoint.toLowerCase())
       const hash = new RendezvousHash(...endpoints)
@@ -35,7 +30,6 @@ export const getNStorageNodes = async (
       sortedEndpoints = allNodes.map((n) => n.endpoint)
     }
 
-    // Check multiple nodes at a time for health until we have numNodes healthy nodes
     const healthyEndpoints: string[] = []
     for (let i = 0; i < sortedEndpoints.length; i += numNodes) {
       const batch = sortedEndpoints.slice(i, i + numNodes)

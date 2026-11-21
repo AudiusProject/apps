@@ -70,14 +70,10 @@ const useStyles = makeStyles(({ spacing }) => ({
   }
 }))
 
-/**
- * `CollectionScreen` displays the details of a collection
- */
 export const CollectionScreen = () => {
   const { params } = useRoute<'Collection'>()
   const navigation = useNavigation()
 
-  // params is incorrectly typed and can sometimes be undefined
   const {
     id = null,
     searchCollection,
@@ -86,8 +82,6 @@ export const CollectionScreen = () => {
     slug
   } = params ?? {}
 
-  // Use useCollectionByParams to handle both ID-based and permalink-based collection fetching.
-  // collectionType comes from linking (e.g. ?collectionType=playlist) and is required for permalinks.
   const collectionParams = id
     ? { collectionId: id }
     : { handle, slug, collectionType }
@@ -104,7 +98,6 @@ export const CollectionScreen = () => {
       ? collection._marked_deleted
       : false
 
-  // Navigate back if collection is deleted or marked for deletion
   useEffect(() => {
     if (isDeleted || isMarkedDeleted) {
       navigation.goBack()

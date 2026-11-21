@@ -148,7 +148,6 @@ export const ChatBlastModal = NiceModal.create(() => {
                   type='submit'
                   css={{ flexGrow: 1 }}
                   onClick={submitForm}
-                  // Empty default audience means there are no users in any audience
                   disabled={!!isSubmitting || !defaultAudience}
                 >
                   {messages.continue}

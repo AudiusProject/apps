@@ -64,60 +64,17 @@ const messages = {
   cancel: 'Cancel'
 }
 
-/**
- * - `updates` renders only host-authored top-level posts. Composer shown
- *   only to the host; composer exposes an Attach Video affordance.
- * - `comments` renders everything that *isn't* a host post-update
- *   (community comments + replies). Composer shown to public viewers and
- *   login-gated for signed-out users. No video attach — that's host-only.
- */
 export type ContestCommentsMode = 'updates' | 'comments'
 
 type ContestCommentsTileProps = {
   eventId: ID
   eventOwnerUserId: ID | undefined
   mode: ContestCommentsMode
-  /**
-   * Hide the top-of-Paper `COMMENTS (N)` / `UPDATES (N)` label. Used by the
-   * mobile Updates tab where the tab title already reads "Updates" — the
-   * inner card label would double up. Defaults to false (label shown).
-   */
   hideHeading?: boolean
-  /**
-   * Render only the feed (no composer / sign-in stub). Used on surfaces
-   * where a separate `PostUpdateComposer` already owns the compose
-   * affordance — e.g. desktop contest details, where the composer sits
-   * above About and the historical feed sits below Prizes. Defaults to
-   * false (composer rendered when the user is allowed to post).
-   */
   hideComposer?: boolean
-  /**
-   * When true, render nothing if there are no items to show AND the
-   * composer is hidden. Used by the desktop Updates section so an empty
-   * "Nothing here yet" card doesn't take up space below Prizes for
-   * non-hosts. Defaults to false (empty-state card always rendered).
-   */
   hideWhenEmpty?: boolean
 }
 
-/**
- * A tile-wrapped comments feed for a remix-contest event. Visually
- * mirrors the track-page `CommentPreview` so the contest page reads
- * like the rest of Audius: IconMessage + title header, elevated Paper
- * tile around a rich composer (avatar + ComposerInput + send button),
- * sort pills, and avatar-led comment rows with an Artist badge for the
- * event host.
- *
- * We don't route through `CommentSectionProvider` because that provider
- * is track-scoped (requires `useTrack`, `useGatedContentAccess`, a
- * lineup UID for `playTrack`, etc.). Events are a new entity type for
- * comments; rather than bend the track provider to pretend to have a
- * track, this component wires up the event-comment hooks directly and
- * composes a few of the same building blocks (ComposerInput, UserLink,
- * Timestamp). The visual vocabulary matches — that's what the user
- * sees — and the provider can be generalised later as coins/other
- * entities join comments.
- */
 export const ContestCommentsTile = ({
   eventId,
   eventOwnerUserId,
@@ -134,8 +91,6 @@ export const ContestCommentsTile = ({
     currentUserId === eventOwnerUserId
   const isLoggedIn = currentUserId !== null && currentUserId !== undefined
 
-  // Sort toggle lives on the Comments panel only. Updates is host-curated
-  // and always pinned to newest-first.
   const showSortTabs = mode === 'comments'
   const [sortMethod, setSortMethod] = useState<'top' | 'newest'>(
     mode === 'comments' ? 'top' : 'newest'
@@ -153,17 +108,8 @@ export const ContestCommentsTile = ({
 
   const heading =
     mode === 'updates' ? messages.updatesHeading : messages.commentsHeading
-  // In `comments` mode the host should NOT see the top-level composer —
-  // they participate via replies (and via the dedicated POST UPDATE
-  // composer for announcements). Public viewers see the top-level composer;
-  // signed-out viewers get the same account gate as Enter Contest.
-  // In `updates` mode only the host can compose top-level posts.
   const showComposer =
     !hideComposer && (mode === 'comments' ? !isEventOwner : isEventOwner)
-  // When `hideComposer` is set, the caller is rendering a feed-only
-  // tile alongside a separate composer (e.g. desktop details), so the
-  // "sign in to comment" stub would be a redundant CTA. Track separately
-  // from `showComposer` so the empty-feed treatment stays clean.
   const showSignInStub = !hideComposer
   const composerPlaceholder =
     mode === 'updates'
@@ -171,12 +117,9 @@ export const ContestCommentsTile = ({
       : messages.composePlaceholder
   const showAttachVideo = mode === 'updates'
 
-  // Composer local state. videoUrl is owner-only (Updates mode).
   const [videoUrl, setVideoUrl] = useState<string | undefined>()
   const [showAttachVideoModal, setShowAttachVideoModal] = useState(false)
 
-  // Incrementing messageId "clears" the ComposerInput after submit — the
-  // track page uses the same pattern.
   const [messageId, setMessageId] = useState(0)
 
   const handleComposerClick = useRequiresAccountCallback(
@@ -208,22 +151,11 @@ export const ContestCommentsTile = ({
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // `useEventComments` primes each comment into the React Query cache
-  // via `primeCommentData` when the page fetch resolves, so each
-  // `useComment(commentId)` hit would be synchronous. We use the same
-  // cache here at parent level to pre-filter feedItems by mode — that
-  // way the empty-state renders when a mixed feed contains no host
-  // post-updates (Updates mode) or is entirely host post-updates
-  // (Comments mode), instead of showing a blank Paper interior.
   const queryClient = useQueryClient()
   const allItems = feedItems ?? []
   const filteredItems = allItems.filter(({ commentId }) => {
     const comment = queryClient.getQueryData(getCommentQueryKey(commentId))
     if (!comment) {
-      // Cache miss (e.g. comment still loading) — keep the row; the
-      // per-row filter in ContestCommentRow will hide it once the
-      // author data arrives. This is rare because primeCommentData
-      // runs synchronously inside useEventComments' queryFn.
       return true
     }
     const parentCommentId = (comment as any).parentCommentId
@@ -234,9 +166,6 @@ export const ContestCommentsTile = ({
     return mode === 'updates' ? isPostUpdate : !isPostUpdate
   })
 
-  // hideWhenEmpty hides the entire card when there's nothing to show and
-  // the composer is also suppressed — keeps the desktop Updates rail
-  // from rendering an empty "Nothing here yet" tile for non-host viewers.
   if (
     hideWhenEmpty &&
     !isPending &&
@@ -461,16 +390,6 @@ type ContestCommentRowProps = {
   mode: ContestCommentsMode
 }
 
-/**
- * Row renderer. Visually mirrors the track-page `CommentBlock` — avatar
- * on the left, then the content column with user link + Artist badge
- * + relative timestamp, then the message body, optional video, and
- * placeholder reaction affordances.
- *
- * Mode-based filtering is applied here (not at the parent) because we
- * only know each comment's author + parentCommentId after the
- * `useComment` fetch resolves. Non-matching rows return null.
- */
 const ContestCommentRow = ({
   commentId,
   eventId,
@@ -504,7 +423,6 @@ const ContestCommentRow = ({
     comment.userId === eventOwnerUserId &&
     !parentCommentId
 
-  // Client-side mode filter. See parent comment re: placement.
   if (mode === 'updates' && !isPostUpdate) return null
   if (mode === 'comments' && isPostUpdate) return null
 
@@ -516,10 +434,7 @@ const ContestCommentRow = ({
     currentUserId === eventOwnerUserId
   const isCurrentUserAuthor =
     currentUserId !== null && comment.userId === currentUserId
-  // Host moderates the contest; authors can delete their own comments.
   const canDelete = isCurrentUserHost || isCurrentUserAuthor
-  // Replies are allowed on regular comments only; nobody can reply to
-  // an artist's contest update (those are announcements, not threads).
   const canReply = currentUserId !== null && !isPostUpdate
 
   const videoUrl: string | undefined =
@@ -532,14 +447,7 @@ const ContestCommentRow = ({
 
   const handleDelete = () => {
     if (!currentUserId) return
-    // useDeleteComment's optimistic update is hard-coded against the
-    // *track* comment list cache. For event comments we have to scrub
-    // the comment from the eventComments cache ourselves so the row
-    // disappears immediately instead of reappearing until the next
-    // refetch (the bug the contest QA pass flagged: "deleting a
-    // comment makes it reappear immediately").
     if (parentCommentId) {
-      // Reply: drop from the parent comment's nested replies array.
       queryClient.setQueryData(getCommentQueryKey(parentCommentId), (prev) => {
         if (!prev) return prev
         const parent = prev as any
@@ -552,8 +460,6 @@ const ContestCommentRow = ({
         }
       })
     } else {
-      // Top-level: remove the row from every cached sort variant of the
-      // event comments feed.
       queryClient.setQueriesData<any>(
         { queryKey: [QUERY_KEYS.eventComments, eventId] },
         (prevData: any) => {
@@ -565,8 +471,6 @@ const ContestCommentRow = ({
           return next
         }
       )
-      // Drop the per-comment cache entry too so any stragglers re-fetch
-      // fresh data on next render.
       queryClient.removeQueries({
         queryKey: getCommentQueryKey(commentId),
         exact: true
@@ -576,9 +480,6 @@ const ContestCommentRow = ({
     deleteComment({
       commentId,
       userId: currentUserId,
-      // `useDeleteComment` is track-typed; the mutation passes the
-      // entityId through to the SDK regardless. Pass `eventId` so cache
-      // helpers don't choke on undefined.
       trackId: eventId,
       currentSort: undefined,
       parentCommentId
@@ -776,13 +677,6 @@ type ContestCommentReplyRowProps = {
   parentCommentId: ID
 }
 
-/**
- * Nested reply row. Lighter than ContestCommentRow — replies don't get
- * their own reply affordance (single-level threading), don't show the
- * Updates / Comments mode filter (already constrained by the parent),
- * and only carry like + delete affordances. Rendered inside
- * `ContestCommentRow`'s replies list.
- */
 const ContestCommentReplyRow = ({
   reply,
   eventId,
@@ -812,9 +706,6 @@ const ContestCommentReplyRow = ({
 
   const handleDelete = () => {
     if (!currentUserId) return
-    // Optimistic: drop this reply from the parent's replies array. The
-    // mutation's own onMutate handler is track-typed so we own the cache
-    // cleanup here for events.
     queryClient.setQueryData(getCommentQueryKey(parentCommentId), (prev) => {
       if (!prev) return prev
       const parent = prev as any
@@ -920,10 +811,6 @@ type UserAvatarProps = {
   userId: ID
 }
 
-/**
- * Small 40x40 avatar disc backed by the user's profile picture.
- * Mirrors what `CommentBlock` uses for the leading avatar column.
- */
 const UserAvatar = ({ userId }: UserAvatarProps) => {
   const src = useProfilePicture({
     userId,

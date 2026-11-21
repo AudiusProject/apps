@@ -27,8 +27,6 @@ const pluralize = (count: number, noun: string) =>
 
 export const weeklyArtistRecapNotificationMessages = {
   title: 'Your Week on Audius',
-  // e.g. "1,240 plays, 18 new followers, top city Atlanta, 42 saves". Zero
-  // followers or saves and a missing city are left out. Same as the push.
   body: ({
     playCount,
     followerCount,
@@ -56,7 +54,6 @@ export const weeklyArtistRecapNotificationMessages = {
 
 export const trendingGenreNotificationMessages = {
   title: (genre: string) => `Charting in ${genre}`,
-  // e.g. "[track] is #4 in Dubstep this week!"
   is: 'is',
   inGenre: (rank: number, genre: string) => `#${rank} in ${genre} this week!`,
   xShareText: (title: string, rank: number, genre: string) =>

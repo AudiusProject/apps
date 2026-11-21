@@ -17,11 +17,9 @@ import {
 } from '../../search-screen/searchState'
 
 export const SearchInput = () => {
-  // Get state from context
   const [query, setQuery] = useSearchQuery()
   const [autoFocus] = useSearchAutoFocus()
 
-  // Handlers
   const handleClearSearch = useCallback(() => {
     setQuery('')
   }, [setQuery])

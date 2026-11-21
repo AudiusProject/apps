@@ -38,8 +38,6 @@ import watchCollectionErrors from './errorSagas'
 const { addLocalCollection, removeLocalCollection } = libraryPageActions
 const { collectionPage } = route
 
-/* REPOST COLLECTION */
-
 export function* watchRepostCollection() {
   yield* takeEvery(socialActions.REPOST_COLLECTION, repostCollectionAsync)
 }
@@ -59,7 +57,6 @@ export function* repostCollectionAsync(
     return
   }
 
-  // increment the repost count on the user
   const user = yield* queryUser(userId)
   if (!user) return
 
@@ -89,10 +86,7 @@ export function* repostCollectionAsync(
   yield* put(event)
 
   const repostMetadata = action.isFeed
-    ? // If we're on the feed, and someone i follow has
-      // reposted the content i am reposting,
-      // is_repost_of_repost is true
-      { is_repost_of_repost: collection.followee_reposts.length !== 0 }
+    ? { is_repost_of_repost: collection.followee_reposts.length !== 0 }
     : { is_repost_of_repost: false }
   yield* put(
     addLocalCollection({
@@ -148,7 +142,6 @@ export function* confirmRepostCollection(
       function* () {},
       // @ts-ignore: remove when confirmer is typed
       function* ({ timeout, message }: { timeout: boolean; message: string }) {
-        // Revert the incremented repost count
         queryClient.setQueryData(getUserQueryKey(user.user_id), (prevUser) =>
           !prevUser
             ? undefined
@@ -190,7 +183,6 @@ export function* undoRepostCollectionAsync(
     return
   }
 
-  // decrement the repost count on the user
   const user = yield* queryUser(userId)
   if (!user) return
 
@@ -263,7 +255,6 @@ export function* confirmUndoRepostCollection(
       function* () {},
       // @ts-ignore: remove when confirmer is typed
       function* ({ timeout, message }: { timeout: boolean; message: string }) {
-        // Revert the decrement
         queryClient.setQueryData(getUserQueryKey(user.user_id), (prevUser) =>
           !prevUser
             ? undefined
@@ -282,8 +273,6 @@ export function* confirmUndoRepostCollection(
     )
   )
 }
-
-/* SAVE COLLECTION */
 
 export function* watchSaveCollection() {
   yield* takeEvery(
@@ -325,9 +314,7 @@ export function* saveCollectionAsync(
   yield* put(event)
 
   const saveMetadata = action.isFeed
-    ? // If we're on the feed, and the content
-      // being saved is a repost
-      { is_save_of_repost: collection.followee_reposts.length !== 0 }
+    ? { is_save_of_repost: collection.followee_reposts.length !== 0 }
     : { is_save_of_repost: false }
   yield* call(
     confirmSaveCollection,
@@ -337,10 +324,6 @@ export function* saveCollectionAsync(
   )
 
   if (!collection.is_album) {
-    // Optimistically clear the "has updates" badge for this playlist —
-    // saving a playlist counts as viewing it. Replaces the legacy
-    // `updatedPlaylistViewed` action; the mutation hook still drives the
-    // SDK call from the user-facing nav/page click handlers.
     const queryClient = yield* getContext('queryClient')
     const userId = yield* call(queryCurrentUserId)
     queryClient.setQueryData(

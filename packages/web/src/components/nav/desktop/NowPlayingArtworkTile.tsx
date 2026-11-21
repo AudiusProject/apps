@@ -92,10 +92,6 @@ export const NowPlayingArtworkTile = ({
   const trackVisibilityChanged = prevIsTrackVisible.current !== isTrackVisible
   prevIsTrackVisible.current = isTrackVisible
 
-  // `from` seeds the spring on mount. If the track is already playing when this
-  // component mounts (e.g. sidebar toggled), start at the visible state so there
-  // is no flash. `from` is ignored on subsequent renders — the spring continues
-  // from its current animated value.
   const slideInProps = useSpring({
     from: {
       opacity: isTrackVisible ? 1 : 0,

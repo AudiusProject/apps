@@ -24,14 +24,6 @@ export const getSuggestedFollowsQueryKey = ({
 }: UseSuggestedFollowsArgs & { userId: ID | null | undefined }) =>
   [QUERY_KEYS.suggestedFollows, userId, { limit }] as unknown as QueryKey<ID[]>
 
-/**
- * Artists to suggest the current user follow, derived from the tracks and
- * albums they have favorited or reposted but whose artist they don't already
- * follow.
- *
- * Returns an empty array for users with no favorites or reposts. See
- * `useFollowSuggestions` for the fallback to featured artists.
- */
 export const useSuggestedFollows = (
   { limit = DEFAULT_LIMIT }: UseSuggestedFollowsArgs = {},
   options?: QueryOptions

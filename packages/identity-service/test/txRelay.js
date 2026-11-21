@@ -8,7 +8,6 @@ const { Lock } = require('../src/redis')
 describe('test txRelay: selectWallet()', async () => {
   let relayerWallets, selectWallet
   beforeEach(async () => {
-    // reload the module each time for fresh state
     delete require.cache[require.resolve('../src/relay/txRelay')]
     delete require.cache[require.resolve('../src/web3')]
 
@@ -29,7 +28,6 @@ describe('test txRelay: selectWallet()', async () => {
   })
 
   afterEach(async () => {
-    // reload the module each time for fresh state
     delete require.cache[require.resolve('../src/relay/txRelay')]
     delete require.cache[require.resolve('../src/web3')]
     sinon.restore()

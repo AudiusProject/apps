@@ -9,11 +9,9 @@ const ethTxRelay = require('../relay/ethTxRelay')
 const crypto = require('crypto')
 
 module.exports = function (app) {
-  // Relay operations to main ethereum chain
   app.post('/eth_relay', async (req, res, next) => {
     const body = req.body
     if (body && body.contractAddress && body.senderAddress && body.encodedABI) {
-      // send tx
       const reqBodySHA = crypto
         .createHash('sha256')
         .update(JSON.stringify(req.body))
@@ -53,7 +51,6 @@ module.exports = function (app) {
     }
   })
 
-  // Query which returns public key of associated relayer wallet for a given address
   app.get(
     '/eth_relayer',
     handleResponse(async (req, res, next) => {

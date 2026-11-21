@@ -80,11 +80,8 @@ const DISCOVERY_COVER_HEIGHT = 96
 
 const fanClubCardMessages = walletMessages.fanClubs
 
-// Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
-// Below this threshold is considered "dust" and not worth claiming due to transaction fees
 const MIN_CLAIMABLE_FEES = 1_000_000
 
-// Helper function to detect platform from URL
 const detectPlatform = (
   url: string
 ): 'x' | 'instagram' | 'tiktok' | 'website' => {
@@ -103,7 +100,6 @@ const detectPlatform = (
   return 'website'
 }
 
-// Get platform icon
 const getPlatformIcon = (platform: string) => {
   switch (platform) {
     case 'x':
@@ -379,7 +375,6 @@ const formatBalance = (balance: number, coinDecimals: number) => {
   )
 }
 
-/** Body-sized metric value; Harmony `body` default weight is medium — use regular for data. */
 const OnchainMetricValue = ({ children }: { children: ReactNode }) => {
   const theme = useTheme()
   return (
@@ -418,7 +413,6 @@ const OnchainMetricCell = ({
   </Flex>
 )
 
-/** One metric per row, full width, left-aligned. */
 const OnchainMetricBlock = ({ children }: { children: ReactNode }) => (
   <Box w='100%' css={{ alignSelf: 'stretch' }}>
     {children}
@@ -574,7 +568,6 @@ export const FanClubInfoSection = ({
 
   const isManagerMode = useIsManagedAccount()
 
-  // Claim fee hook
   const { mutate: claimFees, isPending: isClaimFeesPending } = useClaimFees({
     onSuccess: (data) => {
       toast(toastMessages.feesClaimed)
@@ -603,7 +596,6 @@ export const FanClubInfoSection = ({
     }
   })
 
-  // Claim vested coins hook
   const { mutate: claimVestedCoins, isPending: isClaimVestedCoinsPending } =
     useClaimVestedCoins({
       onSuccess: (data) => {
@@ -673,8 +665,6 @@ export const FanClubInfoSection = ({
     dispatch(push(UPLOAD_PAGE))
   }, [dispatch])
 
-  // In some cases a custom-made coin will not have a dbc, so we should use the escrow recipient instead.
-  // It's possible to transfer the recipient however, so this isn't a perfect solution.
   const coinCreatorWalletAddress =
     !!coin?.dynamicBondingCurve?.creatorWalletAddress &&
     coin?.dynamicBondingCurve?.creatorWalletAddress !== ''
@@ -697,12 +687,10 @@ export const FanClubInfoSection = ({
       const connectedAddress = solanaAccount?.address
 
       if (!coinCreatorWalletAddress) {
-        // If we hit this block the user has not launched the coin
         toast(toastMessages.feesClaimFailed)
         return
       }
       if (!connectedAddress || connectedAddress !== coinCreatorWalletAddress) {
-        // If we hit this block the user has not connected the wallet they used to launch the coin
         toast(toastMessages.incorrectWalletLinked)
         return
       }
@@ -714,7 +702,6 @@ export const FanClubInfoSection = ({
     const solanaAccount = appkitModal.getAccount('solana')
     const connectedAddress = solanaAccount?.address
 
-    // Track the click event
     record(
       make(Name.LAUNCHPAD_CLAIM_FEES_CLICKED, {
         walletAddress: connectedAddress ?? coinCreatorWalletAddress ?? '',
@@ -723,7 +710,6 @@ export const FanClubInfoSection = ({
       })
     )
 
-    // appkit wallet is not connected, need to prompt connect flow first
     if (!connectedAddress) {
       record(
         make(Name.LAUNCHPAD_CLAIM_FEES_CONNECT_WALLET, {
@@ -733,8 +719,6 @@ export const FanClubInfoSection = ({
       )
       openAppKitModalForFees('solana')
     } else if (connectedAddress !== coinCreatorWalletAddress) {
-      // If we hit this block the user has not connected the wallet they used to launch the coin
-      // Disconnect the current Solana wallet to allow connecting a different one
       record(
         make(Name.LAUNCHPAD_CLAIM_FEES_SWITCH_WALLET, {
           currentWalletAddress: connectedAddress,
@@ -746,8 +730,6 @@ export const FanClubInfoSection = ({
       await appkitModal.disconnect('solana')
       openAppKitModalForFees('solana')
     } else {
-      // appkit wallet is connected with the correct address,
-      // can just initiate claim fees flow immediately
       record(
         make(Name.LAUNCHPAD_CLAIM_FEES_WALLET_CONNECTED, {
           walletAddress: connectedAddress,
@@ -782,7 +764,6 @@ export const FanClubInfoSection = ({
       const solanaAccount = appkitModal.getAccount('solana')
       const connectedAddress = solanaAccount?.address
       if (connectedAddress) {
-        // Pass the rewards pool percentage to the claim function
         handleClaimVestedCoins(connectedAddress, rewardsPoolPercentage)
       }
     },
@@ -822,7 +803,6 @@ export const FanClubInfoSection = ({
       })
     )
 
-    // appkit wallet is not connected, need to prompt connect flow first
     if (!connectedAddress) {
       record(
         make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_CONNECT_WALLET, {
@@ -832,7 +812,6 @@ export const FanClubInfoSection = ({
       )
       openAppKitModalForVestedCoins('solana')
     } else if (connectedAddress !== coinCreatorWalletAddress) {
-      // Disconnect the current Solana wallet to allow connecting a different one
       record(
         make(Name.LAUNCHPAD_CLAIM_VESTED_COINS_SWITCH_WALLET, {
           currentWalletAddress: connectedAddress,
@@ -851,7 +830,6 @@ export const FanClubInfoSection = ({
           mintAddress: mint
         })
       )
-      // Open the modal to let user choose allocation
       openClaimVestedCoinsModal({
         ticker: coin?.ticker ?? '',
         isOpen: true,
@@ -871,7 +849,6 @@ export const FanClubInfoSection = ({
     handleConfirmClaim
   ])
 
-  // Get vesting information from the coin's dynamic bonding curve data
   const hasGraduated = coin?.dynamicBondingCurve?.isMigrated ?? false
 
   const isClaimVestedCoinsDisabled =

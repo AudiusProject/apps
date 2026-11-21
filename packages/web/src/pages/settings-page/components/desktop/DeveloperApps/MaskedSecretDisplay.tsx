@@ -31,7 +31,6 @@ type MaskedSecretDisplayProps = {
   copyLabel: string
   revealLabel: string
   hideLabel: string
-  /** Optional extra actions to render (e.g. delete button) */
   extraActions?: React.ReactNode
   dividerClassName?: string
 }

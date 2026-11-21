@@ -43,9 +43,6 @@ const CollapsibleSectionList = <ItemT,>(
   const { neutral, staticWhite } = useThemeColors()
   const scrollY = useCurrentTabScrollY()
 
-  // Tabs.SectionList overrides onScroll with its own Reanimated handler,
-  // which prevents VirtualizedList's internal onEndReached from firing.
-  // We synthesize onEndReached by watching the Reanimated scroll value.
   const contentHeight = useSharedValue(0)
   const layoutHeight = useSharedValue(0)
   const onEndReachedRef = useRef(onEndReached)
@@ -166,7 +163,6 @@ const AnimatedSectionList = forwardRef(function AnimatedSectionList<
             />
           )
         }
-        // Have to cast here because Animated version doesn't type getScrollResponder
         ref={ref as Ref<Animated.SectionList<ItemT, SectionT>>}
         onScroll={handleScroll}
         onScrollBeginDrag={onScrollBeginDrag}

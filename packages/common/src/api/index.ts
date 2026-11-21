@@ -1,11 +1,8 @@
-// TanStack Query Hooks
 export * from './tan-query/queryKeys'
 export * from './tan-query/types'
 
-// Comments
 export * from './tan-query/comments'
 
-// Collection
 export * from './tan-query/collection/useCollection'
 export * from './tan-query/collection/useCollections'
 export * from './tan-query/collection/useCollectionByPermalink'
@@ -18,7 +15,6 @@ export * from './tan-query/collection/useLibraryCollections'
 export * from './tan-query/collection/useCollectionByParams'
 export * from './tan-query/collection/useDeleteCollection'
 
-// Developer Apps
 export * from '../schemas/developerApps'
 export * from './tan-query/developer-apps/useDeveloperApps'
 export * from './tan-query/developer-apps/useAddDeveloperApp'
@@ -27,19 +23,15 @@ export * from './tan-query/developer-apps/useDeleteDeveloperApp'
 export * from './tan-query/developer-apps/useDeactivateDeveloperAppAccessKey'
 export * from './tan-query/developer-apps/useCreateDeveloperAppAccessKey'
 
-// Events
 export * from './tan-query/events'
 
-// Explore
 export * from './tan-query/collection/useExploreContent'
 export * from './tan-query/collection/useTrendingAlbums'
 export * from './tan-query/collection/useNewAlbumReleases'
 export * from './tan-query/collection/useBestSellingAlbums'
 
-// Feed preferences (UI state, persisted)
 export * from './tan-query/feed/useFeedPreferences'
 
-// Lineups
 export * from './tan-query/lineups/useFeed'
 export * from './tan-query/lineups/useForYouFeed'
 export * from './tan-query/lineups/useExclusiveTracks'
@@ -53,14 +45,12 @@ export * from './tan-query/lineups/useWeeklyRotation'
 export * from './tan-query/lineups/useTrendingWinners'
 export * from './tan-query/lineups/useTrackPageLineup'
 
-// Notifications
 export * from './tan-query/notifications/useMarkNotificationsAsViewed'
 export * from './tan-query/notifications/useNotifications'
 export * from './tan-query/notifications/useNotificationEntities'
 export * from './tan-query/notifications/useNotificationEntity'
 export * from './tan-query/notifications/useNotificationUnreadCount'
 
-// Purchases
 export * from './tan-query/purchases/useAudioTransactions'
 export * from './tan-query/purchases/useUSDCTransactions'
 export * from './tan-query/purchases/useUSDCTransactionsCount'
@@ -73,23 +63,19 @@ export * from './tan-query/purchases/usePurchasers'
 export * from './tan-query/purchases/usePurchasersCount'
 export * from './tan-query/purchases/useSalesAggregate'
 
-// Reactions
 export * from './tan-query/reactions/types'
 
-// Remixes
 export * from './tan-query/remixes/useRemixesLineup'
 export * from './tan-query/remixes/useRemixers'
 export * from './tan-query/remixes/useRemixersCount'
 export * from './tan-query/remixes/useRemixes'
 
-// Search
 export * from './tan-query/search/useSearchAutocomplete'
 export * from './tan-query/search/useSearchResults'
 export * from './tan-query/search/useTopTags'
 export * from './tan-query/search/useGenreSuggestions'
 export * from './tan-query/search/usePopularGenres'
 
-// Tracks
 export * from './tan-query/tracks/useDeleteTrack'
 export * from './tan-query/tracks/useDownloadTrackStems'
 export * from './tan-query/tracks/useTrackDownloadCounts'
@@ -121,7 +107,6 @@ export * from './tan-query/tracks/useFeelingLuckyTrack'
 export * from './tan-query/tracks/useRecentlyPlayedTracks'
 export * from './tan-query/tracks/useRecentlyCommentedTracks'
 
-// Users
 export * from './tan-query/users/useUpdateProfile'
 export * from './tan-query/users/useUpdateUser'
 export * from './tan-query/users/useFeaturedProfiles'
@@ -149,19 +134,15 @@ export * from './tan-query/users/useListenerCities'
 export * from './tan-query/users/useProfileUser'
 export * from './tan-query/users/useOtherChatUsers'
 
-// Account
 export * from './tan-query/users/account/useResetPassword'
 export * from './tan-query/users/account/useResendRecoveryEmail'
 export * from './tan-query/users/account/useCurrentUserEmail'
 
-// Playlist updates
 export * from './tan-query/playlist-updates/usePlaylistUpdates'
 export * from './tan-query/playlist-updates/useMarkPlaylistAsViewed'
 
-// Search users modal
 export * from './tan-query/search-users-modal/useSearchUsersModal'
 
-// Artist Dashboard
 export * from './tan-query/dashboard/useArtistDashboardListenData'
 export * from './tan-query/users/account/useManagedAccounts'
 export * from './tan-query/users/account/useManagers'
@@ -182,7 +163,6 @@ export * from './tan-query/users/account/useWalletAddresses'
 export * from './tan-query/users/account/useAccountStatus'
 export * from './tan-query/users/account/useSyncLocalStorageUser'
 
-// Wallet logic
 export * from './tan-query/wallets/useAudioBalance'
 export * from './tan-query/wallets/useAssociatedWallets'
 export * from './tan-query/wallets/useWalletOwner'
@@ -201,18 +181,14 @@ export * from './tan-query/jupiter/useCoinExchangeRate'
 export * from './tan-query/jupiter/utils'
 export * from './tan-query/jupiter/types'
 
-// Saga fetch utils, remove when migration is complete
 export * from './tan-query/saga-utils'
 export * from './tan-query/utils'
 
-// New authorized-apps exports
 export * from './tan-query/authorized-apps/useAuthorizedApps'
 export * from './tan-query/authorized-apps/useRemoveAuthorizedApp'
 
-// Coins
 export * from './tan-query/coins'
 
-// Uploads
 export * from './tan-query/upload/useUpload'
 export * from './tan-query/upload/useUploadFiles'
 export * from './tan-query/upload/usePublishTracks'

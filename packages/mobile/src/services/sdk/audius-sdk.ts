@@ -19,8 +19,6 @@ let sdkInstance: AudiusSdkWithServices
 const initSdk = async () => {
   inProgress = true
 
-  // For now, the only solana relay we want to use is on DN 1, so hardcode
-  // the selection there.
   const solanaRelay = new SolanaRelay(
     new Configuration({
       basePath: '/solana',
@@ -39,7 +37,6 @@ const initSdk = async () => {
     })
   )
 
-  // Overrides some DN configuration from optimizely
   const audiusWalletClient = await getAudiusWalletClient()
 
   const audiusSdk = createSdkWithServices({

@@ -10,10 +10,6 @@ const initialState: {
   dominantColors: {}
 }
 
-/**
- * This slice tracks computed average colors and dominant colors for a given track art CID.
- * Colors is a map of art cid -> Color
- */
 const slice = createSlice({
   name: 'ui/averageColor',
   initialState,

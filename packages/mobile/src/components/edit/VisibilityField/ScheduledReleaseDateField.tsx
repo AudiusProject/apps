@@ -60,7 +60,7 @@ export const ScheduledReleaseDateField = (
                 nextWeek: 'dddd',
                 lastDay: '[Yesterday]',
                 lastWeek: '[Last] dddd',
-                sameElse: 'M/D/YY' // This is where you format dates that don't fit in the above categories
+                sameElse: 'M/D/YY'
               })
             }
             inputProps={{

@@ -365,8 +365,6 @@ export type SenderAttestation = {
 export type VerifiedMessage = {
   senderEthAddress: string
   attestation: Attestation
-  // Hint to make types not complain when adding empty padding for
-  // the array of verified messages in the account data.
   _: Uint8Array
   operator: string
 }

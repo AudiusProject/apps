@@ -29,7 +29,6 @@ export const prepareSplits = async ({
   logger.debug(
     `Splitting the extra ${extraAmount} between ${userSplitCount} user(s)...`
   )
-  // Convert splits to big int and spread extra amount to every split
   let amountSplits = userSplits.map((split, index) => {
     const amountToAdd = extraAmount / BigInt(userSplitCount - index)
     extraAmount = USDC(extraAmount - amountToAdd).value
@@ -38,7 +37,6 @@ export const prepareSplits = async ({
       amount: BigInt(split.amount) + amountToAdd
     }
   })
-  // Add network split if it exists
   amountSplits = amountSplits.concat(
     networkSplit.map((split) => ({
       ...split,
@@ -49,7 +47,6 @@ export const prepareSplits = async ({
     logger.debug('Calculated splits after extra amount:', amountSplits)
   }
 
-  // Check for user banks as needed
   amountSplits = await Promise.all(
     amountSplits.map(async (split) => {
       if (!split.payoutWallet && split.ethWallet) {

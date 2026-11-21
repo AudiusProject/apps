@@ -3,9 +3,7 @@ import { OverflowAction, OverflowActionCallbacks } from '@audius/common/store'
 import ActionSheetModal from 'components/action-drawer/ActionDrawer'
 
 type MobileOverflowModalProps = {
-  // Actions to show in the modal
   actions: OverflowAction[]
-  // Extra callbacks to fire after a row/action is selected
   callbacks?: OverflowActionCallbacks
   isOpen: boolean
   onClose: () => void
@@ -58,8 +56,6 @@ const rowMessageMap = {
   [OverflowAction.PURCHASE_TRACK]: 'Purchase Track'
 }
 
-// A modal for displaying overflow options on mobile.
-// Configurable by passing in an array of `OverflowActions`.
 const MobileOverflowModal = ({
   actions,
   callbacks,
@@ -82,7 +78,6 @@ const MobileOverflowModal = ({
   onUnfollow,
   onPurchase
 }: MobileOverflowModalProps) => {
-  // Mapping from rows to prop callbacks.
   const rowCallbacks = {
     [OverflowAction.REPOST]: onRepost,
     [OverflowAction.UNREPOST]: onUnrepost,
@@ -106,8 +101,6 @@ const MobileOverflowModal = ({
     [OverflowAction.FOLLOW]: onFollow,
     [OverflowAction.UNFOLLOW]: onUnfollow,
     [OverflowAction.PURCHASE_TRACK]: onPurchase,
-    // These are implement in native mobile,
-    // but not mobile web
     [OverflowAction.REMOVE_FROM_PLAYLIST]: () => {},
     [OverflowAction.EDIT_TRACK]: () => {},
     [OverflowAction.RELEASE_NOW]: () => {},
@@ -122,8 +115,6 @@ const MobileOverflowModal = ({
     if (callbacks && callbacks[action]) {
       callbacks[action]!()
     }
-    // Eventually: will need some special casing for onAddToCollection, which returns
-    // a function accepting playlistId
     callback()
     onClose()
   }

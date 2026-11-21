@@ -21,7 +21,6 @@ module.exports = {
   settings: {
     'import/external-module-folders': ['node_modules', 'web'],
     'import/resolver': {
-      // NOTE: sk - These aliases are required for the import/order rule.
       alias: {
         map: [
           ['app', './src'],

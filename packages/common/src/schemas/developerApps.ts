@@ -29,9 +29,7 @@ export type DeveloperApp = {
   apiKey: string
   apiSecret?: string
   bearerToken?: string
-  /** Bearer tokens from API when fetched with include=metrics */
   api_access_keys?: ApiAccessKey[]
-  /** Pre-registered OAuth redirect/callback URIs */
   redirectUris?: string[]
 }
 

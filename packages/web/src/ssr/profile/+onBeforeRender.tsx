@@ -1,6 +1,5 @@
 import type { PageContextServer } from 'vike/types'
 
-// Simple helper to get API URL without importing services/env which pulls in SDK dependencies
 const getApiUrl = () => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {
@@ -29,7 +28,6 @@ export async function onBeforeRender(pageContext: PageContextServer) {
     if (raw == null) {
       throw new Error(`No user found for handle: ${handle}`)
     }
-    // Handle endpoint returns a single user object; other user routes may return an array
     const user = Array.isArray(raw) ? raw[0] : raw
     if (!user || typeof user !== 'object') {
       throw new Error(`No user found for handle: ${handle}`)

@@ -37,17 +37,14 @@ export class RetryPolicy {
         lastError = error instanceof Error ? error : new Error(String(error))
         attemptNumber++
 
-        // Don't retry on the last attempt
         if (attemptNumber > this.config.maxRetries) {
           break
         }
 
-        // Notify about retry attempt
         if (onRetry) {
           await onRetry(attemptNumber)
         }
 
-        // Wait 2 seconds before retrying
         await this.delay(this.config.delayMs)
       }
     }
@@ -65,5 +62,4 @@ export class RetryPolicy {
   }
 }
 
-// Standard retry policy
 export const STANDARD_RETRY_POLICY = new RetryPolicy(3)

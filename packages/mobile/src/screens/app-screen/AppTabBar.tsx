@@ -23,22 +23,12 @@ export const AppTabBar = (props: TabBarProps) => {
   const insets = useSafeAreaInsets()
   const hidden = useTabBarHiddenProgress()
   const floating = useFloatingTabBar()
-  // Set handlers for the NowPlayingDrawer and BottomTabBar
-  // When the drawer is open, the bottom bar should hide (animated away).
-  // When the drawer is closed, the bottom bar should reappear (animated in).
-  // useRef's initializer arg is re-evaluated on every render even though the
-  // value is thrown away — use lazy init to avoid allocating a discarded
-  // Animated.Value on each re-render.
   const translationAnimRef = useRef<Animated.Value | null>(null)
   if (translationAnimRef.current === null) {
     translationAnimRef.current = new Animated.Value(FULL_DRAWER_HEIGHT)
   }
   const translationAnim = translationAnimRef.current
 
-  // Drop the classic bar past the bottom edge as the chrome hides, clearing
-  // the safe area so no sliver is left over the home indicator. Layered over
-  // the drawer's own translation rather than folded into it. The floating bar
-  // stays and collapses in place instead.
   const hideStyle = useAnimatedStyle(
     () => ({
       transform: [
@@ -69,14 +59,10 @@ export const AppTabBar = (props: TabBarProps) => {
 
 const styles = StyleSheet.create({
   bar: {
-    // Out of flow so screens are full height and content scrolls behind the
-    // bar. Screens clear it with `BottomChin`.
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    // The wrapper is a new stacking context, so restate the bar's z-order to
-    // keep it above the now-playing drawer.
     zIndex: 4,
     elevation: 4
   }

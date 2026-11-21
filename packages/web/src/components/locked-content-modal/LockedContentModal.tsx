@@ -66,7 +66,6 @@ export const LockedContentModal = NiceModal.create(() => {
             <LockedContentDetailsTile metadata={track} owner={owner} />
             <GatedContentSection
               isLoading={false}
-              // TODO: album support?
               contentId={track.track_id}
               contentType={PurchaseableContentType.TRACK}
               streamConditions={track.stream_conditions}

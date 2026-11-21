@@ -69,12 +69,10 @@ const CheckPage = () => {
   const onComplete = useCallback(() => {
     wasSuccessful.current = true
     if (isInWebView.current) {
-      // In WebView, send message instead of navigating
       setTimeout(() => {
         sendMessageToWebView('success')
       }, 500)
     } else {
-      // In web, navigate normally
       setTimeout(() => {
         navigate(`${SETTINGS_PAGE}?verification=success`)
       }, 500)
@@ -83,11 +81,9 @@ const CheckPage = () => {
 
   const onCancel = useCallback(() => {
     if (isInWebView.current) {
-      // In WebView, send message instead of navigating
       if (wasSuccessful.current) {
         sendMessageToWebView('success')
       } else {
-        // User cancelled without completing - just close
         if (window.ReactNativeWebView) {
           window.ReactNativeWebView.postMessage(
             JSON.stringify({ type: 'close' })
@@ -95,7 +91,6 @@ const CheckPage = () => {
         }
       }
     } else {
-      // In web, navigate normally
       if (wasSuccessful.current) {
         navigate(`${SETTINGS_PAGE}?verification=success`)
       } else {
@@ -106,10 +101,8 @@ const CheckPage = () => {
 
   const onError = useCallback(() => {
     if (isInWebView.current) {
-      // In WebView, send message instead of navigating
       sendMessageToWebView('error')
     } else {
-      // In web, navigate normally
       navigate(`${SETTINGS_PAGE}?verification=error`)
     }
   }, [navigate, sendMessageToWebView])

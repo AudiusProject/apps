@@ -34,37 +34,19 @@ type CommentSectionProviderProps<NavigationProp> = {
   entityId: ID
   entityType?: EntityType.TRACK
 
-  // These are optional because they are only used on mobile
-  // and provided for the components in CommentDrawer
-  // TODO: maybe use a discriminated union for mobile/desktop type
   replyingAndEditingState?: ReplyingAndEditingState
   setReplyingAndEditingState?: (
     state: ReplyingAndEditingState | undefined
   ) => void
   navigation?: NavigationProp
   closeDrawer?: () => void
-  /**
-   * Close the comment drawer AND any open now-playing drawer behind it.
-   * Passed from CommentDrawerProvider and threaded through to CommentBlock
-   * so that tapping a user link / mention inside a comment can close both
-   * drawers before navigating away.
-   *
-   * This must be threaded via context (rather than calling useCommentDrawer()
-   * directly in CommentBlock) because @gorhom/bottom-sheet portals content
-   * outside the CommentDrawerContext.Provider's React tree.
-   */
   closeAndExitNowPlaying?: (trackId: ID) => void
   uid?: string
-  /**
-   * Opaque source tag for the playback queue when the user plays the track
-   * from a comment. Defaults to 'comments' when omitted.
-   */
   playbackSource?: string
 }
 
 export type ReplyingAndEditingState = {
   replyingToComment?: Comment | ReplyComment
-  // This can be different from replyingToComment if we are replying to a reply
   replyingToCommentId?: ID
   editingComment?: Comment | ReplyComment
 }
@@ -131,9 +113,7 @@ export function CommentSectionProvider<NavigationProp>(
   })
 
   const queryClient = useQueryClient()
-  // hard refreshes all data
   const resetComments = useCallback(() => {
-    // Reset our comment count since we're reloading comments again - aka can hide the "new comments" button
     resetPreviousCommentCount(queryClient, entityId)
     queryClient.resetQueries({ queryKey: [QUERY_KEYS.trackCommentList] })
     queryClient.resetQueries({ queryKey: [QUERY_KEYS.comment] })
@@ -188,9 +168,7 @@ export function CommentSectionProvider<NavigationProp>(
         )
       }
 
-      // If a timestamp is provided, we should seek to that timestamp
       if (timestampSeconds !== undefined) {
-        // But only if the user has access to the stream
         if (!hasStreamAccess) {
           const { track_id: trackId } = track
           openPremiumContentPurchaseModal(

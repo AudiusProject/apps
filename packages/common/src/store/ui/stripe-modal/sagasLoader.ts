@@ -6,7 +6,6 @@ import {
   stripeSessionStatusChanged
 } from './slice'
 
-/** Loads the Stripe onramp sagas when the onramp is first opened */
 export default function sagas() {
   return [
     lazySagas({

@@ -14,7 +14,6 @@ const messages = {
 
 type FormScreenProps = ScreenProps & {
   onSubmit: () => void
-  /** Save is offered only when there's something valid to save. */
   canSubmit: boolean
 }
 
@@ -24,10 +23,6 @@ const ScreenTitle = () => (
   </Text>
 )
 
-/**
- * Edit profile chrome: back discards, Save sits in the header. No footer bar,
- * so the form gets the whole screen.
- */
 export const FormScreen = (props: FormScreenProps) => {
   const { children, onSubmit, canSubmit, ...other } = props
 

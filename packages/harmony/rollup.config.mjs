@@ -11,7 +11,9 @@ import rollupTypescript from 'rollup-plugin-typescript2'
 import { NO_FONTS_CSS, harmonyCssWithFonts } from './rollup.fonts.mjs'
 
 const cjsRequire = createRequire(import.meta.url)
-const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
+const pkg = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8')
+)
 const tspCompiler = cjsRequire('ts-patch/compiler')
 
 const external = [
@@ -39,7 +41,6 @@ export default {
   plugins: [
     json(),
     alias({
-      // Properly resolve json files from assets folder
       entries: [{ find: /^assets\/(.*)/, replacement: 'src/assets/$1' }]
     }),
     postcss({
@@ -50,7 +51,7 @@ export default {
     harmonyCssWithFonts(),
     svgr(),
     image({
-      exclude: /\.svg$/ // Exclude SVG files since they're handled by SVGR
+      exclude: /\.svg$/
     }),
     rollupTypescript({
       typescript: tspCompiler,

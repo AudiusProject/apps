@@ -36,9 +36,6 @@ export const useUserCoins = <TResult = UserCoin[]>(
       })
       if (response.data) {
         const coins = userCoinListFromSDK(response.data)
-        // Prime per-mint caches so consumers of useUserCoin (e.g. wallet-page
-        // rows) read from this bulk response instead of each firing their own
-        // request.
         coins.forEach((coin) => {
           if (coin.accounts) {
             queryClient.setQueryData(

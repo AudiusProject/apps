@@ -16,7 +16,6 @@ const getRandomInt = () => {
   return Math.floor(Math.random() * 50000)
 }
 
-// Tries our API gateway first, then the public one.
 export class RandomImage {
   static get = async (query?: string) => {
     const timer = (timeout: number): Promise<Timeout> =>

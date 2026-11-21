@@ -9,9 +9,6 @@ import profilePicEmpty from 'app/assets/images/imageProfilePicEmpty2X.png'
 
 import { primitiveToImageSource } from './primitiveToImageSource'
 
-// Per-URL render timeout (ms) so a stalled Open Audio Validator Node
-// advances to the next mirror without waiting on the OS TCP timeout
-// (60–90s). Matches the web MirrorImage pattern.
 const USER_IMAGE_TIMEOUT_MS = 3000
 
 type UseUserImageOptions = {
@@ -39,8 +36,6 @@ export const useProfilePicture = ({
     priorityLowResUrl,
     onError: onImageError
   } = useImageSize({
-    // Deactivated/deleted accounts must not expose their profile picture
-    // (privacy/GDPR) — force the default placeholder instead.
     artwork: is_deactivated ? undefined : profile_picture,
     targetSize: size,
     defaultImage: '',

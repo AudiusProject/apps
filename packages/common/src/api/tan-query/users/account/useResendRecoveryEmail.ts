@@ -4,11 +4,6 @@ import { useAppContext } from '~/context/appContext'
 
 import { useQueryContext } from '../../utils'
 
-/**
- * Sends a recovery info email to the currently logged-in user. Replaces the
- * legacy `recoveryEmailActions.resendRecoveryEmail` saga in
- * packages/web/src/common/store/recovery-email/sagas.ts.
- */
 export const useResendRecoveryEmail = () => {
   const { authService, identityService } = useQueryContext()
   const { getHostUrl } = useAppContext()

@@ -4,21 +4,14 @@ import { useCallback, useRef } from 'react'
 import { TextInput } from '@audius/harmony'
 import type { TextInputProps } from '@audius/harmony'
 
-/**
- * Formats and validates a time string input
- * Returns an object containing the formatted value and cursor position
- */
 const formatTimeInput = (
   value: string,
   prevValue: string,
   selectionStart: number | null
 ) => {
-  // Remove non-numeric characters
   const cleaned = value.replace(/\D/g, '')
 
-  // Handle deletion
   if (value.length < prevValue.length && selectionStart !== null) {
-    // If deleting the colon, remove the digit before it
     if (prevValue[selectionStart] === ':') {
       return {
         value: value.slice(0, selectionStart - 1) + value.slice(selectionStart),
@@ -28,7 +21,6 @@ const formatTimeInput = (
     return { value, cursorPos: selectionStart }
   }
 
-  // Handle empty input
   if (!cleaned) {
     return { value: '', cursorPos: 0 }
   }
@@ -37,12 +29,9 @@ const formatTimeInput = (
   let minutes = ''
   let cursorPos = selectionStart
 
-  // Parse hours and minutes based on input length
   if (cleaned.length === 1) {
-    // Single digit - treat as hour
     hours = cleaned
   } else if (cleaned.length === 2) {
-    // Two digits - if valid hour, treat as hour, otherwise split
     const num = parseInt(cleaned, 10)
     if (num <= 12) {
       hours = cleaned
@@ -51,16 +40,13 @@ const formatTimeInput = (
       minutes = cleaned[1]
     }
   } else {
-    // Three or more digits
     if (
       parseInt(cleaned[0], 10) > 1 ||
       (cleaned.length > 3 && parseInt(cleaned.slice(0, 2), 10) > 12)
     ) {
-      // If first digit > 1 or first two digits > 12, treat first digit as hour
       hours = cleaned[0]
       minutes = cleaned.slice(1, 3)
     } else {
-      // Otherwise take first two digits as hours if possible
       hours = cleaned.slice(0, 2)
       minutes = cleaned.slice(2, 4)
       if (parseInt(hours, 10) > 12) {
@@ -70,25 +56,21 @@ const formatTimeInput = (
     }
   }
 
-  // Format the time string
   let formatted = hours
   if (hours && (cleaned.length > hours.length || value.includes(':'))) {
     formatted += ':' + (minutes || '00')
   }
 
-  // Adjust cursor position
   if (cursorPos !== null) {
     const hadColon = value.includes(':')
     const hasColon = formatted.includes(':')
 
     if (!hadColon && hasColon && cursorPos > hours.length) {
-      // If we just added the colon and cursor was in minutes, adjust for the added colon
       cursorPos++
     } else if (
       formatted.length !== value.length &&
       cursorPos === value.length
     ) {
-      // If we changed the length and cursor was at the end, move it to the end
       cursorPos = formatted.length
     }
   }
@@ -96,10 +78,6 @@ const formatTimeInput = (
   return { value: formatted, cursorPos }
 }
 
-/**
- * Parses and validates a time string
- * Returns null if the time is invalid
- */
 export const parseTime = (time: string) => {
   if (!time) return null
   const match = time.match(/^(\d{1,2}):(\d{2})$/)
@@ -143,7 +121,6 @@ export const TimeInput = ({
       onChange(formatted)
       onError?.(!!formatted && !parseTime(formatted))
 
-      // Set cursor position on next tick after React updates the input
       if (cursorPos !== null) {
         requestAnimationFrame(() => {
           input.setSelectionRange(cursorPos, cursorPos)

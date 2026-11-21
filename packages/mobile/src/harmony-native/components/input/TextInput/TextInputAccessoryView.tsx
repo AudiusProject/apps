@@ -13,7 +13,6 @@ export const TextInputAccessoryView = (props: InputAccessoryViewProps) => {
   const { type, spacing } = useTheme()
 
   if (Platform.OS !== 'ios') {
-    // InputAccessoryView is only available on iOS
     return null
   }
 
