@@ -50,7 +50,6 @@ function* doWithdrawUSDCCoinflow({
   const analyticsFields: WithdrawUSDCTransferEventFields = {
     destinationAddress: 'COINFLOW',
     amount: amount / 100,
-    // Incoming balance is in cents, analytics values are in dollars
     currentBalance: currentBalance / 100
   }
   try {
@@ -109,7 +108,6 @@ function* doWithdrawUSDCCoinflow({
       })
     )
 
-    // Finalizes the transaction for our connection
     yield* call([connection, 'confirmTransaction'], signature, 'finalized')
 
     yield* put(updateAmount({ amount }))
@@ -144,7 +142,6 @@ function* doWithdrawUSDCCoinflow({
         make({ eventName: Name.WITHDRAW_USDC_SUCCESS, ...analyticsFields })
       )
 
-      // Invalidate tan-query cache key for USDC balance
       queryClient.invalidateQueries({
         queryKey: getUSDCBalanceQueryKey(ethWallet, 'processed')
       })
@@ -157,7 +154,6 @@ function* doWithdrawUSDCCoinflow({
         })
       )
       yield* put(buyUSDCActions.startRecoveryIfNecessary())
-      // Wait for the recovery to succeed or error
       const action = yield* take<
         ReturnType<typeof buyUSDCActions.recoveryStatusChanged>
       >((action: any) => {
@@ -169,9 +165,6 @@ function* doWithdrawUSDCCoinflow({
       })
       yield* put(cleanupWithdrawUSDC())
       yield* put(closeWithdrawUSDCModal())
-      // Buy USDC recovery already logs and makes an analytics event, so add
-      // some logs to help discern which flow the recovery was triggered from
-      // and help aid in debugging should this ever hit.
       if (action.payload.status === Status.ERROR) {
         console.warn(
           'Failed to transfer funds back from root wallet:',
@@ -223,7 +216,6 @@ function* doWithdrawUSDCManualTransfer({
   const analyticsFields: WithdrawUSDCTransferEventFields = {
     destinationAddress,
     amount: withdrawalAmountDollars,
-    // Incoming balance is in cents, analytics values are in dollars
     currentBalance: currentBalance / 100
   }
   try {
@@ -269,7 +261,6 @@ function* doWithdrawUSDCManualTransfer({
       track,
       make({ eventName: Name.WITHDRAW_USDC_SUCCESS, ...analyticsFields })
     )
-    // Invalidate tan-query cache key for USDC balance
     queryClient.invalidateQueries({
       queryKey: getUSDCBalanceQueryKey(ethWallet, 'processed')
     })
@@ -292,9 +283,6 @@ function* doWithdrawUSDCManualTransfer({
   }
 }
 
-/**
- * Handles all logic for withdrawing USDC to a given destination. Expects amount in cents.
- */
 function* doWithdrawUSDC({
   payload: { amount, method, currentBalance, destinationAddress }
 }: ReturnType<typeof beginWithdrawUSDC>) {

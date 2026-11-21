@@ -8,6 +8,5 @@ export type TrendingPageState = {
   trendingTimeRange: TimeRange
   trendingGenre: Genre | null
   lastFetchedTrendingGenre: Genre | null
-  /** Mobile: selected tab for trending (Tracks vs Underground vs Winners). */
   trendingCategory: TrendingCategory
 }

@@ -3,12 +3,6 @@ import { useMemo } from 'react'
 import { useUserCoins, useArtistCreatedFanClub } from '~/api'
 import { ID } from '~/models'
 
-/**
- * Hook to check if a user owns a specific artist's coin
- * @param userId - The user ID to check coin ownership for
- * @param artistId - The artist ID whose coin to check for ownership
- * @returns Object with isCoinHolder boolean and loading state
- */
 export const useIsCoinMember = (
   userId: ID | null | undefined,
   artistId: ID | null | undefined
@@ -24,12 +18,10 @@ export const useIsCoinMember = (
       return false
     }
 
-    // If the user is the artist themselves, they own their own coin
     if (userId === artistId) {
       return true
     }
 
-    // Check if the user owns this specific artist's coin with positive balance
     return (
       userCoins?.some(
         (userCoin) => userCoin.mint === fanClub.mint && userCoin.balance > 0

@@ -14,11 +14,9 @@ export const parseCommentTrackTimestamp = (
 ): number => {
   const parts = formattedTimestamp.split(':').map(Number)
   if (parts.length === 3) {
-    // Format is "hours:minutes:seconds"
     const [hours, minutes, seconds] = parts
     return hours * 3600 + minutes * 60 + seconds
   } else if (parts.length === 2) {
-    // Format is "minutes:seconds"
     const [minutes, seconds] = parts
     return minutes * 60 + seconds
   } else {

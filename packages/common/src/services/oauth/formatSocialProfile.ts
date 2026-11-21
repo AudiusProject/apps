@@ -2,9 +2,6 @@ import { TikTokProfile } from '~/store/account/types'
 
 export const MAX_HANDLE_LENGTH = 30
 export const MAX_DISPLAY_NAME_LENGTH = 32
-// Must match CHARACTER_LIMIT_USER_BIO in
-// packages/discovery-provider/src/tasks/entity_manager/utils.py — the
-// indexer rejects bios longer than this with IndexingValidationError.
 export const MAX_BIO_LENGTH = 256
 
 export const formatTikTokProfile = async (
@@ -38,9 +35,6 @@ export const formatTikTokProfile = async (
 
   const profilePicture = await getProfilePicture()
 
-  // Truncate to MAX_HANDLE_LENGTH characters because we don't support longer handles.
-  // If the user is verifed, they won't be able to claim the status if
-  // the handle doesn't match, so just pass through.
   let requiresUserReview = false
   let handleTooLong = false
   if (tikTokProfile.username.length > MAX_HANDLE_LENGTH) {

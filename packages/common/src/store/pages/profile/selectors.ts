@@ -9,7 +9,6 @@ const getProfile = (state: CommonState, handle?: string) => {
   return state.pages.profile.entries[profileHandle]
 }
 
-// Profile selectors
 export const getProfileStatus = (state: CommonState, handle?: string) =>
   getProfile(state, handle)?.status ?? Status.IDLE
 export const getProfileEditStatus = (state: CommonState, handle?: string) => {

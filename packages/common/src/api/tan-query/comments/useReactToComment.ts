@@ -63,7 +63,6 @@ export const useReactToComment = () => {
       const prevComment = queryClient.getQueryData(
         getCommentQueryKey(commentId)
       )
-      // Optimistic update our cache
       queryClient.setQueryData(
         getCommentQueryKey(commentId),
         (prevCommentState) =>
@@ -72,7 +71,7 @@ export const useReactToComment = () => {
             reactCount:
               (prevCommentState?.reactCount ?? 0) + (isLiked ? 1 : -1),
             isArtistReacted: isEntityOwner
-              ? isLiked // If the artist is reacting, update the state accordingly
+              ? isLiked
               : prevCommentState?.isArtistReacted, // otherwise, keep the previous state
             isCurrentUserReacted: isLiked
           }) as CommentOrReply
@@ -82,19 +81,15 @@ export const useReactToComment = () => {
     onError: (error: Error, args, context) => {
       const { commentId } = args
       console.error(error)
-      // Toast standard error message
       dispatch(toast({ content: messages.mutationError('reacting to') }))
 
-      // note: context could be undefined if the onMutate threw before returning
       if (context) {
         const { prevComment } = context
-        // Revert our optimistic cache change
         queryClient.setQueryData(
           getCommentQueryKey(commentId),
           (prevData: CommentOrReply | undefined) =>
             ({
               ...prevData,
-              // NOTE: intentionally only reverting the pieces we changed in case another mutation happened between this mutation start->error
               reactCount: prevComment?.reactCount,
               isArtistReacted: prevComment?.isArtistReacted,
               isCurrentUserReacted: prevComment?.isCurrentUserReacted

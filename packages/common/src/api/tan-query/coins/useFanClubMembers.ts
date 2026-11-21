@@ -97,7 +97,6 @@ export const useFanClubMembers = <TResult = CoinMember[]>(
         return {
           userId: HashId.parse(member.userId),
           balance: member.balance,
-          // Need formatNumberCommas for mobile :(
           balanceLocaleString: formatNumberCommas(
             balanceFD.toLocaleString('en-US', {
               maximumFractionDigits: 0,

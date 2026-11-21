@@ -11,10 +11,6 @@ const cleanSession = (session: StripeSessionData) => {
   return cleaned
 }
 
-/** Extracts the required analytics fields from the session. Since a majority of
- * the session is Nullable at any given time, it attempts to find preferred values
- * from the quote and fixed_transaction objects, falling back to empty strings.
- */
 const getStripeEventFields = (
   session: StripeSessionData
 ): StripeEventFields => ({

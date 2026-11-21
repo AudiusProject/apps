@@ -11,10 +11,6 @@ import { useCurrentUserId } from './useCurrentUserId'
 export const getCurrentUserEmailQueryKey = () =>
   [QUERY_KEYS.currentUserEmail] as unknown as QueryKey<UserEmailResponse>
 
-/**
- * Hook to get the currently logged in user's email address and email
- * verification status from identity service.
- */
 export const useCurrentUserEmail = (options?: QueryOptions) => {
   const { identityService } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()

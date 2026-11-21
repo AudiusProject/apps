@@ -30,13 +30,6 @@ export type UseUSDCBalanceOptions<TResult> = SelectableQueryOptions<
   TResult
 >
 
-/**
- * Hook to get the USDC balance for the current user.
- * Uses TanStack Query for data fetching and caching.
- *
- * @param options Options for the query and polling
- * @returns Object with status, data, refresh, and cancelPolling
- */
 export const useUSDCBalance = <TResult = UsdcWei | null>({
   isPolling,
   pollingInterval = 2000,
@@ -81,12 +74,10 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
             ? (BigInt(account.amount.toString()) as UsdcWei)
             : null
 
-        // Still update Redux for compatibility with existing code
         dispatch(setUSDCBalance({ amount: balance?.toString() as StringUSDC }))
 
         return balance
       } catch (e) {
-        // If user doesn't have a USDC token account yet, return 0 balance
         if (e instanceof TokenAccountNotFoundError) {
           const balance = BigInt(0) as UsdcWei
           dispatch(setUSDCBalance({ amount: balance.toString() as StringUSDC }))
@@ -96,15 +87,12 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
         throw e
       }
     },
-    // TanStack Query's built-in polling - only poll when isPolling is true
     refetchInterval: isPolling ? pollingInterval : false,
-    // Prevent refetching when window regains focus during polling to avoid conflicts
     refetchOnWindowFocus: !isPolling,
     ...queryOptions,
     enabled: !!ethAddress && queryOptions.enabled !== false
   })
 
-  // Map TanStack Query states to the Status enum for API compatibility
   let status = Status.IDLE
   if (result.isPending) {
     status = Status.LOADING
@@ -114,13 +102,8 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
     status = Status.SUCCESS
   }
 
-  // For compatibility with existing code
   const data = result.data ?? null
 
-  // When the recovery saga finishes, invalidate the balance query so the UI
-  // picks up the new balance immediately instead of waiting for the next
-  // polling tick. We keep the loading state on through the refetch so the
-  // skeleton doesn't flash off and reveal the stale balance.
   const wasRecoveringRef = useRef(false)
   const [isRefetchingAfterRecovery, setIsRefetchingAfterRecovery] =
     useState(false)
@@ -143,14 +126,10 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
     }
   }, [recoveryStatus, queryClient, ethAddress, commitment])
 
-  // If we're actively recovering, or finishing up the post-recovery refetch,
-  // keep showing the loading state so consumers render a skeleton/spinner.
   if (recoveryStatus === Status.LOADING || isRefetchingAfterRecovery) {
     status = Status.LOADING
   }
 
-  // Function to cancel polling by invalidating and refetching the query
-  // This effectively stops the current polling cycle
   const cancelPolling = useCallback(() => {
     queryClient.cancelQueries({
       queryKey: getUSDCBalanceQueryKey(ethAddress, commitment)

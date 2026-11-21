@@ -20,9 +20,7 @@ type PurchaseContentState = {
   stage: PurchaseContentStage
   contentType: PurchaseableContentType
   contentId: ID
-  /** Pay extra amount in cents */
   extraAmount?: number
-  /** Used for analytics */
   extraAmountPreset?: string
   error?: PurchaseContentError
   onSuccess?: OnSuccess

@@ -74,7 +74,6 @@ export const updateProgress = (payload: {
   return { type: UPDATE_PROGRESS, payload }
 }
 
-// Action for replacing track audio
 export const updateTrackAudio = (payload: {
   trackId: ID
   file: File | NativeFile
@@ -86,13 +85,9 @@ export const updateTrackAudio = (payload: {
   }
 }
 
-// Persists the form state in the store for resuming upload
-// upon navigating back to the upload page
 export const updateFormState = (payload: UploadFormState) => {
   return { type: UPDATE_FORM_STATE, payload }
 }
-
-// Actions used to reset the react state and then the store state of upload from external container
 
 export const reset = () => {
   return { type: RESET }

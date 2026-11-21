@@ -34,7 +34,6 @@ export const useUnfavoriteTrack = () => {
   } = useAppContext()
 
   return useMutation({
-    // mutationKey: getUnfavoriteMutationKey(trackId),
     mutationFn: async ({ trackId }: UnfavoriteTrackArgs) => {
       if (!currentUserId) throw new Error('User ID is required')
       const isMutationInFlight = queryClient.isFetching({
@@ -49,29 +48,22 @@ export const useUnfavoriteTrack = () => {
     },
     onMutate: async ({ trackId, source }) => {
       if (!currentUserId || !currentUser) {
-        // TODO: throw toast and redirect to sign in
         throw new Error('User ID is required')
       }
 
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: getTrackQueryKey(trackId) })
 
-      // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
       if (!previousTrack) throw new Error('Track not found')
 
-      // Don't allow unfavoriting your own track
       if (previousTrack.owner_id === currentUserId)
         throw new Error('Cannot unfavorite your own track')
 
-      // Don't allow unfavoriting if not already favorited
       if (!previousTrack.has_current_user_saved)
         throw new Error('Track not favorited')
 
-      // Decrement the save count
       dispatch(accountActions.decrementTrackSaveCount())
 
-      // Track analytics event
       trackEvent({
         eventName: Name.UNFAVORITE,
         properties: {
@@ -81,13 +73,11 @@ export const useUnfavoriteTrack = () => {
         }
       })
 
-      // Optimistically update track data
       const update: Partial<Track> = {
         has_current_user_saved: false,
         save_count: Math.max(previousTrack.save_count - 1, 0)
       }
 
-      // Handle co-sign logic for remixes
       const remixTrack = previousTrack.remix_of?.tracks?.[0]
       const isCoSign = remixTrack?.user?.user_id === currentUserId
       if (remixTrack && isCoSign) {
@@ -124,7 +114,6 @@ export const useUnfavoriteTrack = () => {
     onError: (error, _args, context) => {
       if (!context) return
 
-      // Revert optimistic updates
       primeTrackData({
         tracks: [context.previousTrack],
         queryClient,

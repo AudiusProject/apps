@@ -79,7 +79,6 @@ const withServerCounts = (
 const asCommonState = (chat: ReturnType<typeof chatReducer>) =>
   ({ pages: { chat } }) as unknown as CommonState
 
-/** The (non-blast) chat entity, narrowed so `category` is readable. */
 const getUserChatEntity = (
   state: ReturnType<typeof chatReducer>,
   chatId: string
@@ -192,8 +191,6 @@ describe('chat categories', () => {
           category: ChatCategory.GENERAL
         })
       )
-      // A concurrent list refetch returns the stale (uncategorized) chat;
-      // the server always sends an explicit null for uncategorized.
       const clobbered = chatReducer(
         optimistic,
         actions.fetchMoreChatsSucceeded({
@@ -396,7 +393,6 @@ describe('chat categories', () => {
           unread_message_count: 1
         })
       ])
-      // No server count yet: the fallback scan must not stop at the blast
       expect(getChats(asCommonState(seeded))[0].chat_id).toBe(blast.chat_id)
       expect(getHasUnreadMessages(asCommonState(seeded))).toBe(true)
     })

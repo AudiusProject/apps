@@ -7,7 +7,6 @@ import {
 
 import { Nullable } from './typeUtils'
 
-// Returns whether some users may lose access based on the new audience.
 export const getUsersMayLoseAccess = ({
   availability,
   initialStreamConditions
@@ -31,8 +30,6 @@ export const getUsersMayLoseAccess = ({
   return (
     !stillSameGate &&
     !isInitiallyUsdcGated &&
-    // why do we have both FREE and PUBLIC types
-    // and when is one used over the other?
     ![
       StreamTrackAvailabilityType.FREE,
       StreamTrackAvailabilityType.PUBLIC

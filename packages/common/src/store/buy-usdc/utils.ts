@@ -16,10 +16,6 @@ import { getSDK } from '../sdkUtils'
 const POLL_ACCOUNT_INFO_DELAY_MS = 1000
 const POLL_ACCOUNT_INFO_RETRIES = 30
 
-/**
- * Derives a USDC user bank for a given eth address, creating it if necessary.
- * Defaults to the wallet of the current user.
- */
 export function* getOrCreateUSDCUserBank(ethAddress?: string) {
   const audiusSdk = yield* getContext('audiusSdk')
   const sdk = yield* call(audiusSdk)
@@ -44,9 +40,6 @@ export function* getOrCreateUSDCUserBank(ethAddress?: string) {
   return userBank
 }
 
-/** Polls for the given token account info up to a maximum retry count. Useful
- * for ensuring account is returned if it may have just been created.
- */
 export function* pollForTokenAccountInfo({
   retryDelayMs = POLL_ACCOUNT_INFO_DELAY_MS,
   maxRetryCount = POLL_ACCOUNT_INFO_RETRIES,

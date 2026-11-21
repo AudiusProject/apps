@@ -2,13 +2,6 @@ import { findLastIndex } from 'lodash'
 
 import { CommonState } from '~/store/commonStore'
 
-// Confirmer selectors
-
-/**
- * Check whether anything is confirming so UI can block reloads.
- * Also checks for uploads in progress, which don't always use confirmer but
- * should also block unloads.
- */
 export const getIsConfirming = (state: CommonState) =>
   Object.keys(state.confirmer.confirm).length > 0 || state.upload.uploading
 
@@ -41,10 +34,6 @@ export const getLatestResult = (
   return lastCallResultIndex === -1 ? {} : calls[lastCallResultIndex].result
 }
 
-/** Returns `true` if we can cancel the current call
- * - that is, if the next call is also squashable and has the same operation ID.
- * Returns `undefined` if invalid uid or there is no next call.
- * Otherwise, returns `false`. */
 export const getShouldCancelCurrentCall = (
   state: CommonState,
   props: { uid: number | string }
@@ -93,11 +82,6 @@ export const getConfirmLength = (
     ? state.confirmer.confirm[props.uid].calls.length
     : 0
 
-/** If the current call is NOT parallelizable: check if all calls before the current one (at index) have been resolved.
- * If the current call IS parallelizable: check if all calls before the current one that DO
- * NOT share the same `operationId` are resolved (i.e. we do not need previous paralellizable
- * calls of the same operation id to be resolved).
- */
 export const getAreRequisiteCallsComplete = (
   state: CommonState,
   props: {

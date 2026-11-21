@@ -22,7 +22,6 @@ export const useSuggestedArtists = (options?: QueryOptions) => {
       }
       const response = await fetch(env.SUGGESTED_FOLLOW_HANDLES!)
       const suggestedArtists = await response.json()
-      // dedupe the artists just in case the team accidentally adds the same artist twice
       return [...new Set(suggestedArtists as number[])]
     },
     ...options,

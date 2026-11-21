@@ -2,9 +2,6 @@ import { Nullable } from '~/utils/typeUtils'
 
 export type ChallengeType = 'boolean' | 'numeric' | 'aggregate' | 'trending'
 
-// TODO: Fix the types here so they are consistent with API
-// and update SDK adapters to match.
-// https://linear.app/audius/issue/PAY-3350/separate-types-used-for-challenges-and-undisbursed-challenges
 export type UserChallenge = {
   challenge_id: ChallengeRewardID
   challenge_type: ChallengeType
@@ -34,9 +31,6 @@ export type UndisbursedUserChallenge = Pick<
 
 export type Specifier = string
 
-/** Used to map challenge names which are single letters to their
- * semantic equivalents for easier readability
- */
 export enum ChallengeName {
   AudioMatchingBuy = 'b',
   AudioMatchingSell = 's',
@@ -70,8 +64,8 @@ export type ChallengeRewardID =
   | 'listen-streak'
   | 'profile-completion'
   | 'first-playlist'
-  | ChallengeName.AudioMatchingSell // $AUDIO matching seller
-  | ChallengeName.AudioMatchingBuy // $AUDIO matching buyer
+  | ChallengeName.AudioMatchingSell
+  | ChallengeName.AudioMatchingBuy
   | 'trending-track'
   | 'top-api'
   | 'verified-upload'
@@ -98,24 +92,14 @@ export type ChallengeRewardID =
   | ChallengeName.Cosign
   | ChallengeName.RemixContestWinner
 export enum FailureReason {
-  // The attestation requires the user to fill out a captcha
   HCAPTCHA = 'HCAPTCHA',
-  // The attestation is blocked
   BLOCKED = 'BLOCKED',
-  // This reward has already been disbursed
   ALREADY_DISBURSED = 'ALREADY_DISBURSED',
-  // The funds have already been sent, but we have not
-  // indexed the challenge.
   ALREADY_SENT = 'ALREADY_SENT',
-  // UserChallenge doesn't exist on DN
   MISSING_CHALLENGES = 'MISSING_CHALLENGES',
-  // UserChallenge is not in complete state
   CHALLENGE_INCOMPLETE = 'CHALLENGE_INCOMPLETE',
-  // An unknown error has occurred
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
-  // Unknown AAO error
   AAO_ATTESTATION_UNKNOWN_RESPONSE = 'AAO_ATTESTATION_UNKNOWN_RESPONSE',
-  // Need to wait for cooldown period
   WAIT_FOR_COOLDOWN = 'WAIT_FOR_COOLDOWN'
 }
 
@@ -164,9 +148,6 @@ export type FlowSessionEvent =
   | FlowSessionPassEvent
   | FlowSessionFailEvent
 
-/**
- * Represents the mutually exclusive state of a challenge
- */
 export type UserChallengeState =
   | 'inactive'
   | 'incomplete'
@@ -179,9 +160,6 @@ export type SpecifierWithAmount = {
   amount: number
 }
 
-/**
- * A User Challenge that has been updated by the client to optimistically include any updates
- */
 export type OptimisticUserChallenge = Omit<
   UserChallenge,
   'is_complete' | 'is_active' | 'is_disbursed'

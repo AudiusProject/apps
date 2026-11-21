@@ -31,15 +31,7 @@ type UseUSDCTransactionsArgs = {
   sortDirection?: GetUSDCTransactionsSortDirectionEnum
   type?: GetUSDCTransactionsTypeEnum[]
   method?: GetUSDCTransactionsMethodEnum
-  /**
-   * When true, refetch every loaded page periodically. Off by default —
-   * baseline polling refetches every loaded page on each tick, which is
-   * expensive and visually disruptive. Callers waiting on a specific
-   * just-completed withdrawal should manage their own short-term polling
-   * (see `useWithdrawalTransactionPoller` in WithdrawalsTab).
-   */
   isPolling?: boolean
-  /** Poll interval in ms when `isPolling` is true. */
   pollingInterval?: number
 }
 
@@ -67,9 +59,6 @@ export const getUSDCTransactionsQueryKey = (
   ] as unknown as QueryKey<InfiniteData<USDCTransactionDetails[]>>
 }
 
-/**
- * Parser to reformat transactions as they come back from the API.
- */
 const parseTransaction = ({
   transaction
 }: {
@@ -140,9 +129,6 @@ export const useUSDCTransactions = (
     })
   }, [queryClient, queryKey])
 
-  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
-  // doesn't change every render. We read the latest queryData from a ref
-  // at call time instead of capturing it in the closure deps.
   const queryDataRef = useRef(queryData)
   queryDataRef.current = queryData
   const loadNextPageCallback = useCallback(() => {
@@ -150,8 +136,6 @@ export const useUSDCTransactions = (
     if (q.isFetching || !q.hasNextPage) return undefined
     return q.fetchNextPage()
   }, [])
-  // Attach helpers directly onto the query result object (rather than
-  // spreading it) so TanStack Query's tracked-property access keeps working.
   return Object.assign(queryData, {
     reset,
     loadNextPage: loadNextPageCallback

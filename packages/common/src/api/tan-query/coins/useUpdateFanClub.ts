@@ -68,15 +68,12 @@ export const useUpdateFanClub = () => {
       mint,
       updateCoinRequest
     }: UpdateFanClubParams): Promise<MutationContext> => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: getFanClubQueryKey(mint)
       })
 
-      // Snapshot the previous coin
       const previousCoin = queryClient.getQueryData(getFanClubQueryKey(mint))
 
-      // Optimistically update the coin
       if (previousCoin) {
         const coinData = previousCoin
         const optimisticCoin = {
@@ -94,13 +91,11 @@ export const useUpdateFanClub = () => {
       return { previousCoin }
     },
     onError: (_err, { mint }, context?: MutationContext) => {
-      // If the mutation fails, roll back coin data
       if (context?.previousCoin) {
         queryClient.setQueryData(getFanClubQueryKey(mint), context.previousCoin)
       }
     },
     onSettled: (_, __, { mint }) => {
-      // Always refetch after error or success to ensure cache is in sync with server
       queryClient.invalidateQueries({ queryKey: getFanClubQueryKey(mint) })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.coinByTicker] })
     }

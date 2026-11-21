@@ -103,9 +103,6 @@ export const useRemixes = (
     }),
     initialPageParam: 0,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
-      // First page may have the original prepended; subtract it before
-      // comparing to pageSize so a full page of `pageSize` actual remixes
-      // doesn't false-stop pagination.
       const isFirstPage = allPages.length === 1
       const remixesOnLastPage =
         lastPage.length - (isFirstPage && includeOriginal ? 1 : 0)
@@ -145,15 +142,11 @@ export const useRemixes = (
 
       primeTrackData({ tracks: processedTracks, queryClient })
 
-      // Mirror the count into the dedicated count query so single-purpose
-      // count consumers don't need to fire their own request once the
-      // lineup is loaded.
       queryClient.setQueryData(
         getRemixesCountQueryKey({ trackId, isCosign, isContestEntry }),
         data.count ?? 0
       )
 
-      // Update count in legacy redux store
       dispatch(remixesPageActions.setCount({ count: data.count }))
 
       return processedTracks.map((t) => ({
@@ -168,12 +161,6 @@ export const useRemixes = (
   return queryData
 }
 
-/**
- * Count-only companion to `useRemixes`. Hits the same SDK endpoint with
- * `limit=0` and stores just the total under a separate query key so the
- * lineup query can keep its standard `LineupData[]` page shape (which is
- * what `TrackLineup` / `playFrom`'s `querySource` requires).
- */
 export const useRemixesCount = (
   { trackId, isCosign = false, isContestEntry = false }: UseRemixesCountArgs,
   options?: QueryOptions

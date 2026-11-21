@@ -38,7 +38,6 @@ const getInstance = () => {
 
 export const jupiterInstance = getInstance()
 
-// Add support for mint-based parameters for the useSwapCoins hook
 export type JupiterMintQuoteParams = {
   inputMint: string
   outputMint: string
@@ -73,10 +72,6 @@ export type JupiterQuoteResult = {
   quote: QuoteResponse
 }
 
-/**
- * Gets a quote from Jupiter using mint addresses directly
- * This version is used by the useSwapCoins hook
- */
 export const getJupiterQuoteByMint = async ({
   inputMint,
   outputMint,
@@ -130,11 +125,6 @@ export type JupiterQuoteWithRetryResult = {
   quoteResult: JupiterQuoteResult
 }
 
-/**
- * Gets a Jupiter quote with automatic retry logic for maxAccounts
- * Starts with DEFAULT_MAX_ACCOUNTS and increments by 10 until MAX_ALLOWED_ACCOUNTS
- * Returns the successful quote along with the maxAccounts value that worked
- */
 export const getJupiterQuoteByMintWithRetry = async ({
   inputMint,
   outputMint,
@@ -185,17 +175,11 @@ export const getJupiterQuoteByMintWithRetry = async ({
   }
 }
 
-/**
- * Converts an array of Jupiter instructions to Solana TransactionInstructions
- * Filters out undefined instructions and handles the conversion
- */
 export const convertJupiterInstructions = (
   instructions: (Instruction | undefined)[]
 ): TransactionInstruction[] => {
-  // Flatten and filter out undefined instructions
   const filteredInstructions = instructions.filter(removeNullable)
 
-  // Convert to Solana TransactionInstruction format
   return filteredInstructions.map((i) => {
     return {
       programId: new PublicKey(i.programId),

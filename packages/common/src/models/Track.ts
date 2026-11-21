@@ -43,7 +43,6 @@ export type RemixOf = {
   tracks: Remix[]
 }
 
-// Gated content
 export type FollowGatedConditions = { follow_user_id: number }
 
 export type TokenGatedConditions = {
@@ -64,7 +63,6 @@ export type NftGatedConditions = {
   }
 }
 
-/** Single split in USDC purchase conditions (matches API extended_payment_split). */
 export type PaymentSplit = {
   user_id: number
   percentage: number
@@ -118,7 +116,7 @@ export const isContentTokenGated = (
 export const isContentUSDCPurchaseGated = (
   gatedConditions?: Nullable<
     AccessConditions | DeepOmit<USDCPurchaseConditions, 'splits'>
-  > // data coming from upload/edit forms will not have splits on the type
+  >
 ): gatedConditions is USDCPurchaseConditions =>
   !!gatedConditions && 'usdc_purchase' in (gatedConditions ?? {})
 
@@ -188,10 +186,6 @@ export type TrackMetadata = {
   is_scheduled_release: boolean
   is_unlisted: boolean
   is_available: boolean
-  /**
-   * False when the API won't serve audio (deleted track or inactive owner).
-   * Undefined when the source doesn't populate it.
-   */
   is_streamable?: boolean
   is_stream_gated: boolean
   stream_conditions: Nullable<AccessConditions>
@@ -227,7 +221,6 @@ export type TrackMetadata = {
   comment_count: number
   pinned_comment_id?: Nullable<ID>
 
-  // Optional Fields
   is_playlist_upload?: boolean
   is_invalid?: boolean
   stem_of?: {
@@ -240,14 +233,12 @@ export type TrackMetadata = {
   cover_original_song_title?: Nullable<string>
   cover_original_artist?: Nullable<string>
 
-  // Added fields
   dateListened?: string
   duration: number
 
   offline?: OfflineTrackMetadata
   local?: boolean
 
-  // API returned URLS
   stream?: {
     url?: string
     mirrors: string[]
@@ -266,12 +257,8 @@ export type TrackMetadata = {
     permalink: string
   }
 
-  // Accepted collaborator artists (collaborative tracks). Embedded by the API,
-  // same shape as `user` (the track owner). Empty when there are none.
   collaborators?: UserMetadata[]
 
-  // Pending collaborator invites — only populated by the API on the owner's own
-  // tracks, so the edit form can preserve still-pending invites on save.
   pending_collaborators?: UserMetadata[]
 } & Timestamped
 
@@ -284,7 +271,6 @@ export type DownloadReason = {
   collection_id: ID | string
 }
 
-// This is available on mobile for offline tracks
 export type OfflineTrackMetadata = {
   reasons_for_download: DownloadReason[]
   download_completed_time?: EpochTimeStamp
@@ -299,18 +285,14 @@ export type Stem = {
 }
 
 export type ComputedTrackProperties = {
-  // All below, added clientside
   _first_segment?: string
   _followees?: Followee[]
   _marked_deleted?: boolean
   _is_publishing?: boolean
 
-  // Present iff remixes have been fetched for a track
   _remixes?: Array<{ track_id: ID }>
   _remixes_count?: number
-  // Present iff remix parents have been fetched for a track
   _remix_parents?: Array<{ track_id: ID }>
-  // Present iff the track has been cosigned
   _co_sign?: Nullable<Remix>
 
   _blocked?: boolean
@@ -328,12 +310,10 @@ export type LineupTrack = UserTrack & {
   uid: UID
 }
 
-// Track with known non-optional stem
 export type StemTrackMetadata = TrackMetadata & Required<Pick<Track, 'stem_of'>>
 export type StemTrack = Track & Required<Pick<Track, 'stem_of'>>
 export type StemUserTrack = UserTrack & Required<Pick<Track, 'stem_of'>>
 
-// Track with known non-optional remix parent
 export type RemixTrack = Track & Required<Pick<Track, 'remix_of'>>
 export type RemixUserTrack = UserTrack & Required<Pick<Track, 'remix_of'>>
 

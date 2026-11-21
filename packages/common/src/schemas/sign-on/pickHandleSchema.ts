@@ -18,10 +18,6 @@ export const pickHandleErrorMessages = {
   missingHandleError: 'Please enter a handle.'
 }
 
-/**
- * Restricted handles set includes route paths which are defined at the client level and passed in
- * @param restrictedHandles
- */
 export const pickHandleSchema = ({
   queryContext,
   queryClient,

@@ -40,7 +40,7 @@ export const signInSchema = (
           })
           return true
         }
-        return z.NEVER // The return value is not used, but we need to return something to satisfy the typing
+        return z.NEVER
       }),
     password: z.string({
       required_error: messages.passwordRequired

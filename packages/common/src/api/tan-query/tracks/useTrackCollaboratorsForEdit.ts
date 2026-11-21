@@ -16,11 +16,6 @@ export const getTrackCollaboratorsForEditQueryKey = (
   userId: ID | null | undefined
 ) => [QUERY_KEYS.trackCollaboratorsForEdit, trackId, userId]
 
-/**
- * Accepted and pending collaborators of a track, fetched as its owner.
- * Pending invites only come back on a request made by the owner, so the cached
- * track can be missing them. An edit seeded from that would delete the invites.
- */
 export const useTrackCollaboratorsForEdit = (
   trackId: ID | null | undefined
 ) => {

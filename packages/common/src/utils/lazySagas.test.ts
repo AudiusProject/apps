@@ -89,7 +89,6 @@ describe('lazySagas', () => {
     expect(handled).toEqual([TRIGGER, OTHER])
     expect(reduced).toEqual([TRIGGER, OTHER])
 
-    // Later actions go straight to the running sagas
     store.dispatch({ type: TRIGGER })
     expect(handled).toEqual([TRIGGER, OTHER, TRIGGER])
     expect(reduced).toEqual([TRIGGER, OTHER, TRIGGER])

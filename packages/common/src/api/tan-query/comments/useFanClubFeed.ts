@@ -68,10 +68,8 @@ export const useFanClubFeed = ({
         sortMethod
       })
 
-      // Prime related data (users, tracks) in cache
       primeRelatedData({ related: response.related, queryClient })
 
-      // Prime individual comment data and build feed items
       const feedItems: FanClubFeedItem[] = []
 
       for (const item of response.data) {

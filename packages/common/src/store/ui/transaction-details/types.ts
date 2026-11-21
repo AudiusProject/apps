@@ -12,11 +12,9 @@ export enum TransactionType {
 }
 
 export enum TransactionMethod {
-  // Transfer methods
   SEND = 'SENT',
   RECEIVE = 'RECEIVED',
 
-  // Purchase Methods
   COINBASE = 'COINBASE',
   STRIPE = 'STRIPE'
 }

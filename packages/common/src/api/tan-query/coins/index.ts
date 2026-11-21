@@ -1,4 +1,3 @@
-// Coins
 export * from './useFanClub'
 export * from './useFanClubByTicker'
 export * from './useFanClubMembers'
@@ -19,5 +18,4 @@ export * from './useUserCoin'
 export * from './useUserCoins'
 export * from './useWalletCoins'
 
-// Utils
 export * from './tokenUtils'

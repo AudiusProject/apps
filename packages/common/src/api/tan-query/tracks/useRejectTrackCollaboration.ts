@@ -12,11 +12,6 @@ type RejectTrackCollaborationArgs = {
   trackId: ID
 }
 
-/**
- * Decline a pending collaborator invite, or leave a track you've already
- * accepted (remove yourself as a collaborator). Both map to the same on-chain
- * Reject action, signed by the current user.
- */
 export const useRejectTrackCollaboration = () => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()

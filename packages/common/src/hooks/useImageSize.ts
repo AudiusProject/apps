@@ -23,30 +23,14 @@ if (typeof global !== 'undefined') {
 const IMAGE_CACHE =
   typeof global !== 'undefined' ? global.IMAGE_CACHE : new Set<string>()
 
-// Gets the width from a given image size, e.g. '150x150' => 150
 const getWidth = (size: string) => {
   return parseInt(size.split('x')[0])
 }
 
-// A cached larger image is used in place of the target size only up to this
-// many times its width, e.g. 480 for 150 but not 1000, so small thumbnails
-// don't decode full-size artwork.
 const MAX_LARGER_SIZE_RATIO = 3.5
 
 type Artwork<T extends string | number | symbol> = { [key in T]?: string }
 
-/**
- * Fetches an image from the given artwork object managing sizes and using fallback mirrors if necessary.
- *  - If a larger image has already been fetched and is in the cache, use it instead
- *  - If a smaller image has already been fetched and is in the cache, use it while fetching the larger one
- *  - If fetching a given image fails, substitute out mirrors and try again
- * @param artwork - The artwork object to fetch from
- * @param targetSize - The desired size of the image
- * @param defaultImage - The fallback image to use if no image is found in the `artwork` object
- * @param preloadImageFn - A function to preload an image. If not provided, the image will not be preloaded
- *    and it is up to the caller to preload the image if desired.
- * @returns The url of the image, or undefined if the image is not available
- */
 export const useImageSize = <
   SizeType extends SquareSizes | WidthSizes,
   ArtworkType extends Artwork<SizeType> & { mirrors?: string[] | undefined }
@@ -62,15 +46,10 @@ export const useImageSize = <
   preloadImageFn?: (url: string) => Promise<void>
 }) => {
   const [imageUrl, setImageUrl] = useState<Maybe<string>>(undefined)
-  // When upgrading from a smaller cached image to the target size, holds the
-  // smaller URL so callers can show it as a blurred backdrop while the
-  // high-res crossfades in (avoids the opacity-reset flash on source change).
   const [priorityLowResUrl, setPriorityLowResUrl] =
     useState<Maybe<string>>(undefined)
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
 
-  // Callers often pass an inline function. Reading it from a ref keeps the
-  // effect below from re-running (and preloading again) on every render.
   const preloadImageFnRef = useRef(preloadImageFn)
   useEffect(() => {
     preloadImageFnRef.current = preloadImageFn
@@ -128,7 +107,6 @@ export const useImageSize = <
       return
     }
 
-    // If the original URL failed, try mirrors
     if (failedUrls.has(targetUrl)) {
       const mirrorUrl = getNextMirrorUrl(targetUrl, failedUrls)
       if (mirrorUrl) {
@@ -142,8 +120,6 @@ export const useImageSize = <
       return
     }
 
-    // Check for smaller size in the cache
-    // If found, set the image url and preload the actual target url
     const smallerSize = Object.keys(artwork).find(
       (size) =>
         getWidth(size) < getWidth(targetSize) &&
@@ -152,8 +128,6 @@ export const useImageSize = <
         IMAGE_CACHE.has(artwork[size as SizeType]!)
     ) as SizeType | undefined
 
-    // Check for the smallest cached larger size, up to MAX_LARGER_SIZE_RATIO
-    // If found, set the image url to the larger size and return
     const largerSize = Object.keys(artwork)
       .filter(
         (size) =>
@@ -170,11 +144,6 @@ export const useImageSize = <
     }
 
     if (smallerSize) {
-      // Set the target URL optimistically so the main image slot starts
-      // loading the high-res immediately. The smaller cached URL is passed
-      // back as priorityLowResUrl so callers can show it as a blurred
-      // backdrop — this eliminates the opacity-reset flash that occurred
-      // when we previously did setImageUrl(small) then setImageUrl(large).
       setPriorityLowResUrl(artwork[smallerSize])
       setImageUrl(targetUrl)
       try {
@@ -182,18 +151,12 @@ export const useImageSize = <
         IMAGE_CACHE.add(finalUrl)
         if (finalUrl !== targetUrl) setImageUrl(finalUrl)
       } catch (e) {
-        // Fall back to the smaller size if high-res is unreachable.
         setImageUrl(artwork[smallerSize])
       }
       return
     }
 
-    // Set the URL optimistically so the image starts rendering from the
-    // native image cache immediately instead of showing a gray placeholder
-    // while the async prefetch is pending. If fetchWithFallback ends up
-    // resolving a different mirror URL, we update then.
     setImageUrl(targetUrl)
-    // Fetch image with fallback mirrors
     try {
       const finalUrl = await fetchWithFallback(targetUrl)
       IMAGE_CACHE.add(finalUrl)

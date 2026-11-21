@@ -43,7 +43,6 @@ describe('combineQueryResults', () => {
     const baseQuery = createSuccessResult()
     const result = { ...baseQuery, ...overrides }
 
-    // Ensure the result is properly typed based on error state
     if (result.isError) {
       return result as QueryObserverRefetchErrorResult<any, Error>
     }

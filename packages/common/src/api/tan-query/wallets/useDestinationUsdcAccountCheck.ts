@@ -8,7 +8,6 @@ import { QUERY_KEYS } from '../queryKeys'
 import type { QueryKey, QueryOptions } from '../types'
 import { useQueryContext } from '../utils'
 
-/** Result of checking whether a destination wallet has a USDC token account */
 export type DestinationUsdcAccountStatus =
   | { hasUsdcAccount: true }
   | { hasUsdcAccount: false; ataCreationFeeUsdc: number }
@@ -26,11 +25,6 @@ export const getDestinationUsdcAccountQueryKey = (
     destinationAddress
   ] as unknown as QueryKey<DestinationUsdcAccountStatus>
 
-/**
- * Checks whether a destination Solana address has a USDC token account.
- * When it doesn't, returns the estimated one-time fee to create it.
- * Use when the user pastes a destination address during USDC withdrawal (wallet route).
- */
 export const useDestinationUsdcAccountCheck = (
   destinationAddress: string | null | undefined,
   options?: QueryOptions<DestinationUsdcAccountStatus>

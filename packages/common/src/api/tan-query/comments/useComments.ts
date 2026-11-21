@@ -22,7 +22,6 @@ export const useComments = (
     queries: commentIds?.map((commentId) => ({
       queryKey: getCommentQueryKey(commentId),
       queryFn: async (): Promise<CommentOrReply | {}> => {
-        // Comments are expected to be pre-populated in the cache from other queries
         return queryClient.getQueryData(getCommentQueryKey(commentId)) ?? {}
       },
       ...options,

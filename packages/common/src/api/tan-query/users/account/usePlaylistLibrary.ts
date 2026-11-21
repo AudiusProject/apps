@@ -11,11 +11,8 @@ import {
 } from './useCurrentAccount'
 import { useCurrentUserId } from './useCurrentUserId'
 
-const STALE_TIME = 1000 * 60 * 5 // 5 minutes
+const STALE_TIME = 1000 * 60 * 5
 
-/**
- * Hook to get the user's playlist library from the accountUser data
- */
 export const usePlaylistLibrary = (config?: QueryOptions) => {
   const { data: currentUserId } = useCurrentUserId()
   useCurrentAccount()

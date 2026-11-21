@@ -42,29 +42,22 @@ export const useFavoriteTrack = () => {
     },
     onMutate: async ({ trackId, source }) => {
       if (!currentUserId || !currentUser) {
-        // TODO: throw toast and redirect to sign in
         throw new Error('User ID is required')
       }
 
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: getTrackQueryKey(trackId) })
 
-      // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
       if (!previousTrack) throw new Error('Track not found')
 
-      // Don't allow favoriting your own track
       if (previousTrack.owner_id === currentUserId)
         throw new Error('Cannot favorite your own track')
 
-      // Don't allow favoriting if already favorited
       if (previousTrack.has_current_user_saved)
         throw new Error('Track already favorited')
 
-      // Increment the save count
       dispatch(accountActions.incrementTrackSaveCount())
 
-      // Track analytics event
       trackEvent({
         eventName: Name.FAVORITE,
         properties: {
@@ -74,13 +67,11 @@ export const useFavoriteTrack = () => {
         }
       })
 
-      // Optimistically update track data
       const update: Partial<Track> = {
         has_current_user_saved: true,
         save_count: previousTrack.save_count + 1
       }
 
-      // Handle co-sign logic for remixes
       const remixTrack = previousTrack.remix_of?.tracks?.[0]
       const isCoSign = remixTrack?.user?.user_id === currentUserId
       if (remixTrack && isCoSign) {
@@ -108,13 +99,11 @@ export const useFavoriteTrack = () => {
       const track = queryClient.getQueryData(getTrackQueryKey(trackId))
       if (!track) return
 
-      // Dispatch the saveTrackSucceeded action
       dispatch(tracksSocialActions.saveTrackSucceeded(trackId))
     },
     onError: (error, _args, context) => {
       if (!context) return
 
-      // Revert optimistic updates
       primeTrackData({
         tracks: [context.previousTrack],
         queryClient,

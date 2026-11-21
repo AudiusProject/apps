@@ -9,9 +9,6 @@ import { DeepNullable, Nullable } from '~/utils/typeUtils'
 
 export type StripeSessionStatus = OnrampSessionStatus
 
-/** Represents properties of the transaction that were specified during
- * session creation and are immutable. All values are optional
- */
 export type StripeFixedTransactionDetails = DeepNullable<{
   destination_amount: string
   destination_crypto_amount: string
@@ -54,7 +51,6 @@ export type StripeModalState = {
   onrampSucceeded?: Action
   onrampCanceled?: Action
   onrampFailed?: Action
-  /** Used as a comparison between updates to detect what changed */
   previousStripeSessionData?: StripeSessionData
   stripeSessionData?: StripeSessionData
   stripeSessionStatus?: StripeSessionStatus
@@ -72,7 +68,6 @@ export type StripeSessionCreationErrorResponseData = {
 export class StripeSessionCreationError extends Error {
   constructor(
     public code: string,
-    // Avoiding `message` to not shadow the `message` property on Error
     public stripeErrorMessage: string,
     public type: string
   ) {

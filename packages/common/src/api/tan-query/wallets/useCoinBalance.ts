@@ -16,14 +16,6 @@ import { useUSDCBalance, type UseUSDCBalanceOptions } from './useUSDCBalance'
 const USDC_DECIMALS = 6
 const WEI_DECIMALS = 18
 
-/**
- * Wrapper hook that gives the balance of any coin - including USDC which uses a different query.
- * Uses the appropriate query hook and formats accordingly
- *
- * @param mint The mint address of the coin to fetch balance for
- * @param options Options for the query and polling
- * @returns Object with status, data, refresh, and cancelPolling
- */
 export const useCoinBalance = ({
   mint,
   userId,
@@ -52,7 +44,6 @@ export const useCoinBalance = ({
   const isUsdc = mint === env.USDC_MINT_ADDRESS
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
 
-  // For AUDIO, we need to use the useAudioBalance hook since it includes ETH audio. useUserCoin is only SOL AUDIO
   const audioCoinQuery = useAudioBalance(
     {
       userId,
@@ -67,13 +58,11 @@ export const useCoinBalance = ({
     }
   )
 
-  // Fan clubs query
   const userCoinQuery = useUserCoin(
     { mint, userId },
     {
       select: (aggregateCoinAccounts) => {
         if (!aggregateCoinAccounts) return null
-        // This returns the aggregate
         const { balance: combinedBalance, decimals } = aggregateCoinAccounts
         if (!includeExternalWallets) {
           const account = aggregateCoinAccounts.accounts.find(
@@ -109,7 +98,6 @@ export const useCoinBalance = ({
     }
   )
 
-  // USDC query
   const usdcQuery = useUSDCBalance({
     isPolling,
     pollingInterval,

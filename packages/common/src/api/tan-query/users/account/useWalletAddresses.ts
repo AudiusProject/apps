@@ -16,9 +16,6 @@ export const getWalletAddressesQueryKey = () =>
 export const useWalletAddresses = () => {
   return useQuery<WalletAddresses>({
     queryKey: getWalletAddressesQueryKey(),
-    // This data should always be set by the fetchAccountAsync saga
-    // So think of this queryFn as the "initial value"
-    // TODO: refactor the fetchAccountAsync saga to overlap with this queryFn more
     queryFn: () => ({ currentUser: null, web3User: null }),
     staleTime: Infinity,
     gcTime: Infinity

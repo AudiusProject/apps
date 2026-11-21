@@ -1,4 +1,3 @@
-/** Coinflow wallet authentication does not require a merchant API key or fixed IP. */
 export const createCoinflowSession = async ({
   wallet,
   merchantId,
@@ -66,7 +65,6 @@ export const createCoinflowSession = async ({
     if (typeof session?.key !== 'string' || !session.key) {
       throw new Error('Coinflow session key is missing')
     }
-    // Keep the existing conservative 30-minute lifetime and 25-minute refresh.
     return { key: session.key, expiresAt: requestedAt + 30 * 60 * 1000 }
   } finally {
     clearTimeout(timeout)

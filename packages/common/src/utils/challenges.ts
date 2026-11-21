@@ -344,7 +344,6 @@ export const makeOptimisticChallengeSortComparator = (
       return 0
     }
 
-    // Priority 1: Claimable challenges (Ready to Claim) come first
     if (
       userChallenge1.claimableAmount > 0 &&
       userChallenge2.claimableAmount <= 0
@@ -358,10 +357,7 @@ export const makeOptimisticChallengeSortComparator = (
       return 1
     }
 
-    // Priority 2: Reward Pending challenges come next
-    // Reward Pending = completed with cooldown, or has undisbursed specifiers with cooldown
     const isRewardPending = (challenge: OptimisticUserChallenge) => {
-      // Completed with cooldown days
       if (
         challenge.state === 'completed' &&
         challenge.cooldown_days &&
@@ -370,7 +366,6 @@ export const makeOptimisticChallengeSortComparator = (
       ) {
         return true
       }
-      // Has undisbursed specifiers with cooldown (for Cosign, RemixContestWinner, etc.)
       if (
         challenge.undisbursedSpecifiers &&
         challenge.undisbursedSpecifiers.length > 0 &&
@@ -392,7 +387,6 @@ export const makeOptimisticChallengeSortComparator = (
       return 1
     }
 
-    // Priority 3: New and not disbursed challenges come next
     const isNewAndNotDisbursed = (userChallenge: OptimisticUserChallenge) =>
       isNewChallenge(userChallenge.challenge_id) &&
       userChallenge.state !== 'disbursed'
@@ -406,7 +400,6 @@ export const makeOptimisticChallengeSortComparator = (
       return 1
     }
 
-    // Priority 4: Non-disbursed come before disbursed
     if (
       userChallenge1.state !== 'disbursed' &&
       userChallenge2.state === 'disbursed'
@@ -420,7 +413,6 @@ export const makeOptimisticChallengeSortComparator = (
       return 1
     }
 
-    // Order play count challenges
     if (isPlayCountChallenge(id1) && isPlayCountChallenge(id2)) {
       return playCountOrder.indexOf(id1) - playCountOrder.indexOf(id2)
     }
@@ -442,10 +434,6 @@ export const isPlayCountChallenge = (
   )
 }
 
-/** Returns true if the challenge is not a cooldown challenge by checking
- * whether it has `cooldown_days` defined and whether the challenge has been
- * created for more than `cooldown_days` days.
- */
 export const isCooldownChallengeClaimable = (
   challenge: UndisbursedUserChallenge
 ) => {
@@ -456,7 +444,6 @@ export const isCooldownChallengeClaimable = (
   )
 }
 
-/* Filter for only claimable challenges */
 export const getClaimableChallengeSpecifiers = (
   specifiers: SpecifierWithAmount[],
   undisbursedUserChallenges: UndisbursedUserChallenge[]
@@ -466,7 +453,6 @@ export const getClaimableChallengeSpecifiers = (
       (c) => c.specifier === s.specifier
     )
     if (challenge.length === 0) return false
-    // specifiers are unique
     return isCooldownChallengeClaimable(challenge[0])
   })
 }
@@ -497,7 +483,6 @@ export const getChallengeStatusLabel = (
 ): string => {
   if (!challenge) return DEFAULT_STATUS_LABELS.AVAILABLE
 
-  // Handle special aggregate challenges first
   const shouldShowReset =
     challenge.disbursed_amount &&
     !challenge.claimableAmount &&
@@ -534,12 +519,10 @@ export const getChallengeStatusLabel = (
       }
   }
 
-  // Handle claimable state for non-aggregate rewards
   if (challenge.claimableAmount > 0) {
     return DEFAULT_STATUS_LABELS.READY_TO_CLAIM
   }
 
-  // Handle disbursed state - 2nd clause is for aggregate challenges
   const shouldShowComplete =
     challenge.state === 'disbursed' ||
     (challenge.state === 'completed' &&
@@ -548,12 +531,10 @@ export const getChallengeStatusLabel = (
     return DEFAULT_STATUS_LABELS.COMPLETE
   }
 
-  // Handle completed with cooldown state
   if (challenge.state === 'completed' && challenge.cooldown_days) {
     return DEFAULT_STATUS_LABELS.REWARD_PENDING
   }
 
-  // Handle remaining challenge-specific states
   switch (challengeId) {
     case ChallengeName.OneShot:
       return 'Ineligible'
@@ -568,7 +549,6 @@ export const getChallengeStatusLabel = (
     case ChallengeName.TrackUpload:
       return `${challenge.current_step_count ?? 0}/3 Uploaded`
 
-    // Special-case as this is an infinite aggregate challenge (will always be in-progress)
     case ChallengeName.Tastemaker:
       return DEFAULT_STATUS_LABELS.AVAILABLE
 
@@ -580,11 +560,6 @@ export const getChallengeStatusLabel = (
   }
 }
 
-/**
- * Determines if a reward is open to all users or requires verification
- * @param rewardId The reward ID to check
- * @returns true if the reward is open to all users, false if it requires verification
- */
 export const isRewardOpenToAll = (rewardId: ChallengeRewardID): boolean => {
   const openToAllRewards = new Set<ChallengeRewardID>([
     ChallengeName.Tastemaker,

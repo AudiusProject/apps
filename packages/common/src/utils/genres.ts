@@ -1,21 +1,9 @@
 import { Genre as SDKGenre } from '@audius/sdk'
 
-/** Re-export SDK Genre as the canonical source for track metadata. */
 export { Genre } from '@audius/sdk'
 
-/**
- * Track genre value. Any string up to 100 chars is accepted at the API/SDK
- * layer; the {@link Genre} enum provides the canonical autocomplete values.
- * Use this type for read-side / metadata typings so custom-genre tracks
- * flow through without TS errors. Continue using `Genre` for write-side
- * autocomplete sources and static lists where only known values are valid.
- */
 export type { GenreString } from '@audius/sdk'
 
-/**
- * UI-only value for "all genres" filter (e.g. trending page).
- * Not part of SDK Genre - use for filter state only.
- */
 export const ALL_GENRES = 'All Genres' as const
 export type AllGenres = typeof ALL_GENRES
 
@@ -53,7 +41,6 @@ export const getCanonicalName = (genre: SDKGenre | string) => {
   return genre
 }
 
-/** User-facing genre labels. Use `convertGenreLabelToValue` to get the correct genre value (to set as the genre in track metadata). */
 export const GENRES = [
   SDKGenre.Electronic,
   SDKGenre.Rock,
@@ -94,10 +81,6 @@ export const convertGenreLabelToValue = (genreLabel: GenreLabel): SDKGenre => {
   return genreLabel.replace(ELECTRONIC_PREFIX, '') as SDKGenre
 }
 
-/**
- * Converts a string from the trending genre UI (e.g. from URL or genre list)
- * into Genre | null for Redux state. Returns null for null, empty, or ALL_GENRES.
- */
 export const parseTrendingGenreFromUrl = (
   param: string | null
 ): SDKGenre | null => {
@@ -110,10 +93,6 @@ export const parseTrendingGenreFromUrl = (
   return trimmed as SDKGenre
 }
 
-/**
- * Converts a genre string from UI (e.g. from GenreSelectionList) to Genre | null
- * for setTrendingGenre. Use when the value is known to come from GENRES.
- */
 export const toTrendingGenre = (value: string | null): SDKGenre | null => {
   if (value === null || value === '' || value === ALL_GENRES) return null
   const genresList = GENRES as readonly string[]
@@ -121,14 +100,6 @@ export const toTrendingGenre = (value: string | null): SDKGenre | null => {
   return convertGenreLabelToValue(value as GenreLabel)
 }
 
-/**
- * Converts a genre label from the trending filter UI into the value stored in
- * trending state. Unlike {@link toTrendingGenre}, this accepts freeform /
- * community genres that are not part of the static {@link GENRES} list, so the
- * dynamic popular-genres filter can select long-tail genres. Strips the
- * Electronic prefix for the static electronic subgenres and maps the
- * {@link ALL_GENRES} sentinel / empty values to null.
- */
 export const toTrendingGenreValue = (value: string | null): SDKGenre | null => {
   if (value === null || value === '' || value === ALL_GENRES) return null
   return (
@@ -224,17 +195,8 @@ export const mergeGenreSuggestions = (
   })
 }
 
-/** Number of top genres to request from the popular-genres endpoint. */
 export const POPULAR_GENRES_LIMIT = 25
 
-/**
- * Selects the genre suggestions to display in the trending genre filter for a
- * given search query. With no query, returns the popular/ranked genres (those
- * with a recent-activity count) so the top genres are shown by default; while
- * searching, matches labels across the full set so long-tail genres remain
- * discoverable. Falls back to the full list when no popular genres are
- * available (e.g. the popular-genres request failed).
- */
 export const getTrendingGenreSuggestions = (
   suggestions: GenreSuggestion[],
   searchValue = ''

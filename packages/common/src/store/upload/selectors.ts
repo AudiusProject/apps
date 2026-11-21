@@ -10,17 +10,12 @@ export const getUploadError = (state: CommonState) => state.upload.error
 export const getIsUploading = (state: CommonState) => state.upload.uploading
 export const getFormState = (state: CommonState) => state.upload.formState
 
-// Should sum to 1
 const UPLOAD_WEIGHT = 0.5
 const TRANSCODE_WEIGHT = 1 - UPLOAD_WEIGHT
 
-// Should sum to 1
 const AUDIO_WEIGHT = 1
 const IMAGE_WEIGHT = 0
 
-/**
- * Get the upload and transcode status of a track including its stems.
- */
 const trackProgressSummary = (
   trackProgress: ProgressState,
   key: 'image' | 'audio'
@@ -41,10 +36,6 @@ const trackProgressSummary = (
   }
 }
 
-/**
- * Gets the total upload progress for a particular asset type including stems,
- * as a percentage between [0, 1]
- */
 const getKeyUploadProgress = (state: CommonState, key: 'image' | 'audio') => {
   const uploadProgress = state.upload.uploadProgress
   if (uploadProgress == null) return 0

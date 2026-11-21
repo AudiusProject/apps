@@ -58,11 +58,8 @@ export const usePostComment = () => {
         mentions
       } = args
       const isReply = parentCommentId !== undefined
-      // This executes before the mutationFn is called, and the reference to comment is the same in both
-      // therefore, this sets the id that will be posted to the server
       const sdk = await audiusSdk()
       const newId = await sdk.comments.generateCommentId()
-      // hack alert: there is no way to send context from onMutate to mutationFn so we hack it into the args
       args.newId = newId
       const newComment: Comment = {
         id: newId,
@@ -75,15 +72,11 @@ export const usePostComment = () => {
         trackTimestampS,
         reactCount: 0,
         replyCount: 0,
-        // Match the server-hydrated shape (`commentFromSDK` always returns an
-        // array) so the optimistic comment renders identically to a real one.
         replies: [],
         createdAt: new Date().toISOString(),
         updatedAt: undefined
       }
-      // If a root comment, update the sort data
       if (isReply) {
-        // Update the parent comment replies list
         queryClient.setQueryData(
           getCommentQueryKey(parentCommentId),
           (comment) =>
@@ -97,8 +90,6 @@ export const usePostComment = () => {
         queryClient.setQueryData(
           getTrackCommentListQueryKey({ trackId, sortMethod: currentSort }),
           (prevData) => {
-            // NOTE: The prevData here should never be undefined so the backup object should never be used
-            // If it is undefined then the query key might be incorrect
             const newState = cloneDeep(prevData) ?? {
               pages: [[]],
               pageParams: [0]
@@ -109,22 +100,17 @@ export const usePostComment = () => {
           }
         )
       }
-      // Update the individual comment cache
       queryClient.setQueryData(getCommentQueryKey(newId), newComment)
 
-      // Add to the comment count
       addCommentCount(queryClient, trackId)
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
       console.error(error)
-      // Undo comment count change
       subtractCommentCount(queryClient, trackId)
-      // Toast generic error message
       toast({
         content: 'There was an error posting that comment. Please try again'
       })
-      // TODO: avoid hard reset here?
       queryClient.resetQueries({
         queryKey: getTrackCommentListQueryKey({
           trackId,

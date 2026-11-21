@@ -69,7 +69,6 @@ export const useProfileTracks = (
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
       if (!handle) return []
-      // If the @ is still at the beginning of the handle, trim it off
       const handleNoAt = handle.startsWith('@') ? handle.substring(1) : handle
       const { data: tracks } = await sdk.users.getTracksByUserHandle({
         handle: handleNoAt,

@@ -20,16 +20,9 @@ export type SwapError = {
   errorMessage?: string
 }
 
-/**
- * Specialized analytics hook for buy-sell swap flows.
- * Provides pre-configured methods for common buy-sell analytics events.
- */
 export const useBuySellAnalytics = () => {
   const { trackEvent } = useAnalytics()
 
-  /**
-   * Track when a swap is initially requested by the user
-   */
   const trackSwapRequested = useCallback(
     (swapDetails: SwapDetails) => {
       return trackEvent({
@@ -46,9 +39,6 @@ export const useBuySellAnalytics = () => {
     [trackEvent]
   )
 
-  /**
-   * Track when a swap is confirmed by the user
-   */
   const trackSwapConfirmed = useCallback(
     (swapDetails: SwapDetails & { slippageBps: number }) => {
       return trackEvent({
@@ -66,9 +56,6 @@ export const useBuySellAnalytics = () => {
     [trackEvent]
   )
 
-  /**
-   * Track when a swap completes successfully
-   */
   const trackSwapSuccess = useCallback(
     (swapDetails: SwapDetails & { signature: string }) => {
       return trackEvent({
@@ -86,9 +73,6 @@ export const useBuySellAnalytics = () => {
     [trackEvent]
   )
 
-  /**
-   * Track when a swap fails
-   */
   const trackSwapFailure = useCallback(
     (swapDetails: SwapDetails, errorDetails: SwapError) => {
       return trackEvent({
@@ -108,9 +92,6 @@ export const useBuySellAnalytics = () => {
     [trackEvent]
   )
 
-  /**
-   * Track when the user clicks to add funds
-   */
   const trackAddFundsClicked = useCallback(
     (source: 'insufficient_balance_hint' | 'input_screen') => {
       return trackEvent({

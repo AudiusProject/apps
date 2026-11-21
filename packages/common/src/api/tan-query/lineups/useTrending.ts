@@ -123,11 +123,9 @@ export const useTrending = (
   const loadNextPage = useLoadNextPage(query)
 
   return {
-    // Raw data
     data,
     trackIds,
 
-    // Query state
     isPending: query.isPending,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
@@ -140,7 +138,6 @@ export const useTrending = (
     fetchNextPage: query.fetchNextPage,
     loadNextPage,
 
-    // Identity
     queryKey
   }
 }

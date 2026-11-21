@@ -50,7 +50,6 @@ export const useFormattedProgressLabel = ({
       ) {
         label = messages.completeLabel
       } else {
-        // Count down
         label = fillString(
           remainingLabel ?? '',
           formatNumberCommas(
@@ -87,7 +86,6 @@ export const useFormattedProgressLabel = ({
     ) {
       label = getChallengeStatusLabel(challenge, challenge?.challenge_id)
     } else {
-      // Count down
       label = fillString(
         remainingLabel ?? '',
         formatNumberCommas(
@@ -98,7 +96,6 @@ export const useFormattedProgressLabel = ({
       )
     }
   } else {
-    // Count up
     label = fillString(
       progressLabel ?? '',
       formatNumberCommas(challenge?.current_step_count?.toString() ?? ''),

@@ -64,7 +64,6 @@ export function* queryUserByHandle(
 export function* queryUsers(ids: ID[], queryOptions?: QueryOptions) {
   const users = {} as Record<ID, User>
 
-  // NOTE: its important to run these in parallel so that the batcher picks all the users at once
   const userResults = yield* all(
     ids.map((id) => {
       return call(queryUser, id, queryOptions)

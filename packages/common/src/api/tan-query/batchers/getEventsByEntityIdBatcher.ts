@@ -21,14 +21,6 @@ export const getEventsByEntityIdBatcher = memoize(
           userId: OptionalId.parse(currentUserId)
         })
 
-        // Prime the dedicated `useRemixesCount` cache from the entry counts
-        // delivered alongside the event list (keyed by the contest's parent
-        // track hashid). This turns ContestCard's entry-count badge into a
-        // cache hit so surfaces that resolve contests via this endpoint (the
-        // track-page contest section, cold contest pages, web Explore's
-        // featured contests) don't fire a count-only
-        // `/tracks/{id}/remixes?limit=0` per card. Same pattern as
-        // useAllRemixContests / useUserRemixContests.
         const entryCounts = related?.entryCounts ?? {}
         for (const [hashedTrackId, count] of Object.entries(entryCounts)) {
           const trackId = OptionalHashId.parse(hashedTrackId)

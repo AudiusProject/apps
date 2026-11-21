@@ -12,11 +12,6 @@ import { primeCollectionData } from './primeCollectionData'
 import { primeTrackData } from './primeTrackData'
 import { primeUserData } from './primeUserData'
 
-/**
- * Utility function to prime related data from API responses
- * This handles users, tracks, and playlists that may be included in the
- * related field.
- */
 export const primeRelatedData = ({
   related,
   queryClient,

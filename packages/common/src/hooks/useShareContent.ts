@@ -2,9 +2,6 @@ import { useCollection, useTrack, useUser } from '~/api'
 
 import { ShareContent, ShareModalRequest } from '../store/ui/share-modal/types'
 
-// Replaces the share-modal saga: derives populated ShareContent for the
-// modal from a request payload (type + IDs). Each hook short-circuits when
-// its ID is null, so we always call the same number of hooks.
 export const useShareContent = (
   request: ShareModalRequest | null
 ): ShareContent | null => {

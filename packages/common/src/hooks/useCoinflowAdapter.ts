@@ -31,10 +31,6 @@ type CoinflowAdapter = {
   connection: Connection
 }
 
-/** An adapter for signing and sending Coinflow withdrawal transactions. It will decorate
- * the incoming transaction to route it through a user bank. The transcation will then be
- * signed with the current user's Solana root wallet and sent/confirmed via Relay.
- */
 export const useCoinflowWithdrawalAdapter = () => {
   const {
     audiusBackend,
@@ -142,10 +138,6 @@ export const useCoinflowWithdrawalAdapter = () => {
     : null
 }
 
-/** An adapter for signing and sending unmodified Coinflow transactions. Will partialSign with the
- * current user's Solana root wallet and send/confirm locally (no relay).
- * @param onSuccess optional callback to invoke when the relay succeeds
- */
 export const useCoinflowAdapter = ({
   onSuccess,
   onFailure
@@ -184,21 +176,16 @@ export const useCoinflowAdapter = ({
             try {
               const transaction = tx as VersionedTransaction
 
-              // Get a more recent blockhash to prevent BlockhashNotFound errors
               transaction.message.recentBlockhash = (
                 await connection.getLatestBlockhash()
               ).blockhash
 
-              // Use our own fee payer as signer
               transaction.message.staticAccountKeys[0] =
                 await sdk.services.solanaRelay.getFeePayer()
               transaction.signatures[0] = Buffer.alloc(64, 0)
 
-              // Sign with user's Eth wallet derived "root" Solana wallet,
-              // which is the source of the funds for the purchase
               transaction.sign([wallet])
 
-              // Send to relay to make use of retry and caching logic
               const { signature } = await sdk.services.solanaRelay.relay({
                 transaction,
                 sendOptions: {

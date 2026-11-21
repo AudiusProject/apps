@@ -1,6 +1,3 @@
-/**
- * Errors here are complicated & a sensitive area for users, so we want to log lots of info
- */
 export type LaunchCoinErrorMetadata = {
   userId: number
   lastStep: string

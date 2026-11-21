@@ -19,7 +19,6 @@ const messages = {
   }
 }
 
-/** Same as SDK but snake-cased */
 const FollowGatedConditionsSchema = z
   .object({
     follow_user_id: z.number()
@@ -35,7 +34,6 @@ const TokenGatedConditionsSchema = z
   })
   .strict()
 
-/** Same as API extended_payment_split (snake-cased) */
 const PaymentSplitSchema = z.object({
   user_id: z.number(),
   percentage: z.number().min(0).max(100),
@@ -44,7 +42,6 @@ const PaymentSplitSchema = z.object({
   eth_wallet: z.optional(z.string())
 })
 
-/** Same as SDK but snake-cased for USDC purchase conditions */
 const USDCPurchaseConditionsSchema = z
   .object({
     usdc_purchase: z.object({
@@ -54,10 +51,6 @@ const USDCPurchaseConditionsSchema = z
   })
   .strict()
 
-/**
- * Same as SDK: arbitrary string up to 100 chars. The Genre enum is reserved
- * for autocomplete suggestions; users may submit any value.
- */
 const GenreSchema = z
   .string()
   .min(1, { message: messages.genreRequiredError })
@@ -67,7 +60,6 @@ const GenreSchema = z
     message: messages.genreRequiredError
   })
 
-/** Same as SDK. */
 const MoodSchema = z
   .enum(Object.values(Mood) as [Mood, ...Mood[]])
   .nullable()
@@ -133,28 +125,11 @@ const hiddenMetadataSchema = z.object({
   )
 })
 
-// TODO: KJ - Need to update the schema in sdk and then import here
-/**
- * Creates a schema for validating tracks to be uploaded.
- *
- * Used on the EditTrackForm of the upload page, for single/multiple
- * track uploads.
- *
- * Note that it doesn't produce the same type as that used by those
- * forms and their consumers - the form actually submits more data than
- * is validated here.
- * Note the differences between this and other schemas for tracks:
- * - This is snake cased, save for a few fields (remixOf, namely).
- * - IDs are numeric.
- * - No fields that are only knowable after upload.
- */
 const createSdkSchema = () =>
   z
     .object({
       track_id: z.optional(z.number()).nullable(),
       allowed_api_keys: z.optional(z.array(z.string())).nullable(),
-      // Tagged collaborator artists (full user objects in the form; the upload
-      // adapter maps them to numeric ids for the on-chain metadata).
       collaborators: z.optional(
         z.array(z.object({ user_id: z.number() }).passthrough()).nullable()
       ),
@@ -207,13 +182,6 @@ const createSdkSchema = () =>
     .merge(premiumMetadataSchema)
     .merge(hiddenMetadataSchema)
 
-/**
- * This is not really used as it is, since we pick out the title only of it
- * for collections and make the artwork required for non-collections.
- *
- * It does produce a more "validated" correct type for the form but that
- * wasn't used anywhere.
- */
 const TrackMetadataSchema = createSdkSchema().merge(
   z.object({
     artwork: z
@@ -224,13 +192,6 @@ const TrackMetadataSchema = createSdkSchema().merge(
   })
 )
 
-/**
- * This is what's actually used on the EditTrackForm.
- * It makes the artwork required from the TrackMetadataSchema.
- *
- * @see {@link TrackMetadataSchema}
- * @see {@link createSdkSchema}
- */
 export const TrackMetadataFormSchema = TrackMetadataSchema.refine(
   (form) => form.artwork?.url != null,
   {
@@ -244,15 +205,6 @@ const CollectionTrackMetadataSchema = TrackMetadataSchema.pick({
   track_id: true
 })
 
-/**
- * Produces a schema that validates a collection metadata for upload.
- * Note the differences between this schema and the normal collection type:
- * - This one is snake cased.
- * - It has artwork (only validates the url, not the file for some reason).
- * - There's extra track details to be validated.
- * - The tracks are only validated for their titles.
- * - The release date can be in the future.
- */
 export const createCollectionSchema = (collectionType: 'playlist' | 'album') =>
   z
     .object({
@@ -292,9 +244,6 @@ export const createCollectionSchema = (collectionType: 'playlist' | 'album') =>
             USDCPurchaseConditionsSchema,
             z.object({
               usdc_purchase: z.object({
-                // Album uploads set a price for all tracks.
-                // Note: this is made "required" via validation logic, set to optional here to avoid TS conflicts
-                // but is also prefilled in the form component (USDCPurchaseFields)
                 albumTrackPrice: z.optional(z.number().nullable())
               })
             })
@@ -305,7 +254,6 @@ export const createCollectionSchema = (collectionType: 'playlist' | 'album') =>
     )
     .merge(hiddenMetadataSchema)
     .superRefine((data, ctx) => {
-      // For albums, artwork is always required
       if (collectionType === 'album') {
         if (!data.artwork?.url || data.artwork.url === imageBlank) {
           ctx.addIssue({
@@ -330,14 +278,6 @@ export const createCollectionSchema = (collectionType: 'playlist' | 'album') =>
       }
     })
 
-/**
- * Extra metadata on the collection that doesn't get validated to
- * the types that are used.
- * - Playlist ID isn't on the schema.
- * - Artwork is more than just a URL.
- * - Tracks are full TrackForUploads, not just titles.
- * - Then some extra optional Collection fields so that the adapters for SDK are happy.
- */
 type UnvalidatedCollectionMetadata = {
   playlist_id?: number
   artwork:
@@ -365,5 +305,4 @@ export const AlbumSchema = createCollectionSchema('album')
 export type AlbumValues = z.input<typeof AlbumSchema> &
   UnvalidatedCollectionMetadata
 
-/** Values produced by the collection form. */
 export type CollectionValues = PlaylistValues | AlbumValues

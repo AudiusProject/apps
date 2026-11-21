@@ -120,9 +120,6 @@ function* getContentInfo({ contentId, contentType }: GetPurchaseConfigArgs) {
     (metadata && 'download_conditions' in metadata
       ? metadata?.download_conditions
       : null)
-  // Stream access is a superset of download access - purchasing a stream-gated
-  // track also gets you download access, but purchasing a download-gated track
-  // only gets you download access (because the track was already free to stream).
   const purchaseAccess = metadata?.is_stream_gated
     ? PurchaseAccess.STREAM
     : PurchaseAccess.DOWNLOAD
@@ -312,12 +309,6 @@ type GetPurchaseMetadataArgs = {
   contentType: PurchaseableContentType
 }
 
-/**
- * Intended to replace the old purchaseWithCoinflow Saga to use new SDK.
- * purchaseAlbumWithCoinflow to follow
- * Creates the purchase transaction but doesn't send it and instead pops the coinflow modal.
- * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/tracks/TracksApi.ts#L386 purchase}
- */
 function* purchaseTrackWithCoinflow(args: {
   sdk: AudiusSdkWithServices
   trackId: ID
@@ -409,7 +400,6 @@ function* purchaseTrackWithCoinflow(args: {
     canceled: take(transactionCanceled)
   })
 
-  // Return early for failure or cancellation
   if (result.canceled) {
     throw new PurchaseContentError(
       PurchaseErrorCode.Canceled,
@@ -421,11 +411,6 @@ function* purchaseTrackWithCoinflow(args: {
   }
 }
 
-/**
- * Intended to replace the old purchaseWithCoinflow Saga to use new SDK.
- * Creates the purchase transaction but doesn't send it and instead pops the coinflow modal.
- * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/albums/AlbumsApi.ts#L386 purchase}
- */
 function* purchaseAlbumWithCoinflow(args: {
   sdk: AudiusSdkWithServices
   albumId: ID
@@ -517,7 +502,6 @@ function* purchaseAlbumWithCoinflow(args: {
     canceled: take(transactionCanceled)
   })
 
-  // Return early for failure or cancellation
   if (result.canceled) {
     throw new PurchaseContentError(
       PurchaseErrorCode.Canceled,
@@ -530,7 +514,6 @@ function* purchaseAlbumWithCoinflow(args: {
 }
 
 type PurchaseUSDCWithStripeArgs = {
-  /** Amount of USDC to purchase, as dollars */
   amount: number
 }
 function* purchaseUSDCWithStripe({ amount }: PurchaseUSDCWithStripeArgs) {
@@ -553,24 +536,18 @@ function* purchaseUSDCWithStripe({ amount }: PurchaseUSDCWithStripeArgs) {
     failed: take(buyUSDCFlowFailed)
   })
 
-  // Return early for cancellation
   if (result.canceled) {
     throw new PurchaseContentError(
       PurchaseErrorCode.Canceled,
       'User canceled onramp'
     )
   }
-  // throw errors out to the shared handler below
   if (result.failed) {
     throw result.failed.payload.error
   }
   yield* put(usdcBalanceSufficient())
 }
 
-/**
- * Collects and encrypts user's email after a successful purchase
- * @param metadata The metadata of the purchased content
- */
 function* collectEmailAfterPurchase({
   metadata
 }: {
@@ -613,7 +590,6 @@ function* collectEmailAfterPurchase({
       initialEmailEncryptionUuid: EMAIL_ENCRYPTION_UUID ?? 0
     })
   } catch (error) {
-    // Log error but don't disrupt purchase flow
     console.error('Failed to process email after purchase:', error)
   }
 }
@@ -635,7 +611,6 @@ function* doStartPurchaseContentFlow({
   const audiusSdk = yield* getContext('audiusSdk')
   const sdk = yield* call(audiusSdk)
 
-  // wait for guest account creation
   yield* call(
     waitForQueryValue<WalletAddresses>,
     queryWalletAddresses,
@@ -673,7 +648,6 @@ function* doStartPurchaseContentFlow({
     isGuest: !!guestEmail
   }
 
-  // Record start
   yield* call(
     track,
     make({
@@ -683,8 +657,6 @@ function* doStartPurchaseContentFlow({
   )
 
   try {
-    // get user & user bank
-
     if (!purchaserUserId) {
       throw new Error('Failed to fetch purchasing user id')
     }
@@ -693,11 +665,8 @@ function* doStartPurchaseContentFlow({
       tokenAccount: userBank
     })
 
-    // In the case where there is no amount, the token account was probably
-    // just created. Just use 0 for initial balance.
     const { amount: initialBalance } = tokenAccountInfo ?? { amount: 0 }
 
-    // USDC has 6 decimals, so 1 cent = 10^4 wei
     const USDC_CENT_WEI = USDC(0.01).value
     const priceWei = USDC(BigInt(price) * USDC_CENT_WEI).value
     const extraAmountWei = USDC(BigInt(extraAmount ?? 0) * USDC_CENT_WEI).value
@@ -712,14 +681,12 @@ function* doStartPurchaseContentFlow({
     switch (purchaseMethod) {
       case PurchaseMethod.BALANCE:
       case PurchaseMethod.CRYPTO: {
-        // Invariant: The user must have enough funds
         if (balanceNeeded > BigInt(0)) {
           throw new PurchaseContentError(
             PurchaseErrorCode.InsufficientBalance,
             'Unexpected insufficient balance to complete purchase'
           )
         }
-        // No balance needed, perform the purchase right away
         if (contentType === PurchaseableContentType.TRACK) {
           yield* call([sdk.tracks, sdk.tracks.purchaseTrack], {
             userId: Id.parse(purchaserUserId),
@@ -760,7 +727,6 @@ function* doStartPurchaseContentFlow({
         const purchaseAmount = (price + (extraAmount ?? 0)) / 100.0
         switch (purchaseVendor) {
           case PurchaseVendor.COINFLOW:
-            // Purchase with coinflow, funding and completing the purchase in one step.
             if (contentType === PurchaseableContentType.TRACK) {
               yield* call(purchaseTrackWithCoinflow, {
                 sdk,
@@ -784,7 +750,6 @@ function* doStartPurchaseContentFlow({
             }
             break
           case PurchaseVendor.STRIPE:
-            // Buy USDC with Stripe. Once funded, continue with purchase.
             yield* call(purchaseUSDCWithStripe, { amount: purchaseAmount })
             if (contentType === PurchaseableContentType.TRACK) {
               yield* call([sdk.tracks, sdk.tracks.purchaseTrack], {
@@ -809,10 +774,8 @@ function* doStartPurchaseContentFlow({
       }
     }
 
-    // Mark the purchase as successful
     yield* put(purchaseSucceeded())
 
-    // Poll to confirm purchase (waiting for a signature)
     yield* pollForPurchaseConfirmation({ contentId, contentType })
 
     const { metadata } = yield* call(getContentInfo, {
@@ -820,10 +783,8 @@ function* doStartPurchaseContentFlow({
       contentType
     })
 
-    // Collect email after successful purchase
     yield* call(collectEmailAfterPurchase, { metadata })
 
-    // Auto-favorite the purchased item
     if (!guestEmail) {
       if (contentType === PurchaseableContentType.TRACK) {
         yield* put(saveTrack(contentId, FavoriteSource.IMPLICIT))
@@ -842,7 +803,6 @@ function* doStartPurchaseContentFlow({
       }
     }
 
-    // Check if playing the purchased track's preview and if so, stop it
     const isPreviewing = yield* select(getPreviewing)
     const nowPlayingTrackId = yield* select(getTrackId)
     const isPlayingTrackInAlbum =
@@ -859,7 +819,6 @@ function* doStartPurchaseContentFlow({
       yield* put(stop({}))
     }
 
-    // Finish
     yield* put(purchaseConfirmed({ contentId, contentType }))
 
     yield* call(
@@ -870,15 +829,11 @@ function* doStartPurchaseContentFlow({
       })
     )
   } catch (e: unknown) {
-    // If we get a known error, pipe it through directly. Otherwise make sure we
-    // have a properly contstructed error to put into the slice.
     const error =
       e instanceof PurchaseContentError || e instanceof BuyUSDCError
         ? e
         : new PurchaseContentError(PurchaseErrorCode.Unknown, `${e}`)
 
-    // Nested sagas will throw for cancellation, but we don't need to log that as
-    // an error, just return early
     if (error.code === PurchaseErrorCode.Canceled) {
       yield* put(purchaseCanceled())
       return
@@ -947,7 +902,6 @@ function* purchaseWithAnything({
       FeatureFlags.NETWORK_CUT_ENABLED
     )
 
-    // Get the USDC user bank
     const usdcUserBank = yield* call(getOrCreateUSDCUserBank)
     const usdcUserBankTokenAccount = yield* call(pollForTokenAccountInfo, {
       tokenAccount: usdcUserBank
@@ -974,7 +928,6 @@ function* purchaseWithAnything({
       yield* call(waitForValue, getWalletConnectPublicKey)
       sourceWallet = new PublicKey(yield* select(getWalletConnectPublicKey))
     } else {
-      // Get the solana wallet provider
       const provider = window.solana
       if (!provider) {
         throw new Error('No solana provider / wallet found')
@@ -1041,7 +994,6 @@ function* purchaseWithAnything({
         )
       }
 
-      // Make sure user has enough funds to purchase content
       let hasEnoughTokens = false
       try {
         const { amount } = yield* call(
@@ -1055,7 +1007,6 @@ function* purchaseWithAnything({
       }
 
       if (!hasEnoughTokens) {
-        // For wrapped SOL, check SOL balance as well since jupiter will handle the wrapping
         if (inputMint === TOKEN_LISTING_MAP.SOL.address) {
           const amount = yield* call(
             [connection, connection.getBalance],
@@ -1071,7 +1022,6 @@ function* purchaseWithAnything({
         )
       }
 
-      // Get the payment router address and swap directly into it
       const { swapTransaction } = yield* call([jup, jup.swapPost], {
         swapRequest: {
           quoteResponse: quote,
@@ -1082,7 +1032,6 @@ function* purchaseWithAnything({
       const decoded = Buffer.from(swapTransaction, 'base64')
       transaction = VersionedTransaction.deserialize(decoded)
 
-      // Get address lookup table accounts
       const getLUTs = async () => {
         return await Promise.all(
           transaction.message.addressTableLookups.map(async (lookup) => {
@@ -1098,7 +1047,6 @@ function* purchaseWithAnything({
         )
       }
       addressLookupTableAccounts = yield* call(getLUTs)
-      // Decompile transaction message and add transfer instruction
       message = TransactionMessage.decompile(transaction.message, {
         addressLookupTableAccounts
       })
@@ -1147,10 +1095,8 @@ function* purchaseWithAnything({
       } with id ${contentId}...`
     )
 
-    // Compile the message and update the transaction
     transaction.message = message.compileToV0Message(addressLookupTableAccounts)
 
-    // Execute the swap by signing and sending the transaction
     if (isNativeMobile && mobileWalletActions) {
       const { signAndSendTransaction } = mobileWalletActions
       const getWalletConnectState = (state: any) => state.walletConnect

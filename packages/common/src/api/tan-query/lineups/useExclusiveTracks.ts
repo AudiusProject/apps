@@ -101,11 +101,9 @@ export const useExclusiveTracks = (
   const loadNextPage = useLoadNextPage(query)
 
   return {
-    // Raw data
     data,
     trackIds,
 
-    // Query state
     isPending: query.isPending,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
@@ -116,12 +114,10 @@ export const useExclusiveTracks = (
     fetchNextPage: query.fetchNextPage,
     loadNextPage,
 
-    // Identity
     queryKey
   }
 }
 
-// Hook to get the count of exclusive tracks
 export const useExclusiveTracksCount = (args: {
   userId: ID | null | undefined
   gateConditions?: GateCondition[]

@@ -42,8 +42,6 @@ type UseBuySellSwapProps = {
   activeTab: BuySellTab
   selectedPair: CoinPair
   swapHookData: SwapHookData
-  // The swap is handled externally to allow for external wallet swaps
-  // Web and mobile use different services for these so we let each repo handle the logic
   handleSwap: (params: SwapParams) => void
 }
 
@@ -71,16 +69,13 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
 
     const { inputAmount } = transactionData
 
-    // Get the correct input and output token addresses based on the selected pair and active tab
     let inputMintAddress: string
     let outputMintAddress: string
 
     if (activeTab === 'buy') {
-      // Buy: pay with quote token, receive base token
       inputMintAddress = selectedPair.quoteToken.address ?? ''
       outputMintAddress = selectedPair.baseToken.address ?? ''
     } else {
-      // Sell: pay with base token, receive quote token
       inputMintAddress = selectedPair.baseToken.address ?? ''
       outputMintAddress = selectedPair.quoteToken.address ?? ''
     }
@@ -95,19 +90,15 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
 
   const invalidateBalances = () => {
     if (user?.wallet) {
-      // Invalidate USDC balance queries
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.usdcBalance, user.wallet]
       })
-      // Invalidate individual user coin queries (for fan clubs and $AUDIO)
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoin]
       })
-      // Invalidate general user coins queries
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoins]
       })
-      // Invalidate fan club members queries (leaderboard)
       if (baseCoin?.mint) {
         queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.fanClubMembers, baseCoin?.mint]
@@ -119,7 +110,6 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
         })
       }
 
-      // Invalidate fan club queries to refresh fee claiming and graduation progress
       if (baseCoin?.mint) {
         queryClient.invalidateQueries({
           queryKey: getFanClubQueryKey(baseCoin.mint)
@@ -131,7 +121,6 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
         })
       }
 
-      // Invalidate fan club feed and comment queries so locked content is re-evaluated
       if (baseCoin?.mint) {
         queryClient.invalidateQueries({
           queryKey: getFanClubFeedQueryKey({ mint: baseCoin.mint })
@@ -142,12 +131,10 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
           queryKey: getFanClubFeedQueryKey({ mint: quoteCoin.mint })
         })
       }
-      // Invalidate individual comment queries so locked posts refetch with access
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.comment]
       })
 
-      // Invalidate track queries to provide track access if the user has traded the fan club
       const baseOwnerId = baseCoin?.ownerId ?? null
       const quoteOwnerId = quoteCoin?.ownerId ?? null
 
@@ -193,7 +180,6 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
   useEffect(() => {
     if (swapStatus === 'success' && swapData) {
       if (swapData.status === SwapStatus.SUCCESS) {
-        // Success - invalidate balances and navigate to success screen
         invalidateBalances()
         setSwapResult({
           inputAmount:
@@ -206,11 +192,9 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
         })
         setCurrentScreen('success')
       } else {
-        // Error data returned - return to input screen
         setCurrentScreen('input')
       }
     } else if (swapStatus === 'error') {
-      // Error - return to input screen
       setCurrentScreen('input')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

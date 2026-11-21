@@ -1,5 +1,4 @@
 export const walletMessages = {
-  // CashWallet messages
   cashBalance: 'Cash Balance',
   withdraw: 'Withdraw',
   addCash: 'Add Cash',
@@ -22,7 +21,6 @@ export const walletMessages = {
   error: 'An error occured.',
   close: 'Close',
 
-  // Withdraw USDC messages
   withdrawCash: 'Withdraw Cash',
   continue: 'Continue',
   amountToWithdraw: 'Amount to Withdraw',
@@ -55,23 +53,19 @@ export const walletMessages = {
     'By proceeding, you accept full responsibility for any errors, including the risk of irreversible loss of funds. Transfers are final and cannot be reversed.',
   sendTokensTransactionInProgress: 'Transaction in Progress',
 
-  // PrepareTransfer messages
   holdOn: 'Hold on!',
   preparingTransfer:
     "We're getting your transfer ready. This could take a few moments. Please don't leave this page.",
 
-  // TransferInProgress messages
   transferInProgress: 'Transfer in Progress',
   thisMayTakeAMoment: 'This may take a moment.',
 
-  // TransferSuccessful messages
   amountWithdrawn: 'Amount Withdrawn',
   viewOnExplorer: 'View on Solana Block Explorer',
   transactionComplete: 'Your transaction is complete!',
   done: 'Done',
   confirm: 'Confirm',
 
-  // Error messages
   errors: {
     insufficientBalance: 'Insufficient cash balance',
     insufficientBalanceDetails:
@@ -101,7 +95,6 @@ export const walletMessages = {
   buySellNotSupported: 'This is not supported in your region',
   buySellNotSupportedManagerMode: 'This is not supported as a manager',
 
-  // ReceiveTokensModal messages
   receiveTokensTitle: 'receive',
   receiveTokensExplainer: 'Send tokens to your built in Audius wallet.',
   receiveTokensDisclaimer: 'Use caution to avoid errors and lost funds.',
@@ -115,7 +108,6 @@ export const walletMessages = {
   becomeMemberBody: (coinTicker: string) =>
     `Buy $${coinTicker} to join the fan club and unlock members-only perks.`,
 
-  // Linked Wallets messages
   linkedWallets: {
     titleHasWallets: 'Linked Wallets ',
     titleNoWallets: 'Link External Wallet',
@@ -138,7 +130,6 @@ export const walletMessages = {
     }
   },
 
-  // Fan clubs (fan club tokens)
   fanClubs: {
     title: 'Fan Clubs',
     searchPlaceholder: 'Search fan clubs',
@@ -164,7 +155,6 @@ export const walletMessages = {
     sortHolders: 'Holders'
   },
 
-  // Balance History messages
   balanceHistory: {
     loading: 'Loading balance history...',
     error: 'Unable to load balance history'

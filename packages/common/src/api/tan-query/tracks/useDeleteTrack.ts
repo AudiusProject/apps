@@ -46,11 +46,9 @@ export const useDeleteTrack = () => {
         throw new Error('User ID is required')
       }
 
-      // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
       if (!previousTrack) throw new Error('Track not found')
 
-      // Before deleting, check if the track is set as the artist pick & update if so
       if (currentUser.artist_pick_track_id === trackId) {
         const updatedCurrentUser: UserMetadata = {
           ...currentUser,
@@ -64,7 +62,6 @@ export const useDeleteTrack = () => {
         })
       }
 
-      // Optimistic update in cache
       primeTrackData({
         tracks: [
           {
@@ -81,7 +78,6 @@ export const useDeleteTrack = () => {
     onError: (error, { trackId }, context) => {
       if (!context || !currentUserId || !context.previousTrack) return
 
-      // Revert optimistic updates
       primeTrackData({
         tracks: [
           {

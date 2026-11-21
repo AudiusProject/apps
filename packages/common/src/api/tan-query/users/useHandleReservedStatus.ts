@@ -80,9 +80,6 @@ export const getHandleReservedStatusQueryKey = (
     'notReserved' | 'reserved'
   >
 
-/**
- * Hook to check if a handle is reserved on social media platforms
- */
 export const useHandleReservedStatus = (
   handle: string | null | undefined,
   options?: QueryOptions

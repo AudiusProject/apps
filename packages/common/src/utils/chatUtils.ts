@@ -42,9 +42,6 @@ const messages = {
   blastCTACoinHolders: (ticker: string) => `everyone who holds $${ticker}`
 }
 
-/**
- * Title for a group chat from its other members, e.g. "Ann, Bo & 2 others".
- */
 export const formatGroupChatTitle = (
   users: Array<{ name?: string | null }>,
   maxNames = 2
@@ -60,10 +57,6 @@ export const formatGroupChatTitle = (
   return `${names.slice(0, maxNames).join(', ')} & ${rest} ${rest === 1 ? 'other' : 'others'}`
 }
 
-/**
- * True when this message starts a new run from a different sender, which is
- * where group chats show the sender's name.
- */
 export const isFirstInSenderRun = (
   message: ChatMessage,
   previousMessage?: ChatMessage
@@ -72,9 +65,6 @@ export const isFirstInSenderRun = (
   return hasTail(previousMessage, message)
 }
 
-/**
- * Checks to see if the message was sent within the time threshold for grouping it with the next message
- */
 export const hasTail = (message: ChatMessage, newMessage?: ChatMessage) => {
   if (!newMessage) return true
   return (
@@ -84,12 +74,6 @@ export const hasTail = (message: ChatMessage, newMessage?: ChatMessage) => {
   )
 }
 
-/**
- * Checks if the current message:
- * - Is the first unread message
- * - Is by a different user than the current one
- * - Is not the very first message
- */
 export const isEarliestUnread = ({
   unreadCount,
   lastReadAt,
@@ -116,10 +100,6 @@ export const isEarliestUnread = ({
   return isUnread && !!prevMessage && !isPreviousMessageUnread && !isAuthor
 }
 
-/**
- * Can only fetch more messages if it's not in a loading state and
- * there are previous messages to fetch
- */
 export const chatCanFetchMoreMessages = (
   messagesStatus?: Status | 'PENDING',
   prevCount?: number
@@ -127,11 +107,6 @@ export const chatCanFetchMoreMessages = (
   return !!messagesStatus && messagesStatus !== Status.LOADING && !!prevCount
 }
 
-/**
- * Matches audius links with a specific hostname in the provided text
- * @param text input text
- * @param hostname the hostname of the site, e.g. audius.co
- */
 export const matchAudiusLinks = ({
   text,
   hostname
@@ -153,20 +128,10 @@ export const matchAudiusLinks = ({
   }
 }
 
-/**
- * Formats a track for human readability.
- * @param track
- * @returns string of "title - display name"
- */
 export const formatTrackName = ({ track }: { track: Track }) => {
   return `${track.user.name} - ${track.title}`
 }
 
-/**
- * Formats a collection for human readability.
- * @param collection
- * @returns string of "playlist name - display name"
- */
 export const formatCollectionName = ({
   collection
 }: {
@@ -175,23 +140,10 @@ export const formatCollectionName = ({
   return `${collection.user.name} - ${collection.playlistName}`
 }
 
-/**
- * Formats a user for human readability.
- * @param track
- * @returns string of "display name"
- */
 export const formatUserName = ({ user }: { user: User }) => {
   return user.name
 }
 
-/**
- * Custom split function that splits on \n, removing empty results
- * and keeping the \n in the returned array.
- * - hello\nworld becomes ['hello', '\n', 'world']
- * - hello\n becomes ['hello', '\n']
- * @param s
- * @returns array of parts
- */
 export const splitOnNewline = (s: string) => {
   return s.split(/(\n)/).filter(Boolean)
 }

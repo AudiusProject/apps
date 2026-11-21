@@ -24,7 +24,6 @@ export const getLargestTimeUnitText = (time: Date) => {
   const diff = now - then
   let unit: TimeUnit | null = null
 
-  // Iterate through all time units to determine the largest one
   Object.entries(timeUnitMsMap).forEach(([u, ms]) => {
     if (diff >= ms) {
       unit = u as TimeUnit
@@ -50,10 +49,8 @@ export const formatSeconds = (seconds: number): string => {
 export const formatSecondsAsText = (seconds: number): string => {
   const d = dayjs.duration(seconds, 'seconds')
   if (seconds >= SECONDS_PER_HOUR) {
-    // Formatting for durations longer than an hour
     return `${d.hours()}h ${d.minutes()}m`
   } else {
-    // Formatting for durations shorter than an hour
     return `${d.minutes()}m ${d.seconds()}s`
   }
 }
@@ -72,7 +69,6 @@ export const formatLineupTileDuration = (
 
   const d = dayjs.duration(seconds, 'seconds')
   const hourText = d.hours() > 0 ? `${d.hours()}hr ` : ''
-  // Ceiling the minute value
   const minuteText = `${
     d.seconds() > 0 && d.minutes() < 59 ? d.minutes() + 1 : d.minutes()
   }m`

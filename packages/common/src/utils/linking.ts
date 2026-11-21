@@ -16,7 +16,6 @@ export const externalLinkAllowList = new Set([
 
 export const isAllowedExternalLink = (link: string) => {
   try {
-    // Add protocol if missing to allow URL parsing
     const urlWithProtocol =
       link.startsWith('http://') || link.startsWith('https://')
         ? link

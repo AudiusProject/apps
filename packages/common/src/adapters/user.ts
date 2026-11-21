@@ -33,7 +33,6 @@ import {
 import { playlistLibraryFromSDK } from './playlistLibrary'
 import { transformAndCleanList } from './utils'
 
-/** Converts a SDK User response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
 export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
   const decodedUserId = OptionalHashId.parse(input.id)
   if (!decodedUserId) {
@@ -41,7 +40,6 @@ export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
   }
 
   const newUser: UserMetadata = {
-    // Fields from API that are omitted in this model
     ...omit(snakecaseKeys(input), [
       'id',
       'cover_photo_legacy',
@@ -49,12 +47,10 @@ export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
       'artist_coin_badge'
     ]),
 
-    // Conversions
     artist_pick_track_id: input.artistPickTrackId
       ? HashId.parse(input.artistPickTrackId)
       : null,
 
-    // Nested Types
     cover_photo_cids: input.coverPhotoCids
       ? coverPhotoSizesCIDsFromSDK(input.coverPhotoCids)
       : null,
@@ -62,7 +58,6 @@ export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
       ? profilePictureSizesCIDsFromSDK(input.profilePictureCids)
       : null,
 
-    // Re-types
     balance: input.balance as StringWei,
     associated_wallets_balance: input.associatedWalletsBalance as StringWei,
     total_balance: input.totalBalance as StringWei,
@@ -91,7 +86,6 @@ export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
           }
         })()
       : {},
-    // Required Nullable fields
     bio: input.bio ?? null,
     twitter_handle: input.twitterHandle ?? null,
     instagram_handle: input.instagramHandle ?? null,
@@ -103,7 +97,6 @@ export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
     location: input.location ?? null,
     profile_picture_sizes: input.profilePictureSizes ?? null,
 
-    // Explicit handling for fan_club_badge to convert nested logoUri to logo_uri
     fan_club_badge: input.artistCoinBadge
       ? {
           mint: input.artistCoinBadge.mint ?? '',
@@ -164,12 +157,10 @@ export const accountFromSDK = (
     track_save_count: input.trackSaveCount
   }
   return {
-    // Account users included extended information, so we'll merge that in here.
     user: {
       ...user,
       playlists: accountMetadata.playlists
     },
-    // These values are included outside the user as well to facilitate separate caching
     ...accountMetadata
   }
 }
@@ -201,17 +192,9 @@ function mapLibraryContentsToSdkFormat(
 export const userMetadataToSdk = (
   input: WriteableUserMetadata & Pick<AccountUserMetadata, 'playlist_library'>
 ): UpdateUserRequestBody => ({
-  // The SDK's strict schema rejects null for name/handle/is_deactivated, so
-  // coerce nullish to undefined — legacy records where these are null in the
-  // DB (despite TS types) were silently failing profile save.
   name: input.name ?? undefined,
   handle: input.handle ?? undefined,
   isDeactivated: input.is_deactivated ?? undefined,
-  // The SDK schema *does* allow null for profile_type, spl_usdc_payout_wallet,
-  // and coin_flair_mint (null is meaningful — e.g. coinFlairMint:null = use
-  // default badge). The OpenAPI-generated `UpdateUserRequestBody` type is
-  // incorrectly non-nullable for these, so spread via pick to bypass TS while
-  // preserving null at runtime.
   ...camelcaseKeys(
     pick(input, ['profile_type', 'spl_usdc_payout_wallet', 'coin_flair_mint'])
   ),

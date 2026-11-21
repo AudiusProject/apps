@@ -14,15 +14,6 @@ export const FEATURE_FLAG_OVERRIDE_KEY = 'FeatureFlagOverride'
 
 export type OverrideSetting = 'enabled' | 'disabled' | null
 
-/**
- * Helper for when to recompute flag state, used by both FeatureFlags
- * and RemoteConfig. Returns a boolean that toggles whenever it should recompute (i.e. for use in `useEffect`)
- * Recomputes when:
- * - User logs in (account is seen in store)
- * - Config loads
- * - User ID is set on Optimizely (seen by event emission)
- **/
-
 export const useRecomputeToggle = (configLoaded: boolean) => {
   const [recomputeToggle, setRecomputeToggle] = useState(0)
   const isInitialRender = useRef(true)
@@ -31,9 +22,7 @@ export const useRecomputeToggle = (configLoaded: boolean) => {
 
   const hasAccount = useHasAccount()
 
-  // Flip recompute bool whenever account or config state changes
   useEffect(() => {
-    // Skip the initial render to prevent unnecessary rerenders
     if (isInitialRender.current) {
       isInitialRender.current = false
       prevHasAccount.current = hasAccount
@@ -41,7 +30,6 @@ export const useRecomputeToggle = (configLoaded: boolean) => {
       return
     }
 
-    // Only increment if there's an actual change
     if (
       prevHasAccount.current !== hasAccount ||
       prevConfigLoaded.current !== configLoaded
@@ -55,12 +43,6 @@ export const useRecomputeToggle = (configLoaded: boolean) => {
   return recomputeToggle
 }
 
-/**
- * @deprecated use `useFeatureFlag` instead
- * Hooks into updates for a given feature flag.
- * Returns both `isLoaded` and `isEnabled` for more granular control
- * @param flag
- */
 export const createUseFeatureFlagHook =
   ({
     remoteConfigInstance,
@@ -116,7 +98,6 @@ export const createUseFeatureFlagHook =
       getOverride().catch(() => {})
     })
 
-    // Hard-code overrides, mobile only — see `HARDCODED_ENABLED_FLAGS` below.
     if (
       HARDCODED_ENABLED_FLAGS[flag] &&
       remoteConfigInstance.getPlatform() === 'mobile'
@@ -135,15 +116,8 @@ export const createUseFeatureFlagHook =
     }
   }
 
-/**
- * Mobile-only flags that are hard-coded to enabled (Optimizely, env defaults,
- * and local overrides are skipped on native). Web/desktop continue to honor
- * Optimizely and env defaults. Add entries only for short-lived release
- * toggles; remove when remote config is updated.
- */
 const HARDCODED_ENABLED_FLAGS: Partial<Record<FeatureFlags, true>> = {}
 
-/** Fetches enabled status of a given feature flag with fallback. Result is memoized. */
 export const useFeatureFlag = (
   flag: FeatureFlags,
   fallbackFlag?: FeatureFlags

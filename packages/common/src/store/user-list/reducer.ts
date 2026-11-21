@@ -63,9 +63,6 @@ export const UserListReducerFactory = {
           }
         })
       },
-      // Changing the page size after we've started rendering
-      // users is super not supported. If you try to do that,
-      // UserList punishes you by resetting everything to initial values.
       [actions.SET_PAGE_SIZE](state, action) {
         return withTagCheck(state, action, (state, action) => {
           if (state.page !== 0) {

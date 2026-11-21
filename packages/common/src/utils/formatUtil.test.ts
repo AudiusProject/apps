@@ -12,7 +12,6 @@ describe('formatUtil', function () {
     expect(formatCount(100)).toBe('100')
     expect(formatCount(1001)).toBe('1K')
     expect(formatCount(1200)).toBe('1.2K')
-    // expect(formatCount(1239)).toBe('1.23K') fails: rounds up
     expect(formatCount(9998)).toBe('10K')
     expect(formatCount(10023)).toBe('10K')
     expect(formatCount(10423)).toBe('10.4K')
@@ -20,7 +19,6 @@ describe('formatUtil', function () {
     expect(formatCount(103313)).toBe('103K')
     expect(formatCount(1000000)).toBe('1M')
     expect(formatCount(1234567)).toBe('1.23M')
-    // expect(formatCount(1235567)).toBe('1.23M') fails: rounds up
     expect(formatCount(100000000)).toBe('100M')
   })
 

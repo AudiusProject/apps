@@ -7,10 +7,6 @@ export type UseFollowSuggestionsArgs = {
   limit?: number
 }
 
-/**
- * Follow suggestions for empty-feed surfaces: personalized suggestions when
- * available, otherwise the featured artists list.
- */
 export const useFollowSuggestions = (
   { limit }: UseFollowSuggestionsArgs = {},
   options?: QueryOptions
@@ -20,8 +16,6 @@ export const useFollowSuggestions = (
 
   const hasPersonalized = !!personalized?.length
 
-  // Fetch in parallel so new accounts (no personalized results) don't wait on
-  // two serial requests.
   const { data: featured, isPending: isFeaturedPending } = useTopArtists(
     'Featured',
     options

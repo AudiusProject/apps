@@ -18,7 +18,6 @@ export const useCurrentCoinPair = ({
   getPair?: (baseSymbol: string, quoteSymbol: string) => CoinPair | null
 }) => {
   return useMemo(() => {
-    // Convert availableTokens array to map for efficient lookup
     const coinMap = availableCoins.reduce(
       (map, coin) => {
         map[coin.symbol] = coin
@@ -27,7 +26,6 @@ export const useCurrentCoinPair = ({
       {} as Record<string, CoinInfo>
     )
 
-    // Try to get pair using the efficient API first
     if (getPair) {
       const pair = getPair(baseTokenSymbol, quoteTokenSymbol)
       if (pair) {
@@ -35,7 +33,6 @@ export const useCurrentCoinPair = ({
       }
     }
 
-    // Fallback to creating pair from available tokens
     const pair = createPairFromSymbols(
       baseTokenSymbol,
       quoteTokenSymbol,
@@ -45,7 +42,6 @@ export const useCurrentCoinPair = ({
       return pair
     }
 
-    // Final fallback to selected pair or null
     return selectedPair || null
   }, [availableCoins, getPair, baseTokenSymbol, quoteTokenSymbol, selectedPair])
 }

@@ -24,10 +24,6 @@ export const {
   actions: publishHiddenTracksConfirmationModalActions
 } = publishHiddenTracksConfirmationModal
 
-/**
- * The publish sagas block on one of these after opening the modal. They carry no
- * payload: the saga already knows which collection it is publishing.
- */
 export const publishHiddenTracksConfirmed = createAction(
   'modals/PublishHiddenTracksConfirmation/confirmed'
 )

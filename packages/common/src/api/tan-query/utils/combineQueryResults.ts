@@ -36,11 +36,6 @@ export const combineQueryStatuses = (
   }
 }
 
-/**
- * Combines multiple query results into a single query result status
- * @param queries Array of query results to combine
- * @returns A UseQueryResult with combined status information
- */
 export const combineQueryResults = <T>(
   queries: UseQueryResult<T, Error>[]
 ): UseQueryResult<T, Error> => {
@@ -53,7 +48,6 @@ export const combineQueryResults = <T>(
   )
   const isPlaceholderData = queries.some((query) => query.isPlaceholderData)
 
-  // Combine error information if any query has an error
   const error = queries.find((query) => query.error)?.error ?? null
   const errorUpdatedAt = queries.reduce((latest, query) => {
     const currentTime = query.errorUpdatedAt
@@ -62,7 +56,6 @@ export const combineQueryResults = <T>(
     return currentTime > latest ? currentTime : latest
   }, 0)
 
-  // Get the most recent fetch time
   const dataUpdatedAt = queries.reduce((latest, query) => {
     const currentTime = query.dataUpdatedAt
     if (!currentTime) return latest
@@ -70,12 +63,10 @@ export const combineQueryResults = <T>(
     return currentTime > latest ? currentTime : latest
   }, 0)
 
-  // Determine overall status
   let status: 'pending' | 'error' | 'success' = 'success'
   if (isPending) status = 'pending'
   if (isError) status = 'error'
 
-  // Create a combined refetch function that refetches all queries
   const refetch = async (
     options?: RefetchOptions
   ): Promise<QueryObserverResult<T | undefined, Error>> => {
@@ -88,7 +79,6 @@ export const combineQueryResults = <T>(
     } as QueryObserverResult<T | undefined, Error>
   }
 
-  // Create a promise that resolves when all queries are settled
   const promise = Promise.all(queries.map((q) => q.promise)).then(
     () => undefined
   ) as Promise<T | undefined>

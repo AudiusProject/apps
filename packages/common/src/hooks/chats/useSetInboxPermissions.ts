@@ -45,21 +45,9 @@ export const useSetInboxPermissions = () => {
   )
 
   return {
-    /**
-     * The current user's permissions.
-     */
     permissions,
-    /**
-     * The current permissions status.
-     */
     permissionsStatus,
-    /**
-     * Fetches the current user's permissions from the backend.
-     */
     doFetchPermissions,
-    /**
-     * Saves the current user's permissions to the backend.
-     */
     savePermissions
   }
 }

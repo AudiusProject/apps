@@ -5,15 +5,10 @@ import type { Comment, ID } from '~/models'
 import { useTrackComments } from './useTrackComments'
 
 const PAGE_SIZE = 50
-// GetTrackCommentsSortMethodEnum.Timestamp
 const SORT_BY_TIMESTAMP = 'timestamp'
 
 export type TimestampedComment = Comment & { trackTimestampS: number }
 
-/**
- * The track's comments that carry a timestamp, oldest timestamp first.
- * Capped at one page; the list is for markers and bubbles, not the thread.
- */
 export const useTimestampedComments = (
   trackId: ID | undefined,
   enabled: boolean

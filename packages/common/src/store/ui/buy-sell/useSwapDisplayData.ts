@@ -22,7 +22,6 @@ const calculatePriceInternal = (
   if (tab === 'buy') {
     return outputAmount !== 0 ? inputAmount / outputAmount : 0
   } else {
-    // tab === 'sell'
     return inputAmount !== 0 ? outputAmount / inputAmount : 0
   }
 }
@@ -70,7 +69,7 @@ export const useSwapDisplayData = ({
     if (
       swapStatus === 'success' &&
       currentScreen === 'success' &&
-      !successDisplayData // Only set once until explicitly reset
+      !successDisplayData
     ) {
       const payInfo =
         activeTab === 'buy' ? selectedPair.quoteToken : selectedPair.baseToken
@@ -85,7 +84,7 @@ export const useSwapDisplayData = ({
       const finalTransactionData = {
         inputAmount: payAmount,
         outputAmount: receiveAmount,
-        isValid: true // Assuming isValid if we reach success
+        isValid: true
       }
 
       setSuccessDisplayData({

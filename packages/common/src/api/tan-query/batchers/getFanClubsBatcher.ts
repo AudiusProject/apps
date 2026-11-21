@@ -18,7 +18,6 @@ export const getFanClubsBatcher = memoize(
           mint: mints
         })
 
-        // Prime individual coin data
         coins.forEach((coin) => {
           if (!coin.mint) return
           const queryKey = [QUERY_KEYS.coin, coin.mint]

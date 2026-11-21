@@ -18,11 +18,6 @@ export const getNotificationUnreadCountQueryKey = (
     currentUserId
   ] as unknown as QueryKey<number>
 
-/**
- * Hook that returns the number of unread notifications for the current user.
- * Uses the notifications endpoint with limit 0 to just get the count.
- * Polls based on the NOTIFICATION_POLLING_FREQ_MS remote config value.
- */
 export const useNotificationUnreadCount = () => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()

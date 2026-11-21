@@ -34,9 +34,6 @@ export const initialState: PlaybackState = {
   undershot: false
 }
 
-// Build a permutation of [0..length-1] with `currentIndex` (when valid)
-// pinned at position 0 — so the currently-playing track stays "current"
-// when shuffle toggles on.
 const buildShufflePermutation = (length: number, currentIndex: number) => {
   const indices = Array.from({ length }, (_, i) => i).filter(
     (i) => i !== currentIndex
@@ -50,14 +47,9 @@ const buildShufflePermutation = (length: number, currentIndex: number) => {
     : indices
 }
 
-// Apply a permutation (an array of original indices) to a source array,
-// returning a new array in the permuted order.
 const applyPermutation = <T>(source: T[], permutation: number[]): T[] =>
   permutation.map((i) => source[i])
 
-// Drop the entry at `position` from `originalIndices` and decrement any
-// remaining entries that pointed past it, since shuffleOriginalQueue just
-// shrunk by one.
 const removeFromOriginalIndices = (
   originalIndices: number[],
   visibleIndex: number
@@ -81,9 +73,6 @@ type PlayTrackAtPayload = {
 }
 
 type PlayPayload = Maybe<{
-  // Resume / load by trackId (used by chat playback and natural-track-end
-  // paths that don't know the queue index — the saga finds the index from
-  // the trackId).
   trackId?: ID
   startTime?: number
   playerBehavior?: PlayerBehavior
@@ -92,8 +81,6 @@ type PlayPayload = Maybe<{
 }>
 
 type PausePayload = Maybe<{
-  // When true, only set the playing flag — don't actually pause the audio
-  // engine. Mobile audio uses this to keep redux in sync with engine events.
   onlySetState?: boolean
 }>
 
@@ -101,7 +88,6 @@ type StopPayload = Maybe<{}>
 
 type AddToQueuePayload = {
   tracks: PlaybackTrack[]
-  // Optional insertion index; defaults to end.
   index?: number
 }
 
@@ -118,8 +104,6 @@ type AppendPagePayload = {
 }
 
 type ReorderPayload = {
-  // The new ordering expressed as the old indices in their new positions.
-  // E.g. [2, 0, 1] takes queue=[A,B,C] -> [C,A,B].
   orderedIndices: number[]
 }
 
@@ -196,8 +180,6 @@ const slice = createSlice({
     playTrackAt: (state, action: PayloadAction<PlayTrackAtPayload>) => {
       const { index } = action.payload
       if (index < 0 || index >= state.queue.length) return
-      // Queue is already in playable order (shuffled or not), so we just
-      // jump to the chosen position.
       state.index = index
       state.counter += 1
       state.retries = 0
@@ -206,7 +188,6 @@ const slice = createSlice({
       state.undershot = false
     },
 
-    // Resume / load. The saga handles the load+play cycle and sets retries.
     play: (state, action: PayloadAction<PlayPayload>) => {
       state.retries = action.payload?.retries ?? 0
     },
@@ -233,9 +214,6 @@ const slice = createSlice({
     next: (state, action: PayloadAction<NextPayload>) => {
       const skip = action.payload?.skip
       if (state.queue.length === 0) return
-      // Repeat-single on a natural track end (skip falsy): keep the same
-      // index, and let the saga re-issue play to restart the current track.
-      // The next button passes skip=true, which bypasses this and advances.
       if (state.repeat === RepeatMode.SINGLE && !skip) {
         state.counter += 1
         state.retries = 0
@@ -291,9 +269,6 @@ const slice = createSlice({
       }
 
       if (state.shuffle) {
-        // New tracks are appended to originalQueue (they have no "natural"
-        // position pre-shuffle). Their original indices then point at the
-        // newly-appended slots.
         const baseOriginalIndex = state.shuffleOriginalQueue.length
         state.shuffleOriginalQueue = [...state.shuffleOriginalQueue, ...tracks]
         const newOriginalIndices = tracks.map((_, i) => baseOriginalIndex + i)
@@ -358,9 +333,6 @@ const slice = createSlice({
           : -1
 
       if (state.shuffle && state.shuffleOriginalIndices.length > 0) {
-        // The reorder rearranges visible positions; original-position
-        // mappings move with their tracks. shuffleOriginalQueue itself is
-        // untouched — its purpose is to remember the pre-shuffle order.
         state.shuffleOriginalIndices = orderedIndices
           .map((i) => state.shuffleOriginalIndices[i])
           .filter((v): v is number => v !== undefined)
@@ -370,7 +342,6 @@ const slice = createSlice({
     appendPage: (state, action: PayloadAction<AppendPagePayload>) => {
       const { tracks } = action.payload
       if (tracks.length === 0) return
-      // Used by the saga when the backing tanquery fetches a next page.
       state.queue = [...state.queue, ...tracks]
 
       if (state.shuffle) {
@@ -391,9 +362,6 @@ const slice = createSlice({
       state.querySource = null
     },
 
-    // Clear everything except the currently playing track. The track keeps
-    // playing and stays in the queue at index 0; upcoming tracks and
-    // pagination source are dropped.
     clearUpcoming: (state) => {
       if (state.index < 0 || state.index >= state.queue.length) {
         state.queue = []
@@ -446,7 +414,6 @@ const slice = createSlice({
         state.shuffleOriginalQueue = [...state.queue]
         state.shuffleOriginalIndices = permutation
         state.queue = applyPermutation(state.shuffleOriginalQueue, permutation)
-        // currentIndex was pinned to position 0 when valid.
         state.index =
           state.index >= 0 && state.index < state.shuffleOriginalQueue.length
             ? 0

@@ -68,7 +68,6 @@ export interface SwapExecutionResult {
   }
 }
 
-// Unlike other methods, this can go either way but one of the mints must be AUDIO
 async function executeMeteoraSwap(
   tokenMint: string, // Mint address of the token we're swapping (the one not AUDIO)
   swapDirection: 'audioToCoin' | 'coinToAudio',
@@ -99,20 +98,18 @@ async function executeMeteoraSwap(
       )
     }
 
-    // Which token are we swapping to? Fan club for buys, audio for sells
     const inputTokenInfo =
       swapDirection === 'audioToCoin'
-        ? tokenConfigsResult.outputTokenConfig // audio
-        : tokenConfigsResult.inputTokenConfig // fan club
+        ? tokenConfigsResult.outputTokenConfig
+        : tokenConfigsResult.inputTokenConfig
     const outputTokenInfo =
       swapDirection === 'audioToCoin'
-        ? tokenConfigsResult.inputTokenConfig // fan club
-        : tokenConfigsResult.outputTokenConfig // audio
+        ? tokenConfigsResult.inputTokenConfig
+        : tokenConfigsResult.outputTokenConfig
     const inputTokenDecimals =
       swapDirection === 'audioToCoin' ? AUDIO_DECIMALS : TOKEN_DECIMALS
     const inputAmountFD = new FixedDecimal(inputAmountUi, inputTokenDecimals)
 
-    // Get dbc swap transaction first to know exact amount needed
     const swapResult = await sdk.services.solanaRelay.swapCoin({
       inputAmount: inputAmountFD.value.toString(),
       coinMint: tokenMint,
@@ -123,8 +120,6 @@ async function executeMeteoraSwap(
 
     const { transaction, outputAmount, includedFeeInputAmount } = swapResult
 
-    // Transfer tokens from user bank to ATA (AUDIO for buys, fan club for sells)
-    // Use exact consumed amount from quote to avoid leftovers
     const transferAmount = includedFeeInputAmount
       ? BigInt(includedFeeInputAmount)
       : BigInt(inputAmountFD.value)
@@ -139,7 +134,6 @@ async function executeMeteoraSwap(
       instructions
     })
 
-    // Ensure user bank is prepared for receiving the tokens we're about to move (AUDIO for buys, fan club for sells)
     const userBankResult =
       await sdk.services.claimableTokensClient.getOrCreateUserBank({
         ethWallet: ethAddress,
@@ -147,14 +141,12 @@ async function executeMeteoraSwap(
       })
     const destinationUserbank = userBankResult.userBank.toBase58()
 
-    // Get the address for a temporary token account
     const tempOutputTokenAta = getAssociatedTokenAddressSync(
       new PublicKey(outputTokenInfo.mintAddress),
       userPublicKey,
       true
     )
 
-    // Create the temporary token account for our fan club
     instructions.push(
       createAssociatedTokenAccountIdempotentInstruction(
         feePayer,
@@ -168,15 +160,11 @@ async function executeMeteoraSwap(
       Buffer.from(transaction, 'base64')
     )
 
-    // Create a new transaction that combines our setup instructions with the swap instructions
     const connection = await sdk.services.solanaClient.getConnection()
 
-    // Decompose the swap transaction to extract the DBC swap instruction
     const swapMessage = swapTx.message
     const accountKeys = swapMessage.staticAccountKeys
 
-    // The TX here also contains some create ATA instrucitons but we're doing this manually and do not need them
-    // We only need the DBC swap instruction - so we find it by it's program ID
     const poolSwapInstruction = swapMessage.compiledInstructions.find(
       (ix) =>
         accountKeys[ix.programIdIndex].toBase58() === DBC_PROGRAM_ID ||
@@ -197,10 +185,8 @@ async function executeMeteoraSwap(
       data: Buffer.from(poolSwapInstruction.data)
     }
 
-    // Add the DBC swap instruction
     instructions.push(swapInstruction)
 
-    // Transfer the actual received output tokens from the temporary output token account to end user's user bank
     instructions.push(
       createTransferInstruction(
         tempOutputTokenAta,
@@ -210,7 +196,6 @@ async function executeMeteoraSwap(
       )
     )
 
-    // Resolve address lookup table accounts if present
     const lookupTableAccounts = await Promise.all(
       swapMessage.addressTableLookups.map(async (lookup) => {
         const result = await connection.getAddressLookupTable(lookup.accountKey)
@@ -223,7 +208,6 @@ async function executeMeteoraSwap(
       )
       .map((account) => account.key.toBase58())
 
-    // Close the created ATA accounts (both input and output tokens)
     const atasToClose: PublicKey[] = [inputTokenAta, tempOutputTokenAta]
 
     for (const ataToClose of atasToClose) {
@@ -232,7 +216,6 @@ async function executeMeteoraSwap(
       )
     }
 
-    // Build and send transaction
     const signature = await buildAndSendTransaction(
       sdk,
       keypair,
@@ -310,10 +293,6 @@ export abstract class BaseSwapExecutor {
     )
   }
 
-  /**
-   * Queries the actual on-chain token balance for a given token account.
-   * Returns the balance in both lamports (raw) and UI amount (with decimals applied).
-   */
   protected async getTokenBalance(
     tokenAccount: PublicKey,
     decimals: number
@@ -336,7 +315,6 @@ export abstract class BaseSwapExecutor {
       decimals
     )
 
-    // Use FixedDecimal to ensure precise conversion from the string representation
     const uiAmount =
       balance.value.uiAmount ??
       Number(
@@ -396,7 +374,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
 
       const instructions: TransactionInstruction[] = []
 
-      // Validate tokens and create configs
       errorStage = 'DIRECT_SWAP_TOKEN_VALIDATION'
       const tokenConfigsResult = validateAndCreateTokenConfigs(
         inputMintUiAddress,
@@ -414,7 +391,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
 
       const { inputTokenConfig, outputTokenConfig } = tokenConfigsResult
 
-      // Get quote
       errorStage = 'DIRECT_SWAP_GET_QUOTE'
       const { quoteResult: quote } = await getJupiterQuoteByMintWithRetry({
         inputMint: inputMintUiAddress,
@@ -426,7 +402,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         onlyDirectRoutes: false
       })
 
-      // Prepare input token
       errorStage = 'DIRECT_SWAP_PREPARE_INPUT'
       const sourceAtaForJupiter = await addTransferFromUserBankInstructions({
         tokenInfo: inputTokenConfig,
@@ -438,7 +413,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         instructions
       })
 
-      // Prepare output destination
       errorStage = 'DIRECT_SWAP_PREPARE_OUTPUT'
       const preferredJupiterDestination = await prepareOutputUserBank(
         sdk,
@@ -446,7 +420,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         outputTokenConfig
       )
 
-      // Get swap instructions
       errorStage = 'DIRECT_SWAP_GET_INSTRUCTIONS'
       const swapRequestParams: SwapRequest = {
         quoteResponse: quote.quote,
@@ -470,7 +443,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
       const jupiterInstructions = convertJupiterInstructions([swapInstruction])
       instructions.push(...jupiterInstructions)
 
-      // Cleanup
       errorStage = 'DIRECT_SWAP_CLEANUP'
       const atasToClose: PublicKey[] = []
       if (sourceAtaForJupiter) {
@@ -486,7 +458,6 @@ export class DirectSwapExecutor extends BaseSwapExecutor {
         )
       }
 
-      // Build and send transaction
       errorStage = 'DIRECT_SWAP_BUILD_TRANSACTION'
       const signature = await buildAndSendTransaction(
         sdk,
@@ -586,16 +557,13 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         params.outputMint,
         this.dependencies.queryClient
       )
-      // Execute first transaction with retries: InputToken -> AUDIO
       let swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
         inputHasPool ? swapToAudioWithMeteora : swapToAudioWithJupiter,
         async (_attemptNumber: number) => {
-          // Invalidate queries before retry
           await this.invalidateQueries()
         }
       )
 
-      // attempt to fallback to jupiter swap if meteora swap fails
       if (
         inputHasPool &&
         (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result)
@@ -603,12 +571,10 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         swapToAudioRetryResult = await this.retryPolicy.executeWithRetry(
           swapToAudioWithJupiter,
           async (_attemptNumber: number) => {
-            // Invalidate queries before retry
             await this.invalidateQueries()
           }
         )
       }
-      // throw if the first swap failed
       if (!swapToAudioRetryResult.success || !swapToAudioRetryResult.result) {
         return {
           status: SwapStatus.ERROR,
@@ -621,7 +587,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       const swapToAudioResult = swapToAudioRetryResult.result
 
-      // Execute second transaction with retries: AUDIO -> OutputToken
       const swapToTokenWithJupiter = async () =>
         await this.executeJupiterSwapToToken(params, swapToAudioResult)
       const swapToTokenWithMeteora = async () =>
@@ -633,16 +598,13 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         )
 
       let swapToTokenResult = await this.retryPolicy.executeWithRetry(
-        // Prioritize Meteora DBC swap if the token we're swapping is a DBC
         // @ts-ignore
         outputHasPool ? swapToTokenWithMeteora : swapToTokenWithJupiter,
         async (_attemptNumber: number) => {
-          // Invalidate queries before retry
           await this.invalidateQueries()
         }
       )
 
-      // attempt to fallback to jupiter swap if meteora swap fails
       if (
         outputHasPool &&
         (!swapToTokenResult.success || !swapToTokenResult.result)
@@ -650,7 +612,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         swapToTokenResult = await this.retryPolicy.executeWithRetry(
           swapToTokenWithJupiter,
           async (_attemptNumber: number) => {
-            // Invalidate queries before retry
             await this.invalidateQueries()
           }
         )
@@ -682,7 +643,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  // Swap from any token -> AUDIO
   async executeJupiterSwapToAudio(
     params: SwapTokensParams
   ): Promise<IndirectSwapToAudioResult> {
@@ -696,7 +656,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         this.dependencies
       const instructions: TransactionInstruction[] = []
 
-      // Validate input token and create config
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_TOKEN_VALIDATION'
       const tokenConfigsResult = validateAndCreateTokenConfigs(
         inputMintUiAddress,
@@ -712,13 +671,11 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       const { inputTokenConfig } = tokenConfigsResult
 
-      // Create AUDIO token config
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_AUDIO_CONFIG'
       const audioTokenInfo = createTokenConfig(
         findTokenByAddress(this.tokens, AUDIO_MINT)!
       )
 
-      // Get quote: InputToken -> AUDIO
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_QUOTE'
       const { quoteResult: firstQuote } = await getJupiterQuoteByMintWithRetry({
         inputMint: inputMintUiAddress,
@@ -730,7 +687,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         onlyDirectRoutes: false
       })
 
-      // Prepare input token
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_PREPARE_INPUT'
       const sourceAtaForJupiter = await addTransferFromUserBankInstructions({
         tokenInfo: inputTokenConfig,
@@ -742,7 +698,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         instructions
       })
 
-      // Get/create AUDIO user bank
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_PREPARE_AUDIO_USER_BANK'
       const audioUserBankResult =
         await sdk.services.claimableTokensClient.getOrCreateUserBank({
@@ -751,7 +706,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         })
       const audioUserBank = audioUserBankResult.userBank
 
-      // Get swap instructions (InputToken -> AUDIO)
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_SWAP_INSTRUCTIONS'
       const firstSwapRequestParams: SwapRequest = {
         quoteResponse: firstQuote.quote,
@@ -777,7 +731,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       ])
       instructions.push(...firstSwapInstructions)
 
-      // Cleanup ATAs after first swap
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_CLEANUP'
       const firstAtasToClose: PublicKey[] = [sourceAtaForJupiter]
       if (firstOutputAtaForJupiter) {
@@ -790,7 +743,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         )
       }
 
-      // Build and send first transaction
       errorStage = 'INDIRECT_SWAP_TO_AUDIO_BUILD_AND_SEND'
       const signature = await buildAndSendTransaction(
         sdk,
@@ -817,7 +769,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
     }
   }
 
-  // Swap from AUDIO -> any token
   async executeJupiterSwapToToken(
     params: SwapTokensParams,
     swapToAudioResult: IndirectSwapToAudioResult
@@ -833,7 +784,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       const instructions: TransactionInstruction[] = []
 
-      // Validate output token config
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_VALIDATION'
       const tokenConfigsResult = validateAndCreateTokenConfigs(
         AUDIO_MINT,
@@ -849,26 +799,22 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
 
       const { outputTokenConfig } = tokenConfigsResult
 
-      // Create AUDIO token config
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_AUDIO_CONFIG'
       const audioTokenInfo = createTokenConfig(
         findTokenByAddress(this.tokens, AUDIO_MINT)!
       )
 
-      // Query actual AUDIO balance from intermediate account
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_QUERY_BALANCE'
       const actualAudioBalance = await this.getTokenBalance(
         swapToAudioResult.intermediateAudioAta,
         AUDIO_DECIMALS
       )
 
-      // Validate we received a reasonable amount
       if (actualAudioBalance.uiAmount <= 0) {
         throw new Error(
           `Invalid AUDIO balance in intermediate account: ${actualAudioBalance.uiAmount}`
         )
       }
-      // Use the predicted amount if we have enough, otherwise use actual balance
       const predictedAmount = swapToAudioResult.firstQuote.outputAmount.uiAmount
       const predictedFixed = new FixedDecimal(predictedAmount, AUDIO_DECIMALS)
       const actualFixed = new FixedDecimal(
@@ -880,7 +826,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           ? predictedAmount
           : actualAudioBalance.uiAmount
 
-      // Get quote: AUDIO -> OutputToken
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_QUOTE'
       const { quoteResult: audioToTokenQuote } =
         await getJupiterQuoteByMintWithRetry({
@@ -893,7 +838,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           onlyDirectRoutes: false
         })
 
-      // Transfer AUDIO from user bank to ATA for second swap
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_PREPARE_AUDIO_INPUT'
       const audioSourceAtaForJupiter =
         await addTransferFromUserBankInstructions({
@@ -906,7 +850,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
           instructions
         })
 
-      // Prepare output destination
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_PREPARE_OUTPUT'
       const preferredJupiterDestination = await prepareOutputUserBank(
         sdk,
@@ -914,7 +857,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         outputTokenConfig
       )
 
-      // Get swap instructions (AUDIO -> OutputToken)
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_SWAP_INSTRUCTIONS'
       const secondSwapRequestParams: SwapRequest = {
         quoteResponse: audioToTokenQuote.quote,
@@ -938,7 +880,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
       ])
       instructions.push(...secondSwapInstructions)
 
-      // Cleanup
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_CLEANUP'
       const atasToClose: PublicKey[] = [audioSourceAtaForJupiter]
       if (outputAtaForJupiter) {
@@ -951,7 +892,6 @@ export class IndirectSwapExecutor extends BaseSwapExecutor {
         )
       }
 
-      // Build and send second transaction
       errorStage = 'INDIRECT_SWAP_AUDIO_TO_TOKEN_BUILD_AND_SEND'
       const signature = await buildAndSendTransaction(
         sdk,

@@ -65,7 +65,6 @@ export const useTrackByPermalink = <TResult = TQTrack>(
     enabled:
       simpleOptions?.enabled !== false &&
       !!permalink &&
-      // Need to wait for account status to load so that we're able to query with the correct user id
       (accountStatus === Status.SUCCESS || accountStatus === Status.ERROR)
   })
 

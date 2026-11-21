@@ -2,11 +2,9 @@ import { Authentication } from './Authentication'
 import type { CreateKey, LocalStorage } from './types'
 import { bufferFromHexString } from './utils'
 
-// primary account management key for HD wallet
 const PATH = "m/44'/60'/0'/0/0"
 const hedgehogEntropyKey = 'hedgehog-entropy-key'
 
-// Contains functions to help create and maintain user accounts client side
 export class WalletManager {
   static async createWalletObj(
     password: string,
@@ -70,10 +68,7 @@ export class WalletManager {
     password: string,
     createKey: CreateKey
   ) {
-    // lowercase username so the lookupKey is consistently generated to search in the database
     username = username.toLowerCase()
-    // This iv is hardcoded because the auth lookup key should be deterministically
-    // generated given the same username and password
     const ivHex = '0x4f7242b39969c3ac4c6712524d633ce9'
     const { keyHex } = await createKey(username + ':::' + password, ivHex)
     return keyHex
@@ -82,8 +77,6 @@ export class WalletManager {
   static async getEntropyFromLocalStorage(localStorage: LocalStorage) {
     const entropy = await localStorage.getItem(hedgehogEntropyKey)
 
-    // Sometimes the string 'undefined' was being written to localstorage
-    // this is an explicit check for that
     if (entropy && entropy !== 'undefined') {
       return entropy
     } else return null

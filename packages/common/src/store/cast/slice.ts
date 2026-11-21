@@ -28,10 +28,6 @@ const slice = createSlice({
         if (deviceName !== undefined) state.deviceName = deviceName
         return
       }
-      // Turn-off only takes effect if the caller is referring to the
-      // currently-active method (or didn't specify one). This stops the
-      // AirPlay route-change listener from clearing a chromecast session
-      // that was set by GoogleCast.tsx — and vice versa.
       if (method && state.method && state.method !== method) return
       state.isCasting = false
       state.method = null

@@ -1,6 +1,5 @@
 import type { CreateKey, LocalStorage } from './types'
 
-// https://stackoverflow.com/questions/38987784/how-to-convert-a-hexadecimal-string-to-uint8array-and-back-in-javascript
 export function bufferFromHexString(hexString: string) {
   const byteArray = hexString
     .match(/.{1,2}/g)
@@ -19,16 +18,12 @@ export function bytesToHexString(bytes: Uint8Array) {
 }
 
 const hexDigit = (c: number) => {
-  if (c >= 48 && c <= 57) return c - 48 // 0-9
-  if (c >= 97 && c <= 102) return c - 87 // a-f
-  if (c >= 65 && c <= 70) return c - 55 // A-F
+  if (c >= 48 && c <= 57) return c - 48
+  if (c >= 97 && c <= 102) return c - 87
+  if (c >= 65 && c <= 70) return c - 55
   return -1
 }
 
-/**
- * Decodes hex the way Node's `Buffer.from(str, 'hex')` does: stops at the
- * first pair that is not two hex digits and drops a trailing odd nibble.
- */
 export function hexToBytesLikeBuffer(hex: string) {
   const out = new Uint8Array(hex.length >> 1)
   let i = 0
@@ -69,10 +64,6 @@ export function getPlatformLocalStorage(): LocalStorage {
   )
 }
 
-/**
- * Default scrypt createKey. Runs on the calling thread, so web passes its own
- * worker-based createKey and mobile passes a native one.
- */
 export function getPlatformCreateKey(): CreateKey {
   return async (encryptStr, ivHex) => {
     const { createKeyAsync } = await import('./scrypt')
@@ -80,12 +71,6 @@ export function getPlatformCreateKey(): CreateKey {
   }
 }
 
-/**
- * Resolves once `condition` returns true. Checks synchronously first so an
- * already-satisfied wait (the common case: every SDK request goes through
- * `hedgehog.waitUntilReady()` inside the request-signature mutex) does not
- * pay a 100ms poll tick and serialize requests behind it.
- */
 export function waitUntil(condition: () => boolean) {
   if (condition()) {
     return Promise.resolve()

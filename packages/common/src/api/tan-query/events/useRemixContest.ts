@@ -26,10 +26,6 @@ type RemixContestEvent = OverrideProperties<
   }
 >
 
-/**
- * Hook to fetch the remix contest event for a given entity ID.
- * Returns the first active RemixContest event found, or null if none exists.
- */
 export const useRemixContest = (
   entityId: ID | null | undefined,
   options?: SelectableQueryOptions<Event, RemixContestEvent>

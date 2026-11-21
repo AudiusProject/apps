@@ -27,7 +27,6 @@ export const getWalletAccountQueryKey = (wallet: string | null | undefined) =>
     wallet
   ] as unknown as QueryKey<NormalizedAccountUserMetadata | null>
 
-// This queryFn is separate in order to be used in sagas
 export const getWalletAccountQueryFn = async (
   wallet: string,
   sdk: AudiusSdk,
@@ -50,8 +49,6 @@ export const getWalletAccountQueryFn = async (
     }
     return accountData
   } catch (err) {
-    // API returns 404 when user doesn't exist in api (incomplete signup).
-    // Return null so sign-in flow can redirect to complete account setup.
     console.warn(
       'Failed to fetch user account (may be incomplete signup):',
       err
@@ -60,13 +57,6 @@ export const getWalletAccountQueryFn = async (
   }
 }
 
-/**
- * Returns unnormalized account data but updates query cache with normalized data
- * @param wallet
- * @param sdk
- * @param queryClient
- * @returns
- */
 export function* getWalletAccountSaga(
   wallet: string,
   sdk: AudiusSdk,
@@ -92,9 +82,6 @@ export function* getWalletAccountSaga(
   return accountData
 }
 
-/**
- * Hook to get the currently logged in user's data
- */
 export const useWalletAccount = <
   TResult = NormalizedAccountUserMetadata | null | undefined
 >(
@@ -128,8 +115,6 @@ export const useWalletAccount = <
   })
 }
 
-// Some helper selectors - these pull the current wallet addresses out of redux for you
-// NOTE: web3User means the user that signed in originally (i.e. could be a manager)
 export const useCurrentWeb3Account = <TResult = User>(
   options?: SelectableQueryOptions<User, TResult>
 ) => {

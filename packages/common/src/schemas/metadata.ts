@@ -17,7 +17,6 @@ const trackMetadataSchema = {
   mood: null,
   credits_splits: null,
   created_at: null,
-  // TODO: CREATE DATE IS REQUIRED, BUT THIS FIELD IS NEVER USED.
   create_date: null,
   updated_at: null,
   release_date: null,
@@ -89,8 +88,6 @@ export const newTrackMetadata = (
     followee_reposts: [...(trackMetadataSchema.followee_reposts || [])],
     followee_saves: [...(trackMetadataSchema.followee_saves || [])],
     ...validFields,
-    // Reformat remixes last so we don't carry through any extra metadata that
-    // was part of the remix_of response from backends
     remix_of: remixParentTrackId
       ? createRemixOfMetadata({ parentTrackId: remixParentTrackId })
       : null

@@ -187,8 +187,6 @@ export const useDownloadableContentAccess = ({ trackId }: { trackId: ID }) => {
     }
   }
 
-  // Only display downloadable-content-specific gated UI if the track is not
-  // stream-gated
   const isDownloadGatedOnly =
     !track?.is_stream_gated && !!track?.is_download_gated
   const shouldDisplayDownloadFollowGated =

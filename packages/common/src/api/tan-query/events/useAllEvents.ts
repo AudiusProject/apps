@@ -17,10 +17,6 @@ type UseAllEventsArgs = {
   pageSize?: number
 }
 
-/**
- * Hook to fetch all events with infinite query support.
- * This version supports infinite scrolling and maintains the full list of events.
- */
 export const useAllEvents = (
   { pageSize = DEFAULT_PAGE_SIZE }: UseAllEventsArgs = {},
   options?: QueryOptions
@@ -50,7 +46,6 @@ export const useAllEvents = (
         .map((sdkEvent: SDKEvent) => {
           const event = eventMetadataFromSDK(sdkEvent)
           if (!event) return null
-          // Prime the event cache with individual events
           queryClient.setQueryData(getEventQueryKey(event.eventId), event)
           return event.eventId
         })

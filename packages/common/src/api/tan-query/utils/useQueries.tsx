@@ -15,10 +15,6 @@ type UseQueriesConfig<
   combine?: (result: TCombinedResult[]) => TCombinedResult
 }
 
-/**
- * A wrapper around @tanstack/react-query's useQueries function
- * that preserves all type signatures and functionality.
- */
 export function useQueries<T extends Array<any>>(
   { queries, ...options }: UseQueriesConfig<T>,
   queryClient?: QueryClient

@@ -68,8 +68,6 @@ export class IdentityService {
   }
 
   async getAuthHeaders() {
-    // Check if auth headers are provided in localStorage (e.g., from mobile WebView)
-    // This allows mobile apps to inject auth headers for web authentication
     if (typeof window !== 'undefined' && window.localStorage) {
       const storedMessage = window.localStorage.getItem(AuthHeaders.Message)
       const storedSignature = window.localStorage.getItem(AuthHeaders.Signature)
@@ -87,7 +85,7 @@ export class IdentityService {
       throw new Error('User is not authenticated')
     }
 
-    const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
+    const unixTs = Math.round(new Date().getTime() / 1000)
     const message = `Click sign to authenticate with identity service: ${unixTs}`
     const signature = await audiusWalletClient.signMessage({
       message
@@ -99,9 +97,6 @@ export class IdentityService {
     }
   }
 
-  // TODO: Use regular `fetch` and same request patterns as SDK
-  // Likely this means extending BaseAPI and using request sig middleware
-  // But calling code needs to update to follow SDK patterns as well
   private async _makeRequest<T = unknown>(axiosRequestObj: AxiosRequestConfig) {
     axiosRequestObj.baseURL =
       axiosRequestObj.baseURL || this.identityServiceEndpoint
@@ -112,7 +107,6 @@ export class IdentityService {
       'X-Request-ID': requestId
     }
 
-    // Axios throws for non-200 responses
     try {
       const resp: AxiosResponse<T> = await axios(axiosRequestObj)
       if (!resp.data) {
@@ -135,7 +129,6 @@ export class IdentityService {
   }
 
   async sendRecoveryInfo(args: RecoveryInfoParams) {
-    // This endpoint takes data/signature as body params
     const { [AuthHeaders.Message]: data, [AuthHeaders.Signature]: signature } =
       await this.getAuthHeaders()
     return await this._makeRequest<{ status: true }>({
@@ -211,9 +204,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Check if an email address has been previously registered.
-   */
   async checkIfEmailRegistered(email: string) {
     return await this._makeRequest<{ exists: boolean; isGuest: boolean }>({
       url: '/users/check',
@@ -224,10 +214,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Get the user's email and verification status used for notifications and
-   * display.
-   */
   async getUserEmailAndStatus() {
     const headers = await this.getAuthHeaders()
 
@@ -238,9 +224,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Get the user's email used for notifications and display.
-   */
   async getUserEmail() {
     const res = await this.getUserEmailAndStatus()
 
@@ -250,9 +233,6 @@ export class IdentityService {
     return res.email
   }
 
-  /**
-   * Resend the current user's email verification link.
-   */
   async resendEmailVerification() {
     const headers = await this.getAuthHeaders()
 
@@ -263,9 +243,6 @@ export class IdentityService {
     })
   }
 
-  /**
-   * Change the user's email used for notifications and display.
-   */
   async changeEmail({ email, otp }: { email: string; otp?: string }) {
     const headers = await this.getAuthHeaders()
 

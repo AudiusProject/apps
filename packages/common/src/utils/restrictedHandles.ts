@@ -58,9 +58,7 @@ export const restrictedHandles = new Set(
     '400',
     '404',
 
-    // ===== Moods =====
     ...Object.keys(Mood),
-    // ===== Genre =====
     ...filteredGenres
   ].map((h) => h.toLowerCase())
 )

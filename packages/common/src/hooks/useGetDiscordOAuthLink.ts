@@ -6,16 +6,11 @@ import { useQueryContext } from '~/api'
 import { Env } from '~/services/env'
 import { AUDIUS_DISCORD_OAUTH_LINK } from '~/utils/route'
 
-// Returns a random character
 const getRandomSignableCharacter = () => {
   const vals = 'abcdefghijklmnopqrstuvwxyz123456789'
   return vals.charAt(Math.floor(Math.random() * vals.length))
 }
 
-// Sends a signed message to the discord bot, which will then parse the signature and return back a JWT
-// The JWT will be sent thru the discord OAuth flow and then back to the discord server eventually
-// The purpose of this is so that the discord server can verify that the user is the one signing,
-// while also not exposing any details since the oauth flow requires data be passed via query params
 const requestDiscordJWT = async (sdk: AudiusSdkWithServices, env: Env) => {
   const data = getRandomSignableCharacter()
   const signature = await sdk.services.audiusWalletClient.signMessage({

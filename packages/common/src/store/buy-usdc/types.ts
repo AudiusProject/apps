@@ -1,7 +1,4 @@
 export type PurchaseInfo = {
-  /**
-   * Desired amount of USDC in *cents*
-   */
   desiredAmount: number
 }
 

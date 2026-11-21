@@ -30,10 +30,8 @@ const slice = createSlice({
     beginWithdrawUSDC: (
       state,
       _action: PayloadAction<{
-        /** Balance in cents. Used for analytics */
         currentBalance: number
         method: WithdrawMethod
-        /** Transfer amount in cents */
         amount: number
         destinationAddress: string
       }>

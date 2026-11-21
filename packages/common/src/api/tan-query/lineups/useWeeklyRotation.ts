@@ -14,17 +14,10 @@ import { primeTrackData } from '../utils/primeTrackData'
 
 const DEFAULT_LIMIT = 30
 
-// The server recomputes at the ISO week boundary and caches for hours, so
-// anything on this order is cheap. Bounded rather than Infinity so a transient
-// failure or an empty response doesn't stick for the whole session.
 const STALE_TIME_MS = 30 * 60 * 1000
 
 export type UseWeeklyRotationArgs = {
   limit?: number
-  /**
-   * Whose mix. Defaults to the signed-in user; pass another user's id to
-   * view a shared mix. The endpoint is public, so any user works.
-   */
   userId?: ID | null
 }
 
@@ -36,13 +29,6 @@ export const getWeeklyRotationQueryKey = ({
     LineupData[]
   >
 
-/**
- * A user's Weekly Rotation mix: tracks they haven't heard, weighted toward
- * artists they don't already follow. The current user's by default; a shared
- * link passes the sharer's id.
- *
- * A plain `useQuery`: the mix is a fixed 30 tracks with no pagination.
- */
 export const useWeeklyRotation = (
   { limit = DEFAULT_LIMIT, userId: userIdArg }: UseWeeklyRotationArgs = {},
   options?: QueryOptions

@@ -3,7 +3,6 @@ import { describe, test, expect } from 'vitest'
 
 import { getBalanceNeeded, getPurchaseSummaryValues } from './utils'
 
-// USDC has 6 decimals, so 1 cent = 10^4 wei
 const USDC_CENT_WEI = BigInt(10000) as UsdcWei
 
 function centsToBigInt(cents: number) {

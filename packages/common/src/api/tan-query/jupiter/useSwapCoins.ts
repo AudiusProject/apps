@@ -96,15 +96,6 @@ const initializeSwapDependencies = async (
   }
 }
 
-/**
- * Optimistically updates the balances of the user's coins after a swap.
- * Contains special branching logic for AUDIO
- * @param params - The parameters of the swap
- * @param result - The result of the swap
- * @param queryClient - The query client
- * @param user - The user
- * @param env - The environment
- */
 export const optimisticallyUpdateSwapBalances = (
   params: SwapTokensParams,
   result: SwapTokensResult,
@@ -115,11 +106,9 @@ export const optimisticallyUpdateSwapBalances = (
   const { inputMint, outputMint } = params
   const { inputAmount, outputAmount } = result
 
-  // Check if AUDIO is involved in the swap
   const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
   const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
 
-  // Handle fan club optimistic updates (not AUDIO)
   if (inputMint && !isInputAudio) {
     queryClient.setQueryData(
       getUserCoinQueryKey(inputMint, user?.user_id),
@@ -128,9 +117,7 @@ export const optimisticallyUpdateSwapBalances = (
 
         return {
           ...prevAccountBalances,
-          // Update aggregate account balance (includes connected wallets)
           balance: prevAccountBalances?.balance - (inputAmount?.amount ?? 0),
-          // Update internal wallet balance (we only do swaps against internal wallets)
           accounts: prevAccountBalances.accounts.map((account) =>
             account.isInAppWallet
               ? {
@@ -152,9 +139,7 @@ export const optimisticallyUpdateSwapBalances = (
 
         return {
           ...prevAccountBalances,
-          // Update aggregate account balance (includes connected wallets)
           balance: prevAccountBalances?.balance + (outputAmount?.amount ?? 0),
-          // Update internal wallet balance (we only do swaps against internal wallets)
           accounts: prevAccountBalances.accounts.map((account) =>
             account.isInAppWallet
               ? {
@@ -168,9 +153,7 @@ export const optimisticallyUpdateSwapBalances = (
     )
   }
 
-  // If AUDIO is involved, optimistically update audioBalance queries
   if ((isInputAudio || isOutputAudio) && user?.spl_wallet) {
-    // Calculate the net change in lamports (8 decimals for AUDIO on Solana)
     const inputAudioLamports = isInputAudio ? (inputAmount?.amount ?? 0) : 0
     const outputAudioLamports = isOutputAudio ? (outputAmount?.amount ?? 0) : 0
 
@@ -184,7 +167,6 @@ export const optimisticallyUpdateSwapBalances = (
     })
   }
 
-  // Invalidate fan club queries to refresh fee claiming and graduation progress
   if (inputMint && !isInputAudio) {
     queryClient.invalidateQueries({
       queryKey: getFanClubQueryKey(inputMint)
@@ -196,7 +178,6 @@ export const optimisticallyUpdateSwapBalances = (
     })
   }
 
-  // Invalidate fan club feed and comment queries so locked content is re-evaluated
   if (inputMint && !isInputAudio) {
     queryClient.invalidateQueries({
       queryKey: getFanClubFeedQueryKey({ mint: inputMint })
@@ -207,22 +188,15 @@ export const optimisticallyUpdateSwapBalances = (
       queryKey: getFanClubFeedQueryKey({ mint: outputMint })
     })
   }
-  // Invalidate individual comment queries so locked posts refetch with access
   queryClient.invalidateQueries({
     queryKey: [QUERY_KEYS.comment]
   })
 
-  // Invalidate user query to ensure user data is fresh after swap
   queryClient.invalidateQueries({
     queryKey: getUserQueryKey(user?.user_id)
   })
 }
 
-/**
- * Auto-follows the owning artist of a coin after a successful purchase.
- * Skips if the output mint is not an artist coin, the user already follows
- * the artist, or the coin's owner can't be resolved.
- */
 const autoFollowArtistOnCoinPurchase = async ({
   outputMint,
   queryClient,
@@ -260,7 +234,6 @@ const autoFollowArtistOnCoinPurchase = async ({
       return
     }
 
-    // Skip if the current user already follows the artist
     const artistUser = queryClient.getQueryData(getUserQueryKey(coin.ownerId))
     if (artistUser?.does_current_user_follow) {
       return
@@ -275,10 +248,6 @@ const autoFollowArtistOnCoinPurchase = async ({
   }
 }
 
-/**
- * Hook for executing coin swaps using Jupiter.
- * Swaps any supported SPL token (or SOL) for another.
- */
 export const useSwapCoins = () => {
   const queryClient = useQueryClient()
   const { solanaWalletService, audiusSdk, env } = useQueryContext()
@@ -295,7 +264,6 @@ export const useSwapCoins = () => {
       let signature: string | undefined
 
       try {
-        // Initialize dependencies
         errorStage = 'WALLET_INITIALIZATION'
         const dependenciesResult = await initializeSwapDependencies(
           solanaWalletService,
@@ -337,7 +305,6 @@ export const useSwapCoins = () => {
             }
           )
 
-          // Throw error so React Query calls onError instead of onSuccess
           throw new Error(result.error?.message || 'Swap failed')
         }
 
@@ -362,7 +329,6 @@ export const useSwapCoins = () => {
     },
     onSuccess: (result, params) => {
       optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
-      // Auto-follow the artist whose coin was just purchased
       autoFollowArtistOnCoinPurchase({
         outputMint: params.outputMint,
         queryClient,

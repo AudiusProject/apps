@@ -68,7 +68,6 @@ export const getCommentRepliesQueryKey = ({
 export const setPreviousCommentCount = (
   queryClient: QueryClient,
   trackId: ID,
-  // If not provided, we will use the current value to set the previous value (aka reset)
   updaterFn?: (prevData: TrackCommentCount | undefined) => TrackCommentCount
 ) => {
   queryClient.setQueryData(
@@ -83,14 +82,12 @@ export const setPreviousCommentCount = (
   )
 }
 
-// Quick wrapper around setPreviousCommentCount to pass undefined as  (which will prompt it to just use the current value)
 export const resetPreviousCommentCount = (
   queryClient: QueryClient,
   trackId: ID
 ) => setPreviousCommentCount(queryClient, trackId)
 
 export const addCommentCount = (queryClient: QueryClient, trackId: ID) => {
-  // Increment the track comment count
   setPreviousCommentCount(queryClient, trackId, (prevData) => ({
     previousValue: (prevData?.previousValue ?? 0) + 1,
     currentValue: (prevData?.currentValue ?? 0) + 1
@@ -106,7 +103,6 @@ export const addCommentCount = (queryClient: QueryClient, trackId: ID) => {
 }
 
 export const subtractCommentCount = (queryClient: QueryClient, trackId: ID) => {
-  // Increment the track comment count
   setPreviousCommentCount(queryClient, trackId, (prevData) => ({
     previousValue: (prevData?.previousValue ?? 0) - 1,
     currentValue: (prevData?.currentValue ?? 0) - 1

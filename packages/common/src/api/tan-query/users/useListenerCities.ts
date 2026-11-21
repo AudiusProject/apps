@@ -24,10 +24,6 @@ export const getListenerCitiesQueryKey = ({
     ListenerCity[]
   >
 
-/**
- * Cities whose listeners played the artist's tracks the most. Only the
- * artist or one of their managers can read this.
- */
 export const useListenerCities = (
   { userId, time, limit = 10 }: UseListenerCitiesArgs,
   options?: QueryOptions

@@ -30,7 +30,6 @@ export const useArtistCreatedFanClub = <TResult = Coin | null>(
 
       const sdk = await audiusSdk()
 
-      // Encode owner_id param to match API expectations
       const encodedOwnerId = Id.parse(ownerId)
 
       const response = await sdk.coins.getCoins({
@@ -40,9 +39,8 @@ export const useArtistCreatedFanClub = <TResult = Coin | null>(
       const coins = response?.data
       const parsedCoins = coinListFromSDK(coins)
 
-      // Prime individual coin data for each mint
       if (parsedCoins && parsedCoins.length > 0) {
-        const coin = parsedCoins[0] // Get the first (and only) coin
+        const coin = parsedCoins[0]
         if (coin.mint) {
           queryClient.setQueryData(getFanClubQueryKey(coin.mint), coin)
         }

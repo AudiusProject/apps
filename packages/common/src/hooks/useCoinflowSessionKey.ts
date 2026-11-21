@@ -9,7 +9,6 @@ import { createCoinflowSession } from '~/services/coinflow'
 const REFRESH_INTERVAL_MS = 25 * 60 * 1000
 const EXPIRY_BUFFER_MS = 60 * 1000
 
-/** Keep Coinflow credentials in memory and scoped to the active wallet. */
 export const useCoinflowSessionKey = ({
   wallet,
   environment,
@@ -75,7 +74,6 @@ export const useCoinflowSessionKey = ({
   const expiresAt = query.data?.expiresAt
   useEffect(() => {
     if (!isEnabled || !expiresAt) return
-    // If refresh fails, stop using the previous key before it expires.
     const timer = setTimeout(
       render,
       Math.max(0, expiresAt - Date.now() - EXPIRY_BUFFER_MS)

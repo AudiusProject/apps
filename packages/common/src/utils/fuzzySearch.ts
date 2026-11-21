@@ -1,4 +1,3 @@
-// Function to calculate the Levenshtein distance between two strings
 function levenshteinDistance(str1: string, str2: string): number {
   const m = str1.length
   const n = str2.length

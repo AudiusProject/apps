@@ -40,7 +40,6 @@ const slice = createSlice({
     ) => {
       state.stripeClientSecret = action.payload.clientSecret
     },
-    // Handled by saga
     cancelStripeOnramp: () => {},
     stripeSessionStatusChanged: (
       state,

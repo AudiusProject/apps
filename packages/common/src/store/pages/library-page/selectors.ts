@@ -61,7 +61,6 @@ export const getLocalRemovedPlaylistFavorites = (state: CommonState) =>
 export const getLocalRemovedPlaylistReposts = (state: CommonState) =>
   state.pages.libraryPage.local.playlist.favorites.removed
 
-/** Get the tracks in currently selected category that have been added to the library in current session */
 export const getSelectedCategoryLocalTrackAdds = createSelector(
   [
     getTracksCategory,
@@ -77,7 +76,6 @@ export const getSelectedCategoryLocalTrackAdds = createSelector(
     } else if (selectedCategory === LibraryCategory.Repost) {
       return localReposts
     }
-    // Category = ALL
     return {
       ...localReposts,
       ...localFavorites,
@@ -102,13 +100,13 @@ const makeGetSelectedCategoryLocalCollectionUpdates = ({
   let getReposts: (state: CommonState) => ID[]
   if (updateType === 'add') {
     getFavorites = isAlbum ? getLocalAlbumFavorites : getLocalPlaylistFavorites
-    getPurchases = isAlbum ? getLocalAlbumPurchases : getNone // Can't buy playlists
+    getPurchases = isAlbum ? getLocalAlbumPurchases : getNone
     getReposts = isAlbum ? getLocalAlbumReposts : getLocalPlaylistReposts
   } else {
     getFavorites = isAlbum
       ? getLocalRemovedAlbumFavorites
       : getLocalRemovedPlaylistFavorites
-    getPurchases = getNone // Can't remove purchases
+    getPurchases = getNone
     getReposts = isAlbum
       ? getLocalRemovedAlbumReposts
       : getLocalRemovedPlaylistReposts
@@ -125,7 +123,6 @@ const makeGetSelectedCategoryLocalCollectionUpdates = ({
         case LibraryCategory.Repost:
           return localReposts
         default:
-          // Category = ALL
           return uniq([...localReposts, ...localFavorites, ...localPurchases])
       }
     }

@@ -24,12 +24,6 @@ export const getEventFollowersQueryKey = ({
 }: UseEventFollowersArgs) =>
   [QUERY_KEYS.eventFollowers, eventId, { limit }] as unknown as QueryKey<ID[]>
 
-/**
- * Hook returning the user IDs subscribed to a remix-contest event — feeds
- * the "Followers (N)" avatar stack on the contest page.
- *
- * Backed by `GET /v1/events/:eventId/followers` via the generated SDK.
- */
 export const useEventFollowers = (
   { eventId, limit = DEFAULT_LIMIT }: UseEventFollowersArgs,
   options?: QueryOptions

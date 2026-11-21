@@ -61,7 +61,6 @@ export const chatMiddleware =
             )
             const isSelfMessage =
               message.sender_user_id === Id.parse(currentUser?.userId)
-            // Only add blasts that current user sent as blast UI should only be visible to sender.
             if (isSelfMessage) {
               store.dispatch(
                 addMessage({
@@ -92,8 +91,6 @@ export const chatMiddleware =
           }
           errorListener = (e) => {
             console.debug('[chats] WebSocket error.', e)
-            // Most errors received here have no `code` and are not actionable, so only
-            // log the outliers.
             if (e.code) {
               store.dispatch(
                 chatActions.logError({

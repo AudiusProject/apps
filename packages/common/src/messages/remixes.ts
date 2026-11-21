@@ -17,7 +17,6 @@ export const remixMessages = {
   winnerPlaceholder:
     'Click the +/- buttons to add or remove winners, then arrange them by dragging.',
 
-  // Modal Messages
   modalTitle: 'Host Remix Contest',
   modalDescription:
     'Turn your track into a remix challenge and co-sign your favorite submissions.',

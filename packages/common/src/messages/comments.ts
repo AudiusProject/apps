@@ -1,7 +1,6 @@
 import { formatCount } from '~/utils'
 
 export const commentsMessages = {
-  // Generic messages across the page
   title: 'Comments',
   postComment: 'Post Comment',
   addComment: 'Add a comment',
@@ -32,7 +31,6 @@ export const commentsMessages = {
   seeLess: 'See Less',
   newComments: 'New Comments!',
 
-  // Overflow Menu Actions
   menuActions: {
     pin: 'Pin',
     unpin: 'Unpin',
@@ -46,7 +44,6 @@ export const commentsMessages = {
     delete: 'Delete',
     moreActions: 'more actions'
   },
-  // Toasts/Popups from the overflow menu actions
   toasts: {
     pinned: 'Comment pinned',
     unpinned: 'Comment unpinned',
@@ -73,7 +70,6 @@ export const commentsMessages = {
       confirm: 'Unpin',
       cancel: 'Cancel'
     },
-    // Specifically for an artist deleting someone else's comment
     artistDelete: {
       title: 'Delete comment',
       body: (userDisplayName: string | undefined) =>
@@ -81,7 +77,6 @@ export const commentsMessages = {
       confirm: 'Delete',
       cancel: 'Cancel'
     },
-    // An individual deleting their own comment
     delete: {
       title: 'Delete comment',
       body: 'Delete your comment permanently?',

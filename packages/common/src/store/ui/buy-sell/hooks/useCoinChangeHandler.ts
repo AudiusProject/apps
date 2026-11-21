@@ -1,8 +1,3 @@
-/**
- * Hook for handling token changes and value preservation
- * Manages state transitions when users switch between different token pairs
- */
-
 import { useCallback, useEffect, useRef } from 'react'
 
 import type { CalculationSource } from '../types/swap.types'
@@ -24,9 +19,6 @@ export type CoinChangeHandlerResult = {
   onCoinsChanged: (callback: () => void) => void
 }
 
-/**
- * Hook that manages token change detection and value preservation
- */
 export const useCoinChangeHandler = ({
   inputCoinAddress,
   outputCoinAddress,
@@ -48,7 +40,6 @@ export const useCoinChangeHandler = ({
     source: null as CalculationSource
   })
 
-  // Update preserved values when current values change
   useEffect(() => {
     preservedValuesRef.current = {
       inputAmount: currentInputAmount,
@@ -57,7 +48,6 @@ export const useCoinChangeHandler = ({
     }
   }, [currentInputAmount, currentOutputAmount, currentSource])
 
-  // Detect token changes and prepare for recalculation
   useEffect(() => {
     if (!inputCoinAddress || !outputCoinAddress) return
 

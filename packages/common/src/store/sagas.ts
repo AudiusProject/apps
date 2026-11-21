@@ -18,13 +18,6 @@ import {
 
 import { CommonStoreContext } from './storeContext'
 
-/**
- * A function that creates common sagas. The function takes
- * a CommonStoreContext as input such that platforms (native and web)
- * may specify system-level APIs, e.g. local storage.
- * @param ctx
- * @returns an object of all sagas to be yielded
- */
 export const sagas = (_ctx: CommonStoreContext) => ({
   account: accountSagas,
   buyUSDC: buyUSDCSagas,

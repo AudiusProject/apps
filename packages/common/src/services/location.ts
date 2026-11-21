@@ -28,7 +28,7 @@ export type Location = {
 }
 
 const LOCATION_CACHE_KEY = 'LAST_LOCATION'
-const LOCATION_CACHE_DURATION = 2 * 24 * 3600 // 2 days
+const LOCATION_CACHE_DURATION = 2 * 24 * 3600
 
 export const getLocation = async (
   localStorage: LocalStorage,

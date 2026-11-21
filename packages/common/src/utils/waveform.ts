@@ -1,7 +1,6 @@
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value))
 
-// Small deterministic PRNG so a track always draws the same shape.
 const mulberry32 = (seed: number) => () => {
   seed = (seed + 0x6d2b79f5) | 0
   let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
@@ -9,10 +8,6 @@ const mulberry32 = (seed: number) => () => {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296
 }
 
-/**
- * Fallback for tracks no content node has analyzed: a shape synthesized from
- * the track id, a slow section envelope with per-bar jitter. Values are 0-1.
- */
 export const makeWaveformPeaks = (seed: number, count: number) => {
   const rand = mulberry32(seed)
   const peaks: number[] = []
@@ -26,11 +21,6 @@ export const makeWaveformPeaks = (seed: number, count: number) => {
   return peaks
 }
 
-/**
- * Fits a node's 0-255 buckets to the bar count, keeping each span's loudest.
- * Values are 0-1, scaled so the loudest bucket fills the height; a quiet
- * master would otherwise draw as a flat strip.
- */
 export const resampleWaveformPeaks = (source: number[], count: number) => {
   const loudest = Math.max(1, ...source)
   const peaks: number[] = []

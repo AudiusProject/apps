@@ -14,7 +14,6 @@ export const useAccountSwitcher = () => {
         console.error('User has no wallet address')
         return
       }
-      // Set an override if we aren't using the wallet of the "signed in" user
       if (currentWeb3User && currentWeb3User.wallet === user.wallet) {
         await localStorage.clearAudiusUserWalletOverride()
       } else {
@@ -33,7 +32,6 @@ export const useAccountSwitcher = () => {
     [currentWeb3User, localStorage, reloadApp]
   )
 
-  /** Convenience method to switch out of Manager Mode and back to the current web3 user */
   const switchToWeb3User = useCallback(async () => {
     if (!currentWeb3User) {
       console.error('No current web3 user')
@@ -45,7 +43,6 @@ export const useAccountSwitcher = () => {
   return { switchAccount, switchToWeb3User }
 }
 
-/** Determines if we are in Manager Mode, i.e. the current user is not the logged-in user */
 export const useIsManagedAccount = () => {
   const { data: currentWeb3User } = useCurrentWeb3Account()
   const { data: currentUserId } = useCurrentUserId()

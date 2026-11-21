@@ -25,8 +25,6 @@ export const useCollections = (
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
 
-  // Callers often pass a new array each render, so key on the ids themselves
-  // to keep the queries below stable.
   const collectionIdsKey = collectionIds?.join(',')
   const uniqueCollectionIds = useMemo(
     () =>
@@ -37,8 +35,6 @@ export const useCollections = (
     [collectionIdsKey]
   )
 
-  // Rebuilding these every render makes tanstack re-hash every key and
-  // re-sync every observer, so only rebuild when an input changes.
   const queries = useMemo(
     () =>
       uniqueCollectionIds?.map((collectionId) => ({

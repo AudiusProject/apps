@@ -13,12 +13,6 @@ import { primeTrackData } from '../utils/primeTrackData'
 export const getStemsQueryKey = (trackId: ID | null | undefined) =>
   [QUERY_KEYS.stems, trackId] as unknown as QueryKey<StemTrack[]>
 
-/**
- * Hook that returns stem tracks for a given track ID.
- * @param trackId The ID of the track to get stems for
- * @param options Query options
- * @returns The stem tracks data or null if not found
- */
 export const useStems = (
   trackId: ID | null | undefined,
   options?: QueryOptions

@@ -10,7 +10,6 @@ import { confirmEmailSchema, emailSchema } from '~/schemas'
 
 import { isOtpMissingError } from './useChangePasswordFormConfiguration'
 
-// Note: Not an SDK RequestError as it comes from Hedgehog
 const INVALID_CREDENTIALS_ERROR = 'Invalid credentials'
 const isInvalidCredentialsError = (e: unknown) => {
   return (
@@ -57,7 +56,6 @@ export const useChangeEmailFormConfiguration = (onComplete: () => void) => {
   const { authService } = queryContext
   const queryClient = useQueryClient()
 
-  // Move schema initializations inside the hook to prevent initialization timing issues
   const confirmPasswordFormikSchema = toFormikValidationSchema(
     z.object({
       password: z.string({

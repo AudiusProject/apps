@@ -27,10 +27,6 @@ export const getFollowingQueryKey = ({ userId, pageSize }: UseFollowingArgs) =>
     InfiniteData<ID[]>
   >
 
-/**
- * Hook to fetch following for a user with infinite query support.
- * This version supports infinite scrolling and maintains the full list of following.
- */
 export const useFollowing = (
   { userId, pageSize = DEFAULT_PAGE_SIZE }: UseFollowingArgs,
   options?: QueryOptions

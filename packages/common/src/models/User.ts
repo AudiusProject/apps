@@ -67,7 +67,6 @@ export type UserMetadata = {
   user_id: number
   wallet?: string
 
-  // Used by redux cache
   local?: boolean
 } & Timestamped
 

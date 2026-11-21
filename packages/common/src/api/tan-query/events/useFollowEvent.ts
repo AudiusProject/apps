@@ -25,14 +25,6 @@ export const getEventFollowStateQueryKey = (
   ] as unknown as QueryKey<EventFollowState>
 }
 
-/**
- * Read-hook: is the current user subscribed to this remix-contest event?
- * Also returns the total follower count so the page can render both the
- * button state and a "X following" number without a second call.
- *
- * Backed by GET /v1/events/:eventId/follow_state — a small ad-hoc endpoint
- * we added specifically for this flow.
- */
 export const useEventFollowState = (eventId: ID | null | undefined) => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
@@ -45,13 +37,6 @@ export const useEventFollowState = (eventId: ID | null | undefined) => {
         return { isFollowed: false, followerCount: 0 }
       }
       const sdk = await audiusSdk()
-      // The generated response is already camelCased by the openapi
-      // generator (see EventFollowState.ts), so no snake_case adaptation
-      // needed here.
-      //
-      // The api uses the `user_id` query param to decide whose follow
-      // state to return; without it, the endpoint returns isFollowed=false
-      // for signed-in users and the button sticks on "Follow Contest".
       const response = await sdk.events.getEventFollowState({
         eventId: encodeHashId(eventId)!,
         userId: currentUserId ? encodeHashId(currentUserId)! : undefined
@@ -71,18 +56,12 @@ export const useFollowEvent = () => {
   return useMutation({
     mutationFn: async ({ userId, eventId }: { userId: ID; eventId: ID }) => {
       const sdk = await audiusSdk()
-      // Pass numeric ids so the EventsApi override dispatches to the
-      // entity-manager (client-signed) path. Handing hashid strings via
-      // Id.parse here would route to the generated HTTP endpoint, which
-      // requires an OAuth Authorization header that the web app doesn't
-      // supply.
       return await sdk.events.followEvent({
         userId,
         eventId
       })
     },
     onMutate: async ({ userId, eventId }) => {
-      // Optimistic: flip the button immediately.
       const key = getEventFollowStateQueryKey(eventId, userId)
       const prev = queryClient.getQueryData<EventFollowState>(key)
       queryClient.setQueryData(key, {
@@ -103,8 +82,6 @@ export const useFollowEvent = () => {
       queryClient.invalidateQueries({
         queryKey: getEventFollowStateQueryKey(eventId, userId)
       })
-      // Also refresh the followers avatar list so the user's avatar
-      // appears in the leaderboard card / modal without a refresh.
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.eventFollowers, eventId]
       })

@@ -36,7 +36,6 @@ export const useReportComment = () => {
       })
     },
     onMutate: ({ trackId, commentId, currentSort, parentCommentId }) => {
-      // Optimistic update - filter out the comment from either the top list or the parent comment's replies
       if (parentCommentId) {
         queryClient.setQueryData(
           getCommentQueryKey(parentCommentId),
@@ -60,7 +59,6 @@ export const useReportComment = () => {
           (prevData) => {
             if (!prevData) return
             const newState = cloneDeep(prevData)
-            // Filter out our reported comment
             newState.pages = newState.pages.map((page) =>
               page.filter((id) => id !== commentId)
             )
@@ -72,16 +70,13 @@ export const useReportComment = () => {
       queryClient.resetQueries({
         queryKey: getCommentQueryKey(commentId)
       })
-      // Decrease the track comment count
       subtractCommentCount(queryClient, trackId)
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
       console.error(error)
-      // Generic toast error
       dispatch(toast({ content: messages.mutationError('reporting') }))
 
-      // Reload data
       queryClient.resetQueries({
         queryKey: getTrackCommentListQueryKey({
           trackId,

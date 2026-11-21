@@ -21,15 +21,12 @@ type ClearTrackPositionPayload = {
 
 const initialState: PlaybackPositionState = {}
 
-// Cap how many tracks we remember per user. Resume position is only useful for
-// recently played long-form content, so an unbounded map just bloats storage.
 const MAX_TRACK_POSITIONS_PER_USER = 10
 
 const slice = createSlice({
   name: 'playback-position',
   initialState,
   reducers: {
-    // NOTE: This should only be called when seeding the initial state from local storage
     initializePlaybackPositionState: (
       state,
       action: PayloadAction<InitializePlaybackPositionStatePayload>
@@ -49,9 +46,6 @@ const slice = createSlice({
 
       const userState = state[userId] ?? { trackPositions: {} }
 
-      // Re-insert (delete then set) so the most recently updated track moves
-      // to the end of the insertion-ordered map, making the LRU trim below
-      // drop the oldest entries first.
       delete userState.trackPositions[trackId]
       userState.trackPositions[trackId] = positionInfo
 

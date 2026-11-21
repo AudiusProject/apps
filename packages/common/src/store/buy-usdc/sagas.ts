@@ -85,14 +85,12 @@ function* purchaseStep({
 
   yield* put(purchaseStarted())
 
-  // Wait for on ramp finish
   const result = yield* race({
     failure: take(onrampFailed),
     success: take(onrampSucceeded),
     canceled: take(onrampCanceled)
   })
 
-  // If the user didn't complete the on ramp flow, return early
   if (result.canceled) {
     yield* call(
       track,
@@ -112,7 +110,6 @@ function* purchaseStep({
         error: errorString
       })
     )
-    // Throw up to the flow above this
     if (
       result.failure.payload?.error?.code ===
       'crypto_onramp_unsupported_country'
@@ -123,7 +120,6 @@ function* purchaseStep({
   }
   yield* call(track, make({ eventName: Name.BUY_USDC_ON_RAMP_SUCCESS, vendor }))
 
-  // Wait for the funds to come through
   const newBalance = yield* call(pollForTokenBalanceChange, sdk, {
     mint: 'USDC',
     tokenAccount,
@@ -132,7 +128,6 @@ function* purchaseStep({
     maxRetryCount
   })
 
-  // Check that we got the requested amount
   const purchasedAmount = newBalance - initialBalance
   if (purchasedAmount !== BigInt(desiredAmount)) {
     console.warn(
@@ -179,7 +174,7 @@ function* transferStep({
     userBank, // destination
     wallet.publicKey, // owner
     amount, // amount
-    mintDecimals // decimals
+    mintDecimals
   )
 
   yield* call(
@@ -251,7 +246,6 @@ function* doBuyUSDC({
       case PurchaseVendor.STRIPE: {
         yield* put(
           initializeStripeModal({
-            // stripe expects amount in dollars, not cents
             amount: (desiredAmount / 100).toString(),
             destinationCurrency: 'usdc',
             destinationWallet: rootAccount.publicKey.toString(),
@@ -264,20 +258,15 @@ function* doBuyUSDC({
 
         yield* put(setVisibility({ modal: 'StripeOnRamp', visible: true }))
 
-        // Record start
         yield* call(
           track,
           make({ eventName: Name.BUY_USDC_ON_RAMP_OPENED, vendor })
         )
 
-        // Get config
         const { retryDelayMs, maxRetryCount } = yield* call(
           getBuyUSDCRemoteConfig
         )
 
-        // Wait for purchase
-        // Have to do some typescript finangling here due to the "race" effect in purchaseStep
-        // See https://github.com/agiledigital/typed-redux-saga/issues/43
         const { newBalance } = (yield* call(purchaseStep, {
           vendor,
           desiredAmount,
@@ -286,12 +275,10 @@ function* doBuyUSDC({
           maxRetryCount
         }) as unknown as ReturnType<typeof purchaseStep>)!
 
-        // If the user canceled the purchase, stop the flow
         if (newBalance === undefined) {
           return
         }
 
-        // Transfer from the root wallet to the userbank
         yield* call(transferStep, {
           wallet: rootAccount,
           userBank,
@@ -308,7 +295,6 @@ function* doBuyUSDC({
 
     yield* put(buyUSDCFlowSucceeded())
 
-    // Update USDC balance in store
     const { currentUser: ethAddress } = yield* call(queryWalletAddresses)
     if (!ethAddress) {
       throw new Error('User is not signed in')
@@ -320,7 +306,6 @@ function* doBuyUSDC({
     const balance = account?.amount ?? BigInt(0)
     yield* put(setUSDCBalance({ amount: balance.toString() as StringUSDC }))
 
-    // Record success
     yield* call(
       track,
       make({
@@ -405,7 +390,6 @@ function* recoverPurchaseIfNecessary() {
 
     const userBankAddress = userBank.toBase58()
 
-    // Transfer all USDC from the from the root wallet to the user bank
     yield* put(recoveryStatusChanged({ status: Status.LOADING }))
     yield* call(
       track,
@@ -429,14 +413,12 @@ function* recoverPurchaseIfNecessary() {
       amount
     })
 
-    // Wait for transaction to be finalized before polling balance
     yield* call(
       [connection, connection.confirmTransaction],
       signature,
       'finalized'
     )
 
-    // Ensure RPC catches up to balance change before continuing
     const updatedBalance = yield* call(pollForTokenBalanceChange, sdk, {
       tokenAccount: userBank,
       mint: 'USDC',
@@ -473,10 +455,6 @@ function* watchOnRampOpened() {
 }
 
 function* watchRecovery() {
-  // Use takeLeading since:
-  // 1) We don't want to run more than one recovery flow at a time (so not takeEvery)
-  // 2) We don't need to interrupt if already running (so not takeLatest)
-  // 3) We do want to be able to trigger more than one time per session in case of same-session failures (so not take)
   yield* takeLeading(startRecoveryIfNecessary, recoverPurchaseIfNecessary)
 }
 

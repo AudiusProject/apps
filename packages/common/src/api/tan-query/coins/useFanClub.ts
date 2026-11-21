@@ -52,7 +52,6 @@ export const useFanClub = <TResult = Coin | undefined>(
 
       const parsedCoin = coinFromSdk(coin)
 
-      // Prime the ticker query key if we have coin data with ticker
       if (parsedCoin?.ticker) {
         queryClient.setQueryData(
           getFanClubByTickerQueryKey(parsedCoin.ticker),

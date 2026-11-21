@@ -1,0 +1,33 @@
+name: Comment ratchet
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: comments-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  comment-ratchet:
+    name: Comment ratchet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+
+      - name: Install TypeScript only
+        run: npm install --prefix /tmp/ts --no-save --no-package-lock typescript@5.0.4
+
+      - name: Check comment budgets
+        env:
+          TS_PATH: /tmp/ts/node_modules
+        run: npm run lint:comments

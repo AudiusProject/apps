@@ -51,8 +51,6 @@ export const useRedeemCoinCode = () => {
     onError: (error: Error, _args, _context) => {
       console.error(error)
 
-      // TODO: Should 'Please try again' be added to the end of the message?
-      // Toast generic error message
       toast({
         content: 'There was an error redeeming the coin code'
       })

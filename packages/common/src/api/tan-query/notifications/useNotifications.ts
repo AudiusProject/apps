@@ -43,11 +43,6 @@ export const getNotificationsQueryKey = ({
     { pageSize }
   ] as unknown as QueryKey<InfiniteData<Notification[]>>
 
-/**
- * Hook that returns paginated notifications for the current user.
- * Uses infinite query to support "Load More" functionality.
- * Pagination is based on the timestamp and groupId of the last notification.
- */
 export const useNotifications = (options?: QueryOptions) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
@@ -56,7 +51,6 @@ export const useNotifications = (options?: QueryOptions) => {
   const { data: unreadCount } = useNotificationUnreadCount()
   const prevUnreadCount = usePrevious(unreadCount)
 
-  // Get whitelisted challenge reward IDs from remote config
   const challengeRewardIdsString = useRemoteVar(StringKeys.CHALLENGE_REWARD_IDS)
   const whitelistedChallengeIds = useMemo(() => {
     if (!challengeRewardIdsString) return new Set<ChallengeRewardID>()
@@ -77,9 +71,6 @@ export const useNotifications = (options?: QueryOptions) => {
       const sdk = await audiusSdk()
       const response = await sdk.notifications.getNotifications({
         id: Id.parse(currentUserId),
-        // Requester id sent as `?user_id=` so the backend personalizes
-        // embedded related.users (e.g. does_current_user_follow). The path
-        // id alone identifies the notifications owner, not the requester.
         userId: Id.parse(currentUserId),
         limit: DEFAULT_LIMIT,
         timestamp: pageParam?.timestamp,
@@ -93,7 +84,6 @@ export const useNotifications = (options?: QueryOptions) => {
         notificationFromSDK
       ) as Notification[]
 
-      // Filter out challenge reward notifications that aren't whitelisted
       return notifications.filter((notification) => {
         if (notification.type === NotificationType.ChallengeReward) {
           return whitelistedChallengeIds.has(notification.challengeId)
@@ -115,14 +105,12 @@ export const useNotifications = (options?: QueryOptions) => {
     enabled: options?.enabled !== false && !!currentUserId
   })
 
-  // Refetch when new notifications arrive
   useEffect(() => {
     if (
       prevUnreadCount !== undefined &&
       unreadCount !== undefined &&
       unreadCount > prevUnreadCount
     ) {
-      // Only refetch if we're not already fetching
       if (!query.isFetching) {
         query.refetch()
       }

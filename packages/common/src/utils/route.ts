@@ -5,7 +5,6 @@ import { ID, SearchCategory, SearchFilters } from '~/models'
 import { encodeUrlName, formatTickerForUrl } from './formatUtil'
 import { convertGenreLabelToValue, type GenreLabel } from './genres'
 
-// External Routes
 export const PRIVACY_POLICY = '/legal/privacy-policy'
 export const TERMS_OF_SERVICE = '/legal/terms-of-use'
 export const FAN_CLUB_TERMS = '/legal/fan-club-terms'
@@ -16,14 +15,12 @@ export const DOWNLOAD_LINK = '/download'
 export const PRESS_PAGE = '/press'
 export const AUTH_REDIRECT = '/auth-redirect'
 
-// App Routes
 export const ANDROID_PLAY_STORE_LINK =
   'https://play.google.com/store/apps/details?id=co.audius.app'
 export const IOS_WEBSITE_STORE_LINK =
   'https://apps.apple.com/us/app/audius-music/id1491270519'
 export const IOS_APP_STORE_LINK = 'itms-apps://us/app/audius-music/id1491270519'
 
-// Static routes.
 export const FEED_PAGE = '/feed'
 export const TRENDING_PAGE = '/trending'
 export const TRENDING_PLAYLISTS_PAGE_LEGACY = '/trending/playlists'
@@ -32,11 +29,9 @@ export const EXPLORE_PAGE = '/explore'
 export const TRENDING_PLAYLISTS_PAGE = '/explore/playlists'
 export const TRENDING_UNDERGROUND_PAGE = '/explore/underground'
 export const WEEKLY_ROTATION_PAGE = '/explore/weekly-rotation'
-// Under /explore to avoid colliding with /:handle/:slug track permalinks.
 export const WEEKLY_ROTATION_USER_PAGE = '/explore/weekly-rotation/:handle'
 export const CONTESTS_PAGE = '/contests'
 
-// DEPRECATED - use /library instead.
 export const SAVED_PAGE = '/favorites'
 export const FAVORITES_PAGE = '/favorites'
 
@@ -82,7 +77,6 @@ export const COIN_DETAIL_BUY_PAGE = '/coins/:ticker/buy'
 export const COIN_REDEEM_PAGE = '/coins/:ticker/redeem/:code?'
 export const COIN_EXCLUSIVE_TRACKS_PAGE = '/coins/:ticker/exclusive-tracks'
 export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
-/** Primary club detail route */
 export const CLUB_DETAIL_PAGE = '/clubs/:ticker'
 export const CLUB_DETAIL_BUY_PAGE = '/clubs/:ticker/buy'
 export const CLUB_REDEEM_PAGE = '/clubs/:ticker/redeem/:code?'
@@ -93,9 +87,7 @@ export const WALLET_GUIDE_PAGE = '/wallet/guide'
 export const CASH_PAGE = '/cash'
 export const COINS_CREATE_PAGE = '/coins/create'
 export const CLUBS_CREATE_PAGE = '/clubs/create'
-/** Legacy explore URL; app redirects to CLUBS_EXPLORE_PAGE. */
 export const COINS_EXPLORE_PAGE = '/coins'
-/** Fan club discovery (primary); same UI as legacy /coins. */
 export const CLUBS_EXPLORE_PAGE = '/clubs'
 export const PRIVATE_KEY_EXPORTER_SETTINGS_PAGE = '/settings/export-private-key'
 export const DEV_TOOLS_PAGE = '/dev-tools'
@@ -103,7 +95,6 @@ export const SOLANA_TOOLS_PAGE = '/dev-tools/solana'
 export const USER_ID_PARSER_PAGE = '/dev-tools/user-id-parser'
 export const COIN_API_MOCKS_PAGE = '/dev-tools/coin-api-mocks'
 
-// Multi-stage sign up flow routes
 export enum SignUpPath {
   createEmail = 'create-email',
   createPassword = 'create-password',
@@ -118,7 +109,7 @@ export enum SignUpPath {
   completedReferrerRedirect = 'completed-referrer'
 }
 export const SIGN_UP_EMAIL_PAGE = `/signup/${SignUpPath.createEmail}`
-export const SIGN_UP_START_PAGE = SIGN_UP_EMAIL_PAGE // entry point for sign up if needing to redirect to the beginning
+export const SIGN_UP_START_PAGE = SIGN_UP_EMAIL_PAGE
 export const SIGN_UP_PASSWORD_PAGE = `/signup/${SignUpPath.createPassword}`
 export const SIGN_UP_HANDLE_PAGE = `/signup/${SignUpPath.pickHandle}`
 export const SIGN_UP_REVIEW_HANDLE_PAGE = `/signup/${SignUpPath.reviewHandle}`
@@ -130,7 +121,6 @@ export const SIGN_UP_LOADING_PAGE = `/signup/${SignUpPath.loading}`
 export const SIGN_UP_COMPLETED_REDIRECT = `/signup/${SignUpPath.completedRedirect}`
 export const SIGN_UP_COMPLETED_REFERRER_REDIRECT = `/signup/${SignUpPath.completedReferrerRedirect}`
 
-// Param routes.
 export const NOTIFICATION_USERS_PAGE = '/notification/:notificationId/users'
 export const SEARCH_CATEGORY_PAGE_LEGACY = '/search/:query/:category'
 export const SEARCH_PAGE = '/search/:category?'
@@ -164,12 +154,10 @@ export const PROFILE_PAGE_REPOSTS = '/:handle/reposts'
 export const PROFILE_PAGE_CONTESTS = '/:handle/contests'
 export const PROFILE_PAGE_COMMENTS = '/:handle/comments'
 
-// Opaque id routes
 export const TRACK_ID_PAGE = '/tracks/:id'
 export const USER_ID_PAGE = '/users/:id'
 export const PLAYLIST_ID_PAGE = '/playlists/:id'
 
-// Mobile Only Routes
 export const REPOSTING_USERS_ROUTE = '/reposting_users'
 export const FAVORITING_USERS_ROUTE = '/favoriting_users'
 export const FOLLOWING_USERS_ROUTE = '/following'
@@ -193,7 +181,6 @@ export const ACCOUNTS_YOU_MANAGE_SETTINGS_PAGE = '/settings/accounts-you-manage'
 export const TRENDING_GENRES = '/trending/genres'
 export const EMPTY_PAGE = '/empty_page'
 
-// External Links
 export const AUDIUS_X_LINK = 'https://x.com/audius'
 export const AUDIUS_INSTAGRAM_LINK = 'https://www.instagram.com/audius'
 export const AUDIUS_DISCORD_LINK = 'https://discord.gg/audius'
@@ -219,7 +206,6 @@ export const externalInternalLinks = [
   'https://help.audius.co'
 ]
 
-// Org Links
 export const AUDIUS_ORG = 'https://audius.org'
 export const AUDIUS_DOCS_LINK = 'https://docs.audius.co'
 export const AUDIUS_TEAM_LINK = 'https://www.tikilabs.com/team'
@@ -240,7 +226,6 @@ export const AUDIUS_API_LINK = 'https://audius.org/api'
 export const AUDIUS_FAN_CLUBS_HELP_LINK =
   'https://help.audius.co/product/fan-clubs'
 
-// Birdeye Links
 export const BIRDEYE_BASE_URL = 'https://birdeye.so'
 export const birdeyeUrl = (mint: string, network: string = 'solana') =>
   `${BIRDEYE_BASE_URL}/${network}/token/${mint}`
@@ -286,7 +271,6 @@ export const publicSiteRoutes = [
   AUTH_REDIRECT
 ]
 
-// ordered list of routes the App attempts to match in increasing order of route selectivity
 export const orderedRoutes = [
   SIGN_IN_PAGE,
   EMAIL_VERIFICATION_PAGE,
@@ -445,7 +429,6 @@ export const collectionPage = (
   permalink?: string | null,
   isAlbum?: boolean
 ) => {
-  // Prioritize permalink if available. If not, default to legacy routing
   if (permalink) {
     return permalink
   } else if (playlistName && playlistId && handle) {
@@ -459,10 +442,6 @@ export const collectionPage = (
   }
 }
 
-/**
- * Generate a short base36 hash for a given string.
- * Used to generate short hashes for for queries and urls.
- */
 export const getHash = (str: string) =>
   Math.abs(
     str.split('').reduce((a, b) => {
@@ -489,7 +468,6 @@ export const searchPage = (searchOptions: SearchOptions) => {
     )
   }
 
-  // Build the search path - category is optional
   const searchPath = category ? `/search/${category}` : '/search'
 
   return qs.stringifyUrl({

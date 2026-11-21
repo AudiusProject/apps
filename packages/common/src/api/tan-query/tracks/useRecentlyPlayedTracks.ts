@@ -17,7 +17,6 @@ import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 const DEFAULT_PAGE_SIZE = 10
 
-// `id` is automatically added by the hook
 export type UseRecentlyPlayedTracksArgs = Omit<
   SDKInfiniteQueryArgs<GetUsersTrackHistoryRequest>,
   'id'

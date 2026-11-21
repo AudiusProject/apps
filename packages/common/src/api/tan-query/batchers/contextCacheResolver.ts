@@ -1,9 +1,5 @@
 import { BatchContext } from './types'
 
-/**
- * Utility to maintain a stable context for batcher memoization
- * @returns The previous context if it is effectively equal to the current context
- */
 export const contextCacheResolver = () => {
   let lastContext: BatchContext | null = null
 

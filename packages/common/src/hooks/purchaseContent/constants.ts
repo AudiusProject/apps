@@ -7,7 +7,6 @@ export const GUEST_CHECKOUT = 'guestCheckout'
 export const GUEST_EMAIL = 'guestEmail'
 export const PAGE = 'page'
 
-// Pay between $1 and $100 extra
 export const minimumPayExtraAmountCents = 100
 export const maximumPayExtraAmountCents = 10000
 

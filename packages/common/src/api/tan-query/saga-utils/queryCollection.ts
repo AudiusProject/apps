@@ -45,7 +45,6 @@ export function* queryCollection(
 export function* queryCollections(ids: ID[], queryOptions?: QueryOptions) {
   const collections = {} as Record<ID, TQCollection>
   for (const id of ids) {
-    // Call each queryCollection individually. They will be batched together in the queryFn (if necessary)
     const collection = yield* call(queryCollection, id, queryOptions)
     if (collection) {
       collections[id] = collection

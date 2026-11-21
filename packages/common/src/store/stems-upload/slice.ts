@@ -17,9 +17,6 @@ type StartUploadsPayload = {
   batchUID: string
 }
 
-// Keeps track of uploading stems from the
-// edit track modal. Not currently used for
-// the upload track flow.
 const slice = createSlice({
   name: 'application/ui/stemsUpload',
   initialState,

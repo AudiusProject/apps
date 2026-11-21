@@ -7,14 +7,9 @@ import { setVisibility } from '../modals/parentSlice'
 
 import { requestOpen } from './slice'
 
-// The previous saga fetched track/user/collection data before opening the
-// modal. That work now lives in `useShareContent` so the modal loads its own
-// data via TanStack Query. All that remains is to flip the nice-modal
-// visibility and record the open once a share request lands in the slice.
 function* handleRequestOpen({ payload }: ReturnType<typeof requestOpen>) {
   yield put(setVisibility({ modal: 'Share', visible: true }))
 
-  // `ids` is the request's entity id, e.g. `trackId` or `userId`.
   const { source, type, ...ids } = payload
   const { track, make } = yield* getContext('analytics')
   yield* call(

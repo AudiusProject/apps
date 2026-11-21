@@ -16,12 +16,6 @@ type CollectionParams =
     }
   | { permalink?: string }
 
-/**
- * Hook that returns collection data given either a collection ID, handle+slug+type, or permalink.
- * Internally uses useCollection and useCollectionByPermalink for consistent behavior.
- * @param params The collection params - either {collectionId}, {handle, slug, type}, or {permalink}
- * @returns The collection data or null if not found
- */
 export const useCollectionByParams = <
   TResult extends { playlist_id: ID } = TQCollection
 >(

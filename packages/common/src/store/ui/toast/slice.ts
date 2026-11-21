@@ -16,15 +16,9 @@ const slice = createSlice({
   name: 'application/ui/toast',
   initialState,
   reducers: {
-    /**
-     * Adds a toast
-     */
     toast: (_, _action: ToastAction) => {
       // Triggers saga
     },
-    /**
-     * Internal method for the saga to track individual toasts by key
-     */
     registerToast: (state, action: AddToastAction) => {
       const toast = action.payload
       state.toasts.push(toast)
@@ -33,8 +27,6 @@ const slice = createSlice({
       const toastIdx = state.toasts.findIndex(
         (t) => t.key === action.payload.key
       )
-      // NOTE: Set the toast timeout to 0 so that the Toast component animates out and dismissed the toast
-      // Used for mobile toasts
       if (!state.toasts[toastIdx]) return
       state.toasts[toastIdx].timeout = 0
     },

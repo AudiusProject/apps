@@ -28,7 +28,6 @@ const slice = createSlice({
     setDownloadError: (state, action: PayloadAction<Error>) => {
       state.error = action.payload
     },
-    // Mobile only
     setFileInfo: (
       state,
       action: PayloadAction<{
@@ -39,7 +38,6 @@ const slice = createSlice({
       state.trackName = action.payload.trackName
       state.fileName = action.payload.fileName
     },
-    // Mobile only
     setFetchCancel: (state, action: PayloadAction<() => void>) => {
       state.fetchCancel = action.payload
     }

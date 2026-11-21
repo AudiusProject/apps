@@ -11,17 +11,11 @@ import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
 import { useQueryContext } from '../utils'
 
-const STALE_TIME = 15 * 60 * 1000 // 15 minutes
+const STALE_TIME = 15 * 60 * 1000
 
 export const getPopularGenresQueryKey = () =>
   [QUERY_KEYS.popularGenres] as unknown as QueryKey<GenreSuggestion[]>
 
-/**
- * Fetches the currently top-ranked genres from /v1/genres/popular and merges
- * them with the static genre list. Popular (ranked) genres carry a `count`;
- * use {@link getTrendingGenreSuggestions} to narrow to the ranked subset.
- * Powers the trending genre filter and the Explore "Trending Genres" section.
- */
 export const usePopularGenres = (options?: QueryOptions) => {
   const { audiusSdk } = useQueryContext()
 

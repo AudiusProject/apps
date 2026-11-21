@@ -7,10 +7,6 @@ import { playbackSelectors } from '../store/playback'
 
 const { getTrackId } = playbackSelectors
 
-/**
- * Hook to get the current track from the player state
- * @returns The current track or null if no track is playing
- */
 export const useCurrentTrack = <TResult = TQTrack>(
   options?: SelectableQueryOptions<TQTrack, TResult>
 ) => {

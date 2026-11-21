@@ -52,7 +52,6 @@ export const formatCooldownChallenges = (
 ) => {
   if (challenges.length === 0) return []
 
-  // Memoize the expensive dayjs operation
   const now = dayjs().endOf('day')
   const cooldownDays = challenges[0].cooldown_days ?? 0
   const cooldownChallenges = new Array(cooldownDays)
@@ -70,10 +69,6 @@ export const formatCooldownChallenges = (
   return cooldownChallenges
 }
 
-/**
- * Returns a list of challenges in cooldown period (not claimable yet), and
- * the total currently claimable amount (for challenges past the cooldown period).
- */
 export const useChallengeCooldownSchedule = ({
   challengeId,
   multiple
@@ -93,40 +88,32 @@ export const useChallengeCooldownSchedule = ({
         currentUser
       )
 
-      // Filter challenges by ID or multiple flag
       const idFiltered = undisbursedChallenges.filter(
         (c) => multiple || c.challenge_id === challengeId
       )
 
-      // Filter out trending challenges
       const nonTrending = idFiltered.filter(
         (c) => !TRENDING_CHALLENGE_IDS.has(c.challenge_id)
       )
 
-      // Filter out optimistically claimed challenges
       const filteredChallenges = nonTrending.filter((challenge) => {
         const optimisticChallenge = optimisticChallenges[challenge.challenge_id]
-        // If there's no optimistic challenge or it has a claimable amount, keep the challenge
         if (!optimisticChallenge || optimisticChallenge.claimableAmount > 0) {
           return true
         }
-        // Check if this specific specifier is still undisbursed
         return optimisticChallenge.undisbursedSpecifiers.some(
           (spec) => spec.specifier === challenge.specifier
         )
       })
 
-      // Partition challenges into claimable and cooldown
       const [claimableChallenges, cooldownChallenges] = partition(
         filteredChallenges,
         isCooldownChallengeClaimable
       )
 
-      // Calculate amounts
       const claimableAmount = sum(claimableChallenges.map((c) => c.amount))
       const cooldownAmount = sum(cooldownChallenges.map((c) => c.amount))
 
-      // Create summary if there are claimable amounts
       const summary =
         claimableAmount > 0
           ? {

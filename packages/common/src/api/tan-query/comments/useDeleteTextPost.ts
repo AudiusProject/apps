@@ -30,7 +30,6 @@ export const useDeleteTextPost = () => {
       })
     },
     onMutate: ({ commentId, mint, sortMethod = 'newest' }) => {
-      // Remove from the fan club feed
       const feedQueryKey = getFanClubFeedQueryKey({ mint, sortMethod })
       queryClient.setQueryData(feedQueryKey, (prevData: any) => {
         if (!prevData) return prevData
@@ -45,7 +44,6 @@ export const useDeleteTextPost = () => {
         }
         return newState
       })
-      // Remove the individual comment cache
       queryClient.removeQueries({
         queryKey: getCommentQueryKey(commentId),
         exact: true
@@ -62,7 +60,6 @@ export const useDeleteTextPost = () => {
     onError: (error: Error, args) => {
       console.error(error)
       dispatch(toast({ content: 'There was an error deleting the post.' }))
-      // Reset to server state
       queryClient.invalidateQueries({
         queryKey: getFanClubFeedQueryKey({
           mint: args.mint,

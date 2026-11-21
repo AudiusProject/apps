@@ -30,7 +30,7 @@ export const useCommentReplies = (
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
-  const startingLimit = 3 // comments will load in with 3 already so we don't start pagination at 0
+  const startingLimit = 3
   const { data: currentUserId } = useCurrentUserId()
 
   const queryRes = useInfiniteQuery({
@@ -53,8 +53,6 @@ export const useCommentReplies = (
 
       primeRelatedData({ related: response.related, queryClient })
 
-      // Update the parent comment with the new replies and prime the reply data
-      // Add the replies to our parent comment replies list
       queryClient.setQueryData(
         getCommentQueryKey(commentId),
         (comment) =>
@@ -64,10 +62,8 @@ export const useCommentReplies = (
           }) as Comment
       )
 
-      // Prime each reply in the cache
       primeCommentData({ comments: replies, queryClient })
 
-      // Return just the IDs for the infinite query
       return replies.map((reply) => reply.id)
     },
     select: (data) => data.pages.flat(),

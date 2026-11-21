@@ -206,17 +206,14 @@ describe('getTracksBatcher', () => {
     const batcher = getTracksBatcher(mockContext)
     const ids = [1, 2, 3]
 
-    // Make concurrent requests
     const results = await Promise.all(ids.map((id) => batcher.fetch(id)))
 
-    // Verify single bulk request was made
     expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
     expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: ids.map((id) => Id.parse(id)),
       userId: OptionalId.parse(null)
     })
 
-    // Verify each caller got their correct track data
     results.forEach((result, index) => {
       expect(result).toMatchObject(
         omit(userTrackMetadataFromSDK(createMockSdkTrack(ids[index])), 'user')
@@ -227,22 +224,18 @@ describe('getTracksBatcher', () => {
   it('creates separate batches when requests are not concurrent', async () => {
     const batcher = getTracksBatcher(mockContext)
 
-    // First batch of requests
     const firstBatchIds = [1, 2]
     const firstBatchResults = await Promise.all(
       firstBatchIds.map((id) => batcher.fetch(id))
     )
 
-    // Wait longer than the batch window
     await new Promise((resolve) => setTimeout(resolve, 20))
 
-    // Second batch of requests
     const secondBatchIds = [3, 4]
     const secondBatchResults = await Promise.all(
       secondBatchIds.map((id) => batcher.fetch(id))
     )
 
-    // Verify two separate bulk requests were made
     expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(2)
     expect(mockSdk.tracks.getBulkTracks).toHaveBeenNthCalledWith(1, {
       id: firstBatchIds.map((id) => Id.parse(id)),
@@ -253,7 +246,6 @@ describe('getTracksBatcher', () => {
       userId: OptionalId.parse(null)
     })
 
-    // Verify results for first batch
     firstBatchResults.forEach((result, index) => {
       expect(result).toMatchObject(
         omit(
@@ -263,7 +255,6 @@ describe('getTracksBatcher', () => {
       )
     })
 
-    // Verify results for second batch
     secondBatchResults.forEach((result, index) => {
       expect(result).toMatchObject(
         omit(
@@ -278,7 +269,6 @@ describe('getTracksBatcher', () => {
     const existingId = 1
     const missingId = 999
 
-    // Mock API to only return data for existingId
     const mockBulkTracks = mockSdk.tracks
       .getBulkTracks as unknown as MockInstance<
       [GetBulkTracksRequest],
@@ -298,15 +288,12 @@ describe('getTracksBatcher', () => {
       batcher.fetch(existingId)
     ])
 
-    // Verify existing track is returned correctly
     expect(existingResult).toMatchObject(
       omit(userTrackMetadataFromSDK(createMockSdkTrack(existingId)), 'user')
     )
 
-    // Verify missing track returns null
     expect(missingResult).toBeNull()
 
-    // Verify single batch request was made with both IDs
     expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledTimes(1)
     expect(mockSdk.tracks.getBulkTracks).toHaveBeenCalledWith({
       id: [missingId, existingId].map((id) => Id.parse(id)),

@@ -78,7 +78,6 @@ export type CollectionMetadata = {
 
 export type CollectionDownloadReason = { is_from_favorites: boolean }
 
-// This is available on mobile for offline tracks
 export type OfflineCollectionMetadata = {
   reasons_for_download: CollectionDownloadReason[]
 }
@@ -110,9 +109,6 @@ export type CollectionImage = {
   cover_art_cids?: Nullable<CoverArtSizesCids>
 }
 
-/** A minimal record of a collection saved to an account. Can be used to fetch
- * a full Collection record if extended metadata is needed.
- */
 export type AccountCollection = {
   id: ID
   name: string

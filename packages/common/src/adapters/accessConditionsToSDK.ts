@@ -9,7 +9,6 @@ import {
   type USDCPurchaseConditions
 } from '~/models'
 
-/** Maps common USDC conditions to SDK format. Use for albums (stream conditions are USDC-only). */
 export const usdcPurchaseConditionsToSDK = (
   input: USDCPurchaseConditions
 ): NonNullable<CreateAlbumMetadata['streamConditions']> => {

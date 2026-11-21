@@ -22,10 +22,6 @@ import { QueryKey, QueryOptions } from '../types'
 import { useUsers } from '../users/useUsers'
 import { combineQueryStatuses } from '../utils/combineQueryResults'
 
-// Matches the consumer Table's `fetchBatchSize` so InfiniteLoader's
-// `minimumBatchSize` is satisfied in a single round-trip. When this was 10,
-// the Table asked for 50-row batches and InfiniteLoader cascaded 5 fetches
-// to fill each batch.
 const PAGE_SIZE = 50
 
 export type GetSalesListArgs = {
@@ -96,14 +92,10 @@ export const useSales = (args: GetSalesListArgs, options?: QueryOptions) => {
     [queryResult.data]
   )
 
-  // Call the hooks dropping results to pre-fetch the data
   const usersQueryResult = useUsers(userIdsToFetch)
   const tracksQueryResult = useTracks(trackIdsToFetch)
   const collectionsQueryResult = useCollections(collectionIdsToFetch)
 
-  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
-  // doesn't change every render. We read the latest queryResult from a ref
-  // at call time instead of capturing it in the closure deps.
   const queryResultRef = useRef(queryResult)
   queryResultRef.current = queryResult
   const loadNextPageCallback = useCallback(() => {

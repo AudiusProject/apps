@@ -24,7 +24,6 @@ export const useUpdateProfile = () => {
       const sdk = await audiusSdk()
       metadata.bio = squashNewLines(metadata.bio) ?? null
 
-      // For base64 images (coming from native), convert to a blob
       if (metadata.updatedCoverPhoto?.type === 'base64') {
         const file = await dataURLtoFile(
           metadata.updatedCoverPhoto.file as unknown as string
@@ -51,7 +50,6 @@ export const useUpdateProfile = () => {
         metadata: userMetadataToSdk(metadata)
       })
 
-      // Fetch updated user data
       const response = await sdk.users.getUser({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId)
@@ -60,17 +58,14 @@ export const useUpdateProfile = () => {
       return response.data
     },
     onMutate: async (metadata): Promise<MutationContext> => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: getUserQueryKey(currentUserId)
       })
 
-      // Snapshot the previous values
       const previousMetadata = queryClient.getQueryData(
         getUserQueryKey(currentUserId)
       )
 
-      // Optimistically update user data
       if (previousMetadata) {
         primeUserData({
           queryClient,
@@ -82,10 +77,6 @@ export const useUpdateProfile = () => {
       return { previousMetadata }
     },
     onSuccess: (_data, variables) => {
-      // Re-confirm the mutation in the cache after server success.
-      // We re-apply mutation variables rather than the raw server response
-      // to guard against validator node propagation lag: the node answering
-      // getUser may not yet have indexed the confirmed block.
       const currentCache = queryClient.getQueryData<UserMetadata>(
         getUserQueryKey(currentUserId)
       )
@@ -98,7 +89,6 @@ export const useUpdateProfile = () => {
       }
     },
     onError: (error, _metadata, context?: MutationContext) => {
-      // If the mutation fails, roll back user data to previous state
       if (context?.previousMetadata) {
         primeUserData({
           queryClient,

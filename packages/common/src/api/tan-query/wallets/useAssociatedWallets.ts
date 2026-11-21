@@ -93,7 +93,6 @@ export const useAddAssociatedWallet = () => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId = null } = useCurrentUserId()
 
-  // for priming cache
   const dispatch = useDispatch()
 
   return useMutation({
@@ -109,7 +108,6 @@ export const useAddAssociatedWallet = () => {
       })
     },
     onMutate: async (params) => {
-      // Cache old state
       const previousAssociatedWallets = queryClient.getQueryData<
         ConnectedWallet[]
       >(getConnectedWalletsQueryKey({ userId: currentUserId }))
@@ -118,7 +116,6 @@ export const useAddAssociatedWallet = () => {
         return { previousAssociatedWallets: [] }
       }
 
-      // Optimistically add the new wallet
       const options = getConnectedWalletsQueryOptions(
         { audiusSdk },
         { userId: currentUserId }
@@ -134,7 +131,6 @@ export const useAddAssociatedWallet = () => {
         queryKey: getConnectedWalletsQueryKey({ userId: currentUserId })
       })
 
-      // Temporarily manually refetch relevant redux states
       dispatch(
         profilePageActions.fetchProfile(
           null,
@@ -164,7 +160,6 @@ export const useRemoveAssociatedWallet = () => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
 
-  // for priming cache
   const dispatch = useDispatch()
 
   return useMutation({
@@ -191,12 +186,10 @@ export const useRemoveAssociatedWallet = () => {
       queryClient.invalidateQueries({
         queryKey: getConnectedWalletsQueryKey({ userId: currentUserId })
       })
-      // Invalidate user coin query to update balances
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoin, currentUserId]
       })
 
-      // Temporarily manually refetch relevant redux states
       dispatch(
         profilePageActions.fetchProfile(
           null,

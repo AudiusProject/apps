@@ -65,7 +65,6 @@ export function* pollGatedContent({
     remoteConfigInstance.getRemoteVar(IntKeys.GATED_TRACK_POLL_INTERVAL_MS) ??
     DEFAULT_GATED_TRACK_POLL_INTERVAL_MS
 
-  // get initial track metadata to determine whether we are polling for stream or download access
   const isAlbum = contentType === PurchaseableContentType.ALBUM
   const cachedEntity = isAlbum
     ? yield* queryCollection(contentId)
@@ -73,7 +72,6 @@ export function* pollGatedContent({
   const initiallyHadNoStreamAccess = !cachedEntity?.access.stream
   const initiallyHadNoDownloadAccess = !cachedEntity?.access.download
 
-  // poll for access until it is granted
   while (true) {
     const apiEntity = isAlbum
       ? yield* call(async () => {
@@ -98,15 +96,13 @@ export function* pollGatedContent({
     }
 
     const ownerId =
-      'playlist_owner_id' in apiEntity // isAlbum
+      'playlist_owner_id' in apiEntity
         ? apiEntity.playlist_owner_id
         : apiEntity.owner_id
 
     const currentlyHasStreamAccess = !!apiEntity.access.stream
     const currentlyHasDownloadAccess = !!apiEntity.access.download
 
-    // Update the cache with the new metadata so that the UI
-    // can update and the content can be streamed or downloaded properly.
     if (isAlbum) {
       yield* call(updateCollectionData, [apiEntity as UserCollectionMetadata])
     } else {
@@ -114,10 +110,8 @@ export function* pollGatedContent({
     }
     if (initiallyHadNoStreamAccess && currentlyHasStreamAccess) {
       yield* put(updateGatedContentStatus({ contentId, status: 'UNLOCKED' }))
-      // note: if necessary, update some ui status to show that the download is unlocked
       yield* put(removeFolloweeId({ id: ownerId }))
 
-      // Show confetti if track is unlocked from the how to unlock section on track/collection page or modal
       if (isSourceTrack) {
         yield* put(showConfetti())
       }
@@ -145,10 +139,8 @@ export function* pollGatedContent({
       }
       break
     } else if (initiallyHadNoDownloadAccess && currentlyHasDownloadAccess) {
-      // note: if necessary, update some ui status to show that the track download is unlocked
       yield* put(removeFolloweeId({ id: ownerId }))
 
-      // Show confetti if track is unlocked from the how to unlock section on track page or modal
       if (isSourceTrack) {
         yield* put(showConfetti())
       }
@@ -178,12 +170,6 @@ export function* pollGatedContent({
   }
 }
 
-/**
- * 1. Get follow gated tracks of user
- * 2. Set those track statuses to 'UNLOCKING'
- * 3. Poll for access for those tracks
- * 4. When access is returned, set those track statuses as 'UNLOCKED'
- */
 function* updateFollowGatedTracks(
   trackOwnerId: ID,
   sourceTrackId?: Nullable<ID>
@@ -192,8 +178,6 @@ function* updateFollowGatedTracks(
   const currentUserId = currentUser?.user_id
   if (!currentUserId) return
 
-  // Add followee id to gated content store to subscribe to
-  // polling their newly loaded gated track signatures.
   yield* put(addFolloweeId({ id: trackOwnerId }))
 
   const statusMap: { [id: ID]: GatedContentStatus } = {}
@@ -211,10 +195,8 @@ function* updateFollowGatedTracks(
     const isTrackDownloadGated = isContentFollowGated(downloadConditions)
     if (isTrackStreamGated && ownerId === trackOwnerId) {
       statusMap[id] = 'UNLOCKING'
-      // note: if necessary, update some ui status to show that the track download is unlocking
       tracksToPoll.add(id)
     } else if (isTrackDownloadGated && ownerId === trackOwnerId) {
-      // note: if necessary, update some ui status to show that the track download is unlocking
       tracksToPoll.add(id)
     }
   })
@@ -233,16 +215,9 @@ function* updateFollowGatedTracks(
   )
 }
 
-/**
- * 1. Get follow-gated tracks of unfollowed user
- * 2. Set those track statuses to 'LOCKED'
- * 3. Revoke access for those tracks
- */
 function* handleUnfollowUser(
   action: ReturnType<typeof usersSocialActions.unfollowUser>
 ) {
-  // Remove followee from gated content store to unsubscribe from
-  // polling their newly loaded follow gated track signatures.
   yield* put(removeFolloweeId({ id: action.userId }))
 
   const statusMap: { [id: ID]: GatedContentStatus } = {}
@@ -260,10 +235,8 @@ function* handleUnfollowUser(
     const isDownloadFollowGated = isContentFollowGated(downloadConditions)
     if (isStreamFollowGated && ownerId === action.userId) {
       statusMap[id] = 'LOCKED'
-      // note: if necessary, update some ui status to show that the track download is locked
       revokeAccessMap[id] = 'stream'
     } else if (isDownloadFollowGated && ownerId === action.userId) {
-      // note: if necessary, update some ui status to show that the track download is locked
       revokeAccessMap[id] = 'download'
     }
   })
@@ -278,10 +251,6 @@ function* handleFollowUser(
   yield* call(updateFollowGatedTracks, action.userId, action.trackId)
 }
 
-/**
- * Remove stream signatures from track metadata when they're
- * no longer accessible by the user.
- */
 function* handleRevokeAccess(action: ReturnType<typeof revokeAccess>) {
   const { revokeAccessMap } = action.payload
   const metadatas = Object.keys(revokeAccessMap).map((trackId) => {

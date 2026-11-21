@@ -11,23 +11,13 @@ export type CreateKey = (
   ivHex: string
 ) => Promise<PrivateKey>
 
-/**
- * The subset of the ethereumjs-wallet `Wallet` API that the apps use.
- */
 export type EthWallet = {
-  /** 32-byte secp256k1 private key */
   getPrivateKey: () => Uint8Array
-  /** 0x-prefixed lowercase hex private key */
   getPrivateKeyString: () => string
-  /** 64-byte uncompressed public key without the 0x04 prefix */
   getPublicKey: () => Uint8Array
-  /** 0x-prefixed lowercase hex public key (64 bytes) */
   getPublicKeyString: () => string
-  /** 20-byte address */
   getAddress: () => Uint8Array
-  /** 0x-prefixed lowercase hex address */
   getAddressString: () => string
-  /** 0x-prefixed EIP-55 checksummed address */
   getChecksumAddressString: () => string
 }
 

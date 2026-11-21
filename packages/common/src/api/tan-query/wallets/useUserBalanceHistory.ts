@@ -30,12 +30,6 @@ export const getUserBalanceHistoryQueryKey = (
     params.granularity
   ] as unknown as QueryKey<BalanceHistoryDataPoint[]>
 
-/**
- * Hook to fetch user balance history
- * @param params - Parameters for fetching balance history
- * @param options - TanStack Query options
- * @returns Query result with balance history data points
- */
 export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
   params: UseUserBalanceHistoryParams,
   options?: SelectableQueryOptions<BalanceHistoryDataPoint[], TResult>
@@ -77,8 +71,6 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
 
       const response = await sdk.users.getUserBalanceHistory(requestParams)
 
-      // Map from SDK response format to our hook's return type (SDK uses camelCase)
-      // Convert timestamp from seconds to milliseconds for JavaScript Date
       return (
         response.data?.map((point) => ({
           timestamp: point.timestamp * 1000,

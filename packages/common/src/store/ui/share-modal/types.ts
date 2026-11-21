@@ -19,11 +19,6 @@ type ShareTrackContent = {
   artist: User
 }
 
-/**
- * Contest shares use the same underlying data as a track share (the
- * contest is keyed off a parent track) but link to the contest page
- * (`{trackPermalink}/contest`) instead of the track itself.
- */
 type ShareContestContent = {
   type: 'contest'
   track: Track
@@ -53,10 +48,6 @@ type SharePlaylistContent = {
   creator: User
 }
 
-/**
- * A user's Weekly Rotation. Not backed by an entity; the link is built from
- * the user's handle.
- */
 type ShareWeeklyRotationContent = {
   type: 'weeklyRotation'
   user: User
@@ -68,11 +59,6 @@ export type ShareMilestoneStat =
   | { kind: 'featured'; playlistName: string }
   | { kind: 'genre'; rank: number; genre: string }
 
-/**
- * A track milestone (play count, trending rank, editorial feature) shared as a
- * stat card.
- * Links to the track like a track share.
- */
 type ShareMilestoneContent = {
   type: 'milestone'
   track: Track

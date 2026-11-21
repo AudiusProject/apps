@@ -10,19 +10,12 @@ import {
   PlaylistLibraryID
 } from '../../models/PlaylistLibrary'
 
-/**
- * Finds a playlist by id in the playlist library
- * @param library
- * @param playlistId
- * @returns the identifier or false
- */
 export const findInPlaylistLibrary = (
   library: Nullable<PlaylistLibrary | PlaylistLibraryFolder>,
   playlistId: ID | string
 ): PlaylistLibraryIdentifier | false => {
   if (!library || !library.contents) return false
 
-  // Simple DFS (this likely is very small, so this is fine)
   for (const item of library.contents) {
     switch (item.type) {
       case 'folder': {
@@ -38,21 +31,12 @@ export const findInPlaylistLibrary = (
   return false
 }
 
-/**
- * Finds the index of a playlist or folder id in the library, returning -1 if not found
- * If the target item is nested in a folder, this returns a tuple where the first value is the
- * index of the folder and the second value is the index of the item within that folder's contents.
- * @param library
- * @param entityId
- * @returns {number | number[] | false}
- */
 export const findIndexInPlaylistLibrary = (
   library: PlaylistLibrary | PlaylistLibraryFolder,
   entityId: ID | string
 ): number | number[] | -1 => {
   if (!library.contents) return -1
 
-  // Simple DFS (this likely is very small, so this is fine)
   for (const [i, item] of library.contents.entries()) {
     switch (item.type) {
       case 'folder': {
@@ -71,13 +55,6 @@ export const findIndexInPlaylistLibrary = (
   return -1
 }
 
-/**
- * Removes a playlist or folder from the library and returns the removed item as well as the
- * updated library (does not mutate)
- * @param library
- * @param entityId the id of the playlist or folder to remove
- * @returns { library, removed }
- */
 export const removeFromPlaylistLibrary = (
   library: PlaylistLibrary | PlaylistLibraryFolder,
   entityId: ID | string
@@ -154,15 +131,6 @@ const playlistIdToPlaylistLibraryIdentifier = (
   return null
 }
 
-/**
- * Adds playlist with given id to folder with given id and returns the resulting updated library.
- * If the playlist is already in the library but not in the folder, it removes the playlist from its current position and into the folder.
- * This is a no op if the folder is not in the library or the playlist is already in the target folder. In these cases, the original library is returned.
- * @param library
- * @param playlistId
- * @param folderId
- * @returns the updated playlist library
- */
 export const addPlaylistToFolder = (
   library: PlaylistLibrary,
   playlistId: ID,
@@ -174,12 +142,10 @@ export const addPlaylistToFolder = (
   })
   if (folderIndex < 0) return library
   const folder = library.contents[folderIndex] as PlaylistLibraryFolder
-  // If the playlist is in the right folder already, return the original library.
   if (findInPlaylistLibrary(folder, playlistId) !== false) {
     return library
   }
 
-  // Remove the playlist from the library if it's already there but not in the given folder
   let entry: PlaylistLibraryIdentifier | null
   const { library: newLibrary, removed } = removeFromPlaylistLibrary(
     library,
@@ -187,7 +153,6 @@ export const addPlaylistToFolder = (
   )
 
   if (removed?.type === 'folder') {
-    // Shouldn't hit this but this enforces the right type for `removed`
     return library
   }
   entry = removed as PlaylistLibraryIdentifier
@@ -195,7 +160,6 @@ export const addPlaylistToFolder = (
   if (!entry) {
     entry = playlistIdToPlaylistLibraryIdentifier(playlistId)
   } else {
-    // If playlist was removed the folder index might be different now.
     folderIndex = newLibrary.contents.findIndex((item) => {
       return item.type === 'folder' && item.id === folderId
     })
@@ -215,16 +179,6 @@ export const addPlaylistToFolder = (
   }
 }
 
-/**
- * Changes name of folder with given id to the given new name and returns the resulting
- * updated library. Does not mutate the given library object.
- * Note that this assumes that folders cannot be nested within one another.
- * If we enable nesting folders in the future, this function must be updated.
- * @param library
- * @param folderId
- * @param newName
- * @returns the updated playlist library
- */
 export const renamePlaylistFolderInLibrary = (
   library: PlaylistLibrary,
   folderId: string,
@@ -245,16 +199,6 @@ export const renamePlaylistFolderInLibrary = (
   }
 }
 
-/**
- * Removes folder with given id from the library.
- * Any playlists in the deleted
- * folder are moved out of the folder.
- * Note that this assumes that folders cannot be nested within one another.
- * If we enable nesting folders in the future, this function must be updated.
- * @param library
- * @param folderId
- * @returns the updated playlist library
- */
 export const removePlaylistFolderInLibrary = (
   library: PlaylistLibrary,
   folderId: string
@@ -269,7 +213,6 @@ export const removePlaylistFolderInLibrary = (
     return item.type === 'folder' && item.id === folderId
   })
   const newContents = [...library.contents]
-  // Move contents of folder out
   const removedFolderContents = folder.contents
   newContents.splice(folderIndex, 1, ...removedFolderContents)
   return {
@@ -278,12 +221,6 @@ export const removePlaylistFolderInLibrary = (
   }
 }
 
-/**
- * Adds new folder to a playlist library and returns the result.
- * Does not mutate.
- * @param library
- * @param folder
- */
 export const addFolderToLibrary = (
   library: PlaylistLibrary | null,
   folder: PlaylistLibraryFolder
@@ -294,11 +231,6 @@ export const addFolderToLibrary = (
   }
 }
 
-/**
- * Removes duplicates in a playlist library
- * @param library
- * @param ids ids to keep track of as we recurse
- */
 export const removePlaylistLibraryDuplicates = (
   library: PlaylistLibrary | PlaylistLibraryFolder,
   ids: Set<string> = new Set([])
@@ -306,11 +238,9 @@ export const removePlaylistLibraryDuplicates = (
   if (!library.contents) return library
   const newContents: (PlaylistLibraryFolder | PlaylistLibraryIdentifier)[] = []
 
-  // Simple DFS (this likely is very small, so this is fine)
   for (const item of library.contents) {
     switch (item.type) {
       case 'folder': {
-        // If we've seen this folder already, don't include it in our final result.
         if (ids.has(item.id)) {
           break
         }
@@ -323,7 +253,6 @@ export const removePlaylistLibraryDuplicates = (
         break
       }
       case 'playlist':
-        // If we've seen this playlist already, don't include it in our final result.
         if (ids.has(`${item.playlist_id}`)) {
           break
         }
@@ -338,14 +267,6 @@ export const removePlaylistLibraryDuplicates = (
   }
 }
 
-/**
- * Reorders a playlist library
- * Note that this helper assumes that folders cannot be inside folders.
- * If we ever support nesting folders, this must be updated.
- * @param library
- * @param draggingId the playlist being reordered
- * @param droppingId the playlist where the dragged one was dropped onto
- */
 export const reorderPlaylistLibrary = (
   library: PlaylistLibrary | PlaylistLibraryFolder,
   draggingId: PlaylistLibraryID,
@@ -353,7 +274,6 @@ export const reorderPlaylistLibrary = (
   draggingKind = 'library-playlist',
   reorderBeforeTarget = false
 ) => {
-  // Find the dragging id and remove it from the library if present.
   let entry: PlaylistLibraryIdentifier | PlaylistLibraryFolder | null
   const { library: newLibrary, removed } = removeFromPlaylistLibrary(
     library,
@@ -362,7 +282,6 @@ export const reorderPlaylistLibrary = (
   entry = removed
   if (!entry) {
     if (draggingKind === 'playlist-folder') {
-      // Soft fail if the thing being dragged is a folder and it doesn't exist in the library yet. This shouldn't be possible.
       return library
     } else {
       entry = playlistIdToPlaylistLibraryIdentifier(draggingId)
@@ -374,11 +293,9 @@ export const reorderPlaylistLibrary = (
   if (!entry) return { ...library, contents: newContents }
 
   let index: number | number[]
-  // We are dropping to the top
   if (droppingId === -1) {
     index = 0
   } else {
-    // Find the droppable id and place the draggable id after it
     const found = findIndexInPlaylistLibrary(newLibrary, droppingId)
     if (found === -1) return library
     const indexShift = reorderBeforeTarget ? 0 : 1
@@ -389,9 +306,6 @@ export const reorderPlaylistLibrary = (
     }
   }
   if (Array.isArray(index)) {
-    // The lines below assumes that folders cannot be nested inside folders; that is, that the
-    // dropId will only ever be up to one level deep.
-    // This must be updated if we ever allow nested folders.
     const folderIndex = index[0]
     const dropIndex = index[1]
     const folder = newContents[folderIndex] as PlaylistLibraryFolder
@@ -408,12 +322,6 @@ export const reorderPlaylistLibrary = (
   }
 }
 
-/**
- * Determines whether or not a playlist or folder is inside a folder
- * @param library
- * @param id (playlist or folder id)
- * @returns boolean
- */
 export const isInsideFolder = (
   library: PlaylistLibrary | PlaylistLibraryFolder,
   id: ID | string
@@ -421,7 +329,6 @@ export const isInsideFolder = (
   return Array.isArray(findIndexInPlaylistLibrary(library, id))
 }
 
-/* Returns playlists in `playlists` that are not in the given playlist library `library`. */
 export const getPlaylistsNotInLibrary = (
   library: PlaylistLibrary | null,
   playlists: {

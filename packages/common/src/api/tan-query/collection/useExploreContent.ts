@@ -27,7 +27,6 @@ export const getExploreContentQueryKey = () => {
   return [QUERY_KEYS.exploreContent] as unknown as QueryKey<ExploreContent>
 }
 
-/** Removes duplicates and invalid IDs */
 const parseUniqueValidIds = (ids: string[]): ID[] => {
   return [
     ...new Set(

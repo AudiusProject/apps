@@ -3,7 +3,6 @@ import type { Dayjs } from '~/utils/dayjs'
 
 export type CollectionTrack = LineupTrack & {
   dateAdded: Dayjs
-  /** Raw playlist_contents time (unix seconds). 0 when it was never written. */
   timeAdded?: number
 }
 

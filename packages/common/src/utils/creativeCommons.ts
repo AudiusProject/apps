@@ -64,9 +64,6 @@ const ALL_LICENSES = {
 
 export type License = keyof typeof ALL_LICENSES
 
-/**
- * Computes the Create Commons License for provided attribution, commercial use, and derivative works flags.
- */
 export const computeLicense = (
   allowAttribution: boolean,
   commercialUse: boolean,
@@ -94,9 +91,6 @@ const variables = (
   derivativeWorks
 })
 
-/**
- * Computes the Creative Commons license variables from a license type.
- */
 export const computeLicenseVariables = (licenseType: License) => {
   switch (licenseType) {
     case BY_NC_TYPE:

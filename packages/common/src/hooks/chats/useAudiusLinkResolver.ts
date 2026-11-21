@@ -15,7 +15,6 @@ const {
   instanceOfUserResponse
 } = ResolveApi
 
-// TODO: Move this to util file
 const escapeRegexSpecialChars = (str: string): string => {
   const specialChars = /[.*+?^${}()|[\]\\]/g
   return str.replace(specialChars, '\\$&')
@@ -38,53 +37,6 @@ export type LinkEntity =
       data: User
     }
 
-/**
- * Hook to use within chat composition interfaces.
- * It pulls Audius links out into display text
- * @param value chat input text, e.g. what's in the text area
- * @param hostname audius hostname for this instance, e.g. audius.co
- * @param audiusSdk sdk instantiation interface
- * @returns {Object} Object containing helper methods and state:
- * - linkEntities: Array of the linked entities within the current value.
- *
- * - resolveLinks: Async function that takes the input text and
- *     replaces Audius links with their human-readable counterparts.
- *
- * - restoreLinks: Function that restores human-readable text back into Audius
- *      links in the provided value. This should be used before text submission.
- *
- * - getMatches: Function that returns a generator of matches for resolved
- *      Audius links within the provided value. This is useful when displaying text
- *      back to the user.
- *
- * - handleBackspace: Function that checks if the user backspaced over a resolved link
- *      and modifies the text accordingly, deleting the whole display text/link on a
- *      single keystroke.
- *
- * @example
- * const Input = () => {
- *   const [value, setValue] = useState('')
- *   const { resolveLinks, restoreLinks, clearLinks } = useAudiusLinkResolver({
- *     "Check out this song: https://audius.co/artist/track",
- *     "audius.co",
- *     audiusSdk
- *   })
- *
- *   useEffect(() => {
- *     const fn = async () => {
- *       setValue(await resolveLinks(value))
- *     }
- *     fn()
- *   }, [value, setValue])
- *
- *   const onSubmit = (value: string) => {
- *     const restored = restoreLinks(value)
- *     submit(restored)
- *     clearLinks()
- *   }
- *   return <textarea value={value} onSubmit={onSubmit} />
- * }
- */
 export const useAudiusLinkResolver = ({
   value,
   hostname,
@@ -94,7 +46,6 @@ export const useAudiusLinkResolver = ({
   hostname: string
   audiusSdk: () => Promise<AudiusSdk>
 }) => {
-  // Maintain bidirectional maps of audius links to human readable format
   const linkToHuman = useRef<{ [key: string]: string }>({}).current
   const humanToData = useRef<{ [key: string]: LinkEntity }>({}).current
 
@@ -108,9 +59,6 @@ export const useAudiusLinkResolver = ({
       .join('|')
   }, [getSortedMatchStrings])
 
-  /**
-   * Resolves Audius links in the provided text to their display text equivalent.
-   */
   const resolveLinks = useCallback(
     async (value: string) => {
       const sdk = await audiusSdk()
@@ -121,12 +69,6 @@ export const useAudiusLinkResolver = ({
 
       for (const match of matches) {
         if (!(match in linkToHuman)) {
-          // `sdk.resolve` throws on URLs the indexer can't map to a known
-          // entity (e.g. `/handle/contest/slug` — a contest page rather
-          // than a plain track). Catching here keeps the rest of the
-          // input intact: the unresolved URL stays as a literal link in
-          // the composed message, which is exactly what the user wants
-          // when sharing a contest into a DM.
           let res: Awaited<ReturnType<typeof sdk.resolve>> | null = null
           try {
             res = await sdk.resolve({ url: match })
@@ -164,20 +106,10 @@ export const useAudiusLinkResolver = ({
             }
           }
         } else {
-          // If we already loaded the track, delay showing by 500ms
-          // to give the user some sense of what is happening.
           await new Promise((resolve) => setTimeout(resolve, 500))
         }
       }
 
-      // Sort here to make sure that we replace all content before
-      // replacing their substrings.
-      // This is because in link replacement, we want to replace
-      // https://artist/track
-      // before we replace
-      // https://artist
-      // to make sure that we don't accidentally replace the substring
-      // and then fail to match the larger string
       let editedValue = value
       for (const [link, human] of Object.entries(linkToHuman).sort(
         (a, b) => b[0].length - a[0].length
@@ -190,10 +122,6 @@ export const useAudiusLinkResolver = ({
     [linkToHuman, humanToData, hostname, audiusSdk]
   )
 
-  /**
-   * Restores display text with the original Audius links.
-   * Should be called before form submission.
-   */
   const restoreLinks = useCallback(
     (value: string) => {
       let editedValue = value

@@ -118,7 +118,6 @@ const slice = createSlice({
         balance: bigint
       }>
     ) => {
-      // is connecting
       state.associatedWallets.confirmingWallet.wallet = wallet
       state.associatedWallets.confirmingWallet.chain = chain
       state.associatedWallets.confirmingWallet.balance = balance

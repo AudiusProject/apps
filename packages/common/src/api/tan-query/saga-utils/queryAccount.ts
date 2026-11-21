@@ -49,7 +49,6 @@ export function* queryIsAccountComplete() {
   const account = yield* call(queryCurrentAccount)
   if (!account) return false
   const accountUser = yield* call(queryUser, account?.userId)
-  // an account is complete if it has a handle and name
   return !!accountUser?.handle && !!accountUser?.name
 }
 

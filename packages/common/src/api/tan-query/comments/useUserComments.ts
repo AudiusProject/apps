@@ -66,10 +66,8 @@ export const useUserComments = (
 
       primeRelatedData({ related: commentsRes.related, queryClient })
 
-      // Prime comment data in the cache
       primeCommentData({ comments: commentList, queryClient })
 
-      // Return just the IDs for the infinite query
       return commentList.map((comment) => comment.id)
     },
     select: (data) => data.pages.flat(),

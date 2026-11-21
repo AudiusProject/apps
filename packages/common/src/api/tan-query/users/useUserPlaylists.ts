@@ -88,9 +88,6 @@ export const useUserPlaylists = (
     isLoading: isCollectionsLoading
   } = useCollections(queryRes.data)
 
-  // The ID query can resolve before the per-collection entity queries do; if
-  // we only reported `queryRes.isPending` the consumer would see an empty
-  // `data` array in that gap and flash a "no playlists" state.
   const hasPendingCollections =
     (queryRes.data?.length ?? 0) > 0 && isCollectionsPending
 

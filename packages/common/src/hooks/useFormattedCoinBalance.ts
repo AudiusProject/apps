@@ -23,16 +23,6 @@ type UseFormattedCoinBalanceReturn = {
   formattedHeldValue: string | null
 }
 
-/**
- * Hook to get formatted balance and price information for any supported mint
- * @param mint - The coin mint address to get balance and price for
- * @param locale - Locale for number formatting (defaults to 'en-US')
- * @param isPolling - Whether to enable polling for balance updates
- * @param pollingInterval - Interval for polling in milliseconds (defaults to 3000ms)
- * @param includeExternalWallets - Whether to include external wallet balances (defaults to true)
- * @param includeStaked - Whether to include staked balances (defaults to true)
- * @returns Object with formatted balance, price, and loading states
- */
 export const useFormattedCoinBalance = (
   mint: string,
   locale: string = 'en-US',
@@ -58,19 +48,14 @@ export const useFormattedCoinBalance = (
   const coinPrice = data?.displayPrice
   const hasFetchedCoinBalance = !isNullOrUndefined(balance)
 
-  // Format mint balance with dynamic decimal places
   const coinBalanceFormatted = useMemo(() => {
     if (!hasFetchedCoinBalance || !balance) return null
 
-    // Convert FixedDecimal to number for formatting
     const balanceNumber = Number(balance.toString())
     const decimalPlaces = getTokenDecimalPlaces(balanceNumber)
 
-    // Cap maximumFractionDigits to not exceed the token's native decimal precision
-    // FixedDecimal can't format with more decimals than it was constructed with
     const maxFractionDigits = Math.min(decimalPlaces, coinBalance?.decimals)
 
-    // Need formatNumberCommas for mobile :(
     return formatNumberCommas(
       balance.toLocaleString(locale, {
         maximumFractionDigits: maxFractionDigits,
@@ -79,7 +64,6 @@ export const useFormattedCoinBalance = (
     )
   }, [balance, hasFetchedCoinBalance, locale, coinBalance?.decimals])
 
-  // Calculate dollar value of user's mint balance
   const coinDollarValue = useMemo(() => {
     if (!coinPrice) return '$0.00'
 
