@@ -96,7 +96,6 @@ const BpmRangeView = ({ value, setValue }: ViewProps) => {
   const [maxBpm, setMaxBpm] = useState(minMaxValue?.[1] ?? '')
   const [minError, setMinError] = useState<string | null>(null)
   const [maxError, setMaxError] = useState<string | null>(null)
-  // NOTE: Memo to avoid the constantly changing function instance from triggering the effect
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onChange = useMemo(() => setValue, [])
 
@@ -116,7 +115,6 @@ const BpmRangeView = ({ value, setValue }: ViewProps) => {
   }, [value, setBpmRange, setMinBpm, setMaxBpm])
 
   useEffect(() => {
-    // Validation
     const minVal = Number(minBpm)
     const maxVal = Number(maxBpm)
     let hasError = false
@@ -154,7 +152,6 @@ const BpmRangeView = ({ value, setValue }: ViewProps) => {
 
     if (hasError) return
 
-    // Value Update
     let value = ''
 
     if (minBpm || maxBpm) {
@@ -222,7 +219,7 @@ const BpmTargetView = ({ value, setValue }: ViewProps) => {
   const [bpmTarget, setBpmTarget] = useState(
     isValidDiff && minMaxValue
       ? String(Number(minMaxValue[0]) + minMaxDiff / 2)
-      : minMaxValue // If range is not valid for target view
+      : minMaxValue
         ? ''
         : value
   )
@@ -230,12 +227,10 @@ const BpmTargetView = ({ value, setValue }: ViewProps) => {
     minMaxDiff === 20 ? 'range10' : minMaxDiff === 10 ? 'range5' : 'exact'
   )
   const [error, setError] = useState<string | null>(null)
-  // NOTE: Memo to avoid the constantly changing function instance from triggering the effect
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onChange = useMemo(() => setValue, [])
 
   useEffect(() => {
-    // Validation
     const val = Number(bpmTarget)
     let hasError = false
 
@@ -255,12 +250,10 @@ const BpmTargetView = ({ value, setValue }: ViewProps) => {
 
     if (hasError) return
 
-    // Value Update
     let value = ''
 
     if (bpmTarget) {
       if (bpmTargetType === 'exact') {
-        // Strip leading 0's
         value = Number(bpmTarget).toString()
       } else {
         const mod = bpmTargetType === 'range5' ? 5 : 10
@@ -311,7 +304,6 @@ const BpmTargetView = ({ value, setValue }: ViewProps) => {
   )
 }
 
-// Given a bpm or bpm range, determine if it should be displayed as a range or target
 const getBpmType = (bpm: string | undefined) => {
   if (!bpm) return 'range'
   if (!bpm.includes('-')) return 'target'

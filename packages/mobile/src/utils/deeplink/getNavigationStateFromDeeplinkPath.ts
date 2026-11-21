@@ -100,22 +100,16 @@ export const getNavigationStateFromDeeplinkPath = ({
     return trimmed
   }
 
-  // Add leading slash if it is missing
   if (path[0] !== '/') path = `/${path}`
 
-  // Decode URL-encoded characters in the path
   try {
     path = decodeURIComponent(path)
   } catch (e) {
-    // If decoding fails, continue with the original path
     console.warn('Failed to decode URL path:', path, e)
   }
 
   path = path.replace('#embed', '')
 
-  // OAuth authorization URLs (e.g. /oauth/authorize?...) are intercepted by
-  // the app via Universal Links. Route them to the OAuth screen instead of
-  // crashing with an unmatched path.
   if (path.match(/^\/oauth\//)) {
     const queryStart = path.indexOf('?')
     const search = queryStart > -1 ? path.slice(queryStart) : ''
@@ -143,18 +137,13 @@ export const getNavigationStateFromDeeplinkPath = ({
   }
 
   if (path.match(`^/app-redirect`)) {
-    // Remove the app-redirect prefix if present
     path = path.replace(`/app-redirect`, '')
   }
 
-  // Strip the trending query param because `/trending` will
-  // always go to ThisWeek
   if (path.match(/^\/trending/)) {
     path = '/trending'
   }
 
-  // Opaque ID routes
-  // /tracks/Nz9yBb4
   if (path.match(/^\/tracks\//)) {
     const id = parseOptionalHashId(pathPart(path)(2))
     return createTrendingStackState({
@@ -165,7 +154,6 @@ export const getNavigationStateFromDeeplinkPath = ({
     })
   }
 
-  // /users/Nz9yBb4
   if (path.match(/^\/users\//)) {
     const id = parseOptionalHashId(pathPart(path)(2))
     return createTrendingStackState({
@@ -176,7 +164,6 @@ export const getNavigationStateFromDeeplinkPath = ({
     })
   }
 
-  // /playlists/Nz9yBb4
   if (path.match(/^\/playlists\//)) {
     const id = parseOptionalHashId(pathPart(path)(2))
     return createTrendingStackState({
@@ -205,7 +192,6 @@ export const getNavigationStateFromDeeplinkPath = ({
     const redeemCode = pathPart(path)(4)
 
     if (ticker && ticker !== 'create') {
-      // Normalize ticker to uppercase
       const normalizedTicker = ticker.toUpperCase()
 
       if (coinRoute === 'redeem') {
@@ -229,14 +215,11 @@ export const getNavigationStateFromDeeplinkPath = ({
     })
   }
 
-  // /search
   if (path.match(/^\/search(?:\/|\?|$)/)) {
     const {
       query: { query: searchQuery, ...filters }
     } = queryString.parseUrl(path)
 
-    // Route search URLs to the explore tab with SearchExplore screen
-    // This ensures proper deeplinking for both search URLs and search with filters
     return createExploreStackState({
       name: 'SearchExplore',
       params: {
@@ -248,14 +231,11 @@ export const getNavigationStateFromDeeplinkPath = ({
     })
   }
 
-  // /explore
   if (path.match(/^\/explore(?:\/|\?|$)/)) {
     const {
       query: { query: exploreQuery, ...filters }
     } = queryString.parseUrl(path)
 
-    // Route explore URLs to the explore tab with SearchExplore screen
-    // This ensures both /search and /explore URLs work for deeplinking
     return createExploreStackState({
       name: 'SearchExplore',
       params: {
@@ -283,36 +263,29 @@ export const getNavigationStateFromDeeplinkPath = ({
       queryParamsStart > -1 ? `&${path.slice(queryParamsStart + 1)}` : ''
     path = `/settings${subpathParam}${queryParams}`
   } else if (accountHandle && isProfilePathForHandle(path, accountHandle)) {
-    // If the path is explicitly a profile URL for the current user, rewrite to `/profile`
     path = path.replace(
       new RegExp(`^/${accountHandle.replace(/^@/, '')}`, 'i'),
       '/profile'
     )
   } else {
-    // If the path has two parts
     if (path.match(/^\/[^/]+\/[^/]+$/)) {
-      // If the path doesn't match a profile tab, it's a track
       if (!path.match(/^\/[^/]+\/(tracks|albums|playlists|reposts)$/)) {
         path = `/track${path}`
       }
     }
 
     if (path.match(/^\/[^/]+\/playlist\/[^/]+$/)) {
-      // set the path as `collection`
       path = path.replace(/(^\/[^/]+\/)(playlist)(\/[^/]+$)/, '$1collection$3')
       path = `${path}?collectionType=playlist`
     } else if (path.match(/^\/[^/]+\/album\/[^/]+$/)) {
-      // set the path as `collection`
       path = path.replace(/(^\/[^/]+\/)(album)(\/[^/]+$)/, '$1collection$3')
       path = `${path}?collectionType=album`
     }
   }
 
   if (!hasAccount && !path.match(/^\/reset-password/)) {
-    // Redirect to sign in with original path in query params
     const { url, query } = queryString.parseUrl(path)
 
-    // If url is signin or signup, set screen param instead of routeOnCompletion
     if (url === '/signin' || url === '/signup') {
       path = queryString.stringifyUrl({
         url: '/sign-on',

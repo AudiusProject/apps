@@ -20,8 +20,6 @@ type TrackTileStatsProps = {
   trackId: ID
   isTrending?: boolean
   rankIndex?: number
-  // Source tag for playback when the user plays the track from within the
-  // comment drawer opened via the CommentMetric.
   playbackSource?: string
 }
 

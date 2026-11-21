@@ -61,7 +61,6 @@ export type ThemeColors = {
   shadow: string
   staticTwitterBlue: string
   staticWhite: string
-  // TODO: Remove when theme v2 is enabled
   inverse: string
   staticNeutral: string
   staticNeutralLight2: string
@@ -177,7 +176,6 @@ export type ResolvedThemeName =
   | 'classic-dark'
   | 'matrix'
 
-/** True when theme has dark backgrounds (status/nav bar should use light content) */
 export const isDarkTheme = (theme: ResolvedThemeName): boolean =>
   theme === 'default-dark' || theme === 'classic-dark' || theme === 'matrix'
 
@@ -190,7 +188,6 @@ export const themeColorsByThemeVariant: Record<ResolvedThemeName, ThemeColors> =
     matrix: matrixTheme
   }
 
-/** @deprecated Use useResolvedThemeName + themeColorsByThemeVariant */
 export const legacyThemeColorsByThemeVariant = {
   [Theme.LIGHT]: defaultTheme,
   [Theme.DARK]: darkTheme,
@@ -203,7 +200,6 @@ export const selectSystemTheme = (state: CommonState) => {
   return legacyThemeColorsByThemeVariant[systemTheme]
 }
 
-/** Resolve palette + mode + system preference to theme name */
 const resolveThemeName = (
   themePalette: ThemePalette | null,
   themeMode: ThemeMode | null,
@@ -271,7 +267,6 @@ export const useColor = (color: string): string => {
   return (theme as any)[color]
 }
 
-// Uses normalColor when in light/dark mode, but "special color" when in other mode
 export const useSpecialColor = (normalColor: string, specialColor: string) => {
   const resolvedTheme = useResolvedThemeName()
   const themeVariant = useThemeColors()

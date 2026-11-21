@@ -51,7 +51,6 @@ export const AccountsManagingYouScreen = () => {
     isPending,
     isSuccess
   } = useManagers(userId, {
-    // Grants can change from web or another device
     staleTime: 0
   })
   const { mutate: cancelInvite } = useRemoveManager()

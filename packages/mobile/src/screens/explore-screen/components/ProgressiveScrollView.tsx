@@ -34,7 +34,6 @@ export const ProgressiveScrollView = ({
 
   const childrenArray = useMemo(() => Children.toArray(children), [children])
 
-  // Load sections progressively
   useEffect(() => {
     if (hasStartedLoadingRef.current) return
 
@@ -43,10 +42,8 @@ export const ProgressiveScrollView = ({
     const loadSections = () => {
       childrenArray.forEach((_, index) => {
         if (index < initialLoadCount) {
-          // Load initial sections immediately
           setLoadedIndices((prev) => new Set([...prev, index]))
         } else {
-          // Load remaining sections with delay
           setTimeout(
             () => {
               setLoadedIndices((prev) => new Set([...prev, index]))
@@ -60,13 +57,11 @@ export const ProgressiveScrollView = ({
     loadSections()
   }, [childrenArray, initialLoadCount, loadDelay])
 
-  // Accelerate loading if user starts interacting
   const handleScroll = () => {
     if (!isUserInteracting) {
       setIsUserInteracting(true)
       onUserInteraction?.()
 
-      // Load all remaining sections immediately
       const allIndices = new Set(childrenArray.map((_, index) => index))
       setLoadedIndices(allIndices)
     }
@@ -74,7 +69,6 @@ export const ProgressiveScrollView = ({
 
   const renderChild = (child: React.ReactElement, index: number) => {
     const isLoaded = loadedIndices.has(index)
-    // Clone the child and pass isLoading prop
     return cloneElement(child, {
       key: index,
       // @ts-ignore

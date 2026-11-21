@@ -80,7 +80,6 @@ export const SendTokensUserSelectionScreen = () => {
   const callbackId = params?.callbackId
   const { onOpen: openSendTokensDrawer } = useSendTokensModal()
 
-  // Debounce the search query
   useDebounce(
     () => {
       setDebouncedQuery(inputValue)
@@ -89,20 +88,15 @@ export const SendTokensUserSelectionScreen = () => {
     [inputValue]
   )
 
-  // Handle back button press to reopen drawer
   const handleBack = useCallback(() => {
-    // Only reopen drawer if callback still exists (user didn't select someone)
     if (callbackId && userSelectionCallbacks.has(callbackId)) {
-      // Clean up the callback
       userSelectionCallbacks.delete(callbackId)
-      // Reopen the send drawer after navigation completes
       setTimeout(() => {
         openSendTokensDrawer()
       }, 150)
     }
   }, [callbackId, openSendTokensDrawer])
 
-  // Clean up callback if component unmounts without user selection
   useEffect(() => {
     return () => {
       if (callbackId && userSelectionCallbacks.has(callbackId)) {
@@ -113,17 +107,14 @@ export const SendTokensUserSelectionScreen = () => {
 
   const { data: currentUserId } = useCurrentUserId()
 
-  // Fetch current user's followers for zero state
   const { users: followerUsers, isPending: isLoadingFollowers } = useFollowers(
     { userId: currentUserId ?? null, pageSize: 20 },
     { enabled: !!currentUserId }
   )
-  // Filter out excluded users from followers
   const filteredFollowerUsers = followerUsers?.filter(
     (user) => !excludedUserIds?.includes(user.user_id)
   )
 
-  // Use tan-query for user search with debounced query
   const {
     data: searchUsers,
     isPending: isSearchPending,
@@ -140,7 +131,6 @@ export const SendTokensUserSelectionScreen = () => {
     }
   )
 
-  // Filter out excluded users (data is already flattened by FlatUseInfiniteQueryResult)
   const filteredUsers = (searchUsers ?? []).filter(
     (user) => !excludedUserIds?.includes(user.user_id)
   )
@@ -161,13 +151,10 @@ export const SendTokensUserSelectionScreen = () => {
       if (callbackId) {
         const callback = userSelectionCallbacks.get(callbackId)
         if (callback) {
-          // Callback will handle reopening the drawer and updating state
           callback(user)
         }
-        // Clean up the callback
         userSelectionCallbacks.delete(callbackId)
       }
-      // Close the user selection screen
       navigation.goBack()
     },
     [callbackId, navigation]

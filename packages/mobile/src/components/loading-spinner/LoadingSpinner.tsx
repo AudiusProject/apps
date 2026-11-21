@@ -17,30 +17,16 @@ const styles = StyleSheet.create({
 })
 
 export type LoadingSpinnerProps = {
-  /**
-   * @deprecated The color of the spinner
-   */
   color?: string
-  /**
-   * Fill color of the spinner
-   */
   fill?: string
-  /**
-   * Style to apply to the spinner
-   */
   style?: StyleProp<ViewStyle>
 }
 
-/**
- * @deprecated Use the harmony-native LoadingSpinner component instead
- */
 const LoadingSpinner = (props: LoadingSpinnerProps) => {
   const { neutralLight4 } = useThemeColors()
   const color = props.color ?? props.fill ?? neutralLight4
   const ref = useRef<AnimatedLottieView>(null)
 
-  // Fix paused animation when entering foreground
-  // see: https://github.com/lottie-react-native/lottie-react-native/issues/412
   useEnterForeground(
     useCallback(() => {
       ref.current?.play()

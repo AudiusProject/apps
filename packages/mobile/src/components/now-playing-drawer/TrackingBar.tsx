@@ -27,28 +27,18 @@ const useStyles = makeStyles(({ palette }) => ({
     backgroundColor: palette.neutralLight7,
     overflow: 'hidden'
   },
-  // Inside the floating glass pill the empty rail reads as a stray gray line
-  // along the rounded top, so only the progress itself is drawn.
   floatingRail: {
     backgroundColor: 'transparent'
   },
   tracker: {
     height: 3,
-    // flexGrow: 1,
     backgroundColor: 'red'
   }
 }))
 
 type TrackingBarProps = {
-  /**
-   * A unique key to represent this instances of playback.
-   * If the user replays the same track, mediaKey should change
-   */
   mediaKey: string
   duration: number
-  /**
-   * Animation that signals how "open" the now playing drawer is.
-   */
   translateYAnimation: Animated.Value
   floating?: boolean
 }
@@ -72,7 +62,6 @@ export const TrackingBar = (props: TrackingBarProps) => {
   })
   const playbackRate = useSelector(playbackSelectors.getPlaybackRate)
 
-  // Calculate the actual playback rate based on track type
   const isLongFormContent =
     trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
   const actualPlaybackRate = isLongFormContent
@@ -125,12 +114,6 @@ export const TrackingBar = (props: TrackingBarProps) => {
   useEffect(() => () => currentAnimation.current?.stop(), [])
 
   const rootOpacity = translateYAnimation.interpolate({
-    // Interpolate the animation such that the tracker fades out
-    // at 5% up the screen.
-    // The tracker is important to fade away shortly after
-    // the now playing drawer is opened so that the drawer may
-    // animate in corner radius without showing at the same time
-    // as the tracker.
     inputRange: [0, 0.9 * NOW_PLAYING_HEIGHT, NOW_PLAYING_HEIGHT],
     outputRange: [0, 0, 2]
   })

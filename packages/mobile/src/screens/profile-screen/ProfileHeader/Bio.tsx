@@ -21,8 +21,6 @@ export const Bio = (props: BioProps) => {
 
   if (!bio) return null
 
-  // Collapsed case
-  // This is separate because we want to allow scrolling on the bio text
   if (numberOfLines)
     return (
       <View pointerEvents='none'>
@@ -34,9 +32,6 @@ export const Bio = (props: BioProps) => {
           }}
           variant='body'
           size='s'
-          // only set number of lines after we determine that the text should be truncated
-          // this allows us to let the parent component know whether we have met one of
-          // the conditions to make the bio section expansible.
           numberOfLines={
             isExpandable && numberOfLines ? numberOfLines : undefined
           }

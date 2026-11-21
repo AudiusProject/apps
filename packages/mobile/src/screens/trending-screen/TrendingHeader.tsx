@@ -34,15 +34,12 @@ type TrendingHeaderProps = {
   title: string
   icon: ComponentType<SvgProps>
   filterModal: Modals
-  /** When false, only the category pills are shown (title row is in native header) */
   showTitleRow?: boolean
   styles?: StylesProp<{ root: ViewStyle }>
-  /** Extra controls after the category pills. */
   children?: ReactNode
 }
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
-  // No backgroundColor: `FloatingSubHeader` owns the fill.
   root: {
     borderBottomWidth: 1,
     borderBottomColor: palette.neutralLight8,

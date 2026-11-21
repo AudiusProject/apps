@@ -131,7 +131,6 @@ describe('PushNotifications', () => {
       expect(navigate).toHaveBeenCalledWith({ type: 'Follow', id: 1 })
       expect(mockMessaging.getInitialNotification).not.toHaveBeenCalled()
 
-      // A later remount must not replay it
       await notifications.openInitialNotification()
       expect(navigate).toHaveBeenCalledTimes(1)
     })

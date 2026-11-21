@@ -66,7 +66,6 @@ export const InputTokenSection = ({
 
   const displayTokenDropdown = availableTokens && availableTokens.length > 0
 
-  // Sync local state with prop changes and apply smart decimal formatting
   useEffect(() => {
     const formattedAmount = amount
       ? formatTokenInputWithSmartDecimals(amount)

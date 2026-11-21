@@ -39,10 +39,6 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
   })
   const dispatch = useDispatch()
 
-  // Read user from the route-params cache directly so it's available on
-  // the first render. `useProfileUser` depends on Redux state that is set
-  // in a focus effect, which races with the component's initial render and
-  // caused the whole header section to briefly collapse.
   const { data: paramsUser } = useUserByParams(params, {
     select: (user) => ({
       user_id: user.user_id,
@@ -55,7 +51,6 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
   const profileUserId = user_id
   const { canCreateChat } = useCanCreateChat(profileUserId)
   const chatPermissionStatus = useSelector(getChatPermissionsStatus)
-  // DMs and token transfers aren't available while managing another account
   const isManagedAccount = useIsManagedAccount()
 
   useEffect(() => {

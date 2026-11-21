@@ -4,10 +4,6 @@ import { useAccountSwitcher } from '@audius/common/hooks'
 
 import { useManagerModeAccounts } from './useManagerModeAccounts'
 
-/**
- * Switches back to the signed-in user if their access to the managed account
- * they're using was revoked. Runs once per app launch.
- */
 export const useManagedAccountAccessCheck = () => {
   const { currentUserId, isManagedAccount, isAccountsLoaded, accounts } =
     useManagerModeAccounts()

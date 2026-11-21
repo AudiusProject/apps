@@ -16,21 +16,17 @@ import { watchUnsaveTrackSaga } from './sagas/watchUnsaveTrackSaga'
 
 const sagas = () => {
   return [
-    // Loading/syncing/updating offline content
     rehydrateOfflineDataSaga,
     syncOfflineDataSaga,
 
-    // User actions
     requestDownloadAllFavoritesSaga,
     requestDownloadCollectionSaga,
     requestDownloadFavoritedCollectionSaga,
     requestRemoveAllDownloadedFavoritesSaga,
     requestRemoveDownloadedCollectionSaga,
 
-    // Queue sagas
     ...offlineQueueSagas(),
 
-    // Track/Collection watchers
     watchSaveTrackSaga,
     watchUnsaveTrackSaga,
     watchSaveCollectionSaga,
@@ -38,7 +34,6 @@ const sagas = () => {
     watchRemoveOfflineItems,
     watchAddTrackToPlaylistSaga,
 
-    // Cleanup
     clearOfflineDownloadsSaga
   ]
 }

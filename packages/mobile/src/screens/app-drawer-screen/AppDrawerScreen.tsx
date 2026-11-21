@@ -26,9 +26,6 @@ type AppTabScreenProps = {
   setIsAtStackRoot: (isAtStackRoot: boolean) => void
 }
 
-/**
- * The app stack after signing up or signing in
- */
 const AppStack = memo(function AppStack(props: AppTabScreenProps) {
   const {
     navigation: drawerHelpers,
@@ -64,12 +61,6 @@ export const AppDrawerScreen = memo(() => {
     setIsAtStackRootState((prev) => (prev === next ? prev : next))
   }, [])
 
-  // Drawer swipe-to-open is enabled only when at the tab stack's root, so
-  // the right-swipe gesture inside a nested stack falls through to the native
-  // stack's fullScreenSwipe back behavior. The navigator's pan (fixed 5pt
-  // thresholds) is limited to the left edge so it can't take vertical scrolls;
-  // mid-screen opening uses `useOpenDrawerGesture`. swipeEdgeWidth only applies
-  // while closed, so swipe-to-close stays full-width.
   const drawerScreenOptions = useMemo(
     () => ({
       headerShown: false,
@@ -82,7 +73,6 @@ export const AppDrawerScreen = memo(() => {
     [isAtStackRoot, gesturesDisabled, isNowPlayingDrawerOpen]
   )
 
-  // Close the left nav drawer if it's open when the now-playing drawer opens
   useEffect(() => {
     if (isNowPlayingDrawerOpen && drawerHelpersRef.current) {
       drawerHelpersRef.current.closeDrawer()
@@ -103,7 +93,6 @@ export const AppDrawerScreen = memo(() => {
         screenOptions={drawerScreenOptions}
         defaultStatus='closed'
         drawerContent={(props) => {
-          // Store drawer helpers in ref so we can close the drawer when needed
           drawerHelpersRef.current = props.navigation
           return <LeftNavDrawer {...gestureProps} {...props} />
         }}

@@ -141,7 +141,6 @@ const TrackTileComponent = (props: TrackTileProps) => {
       isUSDCEnabled && isContentUSDCPurchaseGated(track.stream_conditions)
     const isStreamGated = !!track.stream_conditions
 
-    // Check if track is gated and user doesn't have access
     if (isStreamGated && !hasStreamAccess && !track.preview_cid) {
       if (isUSDCPurchase) {
         openPremiumContentPurchaseModal(
@@ -299,6 +298,4 @@ const TrackTileComponent = (props: TrackTileProps) => {
   )
 }
 
-// Memoize TrackTile to prevent unnecessary re-renders when props haven't changed
-// This is critical for performance when rendering many tiles in a list
 export const TrackTile = memo(TrackTileComponent)

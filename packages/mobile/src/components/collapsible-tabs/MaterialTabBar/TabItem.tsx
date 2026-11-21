@@ -3,7 +3,7 @@ import { StyleSheet, Pressable, Platform } from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
-  useAnimatedStyle,
+  useAnimatedStyle
 } from 'react-native-reanimated'
 
 import { MaterialTabItemProps } from './types'
@@ -12,9 +12,6 @@ import { TabName } from '../types'
 export const TABBAR_HEIGHT = 48
 const DEFAULT_COLOR = 'rgba(0, 0, 0, 1)'
 
-/**
- * Any additional props are passed to the pressable component.
- */
 export const MaterialTabItem = <T extends TabName = string>(
   props: MaterialTabItemProps<T>
 ): React.ReactElement => {
@@ -45,9 +42,7 @@ export const MaterialTabItem = <T extends TabName = string>(
         Extrapolation.CLAMP
       ),
       color:
-        Math.abs(index - indexDecimal.value) < 0.5
-          ? activeColor
-          : inactiveColor,
+        Math.abs(index - indexDecimal.value) < 0.5 ? activeColor : inactiveColor
     }
   })
 
@@ -70,12 +65,12 @@ export const MaterialTabItem = <T extends TabName = string>(
         { opacity: pressed ? pressOpacity : 1 },
         !scrollEnabled && styles.grow,
         styles.item,
-        style,
+        style
       ]}
       onPress={() => onPress(name)}
       android_ripple={{
         borderless: true,
-        color: pressColor,
+        color: pressColor
       }}
       {...rest}
     >
@@ -86,15 +81,15 @@ export const MaterialTabItem = <T extends TabName = string>(
 
 const styles = StyleSheet.create({
   grow: {
-    flex: 1,
+    flex: 1
   },
   item: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 10,
-    height: TABBAR_HEIGHT,
+    height: TABBAR_HEIGHT
   },
   label: {
-    margin: 4,
-  },
+    margin: 4
+  }
 })

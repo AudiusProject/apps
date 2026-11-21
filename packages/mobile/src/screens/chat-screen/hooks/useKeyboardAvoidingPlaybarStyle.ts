@@ -23,8 +23,6 @@ export const useKeyboardAvoidingPlaybarStyle =
     const insets = useSafeAreaInsets()
 
     return useMemo(() => {
-      // The tab bar floats over the screen (see AppTabBar), so content has to
-      // clear it here.
       const tabBarHeight = BOTTOM_BAR_HEIGHT + insets.bottom
       const style: KeyboardAvoidingPlaybarStyle = {
         paddingTop: tabBarHeight,

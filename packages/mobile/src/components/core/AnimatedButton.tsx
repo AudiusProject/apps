@@ -61,8 +61,6 @@ export const AnimatedButton = ({
   const previousExternalIconIndex = usePrevious(externalIconIndex)
   const previousActiveState = usePrevious(isActive)
 
-  // When externalIconIndex is updated, update iconIndex
-  // if animation isn't currently playing
   if (
     externalIconIndex !== undefined &&
     previousExternalIconIndex !== undefined &&
@@ -88,10 +86,6 @@ export const AnimatedButton = ({
     else if (haptic) medium()
   }, [haptics, hapticsConfig, iconIndex])
 
-  // Lottie also reports finishes for animations this button didn't start, e.g.
-  // the icon that replaces the play button's buffering spinner can play
-  // through on its own. Acting on those makes the button press itself, so
-  // just put the icon back on its first frame.
   const isAnimatingRef = useRef(false)
 
   const handleAnimationFinish = useCallback(() => {
@@ -105,12 +99,9 @@ export const AnimatedButton = ({
     }
     if (hasMultipleStates) {
       setIconIndex((iconIndex) => {
-        // If externalIconIndex is provided,
-        // set iconIndex to it
         if (externalIconIndex !== undefined) {
           return externalIconIndex
         }
-        // Otherwise increment iconIndex
         return (iconIndex + 1) % iconJSON.length
       })
     }
@@ -155,8 +146,6 @@ export const AnimatedButton = ({
     }
   }, [onLongPress, handleHaptics, handlePress])
 
-  // For multi state buttons, when `isActive` flips, trigger
-  // the animation to run
   useEffect(() => {
     if (hasMultipleStates) {
       if (isActive !== previousActiveState && !isPlaying) {
@@ -182,9 +171,6 @@ export const AnimatedButton = ({
     return isActive ? 1 : 0
   }, [isPlaying, isActive, hasMultipleStates])
 
-  // For binary state buttons, reset the animation
-  // when not playing. This prevents the animation from getting stuck
-  // in the active state when many rerenders are happening
   useEffect(() => {
     if (!hasMultipleStates && !isActive && !isPlaying) {
       animationRef.current?.reset()

@@ -16,15 +16,10 @@ const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { getTrackPosition } = playbackPositionSelectors
 
 type Options = {
-  /**
-   * Adds share, favorite and repost. Rows have no inline buttons for these,
-   * so they go in the menu.
-   */
   includeSocial?: boolean
   hideViewArtist?: boolean
 }
 
-/** Opens the track overflow menu used by lineup tiles and rows. */
 export const useOpenTrackOverflow = (id: ID, options: Options = {}) => {
   const { includeSocial = false, hideViewArtist = false } = options
   const dispatch = useDispatch()

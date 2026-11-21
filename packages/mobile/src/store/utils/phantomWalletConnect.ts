@@ -1,5 +1,3 @@
-// package to assist with phantom wallet connect
-
 import type { VersionedTransaction } from '@solana/web3.js'
 import bs58 from 'bs58'
 import { Linking } from 'react-native'

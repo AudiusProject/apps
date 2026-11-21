@@ -4,8 +4,6 @@ import { OptionalId } from '@audius/sdk'
 import { env } from 'app/services/env'
 import { audiusSdk } from 'app/services/sdk/audius-sdk'
 
-// ─── URL / key validation ─────────────────────────────────────────────────────
-
 export const isValidApiKey = (key: string) => {
   const normalized = key.toLowerCase().startsWith('0x') ? key.slice(2) : key
   if (normalized.length !== 40) return false
@@ -33,7 +31,6 @@ export const getIsRedirectValid = (
   }
 }
 
-/** Collapse compound scopes like "read write" to the highest privilege. */
 export const collapseScope = (
   raw: string | string[] | (string | null)[] | null | undefined
 ): string | null => {
@@ -48,12 +45,6 @@ export const collapseScope = (
   return typeof raw === 'string' ? raw : null
 }
 
-// ─── Redirect URL builders ────────────────────────────────────────────────────
-
-/**
- * Build a redirect URL appending the given params either as a fragment (#)
- * or query string (?), depending on responseMode.
- */
 export const buildRedirectUrl = (
   redirectUri: string,
   params: Record<string, string>,
@@ -86,9 +77,6 @@ export const buildErrorUrl = (
   return `${decoded}#${statePart}error=access_denied`
 }
 
-// ─── JWT / auth code helpers ──────────────────────────────────────────────────
-
-/** base64url encode a string (UTF-8 bytes → base64url, no padding) */
 const toBase64Url = (str: string): string => {
   const bytes: number[] = []
   for (let i = 0; i < str.length; i++) {
@@ -111,7 +99,6 @@ const toBase64Url = (str: string): string => {
     .replace(/=+$/, '')
 }
 
-/** Build a signed JWT for the user, used for both implicit and PKCE flows. */
 export const buildUserJwt = async (
   account: UserMetadata,
   userEmail: string | null,
@@ -140,7 +127,6 @@ export const buildUserJwt = async (
   return `${header}.${payloadEncoded}.${toBase64Url(signature)}`
 }
 
-/** Exchange user JWT + PKCE params for an authorization code. */
 export const exchangeForAuthCode = async ({
   jwt,
   apiKey,

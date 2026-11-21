@@ -10,10 +10,6 @@ type FormGroupProps = {
   children: ReactNode
 }
 
-/**
- * iOS settings-style group: a small caption over a rounded card whose rows are
- * split by hairlines.
- */
 export const FormGroup = ({ title, children }: FormGroupProps) => {
   const { color, cornerRadius, spacing } = useTheme()
   const rows = Children.toArray(children)

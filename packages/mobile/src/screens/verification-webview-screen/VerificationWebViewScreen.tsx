@@ -50,7 +50,6 @@ const VerificationWebViewScreen = () => {
   } | null>(null)
   const webViewRef = useRef<WebView>(null)
 
-  // Fetch auth headers
   useEffect(() => {
     const fetchAuthHeaders = async () => {
       try {

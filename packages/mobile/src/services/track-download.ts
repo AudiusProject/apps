@@ -40,9 +40,6 @@ const removePathIfExists = async (path: string) => {
   }
 }
 
-/**
- * Download a file via ReactNativeBlobUtil
- */
 const downloadOne = async ({
   fileUrl,
   filename,
@@ -74,14 +71,10 @@ const downloadOne = async ({
         err instanceof Error ? err : new Error(`Download failed: ${err}`)
       )
     )
-    // On failure attempt to delete the file
     removePathIfExists(filePath)
   }
 }
 
-/**
- * Download multiple files via ReactNativeBlobUtil
- */
 const downloadMany = async ({
   files,
   directory,
@@ -119,7 +112,6 @@ const downloadMany = async ({
       )
     )
   } finally {
-    // Remove source directory at the end of the process regardless of what happens
     removePathIfExists(tempDir)
     try {
       responses.forEach((response) => response.flush())
@@ -149,9 +141,6 @@ const download = async ({
       cancelDownloadTask()
     }
   }
-  // TODO: Remove this method of canceling after the lossless
-  // feature set launches. The abort signal should be the way to do
-  // this task cancellation going forward.
   dispatch(setFetchCancel(cancelDownloadTask))
 
   const audiusDirectory =
@@ -165,8 +154,6 @@ const download = async ({
           url: path
         })
       } finally {
-        // The fetched file is temporary on iOS and we always want to be sure to
-        // remove it.
         removePathIfExists(path)
       }
     }
@@ -177,9 +164,6 @@ const download = async ({
         filename,
         directory: audiusDirectory,
         getFetchConfig: (filePath) => ({
-          /* iOS single file download will stage a file into a temporary location, then use the
-           * share sheet to let the user decide where to put it. Afterwards we delete the temp file.
-           */
           fileCache: true,
           path: filePath
         }),
@@ -190,9 +174,6 @@ const download = async ({
         files,
         directory: audiusDirectory + '/' + rootDirectoryName,
         getFetchConfig: (filePath) => ({
-          /* iOS multi-file download will download all files to a temp location and then create a ZIP and
-           * let the user decide where to put it with the Share sheet. The temp files are deleted after the ZIP is created.
-           */
           fileCache: true,
           path: filePath
         }),
@@ -205,9 +186,6 @@ const download = async ({
       downloadOne({
         fileUrl: url,
         filename,
-        /* Single file download on Android will use the Download Manager and go
-         * straight to the Downloads directory.
-         */
         directory: ReactNativeBlobUtil.fs.dirs.DownloadDir,
         getFetchConfig: () => ({
           addAndroidDownloads: {
@@ -230,11 +208,6 @@ const download = async ({
         )
       downloadMany({
         files,
-        /* Multi-file download on Android will stage the files in a temporary directory
-         * under the downloads folder and then zip them. We don't use Download Manager for
-         * the initial downloads to avoid showing notifications, then manually add a
-         * notification for the zip file.
-         */
         directory:
           ReactNativeBlobUtil.fs.dirs.DownloadDir + '/' + rootDirectoryName,
         getFetchConfig: (filePath) => ({
@@ -243,14 +216,11 @@ const download = async ({
         }),
         onFetchComplete: async (path: string) => {
           let mediaStoragePath
-          // On android 13+, we need to manually copy to media storage
           try {
             mediaStoragePath =
               await ReactNativeBlobUtil.MediaCollection.copyToMediaStore(
                 {
-                  // The name of the file that should show up in Downloads as a .zip
                   name: rootDirectoryName,
-                  // Can be left empty as we're putting the file into downloads
                   parentFolder: '',
                   mimeType: 'application/zip'
                 },
@@ -263,8 +233,6 @@ const download = async ({
             // not work, but we can deliver the file to the old download system
             // by calling android.addCompleteDownload.
           }
-          // We still need to add the complete download notification here anyway
-          // even if on android 13+
           ReactNativeBlobUtil.android.addCompleteDownload({
             title: rootDirectoryName,
             description: rootDirectoryName,
@@ -279,7 +247,6 @@ const download = async ({
   }
 }
 
-/** Generic file download that doesn't use sagas. */
 const downloadFile = async ({
   file: { url, filename },
   mimeType,
@@ -291,10 +258,6 @@ const downloadFile = async ({
     const filePath = audiusDirectory + '/' + filename
     try {
       const fetchPromise = ReactNativeBlobUtil.config({
-        /* on iOS we stage the file into a temporary location, then use the
-         * share sheet to let the user decide where to put it.
-         * Afterwards we delete the temp file.
-         */
         fileCache: true,
         path: filePath
       }).fetch('GET', url)
@@ -308,11 +271,9 @@ const downloadFile = async ({
         url: filePath
       })
     } finally {
-      // The fetched file is temporary on iOS and we always want to be sure to remove it.
       removePathIfExists(filePath)
     }
   } else {
-    // On Android we use the Download Manager to download the file.
     const fetchPromise = ReactNativeBlobUtil.config({
       addAndroidDownloads: {
         description: filename,

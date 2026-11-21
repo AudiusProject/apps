@@ -19,8 +19,6 @@ export const getContestRoute = (
   track: { permalink: string },
   fullUrl = false
 ) => {
-  // Permalink shape: `/{handle}/{slug}` → contest URL is
-  // `/{handle}/contest/{slug}`. Mirror the web `contestPage` helper.
   const [, handle, ...rest] = track.permalink.split('/')
   const route = `/${handle}/contest/${rest.join('/')}`
   return fullUrl ? `${AUDIUS_URL}${route}` : route

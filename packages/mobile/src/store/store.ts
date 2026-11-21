@@ -44,7 +44,6 @@ const errorRestartTimeout = 2000
 const { toast } = toastActions
 
 export type AppState = CommonState & {
-  // These also belong in CommonState but are here until we move them to the @audius/common package:
   signOn: SignOnPageState
   backend: BackendState
 
@@ -81,9 +80,6 @@ const onSagaError = (
     })
   )
 
-  // Automatically restart the app if the session is longer
-  // than 30 seconds. Don't want to restart for shorter sessions
-  // because it could result in a restart loop
   if (Date.now() - initializationTime > 30000) {
     setTimeout(() => {
       RNRestart.Restart()
@@ -95,7 +91,6 @@ const commonStoreReducers = commonReducers(AsyncStorage)
 
 const rootReducer = combineReducers({
   ...commonStoreReducers,
-  // These also belong in common store reducers but are here until we move them to the @audius/common package:
   backend,
   signOn: signOnReducer as unknown as SignOnPageReducer,
   drawers,
@@ -107,8 +102,6 @@ const rootReducer = combineReducers({
   purchaseVendor
 })
 
-// Shared with lazily loaded sagas so they can be handed actions that
-// arrived before they started (see lazySagas)
 const sagaChannel = stdChannel<Action>()
 storeContext.sagaChannel = sagaChannel
 const sagaMiddleware = createSagaMiddleware({
@@ -144,14 +137,9 @@ const enhancer = __DEV__ ? getDevEnhancer() : getProdEnhancer()
 export const store = createStore(
   rootReducer,
   enhancer
-) as unknown as Store<AppState> // need to explicitly type the store for offline-mode store reference
+) as unknown as Store<AppState>
 storeContext.dispatch = store.dispatch
 
-// Lazily created so we can defer redux-persist's first storage read until
-// after the AsyncStorage → MMKV migration completes (kicked off in
-// services/local-storage and gated in App.tsx). If we called persistStore
-// at module load, it would read an empty MMKV before the migration ran and
-// blow away persisted state on first launch after the storage swap.
 let _persistor: ReturnType<typeof persistStore> | null = null
 export const getOrCreatePersistor = () => {
   if (!_persistor) _persistor = persistStore(store)

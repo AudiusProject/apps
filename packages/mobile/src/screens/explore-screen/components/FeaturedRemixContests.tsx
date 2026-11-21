@@ -12,10 +12,6 @@ import { useDeferredElement } from '../../../hooks/useDeferredElement'
 
 import { ExploreSection } from './ExploreSection'
 
-// Carousel slot width for contest cards. The dedicated /contests screen
-// renders cards at roughly full screen width minus its horizontal margins;
-// the Explore carousel matches that visual width while leaving a small
-// peek of the next card to invite horizontal swipe.
 const CONTEST_CARD_PEEK = 48
 
 export const FeaturedRemixContests = () => {

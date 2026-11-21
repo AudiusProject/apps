@@ -46,7 +46,6 @@ export const TastemakerNotification = (props: TastemakerNotificationProps) => {
       if (!entity) return null
       const trackTitle = entity.title ?? ''
       const shareText = messages.xShare(trackOwnerHandle, trackTitle)
-      // The analytics object is cast as any to satisfy the NotificationXButton prop
       const analytics = {
         eventName: 'NOTIFICATIONS_CLICK_TASTEMAKER_TWITTER_SHARE',
         text: shareText

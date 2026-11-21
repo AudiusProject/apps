@@ -37,8 +37,6 @@ export const getLocalTrackDir = (trackId: string): string => {
   return path.join(getLocalTracksRoot(), trackId)
 }
 
-// Collections
-
 export const getLocalCollectionJsonPath = (collectionId: string) => {
   return path.join(getLocalCollectionDir(collectionId), `${collectionId}.json`)
 }
@@ -87,13 +85,9 @@ export const getOfflineCollections = async () => {
   return await ls(collectionsDir)
 }
 
-// Track Json
-
 export const getLocalTrackJsonPath = (trackId: string) => {
   return path.join(getLocalTrackDir(trackId), `${trackId}.json`)
 }
-
-// Cover Art
 
 export const getCollectionCoverArtPath = (collectionId: ID) => {
   return path.join(
@@ -114,13 +108,9 @@ export const getLocalTrackCoverArtPath = (trackId: string) => {
   return path.join(getLocalTrackDir(trackId), IMAGE_FILENAME)
 }
 
-// Audio
-
 export const getLocalAudioPath = (trackId: ID): string => {
   return path.join(getLocalTrackDir(trackId.toString()), `${trackId}.mp3`)
 }
-
-// Storage management
 
 export const listTracks = async (): Promise<string[]> => {
   const tracksDir = getLocalTracksRoot()
@@ -144,7 +134,6 @@ export const getTrackJson = async (
   }
 }
 
-// TODO: Update this to verify that the JSON can be parsed properly?
 export const verifyTrack = async (
   trackId: string,
   expectTrue?: boolean
@@ -168,7 +157,6 @@ export const verifyTrack = async (
   return booleanResults.every((result) => result)
 }
 
-// TODO: Update this to verify that the JSON can be parsed properly?
 export const verifyCollection = async (
   collectionId: string,
   expectTrue?: boolean

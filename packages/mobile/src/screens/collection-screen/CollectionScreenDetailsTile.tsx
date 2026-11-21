@@ -65,9 +65,6 @@ const { getPlaying, getPreviewing } = playbackSelectors
 const { getIsReachable } = reachabilitySelectors
 const { resetCollection, fetchCollection } = collectionPageActions
 
-// Derive the collection's track UIDs from the tanquery-cached collection
-// contents. UIDs are stable so they can be compared against the playing
-// queue uid for highlight purposes.
 const useCollectionTrackUids = (collectionId: ID | null | undefined) => {
   const { data: trackIds } = useCollection(collectionId ?? undefined, {
     select: (c) => c.playlist_contents.track_ids.map(({ track }) => track)
@@ -192,9 +189,6 @@ export const CollectionScreenDetailsTile = ({
 
   const isReachable = useSelector(getIsReachable)
 
-  // Since we're supporting SmartCollections, need to explicitly check that
-  // collectionId is a number before fetching the playlist. -1 is a placeholder,
-  // the request should not go out as the hook is disabled in that case.
   const { data: partialCollection } = useCollection(collectionId as number, {
     enabled: typeof collectionId === 'number',
     select: (collection) =>
@@ -283,8 +277,6 @@ export const CollectionScreenDetailsTile = ({
     style: styles.coverArt
   })
 
-  // Matches legacy collection lineup prefix so existing consumers (e.g.
-  // playlist library highlight) that key off queue source keep working.
   const collectionPlaybackSource = 'COLLECTION_TRACKS'
   const collectionPlaybackQueue: PlaybackTrack[] = useMemo(
     () =>

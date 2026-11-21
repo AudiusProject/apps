@@ -13,10 +13,6 @@ type HexagonalIconProps = {
   size: number
 }
 
-/**
- * Component that applies a hexagonal mask to icons with a 1px inset border
- * Used for user tier badges to match the web design
- */
 export const HexagonalIcon = ({ children, size }: HexagonalIconProps) => {
   const { color } = useTheme()
 
@@ -30,7 +26,6 @@ export const HexagonalIcon = ({ children, size }: HexagonalIconProps) => {
   )
 
   const HexagonalBorder = () => {
-    // Create a smaller hexagon for the inset border effect
     const insetScale = 0.99
     const centerOffset = (1 - insetScale) / 2
 
@@ -49,7 +44,7 @@ export const HexagonalIcon = ({ children, size }: HexagonalIconProps) => {
             fill='none'
             stroke={color.neutral.n950}
             opacity={0.3}
-            strokeWidth={1 / size} // 1px stroke relative to actual size
+            strokeWidth={1 / size}
           />
         </G>
       </Svg>

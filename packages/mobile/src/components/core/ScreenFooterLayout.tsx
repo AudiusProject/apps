@@ -18,7 +18,6 @@ type ScreenFooterLayoutProps = {
   footer: ReactNode
 }
 
-/** A bounded scroll area followed by actions, with navigation clearance applied once. */
 export const ScreenFooterLayout = ({
   children,
   footer
@@ -28,7 +27,6 @@ export const ScreenFooterLayout = ({
   const insets = useSafeAreaInsets()
   const { height } = useReanimatedKeyboardAnimation()
   const bottomInset = bottomBarInset || insets.bottom
-  // The keyboard replaces the bottom navigation area instead of adding to it.
   const clearanceStyle = useAnimatedStyle(
     () => ({
       height: Math.max(0, bottomInset + height.value)

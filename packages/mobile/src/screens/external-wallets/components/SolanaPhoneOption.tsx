@@ -57,7 +57,6 @@ export const SolanaPhoneOption = () => {
       signed_payloads: [signature]
     } = await transact(async (wallet) => {
       const freshAccount = await authorizeSession(wallet)
-      // Existing account or newly connected account
       publicKey = selectedAccount?.address ?? freshAccount.address
 
       dispatch(

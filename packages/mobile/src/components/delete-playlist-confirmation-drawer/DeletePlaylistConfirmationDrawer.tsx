@@ -32,7 +32,6 @@ export const DeletePlaylistConfirmationDrawer = () => {
   const handleConfirm = useCallback(async () => {
     if (playlistId) {
       try {
-        // Use the TanStack Query mutation for optimistic updates
         await deleteCollection({ collectionId: playlistId })
         onClose()
         navigation.goBack()

@@ -11,10 +11,6 @@ import { useToast } from 'app/hooks/useToast'
 
 import { managerModeMessages } from './messages'
 
-/**
- * Removes a manager grant. If the signed-in user just stopped managing the
- * account they're using, switches back to their own account.
- */
 export const useRemoveManagerWithSwitchBack = () => {
   const { mutate: removeManager, isPending } = useRemoveManager()
   const { data: currentWeb3User } = useCurrentWeb3Account()

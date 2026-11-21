@@ -80,7 +80,6 @@ const ChangeEmailNavigator = ({
   const styles = useStyles()
   const navigation = useNavigation()
 
-  // Only show the back button on the OTP page
   const screenOptions = useAppScreenOptions({
     headerRight: () => null,
     headerLeft: () => {
@@ -88,8 +87,6 @@ const ChangeEmailNavigator = ({
     }
   })
 
-  // Map hook page state to screen navigations. The pages live in the nested
-  // stack, so target them through this screen's route.
   useEffect(() => {
     navigation.navigate('ChangeEmail', {
       screen: ChangeEmailPage[page],
@@ -97,7 +94,6 @@ const ChangeEmailNavigator = ({
     })
   }, [page, navigation])
 
-  // Map navigations back to the hook page state
   const stateListener = useCallback<
     EventListenerCallback<EventMapCore<NavigationState>, 'state'>
   >(

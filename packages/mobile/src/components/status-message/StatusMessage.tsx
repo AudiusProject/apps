@@ -41,7 +41,6 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   }
 }))
 
-// TODO: See if spring or some native animation can be used here to animate the icons in
 export const StatusMessage = ({
   label,
   status,

@@ -19,13 +19,11 @@ enum MobileEventNames {
   SHARE_TO_TIKTOK_VIDEO_ERROR = 'Share to TikTok (video) - error',
   SHARE_TO_TIKTOK_VIDEO_SUCCESS = 'Share to TikTok (video) - success',
 
-  // Offline Mode
   OFFLINE_MODE_PLAY = 'Offline Mode: Offline Play'
 }
 
 export const EventNames = { ...CommonEventNames, ...MobileEventNames }
 
-/** Mobile-only events that are never sampled (share channels) */
 export const MOBILE_CORE_EVENTS: readonly string[] = [
   MobileEventNames.SHARE_TO_IG_STORY,
   MobileEventNames.SHARE_TO_IG_STORY_CANCELLED,
@@ -45,7 +43,6 @@ type NotificationsOpenPushNotification = {
   eventName: Name.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
   title?: string
   body?: string
-  /** Matches Amplitude / engagement sync join key */
   notificationCampaignId?: string
 }
 

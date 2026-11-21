@@ -8,11 +8,6 @@ import {
 import { useFeatureFlag, useIsManagedAccount } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
-/**
- * Accounts the signed-in user can switch between. The switcher stays
- * available while managing an account even if the flag is off, so nobody
- * gets stuck in manager mode.
- */
 export const useManagerModeAccounts = () => {
   const { isEnabled: isManagerModeEnabled } = useFeatureFlag(
     FeatureFlags.MOBILE_MANAGER_MODE

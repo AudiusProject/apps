@@ -163,7 +163,6 @@ export const TiersTile = () => {
               </Flex>
             )
           } else {
-            // No content for unavailable features - empty circle was removed in mobile web
             return null
           }
 

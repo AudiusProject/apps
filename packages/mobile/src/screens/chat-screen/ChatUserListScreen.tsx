@@ -193,8 +193,6 @@ const useDefaultUserList = (
   const loadMore =
     defaultUserList === 'followers' ? followersQuery.fetchNextPage : undefined
 
-  // Emulating Status behavior for consistency below. UserList has a legacy
-  // pattern with errorSagas and doesn't use Status directly
   const status =
     defaultUserList === 'followers'
       ? followersQuery.isPending || followersQuery.isFetchingNextPage
@@ -220,7 +218,6 @@ const useQueryUserList = (query: string) => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage()
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  // Map tan-query state onto the Status enum the UI expects below.
   const status =
     isPending || isFetchingNextPage ? Status.LOADING : Status.SUCCESS
 
@@ -329,8 +326,6 @@ const ChatUserListScreenContent = () => {
           <View
             style={[
               styles.searchContainer,
-              // Only show the border below the search input if
-              // there are scrollable users below
               users?.length ? styles.searchBorder : null
             ]}
           >
@@ -372,7 +367,6 @@ const ChatUserListScreenContent = () => {
               extraData={selectedUserIds}
               keyExtractor={(user: User) => user.handle}
               contentContainerStyle={styles.flatListContainer}
-              // Only show empty component if there is no search query
               ListEmptyComponent={query ? null : <ListEmpty />}
               keyboardShouldPersistTaps='always'
               ListFooterComponent={<View style={styles.footerPadding} />}
@@ -409,7 +403,6 @@ const ChatUserListScreenContent = () => {
   )
 }
 
-// DMs act as the signed-in wallet, so they're off while managing an account
 export const ChatUserListScreen = withManagedAccountRestriction(
   ChatUserListScreenContent
 )

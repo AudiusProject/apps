@@ -88,10 +88,6 @@ export const SavesMetric = (props: SavesMetricProps) => {
 
 type CommentMetricProps = {
   trackId: ID
-  // Source tag for the new playback queue when the user plays the track
-  // from the opened comment drawer. Defaults to a generic 'lineup-comments'
-  // tag so AudioPlayer source comparisons never confuse it with a real
-  // page-owned queue.
   playbackSource?: string
   showLeaveCommentText?: boolean
 }

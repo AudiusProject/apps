@@ -1,6 +1,3 @@
-/**
- * Reusable style utility functions
- */
 export * from './flex'
 export * from './makeStyles'
 export * from './shadow'

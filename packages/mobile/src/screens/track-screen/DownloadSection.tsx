@@ -35,10 +35,6 @@ const STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK = 2
 const messages = {
   title: 'Stems & Downloads',
   downloadTitle: 'Download',
-  // TODO: When upgrading react native to >0.74, we need to remove the $ here
-  // and also update android to include jsc+intl
-  // https://github.com/facebook/hermes/issues/23
-  // https://stackoverflow.com/questions/41408025/react-native-tolocalestring-not-working-on-android
   unlockAll: (price: string) => `Unlock All $${price}`,
   purchased: 'purchased',
   followToDownload: 'Must follow artist to download.',
@@ -88,7 +84,6 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
   const handleDownload = useCallback(
     ({ trackIds, parentTrackId }: { trackIds: ID[]; parentTrackId?: ID }) => {
       if (shouldDisplayDownloadFollowGated) {
-        // On mobile, show a toast instead of a tooltip
         toast({ content: messages.followToDownload })
       } else if (track && track.access.download) {
         openWaitForDownloadModal({
@@ -116,7 +111,6 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
       return
     }
 
-    // Only include parent track in count if it's downloadable
     const parentTrackCount = track?.access?.download ? 1 : 0
     openDownloadTrackArchiveModal({
       trackId,
@@ -182,13 +176,7 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
             >
               <IconLockUnlocked color='white' size='xs' />
             </Flex>
-            <Text
-              variant='label'
-              // TODO: size other than m causes misalignment C-3709
-              size='l'
-              strength='strong'
-              color='subdued'
-            >
+            <Text variant='label' size='l' strength='strong' color='subdued'>
               {messages.purchased}
             </Text>
           </Flex>

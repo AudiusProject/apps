@@ -25,7 +25,6 @@ export const EditTrackFormPreviewContextProvider = (props: {
   const [isPlaying, setIsPlaying] = useState(false)
   const isPlayerPlaying = useSelector(playbackSelectors.getPlaying)
 
-  // Request preview playback
   const playPreview = useCallback(
     async (url: string) => {
       if (isPlayerPlaying) dispatch(playbackActions.pause())
@@ -36,7 +35,6 @@ export const EditTrackFormPreviewContextProvider = (props: {
     [dispatch, isPlayerPlaying]
   )
 
-  // Stop preview playback
   const stopPreview = useCallback(async () => {
     setIsPlaying(false)
     setSourceUri('')

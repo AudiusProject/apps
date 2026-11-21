@@ -36,6 +36,9 @@ const isExempt = (file, body) =>
   LICENSE.test(body.slice(0, 200)) ||
   (body.startsWith('/**') && PUBLIC_API_DOCS.test(file)) ||
   body.startsWith('#!') ||
+  /^\/\*+\s*\*?\s*@format\b/.test(body) ||
+  (/\.[cm]?jsx?$/.test(file) &&
+    /@(type|typedef|param|returns?|satisfies)\s*\{/.test(body)) ||
   TUTORIAL.test(file)
 
 const scriptKind = (file) => {

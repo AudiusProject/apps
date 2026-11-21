@@ -60,14 +60,12 @@ const overlayStyle = {
   left: 0,
   right: 0,
   bottom: 0,
-  // Above Artwork's image, which sets zIndex 2
   zIndex: 3,
   alignItems: 'center' as const,
   backgroundColor: 'rgba(0,0,0,0.45)'
 }
 
 export type TrackRowTileProps = TrackTileProps & {
-  /** Shows the offline download state after the title (Library). */
   showDownloadStatus?: boolean
 }
 

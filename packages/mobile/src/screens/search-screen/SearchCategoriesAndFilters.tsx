@@ -50,13 +50,10 @@ const SearchCategory = (props: SearchCategoryProps) => {
       label={labelByCategory[category]}
       isSelected={isSelected}
       onChange={(value, isSelected) => {
-        // Clear Filters and change category
         setFilters({})
         setCategory(isSelected ? (value as SearchCategoryType) : 'all')
       }}
       icon={isSelected ? IconCloseAlt : undefined}
-      // Disable unselect animation when the category is selected
-      // to avoid a flash of purple as the pills rearrange
       disableUnselectAnimation
     />
   )
@@ -119,7 +116,6 @@ export const SearchCategoriesAndFilters = (
   const categoryFilters = filtersByCategory[category]
   const isPodcastGenre = filters.genre === 'Podcasts'
 
-  // Filter out key and bpm when genre is Podcasts
   const availableFilters = isPodcastGenre
     ? categoryFilters.filter((key) => key !== 'key' && key !== 'bpm')
     : categoryFilters

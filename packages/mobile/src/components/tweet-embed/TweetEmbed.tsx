@@ -18,14 +18,7 @@ const styles = StyleSheet.create({
 })
 
 type Props = {
-  /**
-   * The id of the tweet to show
-   */
   tweetId: string
-  /**
-   * Options for the tweet embed
-   * see: https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference
-   */
   options?: Record<string, any>
 }
 
@@ -72,7 +65,6 @@ const TweetEmbed = ({ options, tweetId }: Props) => {
             html
           }}
           onShouldStartLoadWithRequest={(request) => {
-            // Open subsequent links in browser
             if (!isLoading) {
               Linking.canOpenURL(request.url).then((supported) => {
                 if (supported) {

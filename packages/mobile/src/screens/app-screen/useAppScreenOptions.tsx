@@ -61,7 +61,6 @@ export const useAppScreenOptions = <
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
 
   const handleOpenLeftNavDrawer = useCallback(() => {
-    // Prevent opening left nav drawer when now-playing drawer is open
     if (isNowPlayingDrawerOpen) {
       return
     }
@@ -85,13 +84,6 @@ export const useAppScreenOptions = <
         params && (params as ContextualParams).fromAppDrawer
 
       return {
-        // On iOS 26, the default `animation` ('default') makes
-        // `@react-navigation/native-stack` use Apple's
-        // `interactiveContentPopGestureRecognizer`, which is edge-only in our
-        // setup. Picking a non-default animation ('simple_push') combined with
-        // `animationMatchesGesture: true` flips RNScreens onto its own
-        // `RNSPanGestureRecognizer`, which is full-screen and gives us
-        // swipe-to-pop from anywhere on the screen on both iOS 26 and earlier.
         animation: isFromAppLeftDrawer ? 'none' : 'simple_push',
         animationMatchesGesture: true,
         fullScreenGestureEnabled: true,

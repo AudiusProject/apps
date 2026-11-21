@@ -32,17 +32,12 @@ export const usePhantomConnect = (
       return
     }
 
-    // The following set of cases are hooks that handle deep links from
-    // Phantom back to Audius.
     if (params.path === 'connect') {
       dispatch(connect({ ...params, connectionType: 'phantom' }))
       // Connect creates a session between Audius and phantom
     } else if (params.path === 'wallet-connect') {
-      // Wallet-connect creates a session between Audius and phantom
-      // and then associates the wallet to the user's profile
       dispatch(connectNewWallet({ ...params, connectionType: 'phantom' }))
     } else if (params.path === 'wallet-sign-message') {
-      // Wallet-sign-message receives signs a string message
       dispatch(signMessage({ ...params, connectionType: 'phantom' }))
     }
   }, [params?.path, params, dispatch])

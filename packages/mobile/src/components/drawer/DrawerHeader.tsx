@@ -15,7 +15,6 @@ type DrawerHeaderProps = {
   titleImage?: ImageSourcePropType
   isFullscreen?: boolean
   blockClose?: boolean
-  /** Use back arrow instead of close X. For nested drawers that navigate "back". */
   showBackButton?: boolean
 }
 

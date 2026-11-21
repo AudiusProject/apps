@@ -13,9 +13,6 @@ const styles = StyleSheet.create({
 })
 
 type LogoProps = {
-  /**
-   * Animation that signals how "open" the now playing drawer is.
-   */
   translationAnim: Animated.Value
 }
 
@@ -27,8 +24,6 @@ export const Logo = ({ translationAnim }: LogoProps) => {
         styles.root,
         {
           opacity: translationAnim.interpolate({
-            // Interpolate the animation such that the logo fades in
-            // at 25% up the screen.
             inputRange: [0, 0.75 * NOW_PLAYING_HEIGHT, NOW_PLAYING_HEIGHT],
             outputRange: [1, 0, 0],
             extrapolate: 'extend'

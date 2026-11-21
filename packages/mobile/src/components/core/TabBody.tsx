@@ -8,10 +8,6 @@ type Props = {
   isVisible: boolean
 }
 
-/**
- * Common wrapper component for tab content that handles layout and visibility.
- * Used to wrap content in tab views to handle animations and layout measurements.
- */
 export const TabBody = ({ children, onLayout, isVisible }: Props) => {
   return (
     <Flex

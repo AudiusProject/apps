@@ -129,7 +129,6 @@ export const TrackCard = (props: TrackCardProps) => {
             size='s'
             strength='strong'
             color='subdued'
-            // Ensures footer height is not affected
             style={{ lineHeight: 16 }}
           >
             {messages.hidden}

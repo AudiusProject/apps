@@ -18,21 +18,12 @@ type KeyboardAvoidingViewProps = {
   style?: StyleProp<ViewStyle>
   keyboardShowingDuration?: number
   keyboardHidingDuration?: number
-  // Offset is subtracted from the desired height when the keyboard is showing.
   keyboardShowingOffset?: number
   onKeyboardShow?: () => void
   onKeyboardHide?: () => void
   children: React.ReactNode
 }
 
-/**
- * Handrolled implementation of KeyboardAvoidingView. Allows
- * customization of the ratio of the keyboard height by which to translate
- * the content upwards (default 0.75), and the duration of the in/out animations.
- *
- * Mainly built to solve a bug with react-native default KeyboardAvoidingView
- * where the content inside the View would not translate upwards far enough.
- */
 export const KeyboardAvoidingView = ({
   style,
   keyboardShowingDuration = 350,
@@ -53,7 +44,6 @@ export const KeyboardAvoidingView = ({
         Animated.timing(keyboardHeightAnim.current, {
           toValue: -event.endCoordinates.height + keyboardShowingOffset,
           duration: keyboardShowingDuration,
-          // Ease out to start animation fast and settle slowly
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true
         }).start(onKeyboardShow)

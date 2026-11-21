@@ -101,9 +101,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 
 export const ExpandableSectionSkeleton = () => {
   const baseStyle = { height: 12, marginRight: 4, marginBottom: 8 }
-  // Matches the initial CollapsedSection: a 2-line bio. We don't render tier
-  // + full socials here because they only appear once the user expands the
-  // header, so reserving that space would cause a skeleton→content shift.
   return (
     <Flex column gap='s' backgroundColor='white' ph='m' pb='s'>
       <Flex row wrap='wrap'>

@@ -20,13 +20,8 @@ import type { PaperProps } from './types'
 
 const AnimatedFlex = Animated.createAnimatedComponent(Flex)
 
-// Threshold for detecting a swipe (in pixels)
 const SWIPE_THRESHOLD = 10
 
-/**
- * Base layout component used as a building block for creating pages
- * and other components.
- * */
 export const Paper = forwardRef<View, PaperProps>((props, ref) => {
   const {
     backgroundColor = 'white',
@@ -52,7 +47,6 @@ export const Paper = forwardRef<View, PaperProps>((props, ref) => {
     })
     .onEnd(() => {
       'worklet'
-      // Tap will only fire if maxDeltaX/Y constraints are met (no significant movement)
       if (onPress) {
         runOnJS(onPress)()
       }
@@ -109,8 +103,6 @@ export const Paper = forwardRef<View, PaperProps>((props, ref) => {
     return <Flex ref={ref} style={style} {...flexProps} {...other} />
   }
 
-  // Tap gesture with maxDeltaX/Y will automatically fail if there's movement
-  // This allows swipes to bubble up to parent gestures naturally
   const composedGesture = tap
 
   return (

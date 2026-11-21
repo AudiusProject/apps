@@ -11,7 +11,6 @@ type BaseSelectablePillProps = {
   isControlled?: boolean
   value?: string
   icon?: IconComponent
-  /** Rendered inside the pill after the label, e.g. an unread dot. */
   endAdornment?: ReactNode
   onChange?: (value: string, isSelected?: boolean) => void
   fullWidth?: boolean

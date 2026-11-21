@@ -50,9 +50,7 @@ const MIN_BAR_HEIGHT = 3
 const AVATAR_SIZE = 22
 const MAX_AVATARS = 20
 const POLL_MS = 250
-/** How long an avatar stays highlighted after its timestamp plays. */
 const ACTIVE_WINDOW_S = 6
-/** Accessibility increment/decrement step. */
 const A11Y_STEP_S = 15
 
 const clamp = (value: number, min: number, max: number) =>
@@ -68,10 +66,6 @@ const buildPath = (peaks: number[]) => {
   return d
 }
 
-/**
- * Playback position in seconds, polled from the native player while active
- * and snapped to seeks. Fractional so the progress fill moves smoothly.
- */
 const usePlaybackSeconds = (isActive: boolean, mediaKey: string) => {
   const [position, setPosition] = useState(0)
   const seek = useSelector(getSeek)
@@ -91,7 +85,6 @@ const usePlaybackSeconds = (isActive: boolean, mediaKey: string) => {
       const { position } = await TrackPlayer.getProgress()
       if (!cancelled) setPosition(position)
     }
-    // Read once even when paused, so reopening the drawer shows the real spot.
     tick()
     if (!isActive) return
     const interval = setInterval(tick, POLL_MS)
@@ -167,9 +160,7 @@ const CommentAvatar = (props: CommentAvatarProps) => {
 type WaveformScrubberProps = {
   trackId: ID
   duration: number
-  /** Changes when the same track replays, to reset the position. */
   mediaKey: string
-  /** Fetch peaks and poll position only while the player is open. */
   isOpen: boolean
   isPlaying: boolean
   comments: TimestampedComment[]
@@ -177,11 +168,6 @@ type WaveformScrubberProps = {
   onPressOut: () => void
 }
 
-/**
- * The Now Playing scrubber as a waveform, like the desktop track tiles: drag
- * or tap to seek, and timestamped comments sit under it as avatars that open
- * the comment.
- */
 export const WaveformScrubber = (props: WaveformScrubberProps) => {
   const {
     trackId,
@@ -195,21 +181,18 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
   } = props
   const dispatch = useDispatch()
   const { color, type } = useTheme()
-  // n150 nearly disappears on the dark drawer background
   const unplayedColor = type === 'day' ? color.neutral.n150 : color.neutral.n300
   const [width, setWidth] = useState(0)
   const [dragFraction, setDragFraction] = useState<number | null>(null)
   const position = usePlaybackSeconds(isOpen && isPlaying, mediaKey)
   const progressX = useSharedValue(0)
 
-  // Settles to null on a miss or error; either way the fallback shape draws.
   const { data: realPeaks, isFetched: isPeaksSettled } = useTrackWaveformPeaks(
     trackId,
     isOpen
   )
 
   const barCount = Math.max(0, Math.floor(width / (BAR_WIDTH + BAR_GAP)))
-  // Wait for the lookup so a real shape never replaces a fake one on screen.
   const path = useMemo(() => {
     if (!barCount || !isPeaksSettled) return ''
     return buildPath(
@@ -244,7 +227,6 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
         AVATAR_SIZE / 2,
         width - AVATAR_SIZE / 2
       )
-      // Keep neighbours from stacking; the first comment at a spot wins.
       if (x - lastX < AVATAR_SIZE + 2) continue
       placed.push({ comment, x })
       lastX = x
@@ -253,13 +235,10 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
     return placed
   }, [comments, duration, width])
 
-  // Refs so the responder, created once, sees current values.
   const latest = useRef({ width, duration, onPressIn, onPressOut })
   latest.current = { width, duration, onPressIn, onPressOut }
 
   const panResponder = useMemo(() => {
-    // Children don't take touches, so locationX is always relative to the
-    // waveform itself.
     const toFraction = (e: GestureResponderEvent) =>
       latest.current.width
         ? clamp(e.nativeEvent.locationX / latest.current.width, 0, 1)
@@ -267,7 +246,6 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      // Hold on to the touch so the drawer's swipe-to-close can't take it.
       onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: (e) => {
         latest.current.onPressIn()
@@ -344,8 +322,6 @@ export const WaveformScrubber = (props: WaveformScrubberProps) => {
             </Animated.View>
           </Animated.View>
         ) : (
-          // A thin rail while the peaks lookup is pending, so there's
-          // something to aim at.
           <View
             pointerEvents='none'
             style={[styles.rail, { backgroundColor: unplayedColor }]}

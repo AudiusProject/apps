@@ -17,22 +17,18 @@ export const RepostButton = (props: RepostButtonProps) => {
 
   const iconJSON = useMemo(() => {
     const ColorizedRepostOnIcon = colorize(IconRepostOnLight, {
-      // iconRepost Outlines Comp 1.iconRepost Outlines.Group 1.Fill 1
       'assets.0.layers.0.shapes.0.it.3.c.k.0.s': isOwner
         ? neutralLight6
         : neutral,
-      // iconRepost Outlines Comp 1.iconRepost Outlines.Group 1.Fill 1
       'assets.0.layers.0.shapes.0.it.3.c.k.1.s': isOwner
         ? neutralLight6
         : primary
     })
 
     const ColorizedRepostOffIcon = colorize(IconRepostOffLight, {
-      // iconRepost Outlines Comp 2.iconRepost Outlines.Group 1.Fill 1
       'assets.0.layers.0.shapes.0.it.3.c.k.0.s': isOwner
         ? neutralLight6
         : primary,
-      // iconRepost Outlines Comp 2.iconRepost Outlines.Group 1.Fill 1
       'assets.0.layers.0.shapes.0.it.3.c.k.1.s': isOwner
         ? neutralLight6
         : neutral

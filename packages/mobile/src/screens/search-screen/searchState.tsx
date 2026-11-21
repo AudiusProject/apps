@@ -33,10 +33,8 @@ export const SearchContext = createContext<SearchContextType>({
   setCategory: (_) => {},
   filters: {},
   setFilters: (_) => {},
-  // Special state to track how bpm is being set
   bpmType: 'range',
   setBpmType: (_) => {},
-  // Special state to determine if the search query input should be focused automatically
   autoFocus: false,
   setAutoFocus: (_) => {},
   active: false
@@ -57,7 +55,6 @@ export const SearchProvider = ({
   initialAutoFocus = false,
   initialQuery = ''
 }: SearchProviderProps) => {
-  // State
   const [category, setCategory] = useState<SearchCategory>(initialCategory)
   const [filters, setFilters] = useState<SearchFilters>(initialFilters)
   const [bpmType, setBpmType] = useState<'range' | 'target'>('range')

@@ -30,7 +30,6 @@ export const PrepareTransfer = () => {
   useEffect(() => {
     if (coinflowState === CoinflowWithdrawState.READY_FOR_WITHDRAWAL) {
       setData({ page: WithdrawUSDCModalPages.COINFLOW_TRANSFER })
-      // Convert string amount to cents, then to dollars for Coinflow
       const amountCents = filterDecimalString(amountValue as string).value
       onOpen({ amount: amountCents / 100.0 })
     }

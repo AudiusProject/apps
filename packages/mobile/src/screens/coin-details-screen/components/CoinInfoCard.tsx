@@ -34,7 +34,6 @@ import { env } from 'app/services/env'
 const messages = coinDetailsMessages.coinInfo
 const overflowMessages = coinDetailsMessages.overflowMenu
 
-// Helper function to detect platform from URL
 const detectPlatform = (
   url: string
 ): 'x' | 'instagram' | 'tiktok' | 'website' => {
@@ -53,7 +52,6 @@ const detectPlatform = (
   return 'website'
 }
 
-// Get platform icon
 const getPlatformIcon = (platform: string) => {
   switch (platform) {
     case 'x':
@@ -77,7 +75,6 @@ export const BannerSection = ({ mint }: { mint: string }) => {
     size: WidthSizes.SIZE_640
   })
 
-  // Use banner image if available, otherwise fall back to cover photo
   const bannerImageSource = useMemo(() => {
     if (coin?.bannerImageUrl) {
       return primitiveToImageSource(coin.bannerImageUrl)
@@ -86,7 +83,6 @@ export const BannerSection = ({ mint }: { mint: string }) => {
   }, [coin?.bannerImageUrl, coverPhotoSource])
 
   if (isLoading || !coin) {
-    // TODO: Add loading state
     return null
   }
 
@@ -230,7 +226,6 @@ export const CoinInfoCard = ({ mint }: { mint: string }) => {
   const { toast } = useToast()
 
   const handleLearnMore = useCallback(() => {
-    // Open the coin website in browser
     if (coin?.website) {
       Linking.openURL(coin?.website)
     }

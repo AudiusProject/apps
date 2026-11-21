@@ -1,22 +1,15 @@
-// Layout and scale math for BalanceLineChart. The numbers reproduce the layout
-// the chart had when it was drawn with react-native-gifted-charts.
-
 export type ChartPoint = { x: number; y: number }
 
 export const NUMBER_OF_SECTIONS = 2
 export const CURVATURE = 0.2
 
-// Horizontal layout, relative to the plot layer that starts after the y-axis
-// labels. The plot layer overhangs the container on the right.
 export const PLOT_INSET_LEFT = 20
 export const PLOT_INSET_RIGHT = 10
 export const PLOT_OVERHANG_RIGHT = 12
 
-// Vertical layout as fractions of the chart height plus fixed padding.
 export const PLOT_TOP_RATIO = 0.05
 export const BOTTOM_PADDING = 23
 
-// Pointer and tooltip.
 export const POINTER_RADIUS = 6
 export const POINTER_STRIP_INSET_TOP = 20
 export const TOOLTIP_WIDTH = 140
@@ -27,11 +20,8 @@ export const POINTER_VANISH_DELAY_MS = 4000
 export const ANIMATION_DURATION_MS = 800
 
 export type YScale = {
-  // Value drawn at the bottom of the plot.
   offset: number
-  // Value range from the bottom to the top of the plot.
   span: number
-  // Axis labels from bottom to top.
   labels: number[]
 }
 
@@ -45,11 +35,6 @@ const indexOfFirstNonZeroDigit = (num: number) => {
   return i
 }
 
-/**
- * The bottom of the axis sits 10% of the data range below the minimum, and the
- * top is rounded up to the next multiple of 10 (or given 10% headroom when the range
- * is 1 or less).
- */
 export const getYScale = (values: number[]): YScale => {
   if (values.length === 0) {
     return { offset: 0, span: 10, labels: [0, 5, 10] }
@@ -158,7 +143,6 @@ const controlPoint = (
   }
 }
 
-/** Smooth cubic bezier through every point. */
 export const getLinePath = (points: ChartPoint[]): string => {
   if (points.length === 0) return ''
   return points.reduce((acc, point, i, all) => {
@@ -169,7 +153,6 @@ export const getLinePath = (points: ChartPoint[]): string => {
   }, '')
 }
 
-/** The line path closed down to the bottom of the plot. */
 export const getAreaPath = (points: ChartPoint[], bottom: number): string => {
   if (points.length === 0) return ''
   const first = points[0]
@@ -187,11 +170,6 @@ export const getNearestIndex = (
   return Math.min(Math.max(index, 0), pointCount - 1)
 }
 
-/**
- * Tooltip sits above the point, or below it near the top of the plot. It is
- * centered on the point unless that would run off either side, in which case it
- * is anchored to the side with room.
- */
 export const getTooltipPosition = (
   point: ChartPoint,
   layout: ChartLayout

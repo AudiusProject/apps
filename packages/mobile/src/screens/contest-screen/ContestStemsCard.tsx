@@ -32,28 +32,6 @@ import {
 import { useTrackImage } from 'app/components/image/TrackImage'
 import { UserLink } from 'app/components/user-link'
 
-/**
- * Native Stems & Downloads tile — same treatment as the desktop
- * `ContestStemsCard` refactor (Figma 2925-18101).
- *
- * Collapsed state renders a single summary row:
- *   [artwork] Public Free / Artist   [caret]
- *   [N Stems pill]                    Download All ↓
- *
- * Tapping the caret expands an inner list of numbered rows, each
- * showing:
- *   index · Stem category / filename · size · [download icon]
- *
- * The inner "source track + stems" block is wrapped in its own
- * bordered inner container so it reads as a distinct unit inside
- * the outer card — Figma calls for a separator between the
- * collapsed header, the expanded list, and any future siblings.
- *
- * The download actions reuse `useWaitForDownloadModal` — the same
- * hook the track-page download flow uses — so per-file downloads
- * route through the existing native modal and progress UI.
- */
-
 const messages = {
   heading: 'STEMS & DOWNLOADS',
   downloadHeading: 'DOWNLOAD',
@@ -99,10 +77,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     { enabled: stems.length > 0 || !!track?.is_downloadable }
   )
 
-  // Default to expanded for short lists so the user sees the stems
-  // without an extra tap; auto-collapse when there are more than
-  // STEMS_COLLAPSE_THRESHOLD entries so a long list doesn't push the
-  // comments tab way down the screen. Explicit user toggle wins.
   const STEMS_COLLAPSE_THRESHOLD = 5
   const stemsBelowThreshold = stemsCount <= STEMS_COLLAPSE_THRESHOLD
   const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null)
@@ -117,12 +91,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
-  // Auto-follow the contest when a signed-in user kicks off a stem
-  // download — downloading a stem is a strong engagement signal that
-  // the user wants to participate. Fires on tap (rather than on
-  // download completion) because the download saga doesn't expose a
-  // success hook to the caller; the follow mutation is optimistic so
-  // the UI updates instantly, and the user can unfollow at any time.
   const { data: contest } = useRemixContest(trackId)
   const contestEventId = contest?.eventId
   const { data: currentUserId } = useCurrentUserId()
@@ -147,7 +115,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const handleDownloadAll = () => {
     if (!track) return
     followContestIfNeeded()
-    // All stems + (optionally) the parent track.
     const ids = [
       ...(track.is_downloadable ? [trackId] : []),
       ...stems.map((s) => s.track_id)
@@ -235,9 +202,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             >
               <View
                 style={{
-                  // Rotate the caret via transform — react-native
-                  // doesn't support CSS transitions, so this is a
-                  // discrete flip rather than an animated rotation.
                   transform: [{ rotate: expanded ? '180deg' : '0deg' }]
                 }}
               >

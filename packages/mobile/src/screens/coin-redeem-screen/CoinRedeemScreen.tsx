@@ -38,7 +38,6 @@ const messages = {
   claim: 'Claim',
   claiming: 'Claiming',
 
-  // Error messages
   error: {
     ended: 'Rewards have ended.',
     invalid: 'Reward code is invalid.',
@@ -79,7 +78,6 @@ export const CoinRedeemScreen = () => {
   const isClaimDisabled = !!rewardAmountError || isClaiming
 
   const onSuccess = useCallback(() => {
-    // Show toast and navigate to the coin detail page
     toast({ content: 'Reward claimed successfully', type: 'info' })
     navigation.navigate('CoinDetailsScreen', { ticker })
   }, [navigation, ticker, toast])

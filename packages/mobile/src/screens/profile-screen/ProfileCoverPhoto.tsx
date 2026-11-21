@@ -20,8 +20,6 @@ import { BannerViewer } from './BannerViewer'
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
-// Height below the status bar. The avatar is 80px tall and is positioned so
-// it extends ~32px below the cover photo, matching the Figma spec.
 export const COVER_PHOTO_CONTENT_HEIGHT = 96
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -44,9 +42,6 @@ export const ProfileCoverPhoto = () => {
   const styles = useStyles()
   const insets = useSafeAreaInsets()
 
-  // Read from the route-params cache directly so user data is available on
-  // the first render, avoiding the Redux-state race in `useProfileUser`
-  // that caused the cover photo to pop in late and shift layout.
   const { params } = useRoute<'Profile'>()
   const { data: paramsUser } = useUserByParams(params, {
     select: (user) => ({

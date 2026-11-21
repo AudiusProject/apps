@@ -79,9 +79,6 @@ type CommonDrawerProps = {
   modalName: Modals
 }
 
-/*
- * Conditionally renders the drawers hooked up to @audius/web/src/common/ui/modal slice
- */
 const CommonDrawer = (props: CommonDrawerProps) => {
   const { getModal, modalName } = props
   const { modalState } = useDrawerState(modalName)
@@ -97,9 +94,6 @@ type NativeDrawerProps = {
   drawerName: Drawer
 }
 
-/*
- * Conditionally renders the drawers hooked up to native store/drawers slice
- */
 export const NativeDrawer = (props: NativeDrawerProps) => {
   const { getDrawer, drawerName } = props
   const { visibleState } = useDrawer(drawerName)
@@ -110,9 +104,6 @@ export const NativeDrawer = (props: NativeDrawerProps) => {
   return <Drawer />
 }
 
-// Each value is a thunk so the drawer module is only required the first time
-// it opens. With Metro inline requires, referencing the import inside the
-// arrow defers the require; a plain value would load every drawer at startup.
 type LazyComponent = () => ComponentType
 
 const commonDrawersMap: { [Modal in Modals]?: LazyComponent } = {
@@ -133,8 +124,6 @@ const commonDrawersMap: { [Modal in Modals]?: LazyComponent } = {
   DuplicateAddConfirmation: () => DuplicateAddConfirmationDrawer,
   ProfileActions: () => ProfileActionsDrawer,
   PlaybackRate: () => PlaybackRateDrawer,
-  // PremiumContent, AddCash, PurchaseVendor, and StripOnRamp *must* be in this order
-  // to avoid zIndex issues.
   PremiumContentPurchaseModal: () => PremiumContentPurchaseDrawer,
   AddCashModal: () => AddCashDrawer,
   PurchaseVendor: () => PurchaseVendorDrawer,

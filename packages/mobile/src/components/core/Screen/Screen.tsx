@@ -51,19 +51,11 @@ export type ScreenProps = {
   IconProps?: SvgProps
   headerTitle?: Nullable<(() => ReactNode) | string>
   style?: StyleProp<ViewStyle>
-  // url used for screen view analytics
   url?: string
   variant?: ScreenVariant
   as?: ComponentType<ViewProps>
   header?: () => ReactElement
-  /**
-   * Float the custom header over the screen instead of stacking content below
-   * it, so content scrolls behind a translucent header. The screen is then
-   * responsible for padding its own scrollable content by the header height
-   * (see `useRootHeaderHeight`).
-   */
   headerTransparent?: boolean
-  // Callback called when user presses back button
   onBack?: () => void
 }
 
@@ -92,7 +84,6 @@ export const Screen = (props: ScreenProps) => {
   const navigation = useNavigation()
   const isSecondary = variant === 'secondary' || variant === 'white'
 
-  // Handle back button press
   useEffect(() => {
     if (!onBack) return
 
@@ -103,7 +94,6 @@ export const Screen = (props: ScreenProps) => {
     return unsubscribe
   }, [navigation, onBack])
 
-  // Record screen view
   useEffect(() => {
     if (url) {
       screen({ route: url })
@@ -123,7 +113,6 @@ export const Screen = (props: ScreenProps) => {
             ? null
             : topbarRight,
         title: isSecondary ? undefined : titleProp,
-        // An explicit headerTitle wins over the secondary icon + caps title.
         headerTitle:
           isSecondary && headerTitleProp === undefined
             ? () => (

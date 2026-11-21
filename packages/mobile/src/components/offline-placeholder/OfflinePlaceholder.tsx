@@ -37,8 +37,6 @@ export const OfflinePlaceholder = (props: OfflinePlaceholderProps) => {
   const { unboxed } = props
   const styles = useStyles()
   const [{ loading: isRefreshing }, handleRefresh] = useAsyncFn(async () => {
-    // NetInfo.refresh() usually returns almost instantly
-    // Introduce minimum wait to convince user we took action
     return await Promise.all([NetInfo.refresh(), wait(800)])
   })
 

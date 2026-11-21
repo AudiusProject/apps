@@ -6,11 +6,6 @@ import { FlatList } from 'app/components/core'
 import { ContestCommentsList } from '../ContestCommentsList'
 import { useContestPage } from '../ContestPageContext'
 
-/**
- * Updates body — host-only post-updates feed. Renders as the
- * ListHeaderComponent of a core `FlatList` so the scroll coordinates
- * with the collapsible header on the parent screen.
- */
 export const ContestUpdatesTab = () => {
   const { eventId, eventOwnerUserId } = useContestPage()
 

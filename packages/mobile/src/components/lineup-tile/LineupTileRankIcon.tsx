@@ -17,7 +17,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 type LineupTileRankIconProps = {
-  /** Index of this item in the lineup */
   index: number
 }
 

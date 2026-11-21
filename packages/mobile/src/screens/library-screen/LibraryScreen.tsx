@@ -46,11 +46,6 @@ const libraryScreens = [
   }
 ]
 
-/**
- * Category pills and the Tracks / Albums / Playlists tabs, as the header's
- * scroll-away row. The tab bar floats over the tab lists, which pad their own
- * content to start below it.
- */
 const LibraryTabBar = (props: MaterialTopTabBarProps) => {
   const { state, navigation } = props
 

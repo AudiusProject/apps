@@ -51,10 +51,6 @@ import { make, track } from 'app/services/analytics'
 const { makeGetCurrent } = playbackSelectors
 const { getPlaying } = playbackSelectors
 
-// Threshold for `onEndReachedThreshold` (fraction of viewport length).
-// 1.0 means "fetch when one full viewport of content remains below" so the
-// next page request is in flight well before the user actually hits the
-// bottom of the list.
 const LOAD_MORE_THRESHOLD = 1
 
 const styles = StyleSheet.create({
@@ -86,26 +82,14 @@ const SkeletonTileView = memo(function SkeletonTileView(props: {
 })
 
 export type TrackLineupProps = {
-  // Ordered list of track IDs to render. Tiles read full track data from the
-  // tanquery cache (primed by whatever hook produced this list).
   trackIds: ID[]
 
-  // Optional mixed track/collection list. When provided, the lineup renders
-  // collection tiles inline for `PLAYLIST`/`ALBUM` entries and track tiles
-  // for `TRACK` entries (the For You feed uses this). When omitted the
-  // lineup behaves as a pure track lineup driven by `trackIds`.
   lineupItems?: LineupData[]
 
-  // Opaque string that tags the queue entries this lineup produces. Must
-  // match the source used by the playback saga's shadow into legacy queue
-  // so PlayBar-style comparisons continue working.
   source: string
 
-  // Optional tanquery source so the playback saga can paginate when the
-  // queue approaches its end during continuous playback.
   querySource?: PlaybackQuerySource
 
-  // Loading state (from the tanquery hook driving this lineup).
   isPending?: boolean
   isFetching?: boolean
   hasNextPage?: boolean
@@ -113,12 +97,10 @@ export type TrackLineupProps = {
   refresh?: () => void
   refreshing?: boolean
 
-  // Render config.
   pageSize?: number
   initialPageSize?: number
   maxEntries?: number
   isTrending?: boolean
-  /** 'row' renders tracks as dense rows; collections stay tiles. */
   tileVariant?: 'tile' | 'row'
   rankIconCount?: number
   showArtistPick?: boolean
@@ -126,38 +108,19 @@ export type TrackLineupProps = {
   LineupEmptyComponent?: SectionListProps<unknown>['ListEmptyComponent']
   ListFooterComponent?: SectionListProps<unknown>['ListFooterComponent']
   hideHeaderOnEmpty?: boolean
-  /**
-   * Style for the scrollable content. Root tab screens use it to clear the
-   * floating glass header. Defaults to a bottom inset that clears the tab bar
-   * and play bar; pass `paddingBottom` to override it.
-   */
   contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
-  /** Scroll callback, used by root screens to drive the glass chrome. */
   onScroll?: SectionListProps<unknown>['onScroll']
   itemStyles?: ViewStyle
   pullToRefresh?: boolean
   disableTopTabScroll?: boolean
   onPressItem?: (id: ID) => void
-  /** When set, tile plays and pauses record Playback events with it */
   playbackSource?: PlaybackSource
   favoriteSource?: FavoriteSource
   repostSource?: RepostSource
 
-  /**
-   * Map of indices (into `trackIds`) to JSX elements rendered after the
-   * tile at that index. Mirrors the web TrackLineup / legacy
-   * TanQueryLineup delineator pattern — used for inline section labels
-   * (e.g. WINNERS / SUBMISSIONS headers on the contest submissions
-   * lineup).
-   */
   delineatorMap?: Record<number, ReactElement>
 }
 
-/**
- * Tanquery-first replacement for the legacy mobile `<Lineup>` /
- * `<TanQueryLineup>`. Takes an array of track IDs and dispatches through
- * the new playback slice on tile interactions. No redux lineup state.
- */
 export const TrackLineup = ({
   trackIds,
   lineupItems,
@@ -194,9 +157,6 @@ export const TrackLineup = ({
   const dispatch = useDispatch()
   const ref = useRef<RNSectionList>(null)
 
-  // Playback state is read when a tile is pressed rather than subscribed to,
-  // so play/pause/skip don't re-render every tile. Tiles select their own
-  // active/playing state.
   const store = useStore<CommonState>()
   const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
 
@@ -204,9 +164,6 @@ export const TrackLineup = ({
     (id: ID) => makeStableUid(Kind.TRACKS, id, source),
     [source]
   )
-  // Build a single ordered list of mixed track/collection entries. When the
-  // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
-  // wrap the legacy `trackIds` so the rest of the component is uniform.
   const visibleItems: LineupData[] = useMemo(() => {
     const source =
       lineupItems ?? trackIds.map((id) => ({ id, type: EntityType.TRACK }))
@@ -214,11 +171,6 @@ export const TrackLineup = ({
     return source.slice(0, end)
   }, [lineupItems, trackIds, maxEntries])
 
-  // Collection entries contribute their tracks to the playback queue inline,
-  // in feed order, so a playlist/album tile is playable (tap to start) and is
-  // traversed by next/previous rather than skipped. We only need the ordered
-  // track ids, which live on each collection's playlist_contents — fetched
-  // from cache (already primed by the rendered CollectionTiles).
   const collectionIds = useMemo(
     () =>
       visibleItems.filter((i) => i.type !== EntityType.TRACK).map((i) => i.id),
@@ -279,8 +231,6 @@ export const TrackLineup = ({
         recordPlayback(true)
         return
       }
-      // For a collection tile, locate the track within that collection's queue
-      // segment (a track id can otherwise appear more than once in the queue).
       const startIndex =
         collectionId != null
           ? tracksForPlayback.findIndex(
@@ -310,9 +260,6 @@ export const TrackLineup = ({
     ]
   )
 
-  // Keys follow the entity, not its position, so a refetch that reorders the
-  // list moves tiles instead of remounting them. A repeated entity gets a
-  // suffix to keep keys unique.
   const entries: Entry[] = useMemo(() => {
     const seen = new Map<string, number>()
     const keyFor = (base: string) => {
@@ -336,10 +283,6 @@ export const TrackLineup = ({
     )
   }, [visibleItems, uidFor])
 
-  // Synchronous "load more was triggered" flag — set the moment the scroll
-  // handler fires so skeletons render on the next frame, without waiting for
-  // the parent's tanquery `isFetching` to propagate. Cleared once the parent
-  // either delivers more entries or finishes fetching.
   const [isLoadMoreTriggered, setIsLoadMoreTriggered] = useState(false)
   const prevEntriesLengthRef = useRef(entries.length)
   useEffect(() => {
@@ -357,8 +300,6 @@ export const TrackLineup = ({
       if (entries.length === 0 && (isPending || isFetching)) {
         return Math.min(maxEntries, initialPageSize ?? pageSize)
       }
-      // Only a load-more gets trailing skeletons. A background refetch
-      // replaces the list in place.
       if (isLoadMoreTriggered) {
         return Math.min(maxEntries, pageSize)
       }
@@ -452,10 +393,6 @@ export const TrackLineup = ({
     ]
   )
 
-  // Single, synchronous load-more entry point. Flipping the local flag in the
-  // same tick as dispatching the parent's `loadNextPage` makes the skeletons
-  // render on the very next frame, instead of after a debounce window plus
-  // the round-trip through tanquery's `isFetching`.
   const handleLoadMore = useCallback(() => {
     if (!hasNextPage || isFetching || isLoadMoreTriggered) return
     if (!loadNextPage) return
@@ -499,8 +436,6 @@ export const TrackLineup = ({
         ListEmptyComponent={LineupEmptyComponent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={LOAD_MORE_THRESHOLD}
-        // Keep ~5 screens of tiles mounted either side instead of the
-        // default 10, since feed/trending/profile lineups all stay mounted
         windowSize={11}
         sections={isEmpty ? [] : sections}
         stickySectionHeadersEnabled={false}

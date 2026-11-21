@@ -37,10 +37,6 @@ export type AppDrawerProps = SetOptional<DrawerProps, 'isOpen' | 'onClose'> & {
   modalName: Modals
 }
 
-/*
- * Drawer that hooks into the common modal slice to automatically handle
- * opening and closing.
- */
 export const AppDrawer = (props: AppDrawerProps) => {
   const { modalName, onClose: onCloseProp, ...other } = props
 

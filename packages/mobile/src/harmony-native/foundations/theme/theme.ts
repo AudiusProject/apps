@@ -68,13 +68,11 @@ export const theme = {
     color: colorTheme.matrix,
     ...commonFoundations
   },
-  /** @deprecated Use classic-light */
   day: {
     type: harmonyThemes.day.type,
     color: colorTheme.day,
     ...commonFoundations
   },
-  /** @deprecated Use classic-dark */
   dark: {
     type: harmonyThemes.dark.type,
     color: colorTheme.dark,

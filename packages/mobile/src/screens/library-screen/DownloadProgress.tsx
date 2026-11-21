@@ -44,7 +44,6 @@ export const DownloadProgress = () => {
     (status) => status === OfflineDownloadStatus.SUCCESS
   ).length
 
-  // Only render if there are active downloads
   if (numDownloadsComplete === numDownloads || !isReachable) return null
 
   return (

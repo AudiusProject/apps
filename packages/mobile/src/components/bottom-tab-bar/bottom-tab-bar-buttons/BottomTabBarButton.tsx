@@ -18,7 +18,6 @@ export type BaseBottomTabBarButtonProps = {
   onPress: (isActive: boolean, routeName: string, routeKey: string) => void
   onLongPress: () => void
   routeKey: string
-  /** Laid out inside the floating glass pill rather than the classic bar. */
   floating?: boolean
 }
 

@@ -55,7 +55,6 @@ export const ReferralLinkCopyButton = ({
     toast({ content: messages.copyNotice, type: 'info' })
   }, [inviteUrl, toast])
 
-  // Button animation
   const { scale, handlePressIn, handlePressOut } = usePressScaleAnimation()
   return (
     <Animated.View

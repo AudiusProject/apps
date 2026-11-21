@@ -159,10 +159,8 @@ const ctaToTextMap: Record<ChatPermissionAction, string> = {
 type ChatUserListItemProps = {
   userId: number
   presetMessage?: string
-  /** Shows a select circle for building a group chat. */
   isSelectable?: boolean
   isSelected?: boolean
-  /** When something is already selected, tapping the row toggles it. */
   isSelectionMode?: boolean
   onToggleSelect?: (userId: number) => void
 }

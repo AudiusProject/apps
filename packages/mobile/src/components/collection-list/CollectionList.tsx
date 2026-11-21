@@ -26,7 +26,6 @@ type IDListProps = Omit<
 >
 type CreateCard = { _create: boolean }
 
-// Props to show and setup tile for creating new playlists
 type CreateCollectionTileProps = {
   collectionType?: 'playlist' | 'album'
   showCreateCollectionTile?: boolean
@@ -35,7 +34,6 @@ type CreateCollectionTileProps = {
   createPlaylistCallback?: () => void
 }
 
-// Props for infinite loading
 type InfiniteLoadingProps = {
   onEndReached?: () => void
   onEndReachedThreshold?: number
@@ -179,8 +177,6 @@ const CollectionIDList = (props: CollectionIdListProps) => {
   )
 }
 
-// Helper to switch between legacy version and newer version of CollectionList.
-// The latter just takes IDs and allows the child components to fetch their data
 export const CollectionList = (props: CollectionListProps) => {
   return isIdListProps(props)
     ? createElement(CollectionIDList, props)

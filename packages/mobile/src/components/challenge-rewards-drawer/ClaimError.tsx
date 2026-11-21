@@ -5,7 +5,6 @@ const messages = {
     'Something went wrong while claiming your rewards. Please try again and contact support@audius.co.'
 }
 
-/** Renders a generic error message for failed challenge claims */
 export const ClaimError = () => {
   return (
     <Text size='s' color='danger'>

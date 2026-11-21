@@ -78,10 +78,6 @@ const sourceTrackKey = (
   return ''
 }
 
-/**
- * Isolated per `mint` via parent `key` so FlashList recycling does not mix
- * cover hooks between rows. Shimmers until the banner or owner cover loads.
- */
 const FanClubExploreCardCover = ({
   bannerImageUrl,
   ownerId

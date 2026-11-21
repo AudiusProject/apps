@@ -84,7 +84,6 @@ export const HostRemixContestDrawer = () => {
 
   const remixContestData = remixContest?.eventData
 
-  // Form State
   const [description, setDescription] = useState(
     remixContestData ? remixContestData.description : ''
   )
@@ -92,8 +91,6 @@ export const HostRemixContestDrawer = () => {
   const [prizeInfo, setPrizeInfo] = useState(
     remixContestData ? remixContestData.prizeInfo : ''
   )
-  // Pre-populate from existing eventData when editing — same field the web
-  // Edit Contest form writes to (Figma 2811:109911 / Video Link section).
   const [videoUrl, setVideoUrl] = useState<string>(
     (remixContestData as any)?.videoUrl ?? ''
   )
@@ -145,9 +142,6 @@ export const HostRemixContestDrawer = () => {
       updateEvent({
         eventId: remixContest.eventId,
         endDate: endDate.toISOString(),
-        // event_data is replaced wholesale by the indexer on update, so
-        // carry over the fields this form doesn't edit (title,
-        // coverPhotoUrl, sourceTrackIds, etc.) instead of dropping them.
         eventData: {
           ...remixContest.eventData,
           description,

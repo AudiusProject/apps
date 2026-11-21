@@ -125,7 +125,6 @@ export const AccountsYouManageScreen = () => {
     isPending,
     isSuccess
   } = useManagedAccounts(userId, {
-    // Grants can change from web or another device
     staleTime: 0
   })
   const { remove, isPending: isRemoving } = useRemoveManagerWithSwitchBack()
@@ -142,8 +141,6 @@ export const AccountsYouManageScreen = () => {
   const actionRows = useMemo((): ActionDrawerRow[] => {
     if (!selected) return []
     const rows: ActionDrawerRow[] = []
-    // Switching from inside a managed account isn't allowed: the grant
-    // belongs to the signed-in user, not the account being managed.
     if (!isManagedAccount) {
       rows.push({
         text: messages.switchToUser,

@@ -99,10 +99,7 @@ export const Box = styled(View, {
     backgroundColor:
       (backgroundColor && theme.color.background[backgroundColor]) ??
       backgroundColor ??
-      // In order for shadows to work on iOS they need a background color
-      // Using white as a default here, but can be overridden
       (shadow ? color.background.white : undefined),
-    // Native doesn't have a border:"" shorthand
     ...(border && {
       borderStyle: 'solid',
       borderWidth: 1,

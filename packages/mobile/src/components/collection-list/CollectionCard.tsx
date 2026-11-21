@@ -125,7 +125,6 @@ const CollectionCardComponent = (props: CollectionCardProps) => {
             size='s'
             strength='strong'
             color='subdued'
-            // Ensures footer height is not affected
             style={{ lineHeight: 16 }}
           >
             {is_scheduled_release && release_date
@@ -159,12 +158,9 @@ const CollectionCardComponent = (props: CollectionCardProps) => {
   )
 }
 
-// Memoize CollectionCard to prevent unnecessary re-renders when props haven't changed
-// This is critical for performance when rendering many cards in a list
 export const CollectionCard = memo(
   CollectionCardComponent,
   (prevProps, nextProps) => {
-    // Only re-render if id, onPress, or noNavigation actually change
     return (
       prevProps.id === nextProps.id &&
       prevProps.noNavigation === nextProps.noNavigation &&

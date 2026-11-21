@@ -43,7 +43,6 @@ export const Button = (props: ButtonProps) => {
   const isSmallOrXs = size === 'small' || size === 'xs'
 
   const smallHeight = size === 'xs' ? spacing.unit7 : spacing.unit8
-  // - Size Styles -
   const smallStyles: ReactNativeStyle = {
     gap: spacing.xs,
     height: smallHeight,
@@ -54,7 +53,6 @@ export const Button = (props: ButtonProps) => {
     smallStyles.width = smallHeight
   }
 
-  // title-s-default
   const smallTextStyles: TextStyle = {
     fontFamily: typography.fontByWeight.bold,
     fontSize: typography.size.s,
@@ -71,14 +69,12 @@ export const Button = (props: ButtonProps) => {
     defaultStyles.width = spacing.unit12
   }
 
-  // title-l-default
   const defaultTextStyles: TextStyle = {
     fontFamily: typography.fontByWeight.bold,
     fontSize: typography.size.l,
     lineHeight: typography.lineHeight.l
   }
 
-  // - Variant Styles -
   const primaryOverrideColor =
     hexColor ??
     (color && color !== 'coinGradient' ? themeColors.special[color] : null)
@@ -141,10 +137,6 @@ export const Button = (props: ButtonProps) => {
     borderStyle: 'solid',
     borderColor: themeColors.border.default,
 
-    // TODO: Need to add blur
-    // Could use BlurView or try something native
-    // backdropFilter: 'blur(6px)',
-
     ...(isDisabled && {
       opacity: 0.45
     })
@@ -202,8 +194,6 @@ export const Button = (props: ButtonProps) => {
     borderRadius: rounded ? cornerRadius['2xl'] : cornerRadius.s,
     alignItems: 'center',
     justifyContent: 'center',
-    // TODO bring this back properly
-    // ...shadows.near,
     ...(variant === 'secondary'
       ? secondaryStyles
       : variant === 'tertiary'
@@ -262,7 +252,6 @@ export const Button = (props: ButtonProps) => {
     [variant, isDisabled, type]
   )
 
-  // Non-animated version for Android
   const staticIconProps = {
     fill:
       isDisabled && variant === 'secondary'

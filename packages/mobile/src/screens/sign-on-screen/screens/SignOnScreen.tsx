@@ -62,10 +62,6 @@ type SignOnScreenProps = {
   isSplashScreenDismissed: boolean
 }
 
-/*
- * Manages the container for sign-up and sign-in flow
- * Not using navigation for this due to transition between sign-in and sign-up
- */
 export const SignOnScreen = (props: SignOnScreenProps) => {
   const { isSplashScreenDismissed } = props
   const { params } = useRoute<RouteProp<SignOnScreenParamList, 'SignOn'>>()

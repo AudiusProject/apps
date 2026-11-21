@@ -272,7 +272,6 @@ export const ProfileInfoTiles = () => {
   const { data: recentComments = [], isLoading: loadingComments } =
     useUserComments({ userId: user_id, pageSize: 1 })
 
-  // Only animate if comments are not immediately visible
   const [shouldAnimate] = useState(loadingComments)
 
   const {

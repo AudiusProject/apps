@@ -62,8 +62,6 @@ describe('getChartLayout', () => {
 
 describe('paths', () => {
   it('matches the curve react-native-gifted-charts drew for the same data', () => {
-    // Captured from react-native-gifted-charts 1.4.46 (curved, height 200,
-    // width 252). Our plot is shifted 10px right of its coordinate space.
     const gifted =
       'M10,193.33333333333334 C25.46666666666667,176.66666666666669 56.39999999999999,118.33333333333334 87.33333333333333,110 C118.26666666666667,101.66666666666666 133.73333333333332,168.33333333333334 164.66666666666666,151.66666666666666 C195.6,135 226.53333333333333,51.66666666666667 242,26.666666666666657'
     const values = [100, 150, 125, 200]

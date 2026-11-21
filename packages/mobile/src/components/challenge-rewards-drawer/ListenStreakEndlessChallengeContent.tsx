@@ -67,7 +67,6 @@ export const ListenStreakEndlessChallengeContent = ({
           variant='label'
           size='l'
           color='subdued'
-          // iOS has a bug where emojis are not vertically aligned with the text
           style={{ lineHeight: Platform.OS === 'ios' ? 0 : undefined }}
         >
           {statusText}

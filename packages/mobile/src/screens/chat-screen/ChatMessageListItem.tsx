@@ -121,7 +121,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   unfurl: {
     width: Dimensions.get('window').width - 48,
     minHeight: 72,
-    borderRadius: 0 // Undoes border radius from track/collection tiles
+    borderRadius: 0
   }
 }))
 
@@ -162,9 +162,7 @@ type ChatMessageListItemProps = {
   onLongPress?: (id: string) => void
   handleClosePopup?: () => void
   itemsRef?: any
-  /** Group chats show sender names and avatars on others' messages. */
   isGroup?: boolean
-  /** The next older message, used to find the start of a sender run. */
   previousMessageId?: string
 }
 

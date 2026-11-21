@@ -37,7 +37,6 @@ export const CompleteTrackScreen = () => {
           clientId: track.clientId
         }
 
-        // Finish upload with updated metadata
         finishUpload({
           tracks: [updatedTrack],
           uploadType: UploadType.INDIVIDUAL_TRACK
@@ -48,7 +47,6 @@ export const CompleteTrackScreen = () => {
           uploadAttempt
         })
 
-        // Increment attempt count in case we get sent back here after an error
         setUploadAttempt(uploadAttempt + 1)
       }
     },

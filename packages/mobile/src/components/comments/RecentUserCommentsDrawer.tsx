@@ -169,7 +169,6 @@ const RecentUserCommentsDrawerContent = () => {
     }
   }, [fetchNextPage, hasNextPage])
 
-  // Loading state
   if (isPending) {
     return (
       <Flex pv='m'>
@@ -180,7 +179,6 @@ const RecentUserCommentsDrawerContent = () => {
     )
   }
 
-  // Empty state
   if (!comments || !comments.length) {
     return (
       <Flex p='l'>

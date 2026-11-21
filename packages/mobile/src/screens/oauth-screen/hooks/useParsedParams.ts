@@ -40,7 +40,6 @@ export const useParsedParams = (search: string): ParsedParams => {
 
   let error: string | null = null
 
-  // ── Payment flow ───────────────────────────────────────────────────────────
   if (
     typeof recipient === 'string' ||
     typeof amount === 'string' ||
@@ -85,7 +84,6 @@ export const useParsedParams = (search: string): ParsedParams => {
     }
   }
 
-  // ── Auth flows ─────────────────────────────────────────────────────────────
   if (!getIsRedirectValid(redirectUriStr)) {
     error = messages.redirectURIInvalidError
   } else if (scope !== 'read' && scope !== 'write' && scope !== 'write_once') {
@@ -106,7 +104,6 @@ export const useParsedParams = (search: string): ParsedParams => {
     }
   } else if (scope === 'write_once') {
     if (tx === 'connect_dashboard_wallet') {
-      // Requires postMessage back-channel — not possible in a native app
       error = messages.connectWalletNotSupportedError
     } else if (tx === 'disconnect_dashboard_wallet') {
       if (!wallet || typeof wallet !== 'string') {
@@ -117,7 +114,6 @@ export const useParsedParams = (search: string): ParsedParams => {
     }
   }
 
-  // PKCE validations only required when response_type=code
   if (!error && responseType === 'code') {
     if (!codeChallenge || typeof codeChallenge !== 'string') {
       error = messages.missingCodeChallengeError

@@ -23,10 +23,6 @@ const borderWidthMap = {
   default: 2
 }
 
-/*
- * The Avatar component is a visual indicator used to quickly identify a
- * user's account.
- */
 export const Avatar = (props: AvatarProps) => {
   const {
     variant,

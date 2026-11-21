@@ -57,7 +57,6 @@ export const DownloadFavoritesSwitch = (
     TOGGLE_COOLDOWN_MS
   )
 
-  // When user confirms removal, turn switch off
   useLayoutEffect(() => {
     if (!isMarkedForDownload) {
       setValue(false)

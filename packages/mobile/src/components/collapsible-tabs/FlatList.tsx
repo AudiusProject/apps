@@ -10,13 +10,9 @@ import {
   useSharedAnimatedRef,
   useTabNameContext,
   useTabsContext,
-  useUpdateScrollViewContentSize,
+  useUpdateScrollViewContentSize
 } from './hooks'
 
-/**
- * Used as a memo to prevent rerendering too often when the context changes.
- * See: https://github.com/facebook/react/issues/15156#issuecomment-474590693
- */
 const FlatListMemo = React.memo(
   React.forwardRef<RNFlatList, React.PropsWithChildren<FlatListProps<unknown>>>(
     (props, passRef) => {
@@ -42,15 +38,13 @@ function FlatListImpl<R>(
   const { scrollHandler, enable } = useScrollHandlerY(name)
   const onLayout = useAfterMountEffect(rest.onLayout, () => {
     'worklet'
-    // we enable the scroll event after mounting
-    // otherwise we get an `onScroll` call with the initial scroll position which can break things
     enable(true)
   })
 
   const {
     style: _style,
     contentContainerStyle: _contentContainerStyle,
-    progressViewOffset,
+    progressViewOffset
   } = useCollapsibleStyle()
 
   React.useEffect(() => {
@@ -58,7 +52,7 @@ function FlatListImpl<R>(
   }, [name, ref, setRef])
 
   const scrollContentSizeChange = useUpdateScrollViewContentSize({
-    name,
+    name
   })
 
   const scrollContentSizeChangeHandlers = useChainCallback(
@@ -73,7 +67,7 @@ function FlatListImpl<R>(
       refreshControl &&
       React.cloneElement(refreshControl, {
         progressViewOffset,
-        ...refreshControl.props,
+        ...refreshControl.props
       }),
     [progressViewOffset, refreshControl]
   )
@@ -89,11 +83,7 @@ function FlatListImpl<R>(
   )
 
   const memoContentContainerStyle = React.useMemo(
-    () => [
-      _contentContainerStyle,
-      // TODO: investigate types
-      contentContainerStyle as any,
-    ],
+    () => [_contentContainerStyle, contentContainerStyle as any],
     [_contentContainerStyle, contentContainerStyle]
   )
   const memoStyle = React.useMemo(() => [_style, style], [_style, style])
@@ -118,9 +108,6 @@ function FlatListImpl<R>(
   )
 }
 
-/**
- * Use like a regular FlatList.
- */
 export const FlatList = React.forwardRef(FlatListImpl) as <T>(
   p: FlatListProps<T> & { ref?: React.Ref<RNFlatList<T>> }
 ) => React.ReactElement

@@ -32,10 +32,6 @@ const isLoadingItem = (item: RenderItem): item is LoadingItem =>
 const LIST_PADDING_BOTTOM = spacing(30)
 const MVCP_DISABLED = { disabled: true }
 
-/**
- * Hook to handle tracking visibility for notification items, by index.
- * Returns a function to check the visibility for an index, and a callback for the Flatlist.
- */
 const useIsViewable = () => {
   const isFocused = useIsFocused()
   const [viewableMap, setViewableMap] = useState<{ [index: number]: boolean }>(
@@ -45,10 +41,8 @@ const useIsViewable = () => {
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       setViewableMap((viewableMap) => {
-        // First check length
         let didChange =
           viewableItems.length !== Object.values(viewableMap).length
-        // If lengths same, check each element
         if (!didChange) {
           for (const viewable of viewableItems) {
             if (viewable.index !== null && !viewableMap[viewable.index]) {
@@ -57,12 +51,10 @@ const useIsViewable = () => {
             }
           }
         }
-        // If no change, return same item to prevent re-render
         if (!didChange) {
           return viewableMap
         }
 
-        // Reconstruct the viewableMap from the viewableItems
         return viewableItems.reduce((acc, cur) => {
           if (cur.index === null) return acc
           return {
@@ -154,7 +146,6 @@ export const NotificationList = () => {
   )
 
   if (!isPending && !isError && notifications.length === 0) {
-    // Not a list, so it needs the glass-header inset applied directly.
     return (
       <View style={{ paddingTop: glassHeaderInset }}>
         <EmptyNotifications />
@@ -168,8 +159,6 @@ export const NotificationList = () => {
         paddingTop: glassHeaderInset,
         paddingBottom: LIST_PADDING_BOTTOM + bottomChin
       }}
-      // Keeps the pull-to-refresh spinner below the floating header rather
-      // than spinning underneath the glass.
       progressViewOffset={glassHeaderInset}
       onScroll={handleGlassScroll}
       scrollEventThrottle={16}
@@ -181,7 +170,6 @@ export const NotificationList = () => {
       onEndReached={handleLoadMore}
       scrollEnabled={!gesturesDisabled}
       onViewableItemsChanged={visibilityCallback}
-      // New notifications are prepended on refresh; keep them in view.
       maintainVisibleContentPosition={MVCP_DISABLED}
     />
   )

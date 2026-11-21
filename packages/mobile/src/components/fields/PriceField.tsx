@@ -16,19 +16,12 @@ import type {
 import type { TextFieldProps } from './TextField'
 import { TextField } from './TextField'
 
-// Maximum field length to safeguard against numeric overflow:
-// -1 (for len max int)
-// -2 (to account for digits added to include cents)
 const MAX_LENGTH = Number.MAX_SAFE_INTEGER.toString().length - 3
 
 const messages = {
   dollars: '$'
 }
 
-/** Implements a Formik field for entering a price, including default dollar sign
- * adornment and conversion logic to/from human readable price. Internal value is stored
- * as an integer number of cents.
- */
 export const PriceField = (props: TextFieldProps) => {
   const [{ value }, , { setValue: setPrice }] = useField<number>(props.name)
   const [humanizedValue, setHumanizedValue] = useState(

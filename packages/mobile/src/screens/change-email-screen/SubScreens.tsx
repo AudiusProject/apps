@@ -30,7 +30,6 @@ export const CurrentEmail = () => {
   const [{ value: oldEmail }, , { setValue: setOldEmail }] =
     useField('oldEmail')
 
-  // Load the email for the user
   const emailRequest = useAsync(async () => {
     return await identityService.getUserEmail()
   })

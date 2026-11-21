@@ -9,7 +9,6 @@ import { ConfirmationDrawerContent } from './ConfirmationDrawer'
 type ConfirmationDrawerWithoutReduxProps = BaseConfirmationDrawerProps &
   SetOptional<DrawerProps, 'children'>
 
-/** ConfirmationDrawer that isn't coupled to redux */
 export const ConfirmationDrawerWithoutRedux = (
   props: ConfirmationDrawerWithoutReduxProps
 ) => {

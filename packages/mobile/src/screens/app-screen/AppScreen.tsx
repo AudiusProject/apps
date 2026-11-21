@@ -22,12 +22,6 @@ import { AppTabsScreen } from './AppTabsScreen'
 const Stack = createNativeStackNavigator()
 
 export const AppScreen = () => {
-  /**
-   * Reset lastNavAction on transitionEnd
-   * Need to do this via screenListeners on the Navigator because listening
-   * via navigation.addListener inside a screen does not always
-   * catch events from other screens
-   */
   const handleTransitionEnd = useCallback(() => {
     setLastNavAction(undefined)
   }, [])

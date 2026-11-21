@@ -101,7 +101,6 @@ export const FollowArtistCard = (props: FollowArtistCardProps) => {
     }
   }, [artist.name, isPreviewing, playPreview, togglePreview, user_id])
 
-  // The play/pause icon over the user avatar
   const renderPreviewElement = () => {
     let PreviewIcon: IconComponent | null = null
 

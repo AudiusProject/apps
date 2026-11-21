@@ -62,8 +62,6 @@ const SearchExploreContent = () => {
   const handleGlassScroll = useGlassScrollHandler()
   const syncGlassScroll = useSyncGlassScroll()
 
-  // Search results replace the explore list, and the explore list remounts at
-  // the top, so the header always starts back in place.
   useEffect(() => {
     syncGlassScroll(0)
   }, [showSearch, syncGlassScroll])

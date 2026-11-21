@@ -13,15 +13,6 @@ type ExpandableProps = {
   style?: StyleProp<ViewStyle>
 }
 
-/**
- * Wraps content in an expandable container. Pressing the header
- * will expand/collapse the content.
- *
- * @param expanded whether the content is expanded
- * @param onToggleExpand callback when the header is pressed
- * @param renderHeader renders the header
- * @param style style of the container
- */
 export const Expandable = ({
   expanded,
   children,

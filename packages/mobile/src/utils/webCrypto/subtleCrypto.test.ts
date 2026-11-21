@@ -1,6 +1,5 @@
 import { subtle } from './subtleCrypto'
 
-// Node's WebCrypto (the installed @types/node predates its typings)
 const reference: SubtleCrypto = require('crypto').webcrypto.subtle
 const bytes = (n: number, seed = 1) =>
   Uint8Array.from({ length: n }, (_, i) => (i * 31 + seed * 17) & 0xff)

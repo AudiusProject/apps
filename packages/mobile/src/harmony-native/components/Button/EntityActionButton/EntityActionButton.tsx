@@ -98,7 +98,6 @@ export const EntityActionButton = (props: EntityActionButtonProps) => {
     }
   }, [active, type])
 
-  // Non-animated version for Android
   const staticIconProps = {
     fill: dynamicStyles.default.icon
   }

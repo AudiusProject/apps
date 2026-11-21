@@ -18,25 +18,15 @@ import Svg, {
 export type LinearGradientPoint = { x: number; y: number }
 
 export type LinearGradientProps = Omit<ViewProps, 'children'> & {
-  /** Two or more colors, evenly spaced unless `locations` is provided. */
   colors: readonly string[]
-  /** Gradient start as a fraction of the box. Defaults to the top edge. */
   start?: LinearGradientPoint
-  /** Gradient end as a fraction of the box. Defaults to the bottom edge. */
   end?: LinearGradientPoint
-  /**
-   * Bearing in degrees (0 points up, increasing clockwise). Overrides `start`
-   * and `end`, and measures the box to place the gradient line like a CSS
-   * angle gradient.
-   */
   angle?: number
-  /** Per-color stop positions in [0, 1]; should match `colors` length. */
   locations?: readonly number[]
   style?: StyleProp<ViewStyle>
   children?: ReactNode
 }
 
-// Top to bottom by default.
 const DEFAULT_START: LinearGradientPoint = { x: 0.5, y: 0 }
 const DEFAULT_END: LinearGradientPoint = { x: 0.5, y: 1 }
 
@@ -53,8 +43,6 @@ const BORDER_RADIUS_KEYS = [
   'borderCurve'
 ] as const
 
-// The gradient line passes through the center along the bearing and is long
-// enough that the perpendiculars through opposite corners meet its ends.
 export const getAngleStartEnd = (
   angle: number,
   width: number,
@@ -78,12 +66,6 @@ const styles = StyleSheet.create({
   clip: { overflow: 'hidden' }
 })
 
-/**
- * Linear gradient drawn with react-native-svg. `start` and `end` are fractions
- * of the box (objectBoundingBox units), so no layout measurement is needed
- * unless `angle` is set. The gradient renders behind any children and is
- * clipped to the container's border radii.
- */
 export const LinearGradient = (props: LinearGradientProps) => {
   const {
     colors,
@@ -118,10 +100,8 @@ export const LinearGradient = (props: LinearGradientProps) => {
       ? { start: startProp, end: endProp }
       : getAngleStartEnd(angle, size.width, size.height)
 
-  // useId output is not a valid SVG id, so strip it to safe characters.
   const gradientId = `linear-gradient-${useId().replace(/[^\w-]/g, '')}`
 
-  // Clip the gradient (not the children) to the container's corner radii.
   const clipStyle = useMemo(() => {
     const flat = StyleSheet.flatten(style) ?? {}
     const radii = Object.fromEntries(

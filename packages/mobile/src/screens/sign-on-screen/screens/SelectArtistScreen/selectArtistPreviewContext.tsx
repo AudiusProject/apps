@@ -50,7 +50,6 @@ export const SelectArtistsPreviewContextProvider = (props: {
 
   const { data: artistTracks } = useUserTracksByHandle({
     handle: artistHandle,
-    // We just need one playable track. It's unlikely all 3 of an artist's top tracks are unavailable.
     limit: 3
   })
   useEffect(() => {
@@ -80,7 +79,6 @@ export const SelectArtistsPreviewContextProvider = (props: {
     fn()
   }, [nowPlayingArtistId, currentUserId, artistTracks])
 
-  // Request preview playback
   const playPreview = useCallback(async (artistId: ID) => {
     setHasPlayed(true)
     setNowPlayingArtistId(artistId)
@@ -88,7 +86,6 @@ export const SelectArtistsPreviewContextProvider = (props: {
     TrackPlayer.reset()
   }, [])
 
-  // Initiates preview playback once trackUrl is available
   useAsync(async () => {
     if (!trackUrl) return
     setIsPlaying(true)

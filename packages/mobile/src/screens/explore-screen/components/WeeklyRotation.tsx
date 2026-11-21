@@ -19,15 +19,7 @@ import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
 const ART_SIZE = 96
 
-/**
- * Promotional banner for Weekly Rotation, pinned to the top of Explore.
- *
- * Mirrors the web banner: an entry point rather than a content row, so it
- * navigates to the full mix instead of playing in place. Not wrapped in
- * ExploreSection because it sits above the section stack.
- */
 type WeeklyRotationProps = {
-  /** Surface this renders on; sent with every event. */
   surface?: WeeklyRotationSurface
 }
 
@@ -46,7 +38,6 @@ export const WeeklyRotation = ({
     { enabled: inView && isWeeklyRotationEnabled }
   )
 
-  // The banner always promotes the viewer's own mix.
   const mixProperties = useMemo(
     () => ({
       surface,
@@ -59,7 +50,6 @@ export const WeeklyRotation = ({
     [surface, trackIds.length, currentUserId]
   )
 
-  // Fire the impression once, and only once there's a real mix behind it.
   const hasTrackedView = useRef(false)
   useEffect(() => {
     if (hasTrackedView.current || !inView || !trackIds.length) return
@@ -78,8 +68,6 @@ export const WeeklyRotation = ({
     navigation.navigate('WeeklyRotationScreen')
   }, [navigation, trackEvent, mixProperties])
 
-  // Hidden when flagged off or when there's no mix. Gates both the Explore and
-  // feed placements.
   if (
     !isWeeklyRotationEnabled ||
     isError ||

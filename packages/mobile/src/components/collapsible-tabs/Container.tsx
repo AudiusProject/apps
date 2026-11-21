@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
   withDelay,
   withTiming,
-  useFrameCallback,
+  useFrameCallback
 } from 'react-native-reanimated'
 import { runOnUISync, scheduleOnRN } from 'react-native-worklets'
 
@@ -22,7 +22,7 @@ import {
   useContainerRef,
   usePageScrollHandler,
   useTabProps,
-  useLayoutHeight,
+  useLayoutHeight
 } from './hooks'
 import {
   CollapsibleProps,
@@ -30,31 +30,11 @@ import {
   ContainerRef,
   ContextType,
   IndexChangeEventData,
-  TabName,
+  TabName
 } from './types'
 
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView)
 
-/**
- * Basic usage looks like this:
- *
- * ```tsx
- * import { Tabs } from 'react-native-collapsible-tab-view'
- *
- * const Example = () => {
- *   return (
- *     <Tabs.Container renderHeader={MyHeader}>
- *       <Tabs.Tab name="A">
- *         <ScreenA />
- *       </Tabs.Tab>
- *       <Tabs.Tab name="B">
- *         <ScreenB />
- *       </Tabs.Tab>
- *     </Tabs.Container>
- *   )
- * }
- * ```
- */
 export const Container = React.memo(
   React.forwardRef<CollapsibleRef, CollapsibleProps>(
     (
@@ -77,7 +57,7 @@ export const Container = React.memo(
         onIndexChange,
         onTabChange,
         width: customWidth,
-        allowHeaderOverscroll,
+        allowHeaderOverscroll
       },
       ref
     ) => {
@@ -109,8 +89,6 @@ export const Container = React.memo(
       const contentInset = React.useMemo(() => {
         if (allowHeaderOverscroll) return 0
 
-        // necessary for the refresh control on iOS to be positioned underneath the header
-        // this also adjusts the scroll bars to clamp underneath the header area
         return IS_IOS ? (headerHeight || 0) + (tabBarHeight || 0) : 0
       }, [headerHeight, tabBarHeight, allowHeaderOverscroll])
 
@@ -167,7 +145,6 @@ export const Container = React.memo(
         }
       }
 
-      // the purpose of this is to scroll to the proper position if dynamic tabs are changing
       useAnimatedReaction(
         () => {
           return afterRender.value === 1
@@ -181,11 +158,6 @@ export const Container = React.memo(
         [tabNamesArray, refMap, afterRender, contentInset]
       )
 
-      // derived from scrollX
-      // calculate the next offset and index if swiping
-      // if scrollX changes from tab press,
-      // the same logic must be done, but knowing
-      // the next index in advance
       useAnimatedReaction(
         () => {
           const nextIndex = Math.round(indexDecimal.value)
@@ -219,12 +191,6 @@ export const Container = React.memo(
         )
       }
 
-      /*
-       * We run syncCurrentTabScrollPosition in every frame after the index
-       * changes for about 1500ms because the Lists can be late to accept the
-       * scrollTo event we send. This fixes the issue of the scroll position
-       * jumping when the user changes tab.
-       * */
       const toggleSyncScrollFrame = (toggle: boolean) =>
         syncScrollFrame.setActive(toggle)
       const syncScrollFrame = useFrameCallback(({ timeSinceFirstFrame }) => {
@@ -249,7 +215,7 @@ export const Container = React.memo(
               prevIndex: index.value,
               index: i,
               prevTabName: tabNames.value[index.value],
-              tabName: tabNames.value[i],
+              tabName: tabNames.value[i]
             })
             index.value = i
             if (
@@ -268,7 +234,6 @@ export const Container = React.memo(
         () => headerHeight,
         (_current, prev) => {
           if (prev === undefined) {
-            // sync scroll if we started with undefined header height
             resyncTabScroll()
           }
         }
@@ -284,9 +249,9 @@ export const Container = React.memo(
         return {
           transform: [
             {
-              translateY: headerTranslateY.value,
-            },
-          ],
+              translateY: headerTranslateY.value
+            }
+          ]
         }
       }, [revealHeaderOnScroll])
 
@@ -324,7 +289,7 @@ export const Container = React.memo(
         onPageScroll: (e) => {
           'worklet'
           indexDecimal.value = e.position + e.offset
-        },
+        }
       })
 
       React.useImperativeHandle(
@@ -344,7 +309,7 @@ export const Container = React.memo(
           },
           getCurrentIndex: () => {
             return index.value
-          },
+          }
         }),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [onTabPress]
@@ -377,26 +342,26 @@ export const Container = React.memo(
             contentHeights,
             headerTranslateY,
             width,
-            allowHeaderOverscroll,
+            allowHeaderOverscroll
           }}
         >
           <Animated.View
             style={[styles.container, { width }, containerStyle]}
             onLayout={getContainerLayoutHeight}
-            pointerEvents="box-none"
+            pointerEvents='box-none'
           >
             <Animated.View
-              pointerEvents="box-none"
+              pointerEvents='box-none'
               style={[
                 styles.topContainer,
                 headerContainerStyle,
-                !cancelTranslation && stylez,
+                !cancelTranslation && stylez
               ]}
             >
               <View
                 style={[styles.container, styles.headerContainer]}
                 onLayout={getHeaderHeight}
-                pointerEvents="box-none"
+                pointerEvents='box-none'
               >
                 {renderHeader &&
                   renderHeader({
@@ -406,13 +371,13 @@ export const Container = React.memo(
                     focusedTab,
                     indexDecimal,
                     onTabPress,
-                    tabProps,
+                    tabProps
                   })}
               </View>
               <View
                 style={[styles.container, styles.tabBarContainer]}
                 onLayout={getTabBarHeight}
-                pointerEvents="box-none"
+                pointerEvents='box-none'
               >
                 {renderTabBar &&
                   renderTabBar({
@@ -423,7 +388,7 @@ export const Container = React.memo(
                     indexDecimal,
                     width,
                     onTabPress,
-                    tabProps,
+                    tabProps
                   })}
               </View>
             </Animated.View>
@@ -442,7 +407,6 @@ export const Container = React.memo(
                       <Lazy
                         startMounted={lazy ? undefined : true}
                         cancelLazyFadeIn={!lazy ? true : !!cancelLazyFadeIn}
-                        // ensure that we remount the tab if its name changes but the index doesn't
                         key={tabName}
                       >
                         {
@@ -465,11 +429,11 @@ export const Container = React.memo(
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1
   },
   pageContainer: {
     height: '100%',
-    width: '100%',
+    width: '100%'
   },
   topContainer: {
     position: 'absolute',
@@ -479,16 +443,16 @@ const styles = StyleSheet.create({
     shadowColor: '#000000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
-    elevation: 4,
+    elevation: 4
   },
   tabBarContainer: {
-    zIndex: 1,
+    zIndex: 1
   },
   headerContainer: {
-    zIndex: 2,
-  },
+    zIndex: 2
+  }
 })

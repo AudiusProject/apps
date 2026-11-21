@@ -33,7 +33,6 @@ export const CoinLeaderboardScreen = () => {
     }
 
     return () => {
-      // Clean up when component unmounts
       dispatch(coinLeaderboardUserListActions.setCoinLeaderboard(null))
     }
   }, [dispatch, mint])

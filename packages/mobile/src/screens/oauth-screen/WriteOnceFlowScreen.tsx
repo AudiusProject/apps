@@ -52,7 +52,6 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
     skip: false
   })
 
-  // Verify the wallet is actually connected to some user on mount
   const [walletError, setWalletError] = useState<string | null>(null)
   const [walletChecking, setWalletChecking] = useState(true)
 
@@ -96,7 +95,6 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
     setSubmitError(null)
     try {
       const sdk = await audiusSdk()
-      // Verify this user specifically owns the wallet
       const res = await sdk.dashboardWalletUsers.bulkGetDashboardWalletUsers({
         wallets: [wallet]
       })

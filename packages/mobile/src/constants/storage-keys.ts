@@ -8,9 +8,5 @@ export const THEME_STORAGE_KEY = 'theme'
 export const THEME_PALETTE_KEY = 'themePalette'
 export const THEME_MODE_KEY = 'themeMode'
 export const SEARCH_HISTORY_KEY = '@search-history'
-// Tracks which blast chat threads the user has viewed so the
-// `Chat Blast: Message Viewed` analytics event fires only once per blast.
 export const VIEWED_BLAST_CHATS_KEY = '@viewed-blast-chats'
-// Last device token registered with identity, so startup only re-registers
-// when the token or signed-in user changes.
 export const DEVICE_TOKEN_REGISTRATION_KEY = '@device-token-registration'

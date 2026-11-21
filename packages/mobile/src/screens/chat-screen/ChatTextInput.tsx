@@ -24,7 +24,7 @@ const messages = {
 
 type ChatTextInputProps = {
   chatId: string
-  extraOffset?: number // Additional padding needed if screen header size changes
+  extraOffset?: number
   presetMessage?: string
   onMessageSent: () => void
 }
@@ -38,28 +38,23 @@ export const ChatTextInput = ({
   const dispatch = useDispatch()
   const chat = useProxySelector((state) => getChat(state, chatId), [chatId])
   const [messageId, setMessageId] = useState(0)
-  // The track and collection ids used to render the composer preview
   const [trackId, setTrackId] = useState<Nullable<ID>>(null)
   const [collectionId, setCollectionId] = useState<Nullable<ID>>(null)
   const ref = useRef<RNTextInput>(null)
 
-  const handleChange = useCallback(
-    // (value: string, linkEntities: LinkEntity[]) => {
-    (value: string, linkEntities: any[]) => {
-      const track = linkEntities.find((e) => e.type === 'track')
-      setTrackId(
-        track ? (OptionalHashId.parse(track.data.id as string) ?? null) : null
-      )
+  const handleChange = useCallback((value: string, linkEntities: any[]) => {
+    const track = linkEntities.find((e) => e.type === 'track')
+    setTrackId(
+      track ? (OptionalHashId.parse(track.data.id as string) ?? null) : null
+    )
 
-      const collection = linkEntities.find((e) => e.type === 'collection')
-      setCollectionId(
-        collection
-          ? (OptionalHashId.parse(collection.data.id as string) ?? null)
-          : null
-      )
-    },
-    []
-  )
+    const collection = linkEntities.find((e) => e.type === 'collection')
+    setCollectionId(
+      collection
+        ? (OptionalHashId.parse(collection.data.id as string) ?? null)
+        : null
+    )
+  }, [])
 
   const handleSubmit = useCallback(
     async (value: string) => {
@@ -75,9 +70,6 @@ export const ChatTextInput = ({
     [chatId, dispatch, onMessageSent, chat?.audience]
   )
 
-  // For iOS: default padding + extra padding
-  // For Android: extra padding is slightly larger than iOS, and only
-  // needed if the screen header size changes
   const offset =
     Platform.OS === 'ios'
       ? spacing(1.5) + extraOffset

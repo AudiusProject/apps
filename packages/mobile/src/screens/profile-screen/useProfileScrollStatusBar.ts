@@ -10,12 +10,6 @@ import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { PROFILE_NAV_SCROLL_FADE_PX } from './ProfileNavOverlay'
 
-/**
- * Status bar / nav bar style for profile: light icons over the cover at the
- * top, then switch to icons that contrast with the blurred nav bar surface
- * once the header has scrolled up — dark icons on the light-blur surface in
- * light mode, light icons on the dark-blur surface in dark mode.
- */
 export const useProfileScrollStatusBar = (scrollY: SharedValue<number>) => {
   const statusBarEntryRef = useRef<StatusBarProps | null>(null)
   const navigationBarEntryRef = useRef<StatusBarProps | null>(null)
@@ -56,7 +50,6 @@ export const useProfileScrollStatusBar = (scrollY: SharedValue<number>) => {
         barStyle: 'light-content'
       })
 
-      // Align with restored scroll position (reaction only fires on change).
       requestAnimationFrame(() => {
         const barStyle =
           scrollY.value < PROFILE_NAV_SCROLL_FADE_PX
@@ -93,9 +86,6 @@ export const useProfileScrollStatusBar = (scrollY: SharedValue<number>) => {
     [applyBarStyle, scrolledBarStyle]
   )
 
-  // Re-apply when the theme changes while the screen is already scrolled —
-  // otherwise the status bar stays on the previous mode's content style
-  // until the user scrolls across the fade threshold again.
   useEffect(() => {
     if (scrollY.value < PROFILE_NAV_SCROLL_FADE_PX) return
     applyBarStyle(scrolledBarStyle)

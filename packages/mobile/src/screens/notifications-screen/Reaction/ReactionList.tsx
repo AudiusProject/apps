@@ -45,13 +45,6 @@ const initialPositions = {
 
 type Positions = { [k in ReactionTypes]: { x: number; width: number } }
 
-/*
- * List of reactions that allows a user to select a reaction by pressing,
- * or pressHolding + dragging.
- *
- * Implements gesture handler to track user drag position and presses, providing
- * each reaction one of the following statuses: idle/interacting/selected/unselected
- */
 export const ReactionList = (props: ReactionListProps) => {
   const {
     selectedReaction,
@@ -61,11 +54,8 @@ export const ReactionList = (props: ReactionListProps) => {
     style: styleProp
   } = props
   const styles = useStyles()
-  // The current reaction the user is interacting with.
-  // Note this needs to be a ref since the guesture handler is also a ref
   const interactingReactionRef = useRef<ReactionTypes | null>(null)
   const { setGesturesDisabled } = useContext(AppDrawerContext)
-  // Whether or not the user is currently interacting with the reactions
   const [interacting, setInteracting] = useState<ReactionTypes | null>(null)
   const positions = useRef<Positions>(initialPositions)
   const xOffset = useRef(0)
@@ -79,8 +69,6 @@ export const ReactionList = (props: ReactionListProps) => {
         positions.current
       ) as PositionEntries
 
-      // Based on the current x0 and moveX, determine which reaction the user
-      // is interacting with. Offset by the distance from the left edge of screen.
       const currentReaction = positionEntries.find(([, { x, width }]) => {
         const currentPosition = (moveX || x0) - xOffset.current
         return currentPosition > x && currentPosition <= x + width

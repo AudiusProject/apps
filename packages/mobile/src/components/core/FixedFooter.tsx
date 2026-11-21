@@ -16,20 +16,8 @@ type FixedFooterProps = {
   keyboardShowingOffset?: number
 }
 
-/**
- * The default height calculation for the fixed footer
- * Formula: button height (48) + footer padding (2*spacing.l) + extra padding (spacing.xl)
- */
 export const FIXED_FOOTER_HEIGHT = 48 + spacing.l * 2 + spacing.xl
 
-/**
- * A fixed footer component that sticks to the bottom of the screen.
- * Clears floating app navigation, safe area insets and optionally the keyboard.
- * Based on the PageFooter pattern from sign-on screens.
- *
- * Use FixedFooterContent around the main content to reserve space for the
- * footer and any floating app navigation.
- */
 export const FixedFooter = ({
   children,
   avoidKeyboard = false,
@@ -74,9 +62,6 @@ export const FixedFooter = ({
   )
 }
 
-/**
- * Helper component that wraps content with appropriate padding for FixedFooter
- */
 export const FixedFooterContent = ({
   children,
   ...props

@@ -35,10 +35,8 @@ export const TooltipInfoIcon = ({
   const insets = useSafeAreaInsets()
   const { color: themeColor } = useTheme()
 
-  // Create a ref for the bottom sheet modal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
 
-  // Function to handle opening the bottom sheet
   const handleOpenInfoModal = useCallback(() => {
     bottomSheetModalRef.current?.present()
   }, [])

@@ -31,14 +31,7 @@ const {
 const { fetchMoreMessages, fetchLatestChats, fetchMoreChats } = chatActions
 
 const CHATS_MESSAGES_PREFETCH_LIMIT = 10
-/**
- * Chats are paginated by recency across all categories, so a tab can be
- * empty while older pages still hold chats that belong in it. Keep fetching
- * until the tab has at least this many rows or there is nothing left.
- */
 const MIN_VISIBLE_CHATS_PER_TAB = 10
-// Stop backfilling after this many pages per tab visit, so a mostly empty tab
-// doesn't page through the whole chat history.
 const MAX_BACKFILL_PAGES = 5
 const MVCP_DISABLED = { disabled: true }
 
@@ -154,8 +147,6 @@ const ChatListScreenContent = () => {
   const hasMore = useSelector(getHasMoreChats)
   const hasAnyChats = chats.length > 0
 
-  // If this is the first fetch, we want to show the fade-out loading skeleton
-  // On subsequent loads, we want to show a skeleton in each incoming chat row.
   const isLoadingFirstTime =
     chats.length === 0 && (chatsStatus ?? Status.LOADING) === Status.LOADING
   const navigateToChatUserList = () => navigation.navigate('ChatUserList')
@@ -174,7 +165,6 @@ const ChatListScreenContent = () => {
     dispatch(fetchLatestChats())
   }, [dispatch])
 
-  // Backfill the current tab from older pages when it is nearly empty
   const [backfillPages, setBackfillPages] = useState(0)
   useEffect(() => {
     setBackfillPages(0)
@@ -191,7 +181,6 @@ const ChatListScreenContent = () => {
     }
   }, [chatsStatus, needsBackfill, dispatch])
 
-  // Prefetch messages for initial loaded chats
   useEffect(() => {
     if (
       chats.length > 0 &&
@@ -253,7 +242,6 @@ const ChatListScreenContent = () => {
                     hasMore &&
                     chatsStatus !== Status.ERROR &&
                     !isBackfillExhausted ? (
-                      // Still backfilling this tab from older pages
                       <>
                         <ChatListItemSkeleton index={0} shouldFade />
                         <ChatListItemSkeleton index={1} shouldFade />
@@ -266,7 +254,6 @@ const ChatListScreenContent = () => {
                   }
                   onEndReached={handleLoadMore}
                   onEndReachedThreshold={0.7}
-                  // Chats with new messages move to the top; keep them in view.
                   maintainVisibleContentPosition={MVCP_DISABLED}
                 />
               </View>
@@ -278,7 +265,6 @@ const ChatListScreenContent = () => {
   )
 }
 
-// DMs act as the signed-in wallet, so they're off while managing an account
 export const ChatListScreen = withManagedAccountRestriction(
   ChatListScreenContent
 )
