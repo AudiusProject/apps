@@ -1,5 +1,12 @@
 # @audius/sp-actions
 
+## 1.0.35
+
+### Patch Changes
+
+- 687cd53: Default `--web3-provider` to `https://eth-client.audius.co`. The previous default Alchemy key has been deactivated.
+  - @audius/sdk-legacy@6.0.31
+
 ## 1.0.34
 
 ### Patch Changes
