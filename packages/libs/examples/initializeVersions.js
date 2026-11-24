@@ -2,8 +2,7 @@ const Web3 = require('../src/LibsWeb3')
 const AudiusLibs = require('../src/index')
 const serviceTypeList = ['discovery-node', 'content-node']
 const dataWeb3ProviderEndpoint = 'https://sokol.poa.network:443'
-const ethWeb3ProviderEndpoint =
-  'https://ropsten.infura.io/v3/c569c6faf4f14d15a49d0044e7ddd668'
+const ethWeb3ProviderEndpoint = process.env.ETH_WEB3_PROVIDER_ENDPOINT
 const dataRegistryAddress = '0x09033761774Fe45F40A47191DdF873F18B62DE05'
 const ethRegistryAddress = '0xB631ABAA63a26311366411b2025F0cAca00DE27F'
 const ethTokenAddress = '0xF8e679Aa54361467B12c7394BFF57Eb890f6d934'
