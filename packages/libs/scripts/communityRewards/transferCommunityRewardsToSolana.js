@@ -27,7 +27,8 @@ setDefaultWasm('node')
 
 const ETH_PROVIDER = process.env.ethProvider
 const SOLANA_CLUSTER_ENDPOINT =
-  'https://solana-mainnet.g.alchemy.com/v2/LC5JMm2frfCssi_lVc5Fip_wrEy4B3fP'
+  process.env.solanaClusterEndpoint ||
+  'https://carolina-8qh733-fast-mainnet.helius-rpc.com'
 const ETH_BRIDGE_ADDRESS = '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B'
 const SOL_BRIDGE_ADDRESS = 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth'
 const ETH_TOKEN_BRIDGE_ADDRESS = '0x3ee18B2214AFF97000D974cf647E7C347E8fa585'

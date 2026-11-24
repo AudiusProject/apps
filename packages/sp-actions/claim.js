@@ -9,8 +9,7 @@ const { AudiusLibs } = require('@audius/sdk-legacy/dist/libs')
 
 const defaultRegistryAddress = '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C'
 const defaultTokenAddress = '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998'
-const defaultWeb3Provider =
-  'https://eth-mainnet.g.alchemy.com/v2/4hFRA61i6OFXz2UmkyFsSvgXBQBBOGgW'
+const defaultWeb3Provider = 'https://eth-client.audius.co'
 
 async function configureLibs(
   ethRegistryAddress,
