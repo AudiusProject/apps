@@ -1,0 +1,69 @@
+diff --git a/node_modules/zod-to-json-schema/dist/cjs/parsers/array.js b/node_modules/zod-to-json-schema/dist/cjs/parsers/array.js
+index 4f7a3db..d8ca469 100644
+--- a/node_modules/zod-to-json-schema/dist/cjs/parsers/array.js
++++ b/node_modules/zod-to-json-schema/dist/cjs/parsers/array.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.parseArrayDef = void 0;
+-const v3_1 = require("zod/v3");
++const v3_1 = require("zod");
+ const errorMessages_js_1 = require("../errorMessages.js");
+ const parseDef_js_1 = require("../parseDef.js");
+ function parseArrayDef(def, refs) {
+diff --git a/node_modules/zod-to-json-schema/dist/cjs/parsers/record.js b/node_modules/zod-to-json-schema/dist/cjs/parsers/record.js
+index 197f78f..6acd35e 100644
+--- a/node_modules/zod-to-json-schema/dist/cjs/parsers/record.js
++++ b/node_modules/zod-to-json-schema/dist/cjs/parsers/record.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.parseRecordDef = void 0;
+-const v3_1 = require("zod/v3");
++const v3_1 = require("zod");
+ const parseDef_js_1 = require("../parseDef.js");
+ const string_js_1 = require("./string.js");
+ const branded_js_1 = require("./branded.js");
+diff --git a/node_modules/zod-to-json-schema/dist/cjs/selectParser.js b/node_modules/zod-to-json-schema/dist/cjs/selectParser.js
+index fbe18d9..0f7606b 100644
+--- a/node_modules/zod-to-json-schema/dist/cjs/selectParser.js
++++ b/node_modules/zod-to-json-schema/dist/cjs/selectParser.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.selectParser = void 0;
+-const v3_1 = require("zod/v3");
++const v3_1 = require("zod");
+ const any_js_1 = require("./parsers/any.js");
+ const array_js_1 = require("./parsers/array.js");
+ const bigint_js_1 = require("./parsers/bigint.js");
+diff --git a/node_modules/zod-to-json-schema/dist/esm/parsers/array.js b/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
+index 6f275ad..16bdd24 100644
+--- a/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
++++ b/node_modules/zod-to-json-schema/dist/esm/parsers/array.js
+@@ -1,4 +1,4 @@
+-import { ZodFirstPartyTypeKind } from "zod/v3";
++import { ZodFirstPartyTypeKind } from "zod";
+ import { setResponseValueAndErrors } from "../errorMessages.js";
+ import { parseDef } from "../parseDef.js";
+ export function parseArrayDef(def, refs) {
+diff --git a/node_modules/zod-to-json-schema/dist/esm/parsers/record.js b/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
+index dd75a92..8502ac7 100644
+--- a/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
++++ b/node_modules/zod-to-json-schema/dist/esm/parsers/record.js
+@@ -1,4 +1,4 @@
+-import { ZodFirstPartyTypeKind, } from "zod/v3";
++import { ZodFirstPartyTypeKind, } from "zod";
+ import { parseDef } from "../parseDef.js";
+ import { parseStringDef } from "./string.js";
+ import { parseBrandedDef } from "./branded.js";
+diff --git a/node_modules/zod-to-json-schema/dist/esm/selectParser.js b/node_modules/zod-to-json-schema/dist/esm/selectParser.js
+index c4a05bb..890567d 100644
+--- a/node_modules/zod-to-json-schema/dist/esm/selectParser.js
++++ b/node_modules/zod-to-json-schema/dist/esm/selectParser.js
+@@ -1,4 +1,4 @@
+-import { ZodFirstPartyTypeKind } from "zod/v3";
++import { ZodFirstPartyTypeKind } from "zod";
+ import { parseAnyDef } from "./parsers/any.js";
+ import { parseArrayDef } from "./parsers/array.js";
+ import { parseBigintDef } from "./parsers/bigint.js";
