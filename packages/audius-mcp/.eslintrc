@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "extends": "audius",
+  "rules": {
+    "no-console": "off",
+    "import/no-unresolved": [
+      "error",
+      { "ignore": ["^@modelcontextprotocol/sdk/"] }
+    ]
+  }
+}

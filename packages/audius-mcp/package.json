@@ -1,0 +1,38 @@
+{
+  "name": "@audius/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Remote MCP server that lets Claude act for an Audius user, as a listener and as an artist.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env dist/index.js",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ./src",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "npm run lint && npm run typecheck"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AudiusProject/apps.git",
+    "directory": "packages/audius-mcp"
+  },
+  "author": "Audius",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@audius/sdk": "*",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.25",
+    "@types/node": "22.10.0",
+    "tsx": "^4.18.0",
+    "typescript": "5.4.5",
+    "vitest": "3.2.4"
+  }
+}

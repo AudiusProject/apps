@@ -1,0 +1,89 @@
+name: MCP CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/audius-mcp/**'
+      - 'packages/sdk/**'
+      - 'patches/zod-to-json-schema*.patch'
+      - 'package-lock.json'
+      - '.github/workflows/mcp.yml'
+  pull_request:
+    paths:
+      - 'packages/audius-mcp/**'
+      - 'packages/sdk/**'
+      - 'patches/zod-to-json-schema*.patch'
+      - 'package-lock.json'
+      - '.github/workflows/mcp.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: mcp-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24.10.0'
+
+jobs:
+  mcp-ci:
+    name: MCP CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- patches/*.patch packages/*/patches/*.patch packages/mobile/workspace-patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/audius-mcp/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-mcp-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mcp-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npm ci --prefer-offline
+
+      - name: Cache for Turbo
+        uses: rharkor/caching-for-turbo@v2.2.1
+
+      - name: Lint
+        run: npx turbo run lint --filter=@audius/mcp
+
+      - name: Typecheck
+        run: npx turbo run typecheck --filter=@audius/mcp
+
+      - name: Run tests
+        timeout-minutes: 10
+        run: npx turbo run test --filter=@audius/mcp
+
+      - name: Build
+        run: npx turbo run build --filter=@audius/mcp

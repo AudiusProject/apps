@@ -26,10 +26,28 @@ describe('addTokenRefreshMiddleware', () => {
     vi.restoreAllMocks()
   })
 
-  it('passes through non-401 responses unchanged', async () => {
+  it('leaves non-401 responses to the caller and releases its clone', async () => {
     const oauth = createMockOAuth(async () => 'token')
     const mw = addTokenRefreshMiddleware({ oauth })
-    const response = mockResponse(200, { data: 'ok' })
+    const original = mockResponse(200, { data: 'ok' })
+    const clone = original.clone()
+
+    const result = await mw.post!({
+      fetch,
+      url: 'https://api.example.com/v1/users/me',
+      init: {},
+      response: clone
+    })
+
+    expect(result).toBeUndefined()
+    expect(await original.json()).toEqual({ data: 'ok' })
+  })
+
+  it('destroys the clone of a node-fetch style response', async () => {
+    const oauth = createMockOAuth(async () => 'token')
+    const mw = addTokenRefreshMiddleware({ oauth })
+    const destroy = vi.fn()
+    const response = { status: 200, body: { destroy } } as unknown as Response
 
     const result = await mw.post!({
       fetch,
@@ -38,7 +56,8 @@ describe('addTokenRefreshMiddleware', () => {
       response
     })
 
-    expect(result).toBe(response)
+    expect(result).toBeUndefined()
+    expect(destroy).toHaveBeenCalledOnce()
   })
 
   it('passes through 401 without calling refreshAccessToken when unauthenticated', async () => {
