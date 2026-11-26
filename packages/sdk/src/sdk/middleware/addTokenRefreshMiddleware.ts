@@ -2,6 +2,21 @@ import type { Middleware, ResponseContext } from '../api/generated/default'
 import type { OAuth } from '../oauth/OAuth'
 import fetch from '../utils/fetch'
 
+type DiscardableBody = {
+  destroy?: () => void
+  cancel?: () => Promise<void>
+}
+
+const discardBody = (response: Response) => {
+  const body = response.body as DiscardableBody | null
+  if (!body) return
+  if (typeof body.destroy === 'function') {
+    body.destroy()
+  } else if (typeof body.cancel === 'function') {
+    body.cancel().catch(() => {})
+  }
+}
+
 /**
  * Middleware that transparently refreshes an expired access token on 401.
  *
@@ -23,7 +38,8 @@ export const addTokenRefreshMiddleware = ({
   return {
     post: async (context: ResponseContext): Promise<Response | void> => {
       if (context.response.status !== 401) {
-        return context.response
+        discardBody(context.response)
+        return undefined
       }
 
       if (!(await oauth.hasRefreshToken())) {

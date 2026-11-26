@@ -243,6 +243,14 @@ export const registerArtistTools = (tool: RegisterTool) => {
       if (changed.length === 0) {
         throw new Error('Provide at least one field to update')
       }
+      const { data: track } = await sdk.tracks.getTrack({
+        trackId: track_id,
+        userId
+      })
+      if (!track) throw new Error(`Track ${track_id} was not found`)
+      if (track.user.id !== userId) {
+        throw new Error('You can only change tracks that you own')
+      }
       await sdk.tracks.updateTrack({ trackId: track_id, userId, metadata })
       return { track_id, updated_fields: changed }
     }

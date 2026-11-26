@@ -223,9 +223,12 @@ export const registerListenerTools = (tool: RegisterTool) => {
       annotations: READ_ONLY
     },
     async ({ limit, offset }, { sdk, userId }) => {
-      const { data } = await sdk.users.getUserFavoriteTracks({
+      const { data } = await sdk.users.getUserLibraryTracks({
         id: userId,
         userId,
+        type: 'favorite',
+        sortMethod: 'added_date',
+        sortDirection: 'desc',
         limit,
         offset
       })

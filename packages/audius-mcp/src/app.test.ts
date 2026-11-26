@@ -12,7 +12,8 @@ import {
   submitConsent,
   track,
   type TestServer,
-  type Tokens
+  type Tokens,
+  user
 } from './test/harness.js'
 
 const READ_ONLY_TOOLS = [
@@ -465,6 +466,18 @@ describe('audius mcp server', () => {
         arguments: { track_id: 't1' }
       })
       expect(empty.isError).toBe(true)
+
+      sdk.tracks.updateTrack.mockClear()
+      sdk.tracks.getTrack.mockResolvedValueOnce({
+        data: { ...track('t9', 'Theirs'), user: user('someone-else', 'them') }
+      })
+      const notMine = await client.callTool({
+        name: 'update_track_metadata',
+        arguments: { track_id: 't9', title: 'Hijacked' }
+      })
+      expect(notMine.isError).toBe(true)
+      expect(textOf(notMine)).toContain('tracks that you own')
+      expect(sdk.tracks.updateTrack).not.toHaveBeenCalled()
       await client.close()
     })
 

@@ -13,7 +13,7 @@ import type { Config } from '../config.js'
 
 export const CLIENT_REDIRECT = 'https://client.example/oauth/callback'
 
-const user = (id: string, handle: string) => ({
+export const user = (id: string, handle: string) => ({
   id,
   handle,
   name: handle,
@@ -75,7 +75,9 @@ export const createFakeSdk = (userId: string) => {
     tracks: {
       searchTracks: vi.fn(async () => ({ data: [track('t1', 'One')] })),
       getTrendingTracks: vi.fn(async () => ({ data: [track('t2', 'Two')] })),
-      getTrack: vi.fn(async () => ({ data: track('t1', 'One') })),
+      getTrack: vi.fn(async () => ({
+        data: { ...track('t1', 'One'), user: user(userId, 'me') }
+      })),
       favoriteTrack: vi.fn(async () => ({})),
       repostTrack: vi.fn(async () => ({})),
       updateTrack: vi.fn(async () => ({})),
@@ -89,7 +91,7 @@ export const createFakeSdk = (userId: string) => {
       searchUsers: vi.fn(async () => ({ data: [user('u9', 'someone')] })),
       getUser: vi.fn(async () => ({ data: user('u9', 'someone') })),
       getUserByHandle: vi.fn(async () => ({ data: user('u9', 'someone') })),
-      getUserFavoriteTracks: vi.fn(async () => ({
+      getUserLibraryTracks: vi.fn(async () => ({
         data: [{ timestamp: '2026-01-01', item: track('t1', 'One') }]
       })),
       getReposts: vi.fn(async () => ({

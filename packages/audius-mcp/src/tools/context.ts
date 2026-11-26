@@ -48,8 +48,12 @@ export const pagination = {
 }
 
 const describeError = async (error: unknown) => {
-  const response = (error as { response?: unknown } | null)?.response
-  if (response instanceof Response) {
+  const response = (error as { response?: Response } | null)?.response
+  if (
+    response &&
+    typeof response.status === 'number' &&
+    typeof response.clone === 'function'
+  ) {
     const body = await response
       .clone()
       .text()
@@ -101,9 +105,11 @@ export const createToolRegistrar =
           ]
         }
       } catch (error) {
+        const text = await describeError(error)
+        console.error(`[audius-mcp] ${name} failed: ${text}`)
         return {
           isError: true,
-          content: [{ type: 'text' as const, text: await describeError(error) }]
+          content: [{ type: 'text' as const, text }]
         }
       }
     }
