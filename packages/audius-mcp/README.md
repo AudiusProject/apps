@@ -18,7 +18,7 @@ A remote [Model Context Protocol](https://modelcontextprotocol.io) server that l
 | `get_my_tracks` | The signed-in user's uploads | read-only |
 | `get_track_play_count` | Plays, favorites, reposts and comments for a track | read-only |
 | `get_my_followers` | The signed-in user's followers | read-only |
-| `get_top_fans` | Top supporters, ranked by $AUDIO tipped | read-only |
+| `get_top_fans` | Top listeners, ranked by plays of your tracks (optionally one track) | read-only |
 | `create_playlist` | Create a playlist | write |
 | `add_track_to_playlist` | Append a track to an owned playlist | write |
 | `favorite_track` | Favorite a track | write |
@@ -106,7 +106,7 @@ Submit at [claude.ai/directory/manage](https://claude.ai/directory/manage) → S
 | Server name | Audius |
 | URL | `https://<production host>/mcp` |
 | One-liner | Search Audius, manage your library and playlists, and manage your own tracks. |
-| Description | Lets Claude act for an Audius user. Listeners can search tracks, artists and playlists, browse trending, review favorites and reposts, favorite and repost tracks, and build playlists. Artists can review their uploads, stats, followers and top supporters, edit track details, and upload new tracks. |
+| Description | Lets Claude act for an Audius user. Listeners can search tracks, artists and playlists, browse trending, review favorites and reposts, favorite and repost tracks, and build playlists. Artists can review their uploads, stats, followers and top listeners, edit track details, and upload new tracks. |
 | Categories | Music / entertainment |
 | Transport | Streamable HTTP |
 | Auth type | OAuth 2.1, authorization code with PKCE (S256), dynamic client registration, rotating refresh tokens |

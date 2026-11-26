@@ -25,7 +25,7 @@ const user = (id: string, handle: string) => ({
   albumCount: 0
 })
 
-const track = (id: string, title: string) => ({
+export const track = (id: string, title: string) => ({
   id,
   title,
   user: user('artist1', 'artist'),
@@ -38,6 +38,19 @@ const track = (id: string, title: string) => ({
   isUnlisted: false,
   isStreamGated: false,
   permalink: `/artist/${id}`
+})
+
+export const listenersResponse = (
+  listeners: Array<{ id: string; handle: string; count: number }>
+) => ({
+  raw: {
+    json: async () => ({
+      data: listeners.map(({ id, handle, count }) => ({
+        count,
+        user: { id, handle, name: handle, is_verified: false }
+      }))
+    })
+  }
 })
 
 export const createFakeSdk = (userId: string) => {
@@ -66,7 +79,11 @@ export const createFakeSdk = (userId: string) => {
       favoriteTrack: vi.fn(async () => ({})),
       repostTrack: vi.fn(async () => ({})),
       updateTrack: vi.fn(async () => ({})),
-      createTrack: vi.fn(async () => ({ trackId: 'new1' }))
+      createTrack: vi.fn(async () => ({ trackId: 'new1' })),
+      getTrackTopListenersRaw: vi.fn(
+        async (_params: { trackId: string; limit: number; offset: number }) =>
+          listenersResponse([])
+      )
     },
     users: {
       searchUsers: vi.fn(async () => ({ data: [user('u9', 'someone')] })),
@@ -86,10 +103,7 @@ export const createFakeSdk = (userId: string) => {
         ]
       })),
       getTracksByUser: vi.fn(async () => ({ data: [track('t1', 'One')] })),
-      getFollowers: vi.fn(async () => ({ data: [user('u9', 'someone')] })),
-      getSupporters: vi.fn(async () => ({
-        data: [{ rank: 1, amount: '1000', sender: user('u9', 'someone') }]
-      }))
+      getFollowers: vi.fn(async () => ({ data: [user('u9', 'someone')] }))
     },
     playlists: {
       searchPlaylists: vi.fn(async () => ({ data: [playlist] })),

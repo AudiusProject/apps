@@ -5,10 +5,12 @@ import {
   beginAuthorization,
   connectMcpClient,
   exchangeToken,
+  listenersResponse,
   registerClient,
   signIn,
   startTestServer,
   submitConsent,
+  track,
   type TestServer,
   type Tokens
 } from './test/harness.js'
@@ -463,6 +465,71 @@ describe('audius mcp server', () => {
         arguments: { track_id: 't1' }
       })
       expect(empty.isError).toBe(true)
+      await client.close()
+    })
+
+    it('ranks top fans by plays totalled across the artist tracks', async () => {
+      const { tokens } = await signIn(server.baseUrl)
+      const { client } = await connectMcpClient(
+        server.baseUrl,
+        tokens.access_token
+      )
+      const { sdk } = server.sessions[0]!
+      sdk.users.getTracksByUser.mockResolvedValueOnce({
+        data: [track('t1', 'One'), track('t2', 'Two')]
+      })
+      sdk.tracks.getTrackTopListenersRaw.mockImplementation(
+        async ({ trackId }) =>
+          listenersResponse(
+            trackId === 't1'
+              ? [
+                  { id: 'a', handle: 'ann', count: 5 },
+                  { id: 'b', handle: 'bo', count: 4 },
+                  { id: 'user0', handle: 'me', count: 99 }
+                ]
+              : [{ id: 'b', handle: 'bo', count: 3 }]
+          )
+      )
+
+      const all = JSON.parse(
+        textOf(await client.callTool({ name: 'get_top_fans', arguments: {} }))
+      )
+      expect(all.tracks_considered).toBe(2)
+      expect(all.top_fans).toEqual([
+        {
+          rank: 1,
+          play_count: 7,
+          tracks_played: 2,
+          user: { id: 'b', handle: 'bo', name: 'bo', is_verified: false }
+        },
+        {
+          rank: 2,
+          play_count: 5,
+          tracks_played: 1,
+          user: { id: 'a', handle: 'ann', name: 'ann', is_verified: false }
+        }
+      ])
+
+      const single = JSON.parse(
+        textOf(
+          await client.callTool({
+            name: 'get_top_fans',
+            arguments: { track_id: 't2', limit: 5 }
+          })
+        )
+      )
+      expect(sdk.tracks.getTrackTopListenersRaw).toHaveBeenLastCalledWith({
+        trackId: 't2',
+        limit: 5,
+        offset: 0
+      })
+      expect(single.top_fans).toEqual([
+        {
+          rank: 1,
+          play_count: 3,
+          user: { id: 'b', handle: 'bo', name: 'bo', is_verified: false }
+        }
+      ])
       await client.close()
     })
 

@@ -1,4 +1,4 @@
-import { Mood } from '@audius/sdk'
+import { Mood, type AudiusSdk } from '@audius/sdk'
 import { z } from 'zod'
 
 import {
@@ -8,12 +8,7 @@ import {
   pagination,
   type RegisterTool
 } from './context.js'
-import {
-  formatTrack,
-  formatTrackStats,
-  formatUser,
-  formatUserRef
-} from './format.js'
+import { formatTrack, formatTrackStats, formatUser } from './format.js'
 import { fetchRemoteFile } from './remoteFile.js'
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -44,6 +39,54 @@ const tags = z
   )
   .max(10)
   .describe('Up to 10 tags')
+
+const TOP_FANS_TRACK_SAMPLE = 25
+const TOP_FANS_LISTENERS_PER_TRACK = 100
+
+type RawListener = {
+  count?: number
+  user?: {
+    id?: string
+    handle?: string
+    name?: string
+    is_verified?: boolean
+  }
+}
+
+type ListenerRef = {
+  id: string
+  handle: string | undefined
+  name: string | undefined
+  is_verified: boolean | undefined
+}
+
+const formatListener = (user: RawListener['user']): ListenerRef | undefined =>
+  user?.id
+    ? {
+        id: user.id,
+        handle: user.handle,
+        name: user.name,
+        is_verified: user.is_verified
+      }
+    : undefined
+
+const fetchTopListeners = async (
+  sdk: AudiusSdk,
+  trackId: string,
+  limit: number,
+  offset: number
+) => {
+  const response = await sdk.tracks.getTrackTopListenersRaw({
+    trackId,
+    limit,
+    offset
+  })
+  const body = (await response.raw.json()) as { data?: RawListener[] }
+  return (body.data ?? []).map((listener) => ({
+    count: listener.count ?? 0,
+    user: listener.user
+  }))
+}
 
 export const registerArtistTools = (tool: RegisterTool) => {
   tool(
@@ -113,23 +156,62 @@ export const registerArtistTools = (tool: RegisterTool) => {
     {
       title: 'Get top fans',
       description:
-        "List the signed-in user's top supporters, ranked by how much $AUDIO they have tipped.",
-      inputSchema: { ...pagination },
+        "List the signed-in user's top listeners, ranked by how many times they have played the user's tracks. Pass track_id to rank listeners of one track; otherwise plays are totalled across the user's most-played tracks.",
+      inputSchema: {
+        track_id: trackId
+          .optional()
+          .describe('Limit the ranking to listeners of this track'),
+        ...pagination
+      },
       annotations: READ_ONLY
     },
-    async ({ limit, offset }, { sdk, userId }) => {
-      const { data } = await sdk.users.getSupporters({
+    async ({ track_id, limit, offset }, { sdk, userId }) => {
+      if (track_id) {
+        const listeners = await fetchTopListeners(sdk, track_id, limit, offset)
+        return {
+          top_fans: listeners.map((listener, index) => ({
+            rank: offset + index + 1,
+            play_count: listener.count,
+            user: formatListener(listener.user)
+          }))
+        }
+      }
+      const { data: tracks } = await sdk.users.getTracksByUser({
         id: userId,
         userId,
-        limit,
-        offset
+        sort: 'plays',
+        limit: TOP_FANS_TRACK_SAMPLE
       })
+      const perTrack = await Promise.all(
+        (tracks ?? []).map((track) =>
+          fetchTopListeners(sdk, track.id, TOP_FANS_LISTENERS_PER_TRACK, 0)
+        )
+      )
+      const totals = new Map<
+        string,
+        { play_count: number; tracks_played: number; user: ListenerRef }
+      >()
+      for (const listener of perTrack.flat()) {
+        const user = formatListener(listener.user)
+        if (!user || user.id === userId) continue
+        const entry = totals.get(user.id) ?? {
+          play_count: 0,
+          tracks_played: 0,
+          user
+        }
+        entry.play_count += listener.count
+        entry.tracks_played += 1
+        totals.set(user.id, entry)
+      }
+      const ranked = [...totals.values()].sort(
+        (a, b) =>
+          b.play_count - a.play_count || b.tracks_played - a.tracks_played
+      )
       return {
-        top_fans: (data ?? []).map((supporter) => ({
-          rank: supporter.rank,
-          amount_tipped_wei: supporter.amount,
-          user: formatUserRef(supporter.sender)
-        }))
+        tracks_considered: tracks?.length ?? 0,
+        top_fans: ranked
+          .slice(offset, offset + limit)
+          .map((entry, index) => ({ rank: offset + index + 1, ...entry }))
       }
     }
   )
