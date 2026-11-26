@@ -4,19 +4,19 @@ const dotenv = require('dotenv')
 require('dotenv').config()
 
 if (process.argv.length < 3) {
-  console.error('Usage: node configureEnv.cjs <stage|prod|dev>')
+  console.error('Usage: node configureEnv.cjs <prod|dev>')
   process.exit(1)
 }
 const env = process.argv[2]
-if (!(env === 'stage' || env === 'prod' || env === 'dev')) {
+if (!(env === 'prod' || env === 'dev')) {
   console.error(
-    "Invalid environment arg. Please use 'stage', 'prod', or 'dev'."
+    "Invalid environment arg. Please use 'prod' or 'dev'."
   )
   process.exit(1)
 }
 
 const CONFIGURED_ENV_FILE = `.env.${env}.local`
-if (env === 'stage' || env === 'prod') {
+if (env === 'prod') {
   try {
     const ENV_FILE = `.env.${env}`
 
