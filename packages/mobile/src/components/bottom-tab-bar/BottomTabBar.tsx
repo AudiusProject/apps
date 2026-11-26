@@ -6,12 +6,7 @@ import type {
   BottomTabBarProps as RNBottomTabBarProps
 } from '@react-navigation/bottom-tabs'
 import type { NavigationHelpers, ParamListBase } from '@react-navigation/native'
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions
-} from 'react-native'
+import { Animated, Pressable, StyleSheet } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import Reanimated, {
   interpolate,
@@ -24,8 +19,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Flex, IconSearch } from '@audius/harmony-native'
 import { GlassSurface } from 'app/components/core/Screen/GlassSurface'
 import { LiquidGlassView } from 'app/components/core/Screen/LiquidGlass'
-import { FULL_DRAWER_HEIGHT } from 'app/components/drawer'
+import { useFullDrawerHeight } from 'app/components/drawer'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import {
   useIsTabBarCollapsed,
   useTabBarHiddenProgress
@@ -61,18 +57,16 @@ export const bottomTabBarButtons = {
 
 const interpolatePostion = (
   translationAnim: Animated.Value,
-  bottomInset: number
+  bottomInset: number,
+  fullDrawerHeight: number
 ) => ({
   transform: [
     {
       translateY: translationAnim.interpolate({
         inputRange: [
           0,
-          FULL_DRAWER_HEIGHT -
-            bottomInset -
-            BOTTOM_BAR_HEIGHT -
-            PLAY_BAR_HEIGHT,
-          FULL_DRAWER_HEIGHT
+          fullDrawerHeight - bottomInset - BOTTOM_BAR_HEIGHT - PLAY_BAR_HEIGHT,
+          fullDrawerHeight
         ],
         outputRange: [bottomInset + BOTTOM_BAR_HEIGHT, 0, 0]
       })
@@ -97,6 +91,7 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
   const { translationAnim, navigation, state } = props
   const { routes, index: activeIndex } = state
   const insets = useSafeAreaInsets()
+  const fullDrawerHeight = useFullDrawerHeight()
   const floating = useFloatingTabBar()
 
   const handlePress = useCallback(
@@ -153,7 +148,7 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
         style={[
           styles.floatingRoot,
           { height: BOTTOM_BAR_HEIGHT + insets.bottom },
-          interpolatePostion(translationAnim, insets.bottom)
+          interpolatePostion(translationAnim, insets.bottom, fullDrawerHeight)
         ]}
       >
         <FloatingPill
@@ -172,7 +167,7 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
     <Animated.View
       style={[
         { zIndex: 4, elevation: 4 },
-        interpolatePostion(translationAnim, insets.bottom)
+        interpolatePostion(translationAnim, insets.bottom, fullDrawerHeight)
       ]}
     >
       {/*
@@ -207,7 +202,7 @@ const FloatingPill = (props: FloatingPillProps) => {
   const { bottom, activeIndex, tabCount, onPressSearch, children } = props
   const isDarkMode = isDarkTheme(useThemeVariant())
   const colorScheme = isDarkMode ? 'dark' : 'light'
-  const { width: windowWidth } = useWindowDimensions()
+  const windowWidth = useContentWidth()
   const hidden = useTabBarHiddenProgress()
   const isCollapsed = useIsTabBarCollapsed()
   const index = useSharedValue(activeIndex)

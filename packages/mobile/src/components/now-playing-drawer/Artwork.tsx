@@ -7,9 +7,10 @@ import type { Track } from '@audius/common/models'
 import { averageColorSelectors, playbackSelectors } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
-import { Dimensions, View } from 'react-native'
+import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { makeStyles } from 'app/styles'
 
 import { TrackImage } from '../image/TrackImage'
@@ -19,14 +20,12 @@ import { mostSaturated } from './useDominantArtworkColors'
 const { getPreviewing } = playbackSelectors
 const { getDominantColorsByTrack } = averageColorSelectors
 
-const dimensions = Dimensions.get('window')
 const spacing = 24
 
 const useStyles = makeStyles(({ palette }) => ({
   root: {
     marginLeft: spacing,
     marginRight: spacing,
-    maxHeight: dimensions.width - spacing * 2,
     alignSelf: 'center',
     backgroundColor: palette.white,
     borderRadius: 8,
@@ -53,10 +52,12 @@ const useStyles = makeStyles(({ palette }) => ({
 type ArtworkProps = {
   track: Nullable<Track>
   isOpen: boolean
+  maxSize?: number
 }
 
-export const Artwork = ({ track, isOpen }: ArtworkProps) => {
+export const Artwork = ({ track, isOpen, maxSize }: ArtworkProps) => {
   const styles = useStyles()
+  const contentWidth = useContentWidth()
 
   const dominantColors = useSelector((state: CommonState) =>
     getDominantColorsByTrack(state, {
@@ -86,7 +87,13 @@ export const Artwork = ({ track, isOpen }: ArtworkProps) => {
     isPreviewing || canPurchase || shouldDisplayPremiumDownloadLocked
 
   return (
-    <View style={[styles.root, shadowStyle]}>
+    <View
+      style={[
+        styles.root,
+        { maxHeight: maxSize ?? contentWidth - spacing * 2 },
+        shadowStyle
+      ]}
+    >
       <TrackImage
         key={track?.track_id}
         trackId={track?.track_id}

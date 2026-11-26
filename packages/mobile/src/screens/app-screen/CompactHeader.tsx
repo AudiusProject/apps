@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-import { ScrollView, StyleSheet, Text, useWindowDimensions } from 'react-native'
+import { ScrollView, StyleSheet, Text } from 'react-native'
 import type { SharedValue } from 'react-native-reanimated'
 import Animated, {
   runOnJS,
@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GlassCapsule } from 'app/components/core/Screen/GlassCapsule'
 import { isLiquidGlassAvailable } from 'app/components/core/Screen/LiquidGlass'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
@@ -121,7 +122,7 @@ export const CompactControls = (props: CompactControlsProps) => {
   const floating = useSharedValue(1)
   const tint = useCompactTint()
   const top = insets.top + COMPACT_TOP_GAP
-  const { width } = useWindowDimensions()
+  const width = useContentWidth()
   const { isShown, frameStyle, contentStyle } = useCompactFade(progress)
 
   return (

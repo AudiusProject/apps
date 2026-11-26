@@ -15,7 +15,7 @@ import type { ReactionTypes, ChatMessageReaction } from '@audius/sdk'
 import { css } from '@emotion/native'
 import { find } from 'linkifyjs'
 import type { ViewStyle, StyleProp } from 'react-native'
-import { Dimensions, Keyboard } from 'react-native'
+import { Keyboard } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { Flex, spacing, Text } from '@audius/harmony-native'
@@ -25,6 +25,7 @@ import {
   ProfilePicture,
   UserGeneratedText
 } from 'app/components/core'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
@@ -119,7 +120,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     marginLeft: GROUP_AVATAR_SIZE + GROUP_AVATAR_GAP
   },
   unfurl: {
-    width: Dimensions.get('window').width - 48,
+    width: 0,
     minHeight: 72,
     borderRadius: 0
   }
@@ -244,13 +245,16 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
   }, [linkValue])
 
   const { secondaryDark1, neutralLight7 } = useThemeColors()
+  const contentWidth = useContentWidth()
 
   const borderBottomColor = isAuthor ? secondaryDark1 : neutralLight7
   const borderBottomWidth = hideMessage || isCollection || isTrack ? 0 : 1
+  const unfurlWidth = contentWidth - 48
   const unfurlStyles = {
     ...styles.unfurl,
+    width: unfurlWidth,
     ...(isGroupOther
-      ? { width: styles.unfurl.width - GROUP_AVATAR_SIZE - GROUP_AVATAR_GAP }
+      ? { width: unfurlWidth - GROUP_AVATAR_SIZE - GROUP_AVATAR_GAP }
       : null),
     borderBottomColor,
     borderBottomWidth

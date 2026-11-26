@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useCurrentTrack } from '@audius/common/hooks'
 import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
-import { Animated, Dimensions } from 'react-native'
+import { Animated, useWindowDimensions } from 'react-native'
 import TrackPlayer, { useIsPlaying } from 'react-native-track-player'
 import { useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
@@ -14,9 +14,7 @@ import type { LinearAnimation } from 'app/utils/animation'
 import { animateLinear } from 'app/utils/animation'
 import { useThemeColors } from 'app/utils/theme'
 
-import { NOW_PLAYING_HEIGHT } from './constants'
-
-const width = Dimensions.get('window').width
+import { useNowPlayingHeight } from './constants'
 
 const { getSeek, getPaused, getBuffering } = playbackSelectors
 
@@ -113,6 +111,8 @@ export const TrackingBar = (props: TrackingBarProps) => {
 
   useEffect(() => () => currentAnimation.current?.stop(), [])
 
+  const NOW_PLAYING_HEIGHT = useNowPlayingHeight()
+  const { width } = useWindowDimensions()
   const rootOpacity = translateYAnimation.interpolate({
     inputRange: [0, 0.9 * NOW_PLAYING_HEIGHT, NOW_PLAYING_HEIGHT],
     outputRange: [0, 0, 2]

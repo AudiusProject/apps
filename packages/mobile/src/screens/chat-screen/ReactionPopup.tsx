@@ -8,9 +8,10 @@ import { chatActions } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { OptionalId } from '@audius/sdk'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { Dimensions, Pressable, Animated } from 'react-native'
+import { Pressable, Animated } from 'react-native'
 import { useDispatch } from 'react-redux'
 
+import { useContentWidth } from 'app/hooks/useContentWidth'
 import { usePopupAnimation } from 'app/hooks/usePopupAnimation'
 import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
@@ -62,7 +63,6 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
     borderRadius: spacing(12),
     borderColor: palette.neutralLight9,
     zIndex: zIndex.CHAT_REACTIONS_POPUP_CONTENT,
-    width: Dimensions.get('window').width - spacing(10),
     backgroundColor: palette.white,
     marginHorizontal: spacing(5),
     shadowColor: 'black',
@@ -72,7 +72,6 @@ const useStyles = makeStyles(({ spacing, palette, typography }) => ({
   },
   popupChatMessage: {
     position: 'absolute',
-    maxWidth: Dimensions.get('window').width - spacing(12),
     zIndex: zIndex.CHAT_REACTIONS_POPUP_CONTENT
   },
   emoji: {
@@ -105,6 +104,7 @@ export const ReactionPopup = ({
   onClose
 }: ReactionPopupProps) => {
   const styles = useStyles()
+  const contentWidth = useContentWidth()
   const dispatch = useDispatch()
   const { data: userId } = useCurrentUserId()
   const { toast } = useToast()
@@ -195,6 +195,7 @@ export const ReactionPopup = ({
           style={[
             styles.popupChatMessage,
             {
+              maxWidth: contentWidth - spacing(12),
               top: messageTop - containerTop,
               right: isAuthor ? spacing(6) : undefined,
               left: !isAuthor ? spacing(6) : undefined
@@ -217,6 +218,7 @@ export const ReactionPopup = ({
           style={[
             styles.reactionsContainer,
             {
+              width: contentWidth - spacing(10),
               top: Math.max(
                 messageTop - containerTop - REACTION_CONTAINER_HEIGHT,
                 containerTop -

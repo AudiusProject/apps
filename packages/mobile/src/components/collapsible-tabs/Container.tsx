@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, useWindowDimensions, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 import Animated, {
   useAnimatedReaction,
@@ -32,6 +32,7 @@ import {
   IndexChangeEventData,
   TabName
 } from './types'
+import { useContentWidth } from 'app/hooks/useContentWidth'
 
 const AnimatedPagerView = Animated.createAnimatedComponent(PagerView)
 
@@ -67,7 +68,7 @@ export const Container = React.memo(
 
       const [refMap, setRef] = useAnimatedDynamicRefs()
 
-      const windowWidth = useWindowDimensions().width
+      const windowWidth = useContentWidth()
       const width = customWidth ?? windowWidth
 
       const [containerHeight, getContainerLayoutHeight] = useLayoutHeight()

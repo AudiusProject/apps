@@ -18,6 +18,7 @@
 		43C373D295154DA6B89272D5 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04F6B3542BF84180BC937315 /* Colors.xcassets */; };
 		5983D8FED74747CCA45F8FC4 /* AvenirNextLTPro-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 33E11CC84EEA4109B8A1AE2C /* AvenirNextLTPro-Medium.otf */; };
 		5CE1A0022EA1000000A1B2C3 /* SceneDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5CE1A0012EA1000000A1B2C3 /* SceneDelegate.mm */; };
+		5CE1B0022EA1000000A1B2C3 /* AudiusHinge.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CE1B0012EA1000000A1B2C3 /* AudiusHinge.m */; };
 		7103C3ED2929C6B5002B9072 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7103C3EC2929C6B5002B9072 /* BootSplash.storyboard */; };
 		717F36E82733C73F0017511F /* AvenirNextLTPro-DemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 717F36E72733C73F0017511F /* AvenirNextLTPro-DemiBold.otf */; };
 		838AABE023CE3813004B2DA3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 838AABDF23CE3813004B2DA3 /* GoogleService-Info.plist */; };
@@ -78,6 +79,8 @@
 		453FC09EC343ACA359EB312C /* Pods-AudiusReactNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AudiusReactNative.release.xcconfig"; path = "Target Support Files/Pods-AudiusReactNative/Pods-AudiusReactNative.release.xcconfig"; sourceTree = "<group>"; };
 		5CE1A0002EA1000000A1B2C3 /* SceneDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SceneDelegate.h; path = AudiusReactNative/SceneDelegate.h; sourceTree = "<group>"; };
 		5CE1A0012EA1000000A1B2C3 /* SceneDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SceneDelegate.mm; path = AudiusReactNative/SceneDelegate.mm; sourceTree = "<group>"; };
+		5CE1B0002EA1000000A1B2C3 /* AudiusHinge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudiusHinge.h; path = AudiusReactNative/AudiusHinge.h; sourceTree = "<group>"; };
+		5CE1B0012EA1000000A1B2C3 /* AudiusHinge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudiusHinge.m; path = AudiusReactNative/AudiusHinge.m; sourceTree = "<group>"; };
 		622045C334F0F16E3CF4011F /* libPods-AudiusReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AudiusReactNative.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F65A9A9BAD047FABD240C59 /* AvenirNextLTPro-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "AvenirNextLTPro-Regular.otf"; path = "../src/assets/fonts/AvenirNextLTPro-Regular.otf"; sourceTree = "<group>"; };
 		7103C3EC2929C6B5002B9072 /* BootSplash.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = BootSplash.storyboard; path = AudiusReactNative/BootSplash.storyboard; sourceTree = "<group>"; };
@@ -145,6 +148,8 @@
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				5CE1A0002EA1000000A1B2C3 /* SceneDelegate.h */,
 				5CE1A0012EA1000000A1B2C3 /* SceneDelegate.mm */,
+				5CE1B0002EA1000000A1B2C3 /* AudiusHinge.h */,
+				5CE1B0012EA1000000A1B2C3 /* AudiusHinge.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				7103C3EC2929C6B5002B9072 /* BootSplash.storyboard */,
@@ -475,6 +480,7 @@
 				253BCCFA2B324974007DC74C /* NSureSDK.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				5CE1A0022EA1000000A1B2C3 /* SceneDelegate.mm in Sources */,
+				5CE1B0022EA1000000A1B2C3 /* AudiusHinge.m in Sources */,
 				83F7359F23C55C2D0040A4C5 /* AirplayViewManager.m in Sources */,
 				13B32CE723D2782B002F0526 /* SampleSwiftFile.swift in Sources */,
 				83F735A523C64C950040A4C5 /* AirplayEvent.m in Sources */,

@@ -1,7 +1,7 @@
-import { useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs'
-import { Animated, StyleSheet } from 'react-native'
+import { Animated, StatusBar, StyleSheet } from 'react-native'
 import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -10,9 +10,12 @@ import {
   BOTTOM_BAR_HEIGHT,
   useFloatingTabBar
 } from 'app/components/bottom-tab-bar'
-import { FULL_DRAWER_HEIGHT } from 'app/components/drawer'
+import { SetPlayBarVisibilityContext } from 'app/components/core/BottomBarInsetContext'
+import { getFullDrawerHeight } from 'app/components/drawer'
+import { useFoldLayout } from 'app/components/fold'
 import { NowPlayingDrawer } from 'app/components/now-playing-drawer'
 import { OtaUpdateBanner } from 'app/components/ota-update-banner/OtaUpdateBanner'
+import { useDrawer } from 'app/hooks/useDrawer'
 
 import { useTabBarHiddenProgress } from './TabBarAutoHideContext'
 
@@ -23,11 +26,24 @@ export const AppTabBar = (props: TabBarProps) => {
   const insets = useSafeAreaInsets()
   const hidden = useTabBarHiddenProgress()
   const floating = useFloatingTabBar()
+  const { isWide } = useFoldLayout()
+  const setPlayBarVisible = useContext(SetPlayBarVisibilityContext)
+  const { isOpen: isNowPlayingOpen, onClose: closeNowPlaying } =
+    useDrawer('NowPlaying')
   const translationAnimRef = useRef<Animated.Value | null>(null)
   if (translationAnimRef.current === null) {
-    translationAnimRef.current = new Animated.Value(FULL_DRAWER_HEIGHT)
+    translationAnimRef.current = new Animated.Value(getFullDrawerHeight())
   }
   const translationAnim = translationAnimRef.current
+
+  useEffect(() => {
+    if (!isWide) return
+    setPlayBarVisible(false)
+    if (isNowPlayingOpen) {
+      closeNowPlaying()
+      StatusBar.setHidden(false, 'fade')
+    }
+  }, [isWide, isNowPlayingOpen, closeNowPlaying, setPlayBarVisible])
 
   const hideStyle = useAnimatedStyle(
     () => ({
@@ -44,7 +60,7 @@ export const AppTabBar = (props: TabBarProps) => {
 
   return (
     <>
-      <NowPlayingDrawer translationAnim={translationAnim} />
+      {isWide ? null : <NowPlayingDrawer translationAnim={translationAnim} />}
       <OtaUpdateBanner />
       <Reanimated.View style={[styles.bar, hideStyle]}>
         <BottomTabBar

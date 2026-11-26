@@ -6,7 +6,7 @@ import { usersSocialActions } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import { getFollowIds } from 'common/store/pages/signon/selectors'
-import { Dimensions, FlatList, ScrollView, View } from 'react-native'
+import { FlatList, ScrollView, useWindowDimensions, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Text } from 'app/components/core'
@@ -15,12 +15,9 @@ import { makeStyles } from 'app/styles'
 import { ContinueButton } from './ContinueButton'
 import { SuggestedArtistsList } from './SuggestedArtistsList'
 
-const { height } = Dimensions.get('window')
-
 const useStyles = makeStyles(({ spacing, palette }) => ({
   root: {
-    flex: 1,
-    height: height - 220
+    flex: 1
   },
   header: {
     paddingHorizontal: spacing(4),
@@ -48,6 +45,7 @@ const messages = {
 
 export const SuggestedFollows = () => {
   const styles = useStyles()
+  const { height } = useWindowDimensions()
   const dispatch = useDispatch()
   const queryClient = useQueryClient()
 
@@ -80,7 +78,7 @@ export const SuggestedFollows = () => {
   )
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { height: height - 220 }]}>
       <ScrollView>
         <SuggestedArtistsList
           FlatListComponent={FlatList}
